@@ -1,0 +1,4 @@
+/* Compact view select: hidden by default, hosts that prefer it over the tab rail opt in. */
+.ai-task-center-unified__view-select {
+  display: none;
+}

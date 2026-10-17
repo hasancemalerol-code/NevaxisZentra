@@ -30,6 +30,7 @@ import {
   StatusChip,
   WorkCaseCard,
 } from "./digital-workforce-primitives";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 const TABS = [
   "genel",
@@ -114,7 +115,7 @@ export function DigitalWorkforceWorkerDetailView({
 
   return (
     <>
-      {apiError ? <p className="dwf-api-error">{apiError}</p> : null}
+      {apiError ? <p className="dwf-api-error">{customerMessage(apiError)}</p> : null}
       <header className="dwf-hero">
         <div>
           <p className="dwf-hero__eyebrow">{apiDetail?.code ?? worker.code}</p>

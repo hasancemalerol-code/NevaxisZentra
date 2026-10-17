@@ -1,6 +1,7 @@
-import { EmptyState } from "@/components/ui/states";
+
 import { readFactoryWorkspace } from "../server/factory-workspace-queries";
 import { FactoryWorkspaceShell } from "./factory-workspace-shell";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type FactoryWorkspacePageContentProps = Readonly<{
   searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -12,13 +13,11 @@ export async function FactoryWorkspacePageContent({ searchParams }: FactoryWorks
 
   if (result.status === "failure") {
     return (
-      <main className="fact-workspace">
-        <EmptyState
-          data-testid="factory-workspace-error"
-          description={result.message}
-          title="Fabrika çalışma alanı yüklenemedi"
-        />
-      </main>
+      <div className="fact-workspace">
+        <div data-testid="factory-workspace-error">
+          <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Fabrika çalışma alanı şu anda alınamıyor" inline />
+        </div>
+      </div>
     );
   }
 

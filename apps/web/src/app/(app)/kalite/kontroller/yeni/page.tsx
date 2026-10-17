@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+
 
 import { NewQualityInspectionForm } from "@/features/quality-control/components/new-quality-inspection-form";
 import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
@@ -6,6 +6,7 @@ import "@/features/quality-control/components/quality-workspace.css";
 import { readProductionOrders } from "@/features/production-execution/server/production-order-reader";
 import { readQualityWorkspace } from "@/features/quality-control/server/quality-control-reader";
 import { createQualityInspectionAction } from "@/features/quality-control/server/quality-control-writer";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function NewQualityInspectionPage() {
   const [ordersResult, qualityResult] = await Promise.all([
@@ -21,13 +22,7 @@ export default async function NewQualityInspectionPage() {
         eyebrow="KALİTE KONTROL"
         title="Yeni Kalite Kontrolü"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>Üretim emirleri yüklenemedi</h3>
-            <p>{ordersResult.message}</p>
-          </div>
-        </div>
+        <FailureStatePage code={"code" in ordersResult ? ordersResult.code : undefined} message={ordersResult.message} failedTitle="Üretim emirleri yüklenemedi" inline />
       </QualityPageShell>
     );
   }
@@ -40,13 +35,7 @@ export default async function NewQualityInspectionPage() {
         eyebrow="KALİTE KONTROL"
         title="Yeni Kalite Kontrolü"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>Kalite planları yüklenemedi</h3>
-            <p>{qualityResult.message}</p>
-          </div>
-        </div>
+        <FailureStatePage code={"code" in qualityResult ? qualityResult.code : undefined} message={qualityResult.message} failedTitle="Kalite planları yüklenemedi" inline />
       </QualityPageShell>
     );
   }

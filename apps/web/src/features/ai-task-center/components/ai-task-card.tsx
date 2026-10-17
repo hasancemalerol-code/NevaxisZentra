@@ -153,7 +153,7 @@ export function AiTaskCard({
         <div className="ai-task-card__recommendation">
           <div className="ai-task-card__recommendation-heading">
             <span>
-              AI önerisi
+              Yapay zekâ önerisi
             </span>
 
             <Badge tone="ai">
@@ -176,7 +176,7 @@ export function AiTaskCard({
           <div>
             <dt>
               <Gauge aria-hidden="true" />
-              AI güveni
+              Öneri güveni
             </dt>
             <dd>
               {PERCENT_FORMATTER.format(

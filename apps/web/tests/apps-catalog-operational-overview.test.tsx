@@ -130,11 +130,13 @@ test("apps factory operations grid exposes nine canonical analytics surfaces", (
   assert.match(markup, /data-testid="apps-production-distribution-chart"/);
 });
 
-test("apps factory operations section uses Veri yok for missing metrics", () => {
+test("apps factory operations section shows one calm empty state for missing metrics", () => {
   const markup = renderToStaticMarkup(
     <AppsFactoryOperationsSection viewModel={emptyViewModel} /> as ReactElement,
   );
 
   assert.match(markup, /data-testid="apps-factory-operations-section"/);
-  assert.match(markup, /Veri yok/);
+  assert.match(markup, /data-testid="apps-factory-operations-empty"/);
+  assert.match(markup, /Henüz üretim verisi yok/);
+  assert.doesNotMatch(markup, /Veri yok/);
 });

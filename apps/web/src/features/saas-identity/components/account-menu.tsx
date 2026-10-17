@@ -8,6 +8,7 @@ import { useCallback, useId, useState } from "react";
 import { signOutSaasIdentityBrowser } from "../client/saas-identity-browser-client";
 import { SAAS_IDENTITY_MESSAGES } from "../presentation/saas-identity-messages";
 import { useShellPopover } from "@/components/app-shell/use-shell-popover";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AccountMenuProps = Readonly<{
   displayName: string;
@@ -54,6 +55,7 @@ export function AccountMenu({
         aria-controls={menuId}
         aria-expanded={open}
         aria-haspopup="menu"
+        aria-label={`Hesap menüsü: ${displayName}`}
         className="account-placeholder"
         disabled={pending}
         onClick={() => setOpen((current) => !current)}
@@ -109,7 +111,7 @@ export function AccountMenu({
 
       {error ? (
         <p className="account-menu__error" role="alert">
-          {error}
+          {customerMessage(error)}
         </p>
       ) : null}
     </div>

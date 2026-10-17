@@ -1,5 +1,6 @@
-import { ErpWorkspacePage } from "@/features/erp/components/erp-workspace-page";
+import { redirect } from "next/navigation";
 
-export default function ErpVeriEslestirmePage() {
-  return <ErpWorkspacePage activeHref="/erp-entegrasyonlari/veri-eslestirme" />;
+/** "Veri Eşleştirme" is an alias of the Eşleştirme page; one canonical route keeps one active pill. */
+export default function ErpVeriEslestirmePage(): never {
+  redirect("/erp-entegrasyonlari/eslestirme");
 }

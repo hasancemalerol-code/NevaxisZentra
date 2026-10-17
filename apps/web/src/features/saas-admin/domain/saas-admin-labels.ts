@@ -1,8 +1,9 @@
+import { displayAccountName, displayRoleName } from "@/lib/presentation/display-name";
 import type { SaasAdminFacility, SaasAdminPermission } from "./saas-admin-types";
 
 const ROLE_LABELS: Record<string, string> = {
-  "tenant-owner": "Kiracı sahibi",
-  "tenant-admin": "Kiracı yöneticisi",
+  "tenant-owner": "Organizasyon sahibi",
+  "tenant-admin": "Organizasyon yöneticisi",
   "facility-manager": "Tesis yöneticisi",
   "production-manager": "Üretim yöneticisi",
   planner: "Planlamacı",
@@ -78,7 +79,8 @@ const ACTION_LABELS: Record<string, string> = {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function formatRoleLabel(roleReference: string): string {
-  return ROLE_LABELS[roleReference] ?? humanizeToken(roleReference);
+  const mapped = displayRoleName(roleReference);
+  return ROLE_LABELS[roleReference] ?? (mapped !== roleReference ? mapped : humanizeToken(roleReference));
 }
 
 export function formatMembershipStatus(status: string): string {
@@ -235,4 +237,15 @@ function humanizeToken(value: string): string {
   return value
     .replaceAll(/[._-]+/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+/** The person a member row is about: name, then masked e-mail, then a role-derived label, then a truthful fallback. */
+export function memberTitle(member: Readonly<{ displayName: string; emailMasked: string; roleReferences: readonly string[] }>): string {
+  const name = member.displayName.trim();
+  if (name && name !== "Bilinmeyen hesap" && !/^mem_/i.test(name)) return displayAccountName(name);
+  const email = member.emailMasked.trim();
+  if (email && email !== "—" && email !== "-") return email;
+  const role = member.roleReferences[0];
+  if (role) return `${displayRoleName(role)} hesabı`;
+  return "Kimlik bilgisi kullanılamıyor";
 }

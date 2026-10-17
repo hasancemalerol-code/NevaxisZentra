@@ -16,6 +16,7 @@ import {
   loadCommercialSalesPriceAssessmentDetailAction,
   loadCommercialSalesPriceComparisonDetailAction,
 } from "../server/commercial-intelligence-actions";
+import { detailValueClass } from "./commercial-no-data";
 
 export type SalesPriceHistoryResultType = "" | "assessment" | "temporal" | "customer";
 
@@ -426,7 +427,7 @@ function SalesPriceExecutiveDriverSummaryLoaded({
     >
       <div className="commint-driver-summary__header">
         <div>
-          <h2 className="commint-panel__title">Yönetici sürücü özeti</h2>
+          <h2 className="commint-panel__title">Yönetici etken özeti</h2>
           <p className="commint-panel__trace">{record.reference}</p>
         </div>
         <span className={`commint-badge commint-badge--${resolveOutcomeBadgeClass(record.outcomeKey)}`}>
@@ -439,7 +440,7 @@ function SalesPriceExecutiveDriverSummaryLoaded({
           <span className="commint-driver-summary__value">{record.resultTypeLabel}</span>
         </div>
         <div className="commint-driver-summary__item">
-          <span className="commint-detail-field__label">Kanıt paydası</span>
+          <span className="commint-detail-field__label">Karşılaştırılan / hariç kayıt</span>
           <span className="commint-driver-summary__value">
             {formatCount(record.comparableObservationCount)} / {formatCount(record.excludedObservationCount)}
           </span>
@@ -450,7 +451,7 @@ function SalesPriceExecutiveDriverSummaryLoaded({
         </div>
       </div>
       <div className="commint-driver-summary__drivers" data-testid="commercial-sales-price-leading-driver">
-        <p className="commint-driver-summary__leading-label">Önde gelen sürücü</p>
+        <p className="commint-driver-summary__leading-label">Başlıca etken</p>
         <p
           className="commint-driver-summary__leading-value"
           data-testid={driverStatus === "ready" ? "commercial-sales-price-executive-driver-ready" : undefined}
@@ -467,7 +468,7 @@ function SalesPriceExecutiveDriverSummaryLoaded({
             </ul>
           </div>
         ) : driverStatus === "ready" ? (
-          <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+          <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
         ) : null}
       </div>
       <p className="commint-supplier-row__meta">{workspace.provenanceDisclaimer}</p>
@@ -518,7 +519,7 @@ export function SalesPriceExecutiveDriverSummary({
         className="commint-panel commint-panel--driver-summary"
         data-testid="commercial-sales-price-executive-driver-summary"
       >
-        <h2 className="commint-panel__title">Yönetici sürücü özeti</h2>
+        <h2 className="commint-panel__title">Yönetici etken özeti</h2>
         <p className="commint-empty">Henüz değerlendirme kaydı yok</p>
       </section>
     );
@@ -545,7 +546,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }
@@ -644,7 +645,7 @@ export function SalesPriceDetailDrawerBody({
           </div>
         </DetailSection>
         <DetailSection title="Sürücüler" testId="drivers">
-          <DetailField label="Önde gelen sürücü" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
+          <DetailField label="Başlıca etken" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
           {supportingDrivers.length > 0 ? (
             <ul className="commint-driver-list" data-testid="commercial-sales-price-detail-supporting-drivers">
               {supportingDrivers.map((driver) => (
@@ -652,7 +653,7 @@ export function SalesPriceDetailDrawerBody({
               ))}
             </ul>
           ) : (
-            <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+            <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
           )}
         </DetailSection>
         <DetailSection title="Köken" testId="provenance">
@@ -734,7 +735,7 @@ export function SalesPriceDetailDrawerBody({
           </div>
         </DetailSection>
         <DetailSection title="Sürücüler" testId="drivers">
-          <DetailField label="Önde gelen sürücü" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
+          <DetailField label="Başlıca etken" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
           {supportingDrivers.length > 0 ? (
             <ul className="commint-driver-list" data-testid="commercial-sales-price-detail-supporting-drivers">
               {supportingDrivers.map((driver) => (
@@ -742,7 +743,7 @@ export function SalesPriceDetailDrawerBody({
               ))}
             </ul>
           ) : (
-            <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+            <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
           )}
         </DetailSection>
         <DetailSection title="Köken" testId="provenance">

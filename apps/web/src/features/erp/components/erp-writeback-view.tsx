@@ -18,7 +18,7 @@ type ErpWritebackViewProps = Readonly<{
 
 export function ErpWritebackView({ writebacks }: ErpWritebackViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page">
+    <div className="production-execution-page erp-workspace-page">
       <header className="erp-workspace-header production-execution-header">
         <div className="erp-workspace-header__intro">
           <p>ERP ENTEGRASYONLARI</p>
@@ -27,7 +27,7 @@ export function ErpWritebackView({ writebacks }: ErpWritebackViewProps) {
             ERP yazma istekleri — onay ve uygulama akışı. Detay ekranından işlem başlatılır.
           </span>
           <p className="erp-simulator-note">
-            ERP Simulator — gerçek ERP işlemi değildir.
+            Örnek ERP bağlantısı — gerçek ERP işlemi değildir.
           </p>
         </div>
       </header>
@@ -39,11 +39,11 @@ export function ErpWritebackView({ writebacks }: ErpWritebackViewProps) {
           <h2>Yazma İstekleri</h2>
           <p>Komut türü, durum, müşteri referansı ve onay geçmişi</p>
         </div>
-        <div className="erp-table-wrap">
+        <div className="erp-table-wrap" tabIndex={0}>
           {writebacks.length === 0 ? (
             <div className="erp-empty">Henüz onaylı işlem kaydı yok.</div>
           ) : (
-            <table className="erp-table erp-table--writeback">
+            <table aria-label="Yazma İstekleri" className="erp-table erp-table--writeback">
               <thead>
                 <tr>
                   <th>Komut</th>
@@ -98,6 +98,6 @@ export function ErpWritebackView({ writebacks }: ErpWritebackViewProps) {
           <ShieldCheck />
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

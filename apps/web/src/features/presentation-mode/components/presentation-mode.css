@@ -65,7 +65,7 @@
   border-radius: 999px;
   background: rgba(15, 118, 110, 0.08);
   color: #0f766e;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -75,7 +75,7 @@
   align-items: center;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
 }
@@ -110,7 +110,7 @@
   padding: 0.2rem 0.5rem;
   border-radius: 999px;
   border: 1px solid rgba(15, 23, 42, 0.08);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: #334155;
 }
 
@@ -119,14 +119,14 @@
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: #64748b;
+  color: #566478;
 }
 
 .presentation-mode-narrative__arrow {
-  color: #94a3b8;
+  color: #5d6b7f;
 }
 
 .presentation-mode-scenario-card__actions {

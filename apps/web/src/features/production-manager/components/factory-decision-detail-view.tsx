@@ -20,6 +20,9 @@ import {
   productionManagerSimulateAction,
   productionManagerVerifyAction,
 } from "../server/production-manager-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
+import { formatPercent } from "@/lib/presentation/format";
 
 const TABS = [
   "Problem",
@@ -86,7 +89,7 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
   }
 
   return (
-    <main className="commint-page" data-testid="factory-decision-detail-view">
+    <div className="commint-page" data-testid="factory-decision-detail-view">
       <header className="commint-executive">
         <div className="commint-executive__intro">
           <p className="commint-executive__eyebrow">KARAR DETAYI</p>
@@ -161,15 +164,17 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
           <Link className="commint-button commint-button--ghost" href="/operasyon/yonetim-merkezi">
             Operasyon Merkezi
           </Link>
-          <Link className="commint-button commint-button--ghost" href="/dijital-is-gucu">
-            Dijital İş Gücü
-          </Link>
+          {deferredSurfacesEnabled() ? (
+            <Link className="commint-button commint-button--ghost" href="/dijital-is-gucu">
+              Dijital İş Gücü
+            </Link>
+          ) : null}
         </div>
       </header>
 
       {message ? (
         <p role="alert" className="commint-error-banner" data-testid="factory-decision-action-message">
-          {message}
+          {customerMessage(message)}
         </p>
       ) : null}
 
@@ -206,7 +211,7 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
         {activeTab === "Alternatifler" || activeTab === "Karar" ? (
           <div data-testid="factory-decision-option-comparison">
             <h2>Alternatifler</h2>
-            <table className="commint-table">
+            <table aria-label="Alternatifler" className="commint-table">
               <thead>
                 <tr>
                   <th>Seçenek</th>
@@ -271,7 +276,7 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
               Simülasyonu çalıştır
             </button>
             {simulationRows.length > 0 ? (
-              <table className="commint-table">
+              <table aria-label="Senaryo Simülasyonu" className="commint-table">
                 <thead>
                   <tr>
                     <th>Seçenek</th>
@@ -284,8 +289,8 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
                   {simulationRows.map((row) => (
                     <tr key={row.optionCode}>
                       <td>{row.label}</td>
-                      <td>{Math.round(row.onTimeProbability * 100)}%</td>
-                      <td>{Math.round(row.capacityUtilizationPercent)}%</td>
+                      <td>{formatPercent(row.onTimeProbability * 100, 0)}</td>
+                      <td>{formatPercent(row.capacityUtilizationPercent, 0)}</td>
                       <td>{row.requiresApproval ? "Gerekli" : "Hayır"}</td>
                     </tr>
                   ))}
@@ -298,11 +303,11 @@ export function FactoryDecisionDetailView({ decision: initialDecision }: Factory
         {activeTab === "Mevcut Durum" ? (
           <div>
             <h2>Mevcut Durum</h2>
-            <p>Karar anındaki fabrika durumu snapshot ile bağlıdır.</p>
+            <p>Karar anındaki durum kaydıyla bağlıdır.</p>
             <p>Otonomi modu: {getProductionManagerAutonomyLabel(decision.autonomyMode)}</p>
           </div>
         ) : null}
       </section>
-    </main>
+    </div>
   );
 }

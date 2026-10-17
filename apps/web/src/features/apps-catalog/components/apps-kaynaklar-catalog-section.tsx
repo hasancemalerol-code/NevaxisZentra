@@ -6,14 +6,14 @@ import { requiredRoutePermission } from "@/lib/authorization/acceptance-role-con
 
 const KAYNAKLAR_LINKS = [
   {
-    label: "Makineler & Üretim Kaynakları",
+    label: "Makineler ve Üretim Kaynakları",
     href: "/uretim/kaynaklar",
     permissionKey: requiredRoutePermission("kaynaklar"),
     icon: Cpu,
     testId: "apps-kaynaklar-production-resources",
   },
   {
-    label: "Kalıp & Takımlar",
+    label: "Kalıp ve Takımlar",
     href: "/kaliplar",
     permissionKey: "mold.read",
     icon: Boxes,
@@ -30,7 +30,7 @@ export async function AppsKaynaklarCatalogSection() {
   }
 
   return (
-    <section aria-label="Kaynaklar" className="fact-section" data-testid="apps-kaynaklar-catalog-section">
+    <section aria-label="Kaynaklar uygulama kataloğu" className="fact-section" data-testid="apps-kaynaklar-catalog-section">
       <header className="fact-section__header">
         <h2 className="fact-section__title">Kaynaklar</h2>
       </header>
@@ -42,7 +42,6 @@ export async function AppsKaynaklarCatalogSection() {
               <Icon aria-hidden="true" size={16} />
               <div>
                 <h3>{item.label}</h3>
-                <p>{item.href}</p>
               </div>
               <ArrowUpRight aria-hidden="true" size={16} />
             </Link>

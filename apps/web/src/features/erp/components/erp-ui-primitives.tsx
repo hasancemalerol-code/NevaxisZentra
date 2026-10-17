@@ -1,4 +1,9 @@
+import { fixtureDataVisible } from "@/lib/runtime/fixture-data";
+import { displayDataName } from "@/lib/presentation/display-name";
 import Link from "next/link";
+import { Inbox } from "lucide-react";
+
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import type { ReactNode } from "react";
 
 import {
@@ -19,6 +24,7 @@ import {
   getErpSourceFreshnessLabel,
   getErpSourceFreshnessTone,
 } from "../presentation/erp-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 /* ── Page shell ── */
 
@@ -104,11 +110,15 @@ export function ErpKpiCard({
   tone = "neutral",
   timestamp,
 }: ErpKpiCardProps) {
+  // A zero count carries no state: neutral tone and icon so "0" never reads as healthy or alarming.
+  const isEmpty = value === 0 && !timestamp;
+  const effectiveTone = isEmpty ? "neutral" : tone;
+  const effectiveIcon = icon;
   return (
-    <div className={`erp-kpi erp-kpi--${tone}`}>
-      {icon ? (
+    <div className={`erp-kpi erp-kpi--${effectiveTone}${isEmpty ? " erp-kpi--empty" : ""}`}>
+      {effectiveIcon ? (
         <span className="erp-kpi__icon" aria-hidden="true">
-          {icon}
+          {effectiveIcon}
         </span>
       ) : null}
       <div className="erp-kpi__body">
@@ -127,9 +137,15 @@ export function ErpKpiCard({
   );
 }
 
-export function ErpKpiGrid({ children }: Readonly<{ children: ReactNode }>) {
+export function ErpKpiGrid({
+  children,
+  columns,
+}: Readonly<{ children: ReactNode; columns?: 3 | 6 }>) {
   return (
-    <section className="erp-kpi-grid" aria-label="Özet göstergeler">
+    <section
+      className={`erp-metrics${columns ? ` erp-metrics--cols-${columns}` : ""}`}
+      aria-label="Özet göstergeler"
+    >
       {children}
     </section>
   );
@@ -168,11 +184,11 @@ export function ErpProviderBadge({ provider, displayName }: ErpProviderBadgeProp
   const isLogo = provider === "logo";
   const isMikro = provider === "mikro";
   const isNetsis = provider === "netsis";
-  const primaryLabel = isSimulator ? "ERP Simulator" : getErpProviderLabel(provider, displayName);
+  const primaryLabel = isSimulator ? "Örnek ERP" : getErpProviderLabel(provider, displayName);
   return (
     <span className={`erp-provider-badge${isSimulator ? " erp-provider-badge--simulator" : ""}${isLogo ? " erp-provider-badge--logo" : ""}${isMikro ? " erp-provider-badge--mikro" : ""}${isNetsis ? " erp-provider-badge--netsis" : ""}`}>
       <strong>{primaryLabel}</strong>
-      {isSimulator ? <small>Geliştirme / Test</small> : null}
+      {isSimulator ? <small>Örnek veri</small> : null}
       {isLogo ? <small>{getErpLogoAdapterReadyLabel()}</small> : null}
       {isMikro ? <small>{getErpMikroAdapterReadyLabel()}</small> : null}
       {isNetsis ? <small>{getErpNetsisAdapterReadyLabel()}</small> : null}
@@ -216,13 +232,14 @@ export function ErpHealthIndicator({ status, labelOverride }: ErpHealthIndicator
 /* ── Banners ── */
 
 export function ErpSimulatorNotice({ variant = "info" }: Readonly<{ variant?: "info" | "writeback" }>) {
+  if (!fixtureDataVisible()) return null;
   const message =
     variant === "writeback"
-      ? "ERP Simulator — gerçek ERP işlemi değildir."
-      : "ERP Simulator — gerçek ERP bağlantısı değildir.";
+      ? "Örnek ERP bağlantısı — gerçek ERP işlemi değildir."
+      : "Örnek ERP bağlantısı — gerçek ERP bağlantısı değildir.";
   return (
     <p className={`erp-simulator-notice erp-simulator-notice--${variant}`} role="note">
-      {message}
+      {customerMessage(message)}
     </p>
   );
 }
@@ -262,17 +279,21 @@ export function ErpWarningBanner({ title, children }: ErpWarningBannerProps) {
 /* ── Tables ── */
 
 export function ErpDataTable({
+  label,
   children,
   className,
   minWidth,
 }: Readonly<{
+  /** Accessible name of the table (what the records are). */
+  label: string;
   children: ReactNode;
   className?: string;
   minWidth?: number;
 }>) {
   return (
-    <div className="erp-table-wrap">
+    <div className="erp-table-wrap" tabIndex={0}>
       <table
+        aria-label={label}
         className={`erp-table${className ? ` ${className}` : ""}`}
         style={minWidth ? { minWidth: `${minWidth}px` } : undefined}
       >
@@ -316,14 +337,25 @@ export function ErpTableActionCell({ children }: Readonly<{ children: ReactNode 
 type ErpEmptyStateProps = Readonly<{
   title: string;
   description?: string;
+  /** Optional next step, for example a link to the sync centre. */
+  actionHref?: string;
+  actionLabel?: string;
 }>;
 
-export function ErpEmptyState({ title, description }: ErpEmptyStateProps) {
+export function ErpEmptyState({ title, description, actionHref, actionLabel }: ErpEmptyStateProps) {
   return (
-    <div className="erp-empty-state">
-      <p className="erp-empty-state__title">{title}</p>
-      {description ? <p className="erp-empty-state__desc">{description}</p> : null}
-    </div>
+    <EmptyPanel
+      icon={<Inbox />}
+      title={title.replace(/\.$/, "")}
+      description={description}
+      action={
+        actionHref && actionLabel ? (
+          <Link href={actionHref} className="erp-action erp-action--secondary">
+            {actionLabel}
+          </Link>
+        ) : undefined
+      }
+    />
   );
 }
 
@@ -447,7 +479,7 @@ export function ErpConnectionCard({
       <div className="erp-connection-card__top">
         <div className="erp-connection-card__identity">
           <ErpProviderBadge provider={provider} displayName={providerDisplayName} />
-          <h3 className="erp-connection-card__name">{name}</h3>
+          <h3 className="erp-connection-card__name">{displayDataName(name)}</h3>
         </div>
         <div className="erp-connection-card__top-actions">
           <ErpHealthIndicator status={status} labelOverride={logoStateLabel ?? mikroStateLabel ?? netsisStateLabel} />
@@ -469,7 +501,7 @@ export function ErpConnectionCard({
             </div>
             <div>
               <dt>Logo Ürünü</dt>
-              <dd>{isTestTransport ? "Logo Test Fixture" : "—"}</dd>
+              <dd>{isTestTransport ? "Logo test bağlantısı" : "—"}</dd>
             </div>
           </>
         ) : null}
@@ -481,7 +513,7 @@ export function ErpConnectionCard({
             </div>
             <div>
               <dt>Mikro Ürünü</dt>
-              <dd>{isTestTransport ? "Mikro Test Fixture" : "—"}</dd>
+              <dd>{isTestTransport ? "Mikro test bağlantısı" : "—"}</dd>
             </div>
             <div>
               <dt>Sürüm</dt>
@@ -506,7 +538,7 @@ export function ErpConnectionCard({
           <dd>{lastHealthCheck}</dd>
         </div>
         <div className="erp-connection-card__meta-span">
-          <dt>Son Başarılı Senkronizasyon</dt>
+          <dt>Son Başarılı Eşitleme</dt>
           <dd>{lastSuccessfulSync}</dd>
         </div>
       </dl>
@@ -527,7 +559,7 @@ export function ErpConnectionCard({
         ) : null}
         {isSimulator ? (
           <p className="erp-connection-card__disclaimer" role="note">
-            ERP Simulator — gerçek ERP bağlantısı değildir.
+            Örnek ERP bağlantısı — gerçek ERP bağlantısı değildir.
           </p>
         ) : null}
         {isTestTransport && isLogo ? (
@@ -551,12 +583,12 @@ export function ErpConnectionCard({
               Sağlığı Kontrol Et
             </Link>
           ) : (
-            <span className="erp-action erp-action--secondary" title="Sağlık kontrolü API üzerinden">
+            <span className="erp-action erp-action--secondary" title="Sağlık kontrolü sistem tarafından yapılır">
               Sağlığı Kontrol Et
             </span>
           )}
           <Link href={syncHref} className="erp-action erp-action--tertiary">
-            Senkronizasyon Merkezi
+            Eşitleme Merkezi
           </Link>
         </div>
       </div>

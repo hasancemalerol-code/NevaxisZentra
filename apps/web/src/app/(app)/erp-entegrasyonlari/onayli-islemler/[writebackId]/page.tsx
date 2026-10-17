@@ -1,7 +1,8 @@
-import { ShieldCheck } from "lucide-react";
+
 
 import { ErpWritebackDetailView } from "@/features/erp/components/erp-writeback-detail-view";
 import { readErpWritebackDetail } from "@/features/erp/server/erp-writebacks-reader";
+import { ErpFailurePage } from "@/features/erp/components/erp-failure-page";
 
 type ErpWritebackDetailPageProps = Readonly<{
   params: Promise<{ writebackId: string }>;
@@ -13,19 +14,16 @@ export default async function ErpWritebackDetailPage({ params }: ErpWritebackDet
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
-        <header className="production-execution-header">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>Onaylı İşlem Detayı</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "ERP writeback isteği yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen ERP kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+      <ErpFailurePage
+        title="Onaylı İşlem Detayı"
+        description="ERP’ye yazılacak işlem isteği ve onay geçmişi."
+        listHref="/erp-entegrasyonlari/onayli-islemler"
+        listLabel="Onaylı İşlemlere Dön"
+        failedTitle="Onaylı ERP işlemi yüklenemedi"
+        entityLabel="işlem isteği"
+        code={"code" in result ? result.code : undefined}
+        message={result.message}
+      />
     );
   }
 

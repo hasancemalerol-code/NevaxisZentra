@@ -17,7 +17,7 @@ export function EmptyState({ title, description, action, ...props }: StateProps)
   return (
     <div className="state-panel empty-state" {...props}>
       <span className="state-icon" aria-hidden="true"><Inbox /></span>
-      <div><h3>{title}</h3><p>{description}</p></div>
+      <div><strong className="state-panel__title">{title}</strong><p>{description}</p></div>
       {action ? <div>{action}</div> : null}
     </div>
   );
@@ -27,8 +27,8 @@ export function ErrorState({ title, description, onRetry }: StateProps & Readonl
   return (
     <div className="state-panel error-state" role="alert">
       <span className="state-icon" aria-hidden="true"><CircleAlert /></span>
-      <div><h3>{title}</h3><p>{description}</p></div>
-      {onRetry ? <Button variant="secondary" size="small" onClick={onRetry}>Yeniden dene</Button> : null}
+      <div><strong className="state-panel__title">{title}</strong><p>{description}</p></div>
+      {onRetry ? <Button variant="secondary" size="small" onClick={onRetry}>Yeniden Dene</Button> : null}
     </div>
   );
 }

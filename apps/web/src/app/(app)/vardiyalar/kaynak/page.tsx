@@ -1,3 +1,7 @@
+import Link from "next/link";
+import { Users } from "lucide-react";
+
+import { EmptyPanel } from "@/components/ui/empty-panel";
 import { readShiftAssignmentContextOptions, readShiftAssignmentPermissions } from "@/features/shift-assignment/server/shift-assignment-queries";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
 
@@ -14,20 +18,46 @@ export default async function VardiyalarKaynakPage() {
 
   return (
     <>
-      <header className="shift-ops-hero">
-        <p className="shift-ops-hero__eyebrow">EKİP & KAYNAK</p>
-        <h1>Ekip & Kaynak Dağılımı</h1>
-        <p>{shift?.teamLabel ?? "Ekip ataması"} · Amir: {shift?.supervisorLabel ?? "—"}</p>
-      </header>
-      <section className="shift-ops-card">
-        <h3>Operasyonel atama</h3>
-        <p>Hat, makine ve görev sorumlulukları vardiya bağlamında gösterilir.</p>
-        <ul>
-          {machines.slice(0, 8).map((machine) => (
-            <li key={machine.value}>{machine.label}</li>
-          ))}
-        </ul>
-        {canManage ? <p>Yetkinizle operasyonel yeniden atama yapılabilir.</p> : null}
+      <p className="shift-ops-meta" aria-label="Atama durumu">
+        <span className="shift-ops-chip" data-tone={shift?.teamLabel ? "ok" : "neutral"}>{shift?.teamLabel ? `Ekip: ${shift.teamLabel}` : "Ekip: atanmadı"}</span>
+        <span className="shift-ops-chip" data-tone={shift?.supervisorLabel ? "ok" : "neutral"}>
+          {shift?.supervisorLabel ? `Amir: ${shift.supervisorLabel}` : "Amir: atanmadı"}
+        </span>
+        {canManage ? <span className="shift-ops-chip" data-tone="neutral">Yetki: yeniden atama yapabilirsiniz</span> : null}
+      </p>
+      <section className="shift-ops-card" aria-labelledby="shift-ops-assignment-title">
+        <div className="shift-ops-card__heading">
+          <h2 id="shift-ops-assignment-title">Operasyonel atama</h2>
+          {machines.length > 0 ? <span className="shift-ops-count">{machines.length} kaynak</span> : null}
+        </div>
+        {machines.length === 0 ? (
+          <EmptyPanel
+            compact
+            icon={<Users />}
+            title="Atanabilir makine yok"
+            description="Hat, makine ve görev sorumlulukları tanımlandığında vardiya bağlamında burada listelenir."
+            action={<Link className="shift-ops-cta" href="/vardiyalar/plan">Vardiya planına git</Link>}
+          />
+        ) : (
+          <div className="shift-ops-table-wrap" tabIndex={0} role="region" aria-label="Atanabilir kaynaklar (kaydırılabilir)">
+            <table className="shift-ops-table shift-ops-table--resources" aria-label="Atanabilir kaynaklar">
+              <thead>
+                <tr>
+                  <th scope="col">Kaynak</th>
+                  <th scope="col">Tür</th>
+                </tr>
+              </thead>
+              <tbody>
+                {machines.slice(0, 8).map((machine) => (
+                  <tr key={machine.value}>
+                    <td className="shift-ops-row__label">{machine.label}</td>
+                    <td><span className="shift-ops-chip" data-tone="neutral">Makine</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { isFactoryCopilotSurface } from "../application/factory-copilot-context";
@@ -20,14 +20,24 @@ export function FactoryCopilotShell({ children, canAccessCopilot }: FactoryCopil
   const [open, setOpen] = useState(false);
   const surfaceEnabled = useMemo(() => isFactoryCopilotSurface(pathname), [pathname]);
   const enabled = surfaceEnabled && canAccessCopilot;
+  const [headerActions, setHeaderActions] = useState(0);
+  const registerHeaderAction = useCallback(() => {
+    setHeaderActions((count) => count + 1);
+    return () => setHeaderActions((count) => Math.max(0, count - 1));
+  }, []);
+
+  // Leaving a Copilot surface must not leave the panel "open" for the next time the user comes back.
+  useEffect(() => {
+    if (!enabled) setOpen(false);
+  }, [enabled]);
 
   return (
-    <FactoryCopilotShellProvider canAccess={enabled} onOpen={() => setOpen(true)}>
+    <FactoryCopilotShellProvider canAccess={enabled} onOpen={() => setOpen(true)} registerHeaderAction={registerHeaderAction}>
       <div className="factory-copilot-shell">
         {children}
         {enabled ? (
           <>
-            <FactoryCopilotToggle onOpen={() => setOpen(true)} />
+            {headerActions === 0 ? <FactoryCopilotToggle onOpen={() => setOpen(true)} /> : null}
             <FactoryCopilotDrawer
               open={open}
               onClose={() => setOpen(false)}

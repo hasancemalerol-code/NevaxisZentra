@@ -10,7 +10,7 @@ async function resolveAuthorizedContext(permission = "production-manager.read") 
     return {
       status: "failure" as const,
       code: "permission-denied",
-      message: authorization.code === "authorization-denied" ? "AI Üretim Yöneticisi görüntüleme yetkiniz yok." : authorization.message,
+      message: authorization.code === "authorization-denied" ? "Yapay zekâ üretim yöneticisi görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 

@@ -791,13 +791,13 @@ function buildKpis(params: {
       unit: intensityUnit,
       meta: approvedIntensityTarget
         ? `Hedef: ${formatEnergyKwh(approvedIntensityTarget.targetValue)} ${intensityUnit}`
-        : "Payda veya onaylı yoğunluk hedefi yok",
+        : "Üretim toplamı veya onaylı enerji yoğunluğu hedefi yok",
       evidenceLabel: getEnergyEvidenceLabel(intensityAssessment?.evidenceStatus ?? "insufficient-data"),
       state:
         approvedIntensityTarget && hasEnergyValue(intensityAssessment?.actualConsumedKwh)
           ? "available"
           : "insufficient-data",
-      unavailableReason: "Üretim paydası veya yoğunluk hedefi eksik",
+      unavailableReason: "Üretim toplamı veya enerji yoğunluğu hedefi eksik",
     },
     {
       id: "target-variance",
@@ -849,7 +849,7 @@ function buildKpis(params: {
       unit: null,
       meta:
         costWindows.length > 0
-          ? "Geliştirme tarifesi — gerçek fatura değildir"
+          ? "Örnek tarife — gerçek fatura değildir"
           : "Tarife kanıtı bulunamadı",
       evidenceLabel:
         costWindows.length > 0
@@ -1096,7 +1096,7 @@ export async function readEnergyWorkspace(): Promise<EnergyWorkspaceResult> {
         canRead: true,
         canManage,
       },
-      facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+      facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
       reportingPeriodStartUtc: reportingPeriod.startUtc,
       reportingPeriodEndUtc: reportingPeriod.endUtc,
       latestFreshnessUtc,
@@ -1267,7 +1267,7 @@ export async function readEnergyAssessmentDetail(
       drivers,
       ruleSetVersion: "ENERGY-2.0",
       provenanceLabel: summary.isPilotData
-        ? "Yerel geliştirme / simülasyon kanıtı"
+        ? "Örnek veri"
         : null,
     },
   };

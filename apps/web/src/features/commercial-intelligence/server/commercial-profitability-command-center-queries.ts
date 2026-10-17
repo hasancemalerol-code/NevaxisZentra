@@ -1,3 +1,4 @@
+import { resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import type { CommercialProfitabilityCommandCenterFilters } from "../application/commercial-profitability-command-center-filter";
@@ -338,7 +339,7 @@ function buildKpiCards(input: Readonly<{
   return [
     {
       id: "cc-alert-active",
-      label: "Aktif kârlılık uyarıları",
+      label: "Aktif uyarılar",
       value: formatCount(input.alertKpis.activeCount),
       hint: "Açık uyarı yaşam döngüsü",
       tone: input.alertKpis.activeCount > 0 ? "warning" : "neutral",
@@ -346,7 +347,7 @@ function buildKpiCards(input: Readonly<{
     },
     {
       id: "cc-alert-high-critical",
-      label: "Kritik / yüksek uyarı",
+      label: "Kritik ve yüksek uyarı",
       value: formatCount(input.alertKpis.highOrCriticalCount),
       hint: "Öncelikli inceleme",
       tone: input.alertKpis.highOrCriticalCount > 0 ? "negative" : "neutral",
@@ -354,17 +355,17 @@ function buildKpiCards(input: Readonly<{
     },
     {
       id: "cc-open-linked-tasks",
-      label: "Açık bağlı AI görevleri",
+      label: "Açık bağlı görevler",
       value: input.openLinkedTaskCount === null ? "—" : formatCount(input.openLinkedTaskCount),
       hint: input.aiTaskScopeState === "insufficient"
-        ? "ai-task.read gerekli"
-        : "commercial-intelligence kaynaklı",
+        ? "Görev okuma yetkisi gerekli"
+        : "Ticari zekâ kaynaklı",
       tone: input.openLinkedTaskCount && input.openLinkedTaskCount > 0 ? "warning" : "neutral",
       scopeState: input.aiTaskScopeState,
     },
     {
       id: "cc-scenario-review",
-      label: "İnceleme bekleyen senaryo",
+      label: "İnceleme bekleyen",
       value: formatCount(input.scenarioKpis.needsReviewCount),
       hint: "Fiyat koruma incelemesi",
       tone: input.scenarioKpis.needsReviewCount > 0 ? "warning" : "neutral",
@@ -380,7 +381,7 @@ function buildKpiCards(input: Readonly<{
     },
     {
       id: "cc-evidence-review",
-      label: "Kanıt / veri incelemesi",
+      label: "Veri incelemesi",
       value: formatCount(input.alertKpis.evidenceReviewCount),
       hint: "Veri kalitesi incelemesi",
       tone: input.alertKpis.evidenceReviewCount > 0 ? "warning" : "neutral",
@@ -605,7 +606,7 @@ export async function readCommercialProfitabilityCommandCenterWorkspace(
     },
     {
       id: "lens-cost-drivers",
-      label: "Maliyet sürücüleri",
+      label: "Maliyet etkenleri",
       hint: "Eşik altı maliyet karışımı değişimleri",
       deepLinkHref: buildLensHref("/ticari-zeka/malzeme-ve-maliyet-karliligi", filters, {
         lens: "cost-driver",
@@ -629,8 +630,10 @@ export async function readCommercialProfitabilityCommandCenterWorkspace(
       windowFrom: filters.windowFrom,
       windowTo: filters.windowTo,
       ruleSetVersion: alertWorkspaceResult.value.ruleSetVersion,
-      provenanceDisclaimer: localizeCommercialProfitabilityProvenance(
+      provenanceDisclaimer: resolveCommercialProvenance(
         alertWorkspaceResult.value.provenanceDisclaimer,
+        false,
+        localizeCommercialProfitabilityProvenance,
       ),
       automationDisclaimer: alertWorkspaceResult.value.automationDisclaimer,
       kpiCards: buildKpiCards({

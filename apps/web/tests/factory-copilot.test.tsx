@@ -46,7 +46,7 @@ test("factory copilot context header renders operational scope", () => {
 
 test("factory copilot header action is visible when access is granted", () => {
   const html = renderToStaticMarkup(
-    <FactoryCopilotShellProvider canAccess onOpen={() => undefined}>
+    <FactoryCopilotShellProvider canAccess onOpen={() => undefined} registerHeaderAction={() => () => undefined}>
       <FactoryCopilotHeaderAction />
     </FactoryCopilotShellProvider>,
   );

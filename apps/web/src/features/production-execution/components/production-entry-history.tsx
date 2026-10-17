@@ -1,3 +1,4 @@
+import { displayActor } from "@/lib/presentation/display-label";
 import { History } from "lucide-react";
 import type { ProductionExecutionEntry } from "../domain/production-execution-entry";
 import { getEntryTypeLabel, getScrapReasonLabel } from "../domain/production-execution-entry";
@@ -16,7 +17,7 @@ function formatTime(iso: string): string {
 }
 
 function formatSubjectId(id: string): string {
-  if (id.length > 8) return `…${id.slice(-8)}`;
+  return displayActor(id);
   return id;
 }
 

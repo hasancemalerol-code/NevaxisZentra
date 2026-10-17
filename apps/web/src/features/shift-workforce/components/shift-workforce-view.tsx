@@ -47,6 +47,8 @@ import type {
   ShiftAssignmentSelectionContext,
 } from "../../shift-assignment/domain/shift-assignment-types";
 import "./shift-workforce.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type ShiftWorkforceViewProps = Readonly<{
   overview: ShiftWorkforceOverview;
@@ -294,11 +296,11 @@ export function ShiftWorkforceView({
   const pageSubtitle = useMemo(() => {
     switch (activeTab) {
       case "plan":
-        return "Üretim vardiyalarını, personel uygunluğunu, insan onaylı atamaları ve deterministik risk değerlendirmelerini tek operasyon yüzeyinde yönetin.";
+        return "Üretim vardiyalarını, personel uygunluğunu, insan onaylı atamaları ve kural tabanlı risk değerlendirmelerini tek operasyon yüzeyinde yönetin.";
       case "assignment":
-        return "Üretim emri, makine ve vardiya bağlamında deterministik operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın.";
+        return "Üretim emri, makine ve vardiya bağlamında kural tabanlı operatör uygunluğunu değerlendirin ve insan onaylı atama planlayın.";
       case "risk":
-        return "Kapsama gereksinimleri, onaylı atamalar ve personel sürekliliği risklerini deterministik olarak inceleyin.";
+        return "Kapsama gereksinimleri, onaylı atamalar ve personel sürekliliği risklerini kayıtlı verilere dayanarak inceleyin.";
       default:
         return "ERP/HR kaynaklı personel verilerini ve Zentra operasyonel yetkinlik zenginleştirmesini vardiya planlama bağlamında izleyin.";
     }
@@ -314,7 +316,7 @@ export function ShiftWorkforceView({
         return;
       }
 
-      setMessage("Kaynak senkronizasyonu tamamlandı.");
+      setMessage("Kaynak eşitlemesi tamamlandı.");
       reloadPersons();
       if (selectedId) {
         const refreshed = await loadShiftWorkforcePersonDetailAction(selectedId);
@@ -436,7 +438,7 @@ export function ShiftWorkforceView({
           >
             {!isEdit ? (
               <label>
-                Yetkinlik tanımı
+                Yetkinlik tanımı <span className="zx-required" aria-hidden="true">*</span>
                 <select name="competencyDefinitionCode" required defaultValue="">
                   <option value="" disabled>
                     Seçin
@@ -598,7 +600,7 @@ export function ShiftWorkforceView({
           <div className="shift-workforce-alert shift-workforce-alert--warning" role="status">
             <div>
               <h3>Bayat kaynak verisi</h3>
-              <p>Personel bilgileri güncel değil; ERP/HR senkronizasyonu önerilir.</p>
+              <p>Personel bilgileri güncel değil; ERP/HR eşitlemesi önerilir.</p>
             </div>
           </div>
         ) : null}
@@ -670,7 +672,7 @@ export function ShiftWorkforceView({
                   <dd>{formatShiftWorkforceDateTime(detailItem.sourceUpdatedAtUtc)}</dd>
                 </div>
                 <div>
-                  <dt>Senkronizasyon</dt>
+                  <dt>Eşitleme</dt>
                   <dd>{formatShiftWorkforceDateTime(detailItem.synchronizedAtUtc)}</dd>
                 </div>
                 <div>
@@ -750,7 +752,7 @@ export function ShiftWorkforceView({
           </>
         ) : (
           <div className="shift-workforce-empty">
-            <p>Detay yüklenemedi.</p>
+            <InlineUnavailable subject="Ayrıntı" />
           </div>
         )}
       </aside>
@@ -840,13 +842,13 @@ export function ShiftWorkforceView({
       ) : null}
 
       {activeTab === "personnel" && message ? (
-        <div className="shift-workforce-message" role="status">{message}</div>
+        <div className="shift-workforce-message" role="status">{customerMessage(message)}</div>
       ) : null}
       {activeTab === "personnel" && error ? (
         <div className="shift-workforce-alert shift-workforce-alert--error" role="alert">
           <div>
             <h3>İşlem hatası</h3>
-            <p>{error}</p>
+            <p>{customerMessage(error)}</p>
           </div>
         </div>
       ) : null}
@@ -966,7 +968,7 @@ export function ShiftWorkforceView({
             </div>
           </div>
 
-          <div className="shift-workforce-registry__table-wrap">
+          <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Tablo (kaydırılabilir)">
             {persons.items.length === 0 && !isPending ? (
               <div className="shift-workforce-empty">
                 <Users aria-hidden="true" size={28} />
@@ -978,7 +980,7 @@ export function ShiftWorkforceView({
                 </p>
               </div>
             ) : (
-              <table className="shift-workforce-table">
+              <table aria-label="Personel listesi" className="shift-workforce-table">
                 <thead>
                   <tr>
                     <th>Personel</th>

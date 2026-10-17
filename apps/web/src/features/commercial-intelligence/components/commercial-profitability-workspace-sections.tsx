@@ -19,6 +19,7 @@ import {
   type CommercialProfitabilityComparisonFilters,
 } from "../application/commercial-profitability-filter";
 import { reconcileProfitabilityAssessmentCounts } from "./commercial-profitability-presentation";
+import { detailValueClass } from "./commercial-no-data";
 
 export {
   buildCommercialProfitabilityFilterParams,
@@ -41,7 +42,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <p className="commint-detail-field__label">{label}</p>
-      <p className="commint-detail-field__value">{value}</p>
+      <p className={detailValueClass(value)}>{value}</p>
     </div>
   );
 }
@@ -245,7 +246,7 @@ export function CommercialProfitabilityComparisonDetailPanel({
           <DetailField label="Karşılaştırılabilir" value={formatCount(summary.comparableAssessmentCount)} />
           <DetailField label="Hariç tutulan" value={formatCount(summary.excludedAssessmentCount)} />
           <DetailField
-            label="Payda doğrulaması"
+            label="Toplam doğrulaması"
             value={denominatorValid
               ? `${formatCount(summary.comparableAssessmentCount)} + ${formatCount(summary.excludedAssessmentCount)}`
               : "Doğrulanamadı"}
@@ -258,8 +259,8 @@ export function CommercialProfitabilityComparisonDetailPanel({
       </DetailSection>
       {comparisonDetail.results.length > 0 ? (
         <DetailSection title="Sonuç satırları" testId="results">
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Sonuç satırları" className="commint-table">
               <thead>
                 <tr>
                   <th>Kapsam</th>
@@ -293,7 +294,7 @@ export function CommercialProfitabilityComparisonDetailPanel({
         </DetailSection>
       ) : null}
       <DetailSection title="Sürücüler" testId="drivers">
-        <DetailField label="Önde gelen sürücü" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
+        <DetailField label="Başlıca etken" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
         {supportingDrivers.length > 0 ? (
           <ul className="commint-driver-list" data-testid="commercial-profitability-comparison-supporting-drivers">
             {supportingDrivers.map((driver) => (
@@ -305,13 +306,12 @@ export function CommercialProfitabilityComparisonDetailPanel({
             ))}
           </ul>
         ) : (
-          <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+          <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
         )}
       </DetailSection>
       <DetailSection title="Köken" testId="provenance">
         <div className="commint-detail-grid">
           <DetailField label="Köken" value={comparisonDetail.sourceProvenance || "—"} />
-          <DetailField label="Kural seti" value={summary.ruleSetVersion} />
           <DetailField label="Değerlendirme" value={summary.evaluatedLabel} />
         </div>
       </DetailSection>

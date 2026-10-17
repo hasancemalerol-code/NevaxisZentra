@@ -1,0 +1,30 @@
+.fact-intelligence-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.fact-intelligence-empty p {
+  margin: 0;
+}
+
+/* The data-quality tile always holds a word ("İyi", "Veri yok"), never a count: set smaller than the numeric tiles so "Veri yok" does not read as a value. */
+.fact-status-strip__item:last-child .fact-status-strip__value {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+/* Round 5: header copy breathes like the other module pages; the "no data" verdict reads as muted text, not a value. */
+[data-testid="factory-intelligence-view"] .fact-workspace__header > div:first-child {
+  display: grid;
+  gap: 8px;
+}
+
+[data-testid="factory-intelligence-view"] .fact-status-strip__item:last-child .fact-status-strip__value {
+  color: var(--color-text-secondary, #475569);
+  font-size: 1rem;
+  font-weight: 500;
+}

@@ -153,7 +153,7 @@ export default async function OrderDraftDetailPage({
           </Badge>
         }
         description="Kaynak mesajları, AI eşleşmelerini, açık sorunları ve ERP aktarım hazırlığını inceleyin."
-        eyebrow="AI Sipariş Taslağı"
+        eyebrow="Sipariş taslağı"
         preview
         title={orderDraft.title}
       />
@@ -449,7 +449,7 @@ export default async function OrderDraftDetailPage({
         action={
           <Badge tone="ai">
             <ShieldCheck aria-hidden="true" />
-            Human-in-the-Loop
+            İnsan Onayı
           </Badge>
         }
         description="Sipariş yalnızca yetkili onayından sonra bağlı ERP sistemine aktarılabilir."

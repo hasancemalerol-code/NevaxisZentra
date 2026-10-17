@@ -86,11 +86,11 @@ export function DigitalWorkforceManagementTable({
             {label}
           </button>
         ))}
-        <select className="dwf-select" onChange={(event) => setFacility(event.target.value)} value={facility}>
+        <select aria-label="Fabrika" className="dwf-select" onChange={(event) => setFacility(event.target.value)} value={facility}>
           <option value="all">Fabrika: tümü</option>
           <option value="Pilot Enjeksiyon Tesisi">Pilot Enjeksiyon Tesisi</option>
         </select>
-        <select className="dwf-select" onChange={(event) => setLine(event.target.value)} value={line}>
+        <select aria-label="Hat" className="dwf-select" onChange={(event) => setLine(event.target.value)} value={line}>
           <option value="all">Hat: tümü</option>
           <option value="Hat A — Enjeksiyon">Hat A — Enjeksiyon</option>
           <option value="Hat B — Montaj hazırlık">Hat B — Montaj hazırlık</option>
@@ -98,8 +98,8 @@ export function DigitalWorkforceManagementTable({
         <span className="dwf-pill">Tarih: bugün (demo)</span>
         <span className="dwf-pill">İş türü: operasyon (demo)</span>
       </div>
-      <div className="dwf-table-wrap">
-        <table className="dwf-table">
+      <div className="dwf-table-wrap" tabIndex={0} role="region" aria-label="Yönetim Tablosu (kaydırılabilir)">
+        <table aria-label="Yönetim Tablosu" className="dwf-table">
           <thead>
             <tr>
               <th>Dijital Çalışan</th>

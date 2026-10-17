@@ -20,7 +20,6 @@ import {
   LOCAL_PILOT_DISCLAIMER,
   outcomeBadgeClass,
   severityBadgeClass,
-  SHIFT_ASSIGNMENT_RULE_SET_VERSION,
   SHIFT_ASSIGNMENT_STATUS_FILTER_OPTIONS,
 } from "../domain/shift-assignment-labels";
 import type {
@@ -43,6 +42,8 @@ import {
   availabilityBadgeClass,
   freshnessBadgeClass,
 } from "../../shift-workforce/domain/shift-workforce-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type ShiftAssignmentPanelProps = Readonly<{
   contextOptions: ShiftAssignmentContextOptions;
@@ -469,10 +470,6 @@ export function ShiftAssignmentPanel({
               <h3>Uygunluk değerlendirmesi</h3>
               <dl className="shift-workforce-detail-grid">
                 <div>
-                  <dt>Kural seti</dt>
-                  <dd>{detail.ruleSetVersion || SHIFT_ASSIGNMENT_RULE_SET_VERSION}</dd>
-                </div>
-                <div>
                   <dt>Kaynak</dt>
                   <dd>{detail.sourceLabel}</dd>
                 </div>
@@ -542,7 +539,7 @@ export function ShiftAssignmentPanel({
           </>
         ) : (
           <div className="shift-workforce-empty">
-            <p>Aday detayı yüklenemedi.</p>
+            <InlineUnavailable subject="Aday detayı" />
           </div>
         )}
       </aside>
@@ -566,12 +563,12 @@ export function ShiftAssignmentPanel({
         </div>
       ) : null}
 
-      {message ? <div className="shift-workforce-message" role="status">{message}</div> : null}
+      {message ? <div className="shift-workforce-message" role="status">{customerMessage(message)}</div> : null}
       {error ? (
         <div className="shift-workforce-alert shift-workforce-alert--error" role="alert">
           <div>
             <h3>İşlem hatası</h3>
-            <p>{error}</p>
+            <p>{customerMessage(error)}</p>
           </div>
         </div>
       ) : null}
@@ -724,7 +721,7 @@ export function ShiftAssignmentPanel({
             </span>
           </div>
 
-          <div className="shift-workforce-registry__table-wrap">
+          <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Tablo (kaydırılabilir)">
             {!hasLoadedCandidates ? (
               <div className="shift-workforce-empty">
                 <Users aria-hidden="true" size={28} />
@@ -750,7 +747,7 @@ export function ShiftAssignmentPanel({
             ) : null}
 
             {candidatesResult && candidatesResult.candidates.length > 0 ? (
-              <table className="shift-workforce-table">
+              <table aria-label="Uygun adaylar" className="shift-workforce-table">
                 <thead>
                   <tr>
                     <th>Personel</th>
@@ -860,7 +857,7 @@ export function ShiftAssignmentPanel({
           </div>
         </div>
 
-        <div className="shift-workforce-registry__table-wrap">
+        <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Atama kayıtları (kaydırılabilir)">
           {assignments.length === 0 && !isPending ? (
             <div className="shift-workforce-empty">
               <CheckCircle2 aria-hidden="true" size={28} />
@@ -868,7 +865,7 @@ export function ShiftAssignmentPanel({
               <p>Henüz taslak veya onaylı operatör ataması bulunmuyor.</p>
             </div>
           ) : (
-            <table className="shift-workforce-table">
+            <table aria-label="Atama kayıtları" className="shift-workforce-table">
               <thead>
                 <tr>
                   <th>Operatör</th>

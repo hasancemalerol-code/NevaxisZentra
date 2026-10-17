@@ -1,46 +1,27 @@
 .continuous-optimization-shell {
   display: grid;
   gap: 1rem;
+  align-content: start;
+  min-width: 0;
 }
 
-.continuous-optimization-kpis {
+.continuous-optimization-pair {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: stretch;
 }
 
-.continuous-optimization-kpi {
-  border: 1px solid var(--surface-border, #d8dee9);
-  border-radius: 0.75rem;
-  padding: 0.75rem;
-  background: var(--surface-panel, #fff);
-}
-
-.continuous-optimization-kpi__label {
-  font-size: 0.75rem;
-  color: var(--text-muted, #5c6773);
-}
-
-.continuous-optimization-kpi__value {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.continuous-optimization-section {
-  border: 1px solid var(--surface-border, #d8dee9);
-  border-radius: 0.75rem;
-  background: var(--surface-panel, #fff);
-}
-
-.continuous-optimization-section__header {
-  padding: 0.85rem 1rem;
-  border-bottom: 1px solid var(--surface-border, #d8dee9);
+@media (max-width: 1000px) {
+  .continuous-optimization-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .continuous-optimization-section__body {
-  padding: 0.85rem 1rem;
   display: grid;
   gap: 0.65rem;
+  align-content: start;
 }
 
 .continuous-optimization-item {
@@ -56,8 +37,8 @@
 }
 
 .continuous-optimization-item__meta {
-  font-size: 0.85rem;
-  color: var(--text-muted, #5c6773);
+  font-size: 0.8125rem;
+  color: var(--zx-text-muted, #4a5a70);
 }
 
 .continuous-optimization-opportunity-strip {
@@ -79,4 +60,76 @@
 .continuous-optimization-opportunity-strip__benefit {
   font-weight: 600;
   white-space: nowrap;
+}
+
+/* The page wrapper takes the viewport background so a short page shows no lighter strip at the bottom. */
+.fact-workspace.continuous-optimization-page {
+  min-height: 100%;
+  background: transparent;
+}
+
+/* KPI cards match every other KPI card in the product: no accent bar, one-line labels. */
+.continuous-optimization-kpis .zx-metric::before {
+  display: none;
+}
+
+/* Empty state: same tile, eyebrow, title and text as the other modules' empty cards. */
+.continuous-optimization-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 24px 20px;
+  border: 1px dashed #c5d5e8;
+  border-radius: 14px;
+  background: #f8fbff;
+  text-align: center;
+}
+
+.continuous-optimization-empty__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin-bottom: 4px;
+  border: 1px solid #dde8f4;
+  border-radius: 14px;
+  color: #8aaccc;
+  background: #edf4fb;
+}
+
+.continuous-optimization-empty__eyebrow {
+  margin: 0;
+  color: var(--color-accent, #2463a7);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.continuous-optimization-empty__title {
+  color: #10213c;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.continuous-optimization-empty__text {
+  max-width: 360px;
+  margin: 0;
+  color: #4a5a70;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+/* Lower cards: equal height, the empty box fills the card so both bottoms line up. */
+.zx-panel.continuous-optimization-pair__card {
+  display: flex;
+  flex-direction: column;
+}
+
+.continuous-optimization-pair__card > .continuous-optimization-section__body {
+  flex: 1 1 auto;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.continuous-optimization-pair__card .continuous-optimization-empty {
+  align-content: center;
 }

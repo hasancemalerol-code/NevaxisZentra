@@ -34,6 +34,7 @@ import {
 } from "./maintenance-table-primitives";
 import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
 import "./maintenance-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenancePlanningViewProps = Readonly<{
   canManage: boolean;
@@ -59,8 +60,8 @@ function renderDueTable(
   }>,
 ) {
   return (
-    <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
-      <table className="maintenance-table maintenance-table--compact maintenance-table--planning">
+    <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit" tabIndex={0} role="region" aria-label="Periyodik bakım planları (kaydırılabilir)">
+      <table aria-label="Periyodik bakım planları" className="maintenance-table maintenance-table--compact maintenance-table--planning">
         <colgroup>
           <col className="maintenance-table__col--plan" />
           <col className="maintenance-table__col--asset" />
@@ -107,9 +108,13 @@ function renderDueTable(
                 )}
               </td>
               <td>
-                <Badge tone={getPreventiveDueStatusTone(due.status)}>
-                  {getPreventiveDueStatusLabel(due.status)}
-                </Badge>
+                {options.urgent && due.status === "due" ? (
+                  <Badge tone="danger">Gecikti</Badge>
+                ) : (
+                  <Badge tone={getPreventiveDueStatusTone(due.status)}>
+                    {getPreventiveDueStatusLabel(due.status)}
+                  </Badge>
+                )}
               </td>
               <td>
                 {due.workOrderId ? (
@@ -193,10 +198,10 @@ export function MaintenancePlanningView({
   }
 
   return (
-    <main className="production-execution-page maintenance-page">
+    <div className="production-execution-page maintenance-page">
       <header className="maintenance-page-header production-execution-header">
         <div className="maintenance-page-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
+          <p>BAKIM VE ARIZA</p>
           <h1>Bakım Planlama</h1>
           <span>Periyodik bakım vadelerini izleyin ve bakım emirlerini planlayın.</span>
         </div>
@@ -216,7 +221,7 @@ export function MaintenancePlanningView({
 
       {message ? (
         <div role="alert" className="maintenance-error-panel">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
 
@@ -260,15 +265,7 @@ export function MaintenancePlanningView({
         </section>
 
         <section className="maintenance-section maintenance-section--wide" id="planlar">
-          <MaintenanceSectionHeader
-            title="Planlar"
-            actionHref="/bakim/planlar/yeni"
-            actionLabel="Yeni Plan"
-            actionDisabledReason={
-              canManage ? undefined : "Periyodik bakım planı oluşturma yetkiniz yok."
-            }
-            className="maintenance-section__header"
-          />
+          <MaintenanceSectionHeader title="Planlar" className="maintenance-section__header" />
           {activePlans.length === 0 ? (
             <MaintenanceEmptyState
               icon={<CalendarClock aria-hidden="true" size={18} />}
@@ -312,6 +309,6 @@ export function MaintenancePlanningView({
           )}
         </section>
       </div>
-    </main>
+    </div>
   );
 }

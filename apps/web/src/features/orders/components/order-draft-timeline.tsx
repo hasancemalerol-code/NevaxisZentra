@@ -67,7 +67,7 @@ function buildTimelineEvents(
     },
     {
       id: "draft-created",
-      title: "AI sipariş taslağını oluşturdu",
+      title: "Yapay zekâ sipariş taslağını oluşturdu",
       description:
         "Müşteri, ürün, miktar, fiyat ve termin bilgileri kaynaklardan çıkarıldı.",
       occurredAt: orderDraft.createdAt,

@@ -22,6 +22,7 @@ import {
   resolvePermissionAwareNavigation,
   resolveSettingsHref,
 } from "@/lib/navigation/navigation-visibility";
+import { displayAccountName, displayTenantName } from "@/lib/presentation/display-name";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +63,7 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
     redirect(resolveSubscriptionAccessRedirect(subscriptionAccess));
   }
 
-  const accountDisplayName =
+  const rawAccountDisplayName =
     session.status === "authenticated"
       ? session.account.displayName
       : closureDevRuntime
@@ -70,12 +71,15 @@ export default async function ApplicationLayout({ children }: Readonly<{ childre
         : null;
   const emailMasked =
     session.status === "authenticated" ? session.account.emailMasked : null;
-  const organizationLabel =
+  const rawOrganizationLabel =
     session.status === "authenticated"
       ? session.account.organizationLabel
       : closureDevRuntime
         ? process.env.NEVAXIS_FACTOS_DEV_TENANT_KEY ?? null
         : null;
+
+  const accountDisplayName = rawAccountDisplayName ? displayAccountName(rawAccountDisplayName) : rawAccountDisplayName;
+  const organizationLabel = rawOrganizationLabel ? displayTenantName(rawOrganizationLabel) : rawOrganizationLabel;
 
   if (normalizeSubscriptionRoute(pathname) === "/abonelik-erisimi") {
     const access = await fetchEffectiveAccessCapabilities();

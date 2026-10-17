@@ -68,47 +68,115 @@ export function getAiTaskEscalationBadgeLabel(level: number): string | null {
   }
 
   if (level === 1) {
-    return "Eskalasyon 1";
+    return "Üst Seviyeye Aktarım 1";
   }
 
   if (level === 2) {
-    return "Eskalasyon 2";
+    return "Üst Seviyeye Aktarım 2";
   }
 
   if (level === 3) {
-    return "Yönetim Eskalasyonu";
+    return "Yönetim Üst Seviyeye Aktarımı";
   }
 
-  return "Kritik Eskalasyon";
+  return "Kritik Üst Seviyeye Aktarım";
+}
+
+export const AI_TASK_SLA_BREACH_TARGET_LABELS: Readonly<Record<string, string>> = {
+  acknowledgment: "onay hedefi aşıldı",
+  response: "yanıt hedefi aşıldı",
+  resolution: "çözüm hedefi aşıldı",
+};
+
+/**
+ * Names WHICH SLA target was missed. A breach is not automatically a missed resolution/due date: the engine
+ * reports the first missed target (acknowledgement, response, then resolution).
+ */
+export function getAiTaskSlaBreachLabel(
+  slaState: AiTaskSlaState,
+  breachType?: string | null,
+): string {
+  const base = getAiTaskSlaStateLabel(slaState);
+  const target = breachType ? AI_TASK_SLA_BREACH_TARGET_LABELS[breachType] : undefined;
+  if (slaState !== "breached" || !target) {
+    return base;
+  }
+
+  // Only a resolution breach is a generic "SLA ihlali"; an acknowledgement/response breach names the missed target
+  // so it can never read as a contradiction next to a due date that is still ahead.
+  return breachType === "resolution"
+    ? `${base} · ${target}`
+    : `${target.charAt(0).toLocaleUpperCase("tr-TR")}${target.slice(1)}`;
 }
 
 export function getAiTaskSlaDisplayText(
   slaState: AiTaskSlaState | null,
   slaDueAt: string | null | undefined,
   now: Date = new Date(),
+  breachType?: string | null,
 ): string | null {
   if (!slaState || slaState === "not-applicable") {
     return null;
   }
 
-  const countdown = slaDueAt ? formatAiTaskSlaCountdown(slaDueAt, now) : null;
-
   switch (slaState) {
     case "on-track":
-      return countdown ?? "SLA içinde";
+      return formatAiTaskSlaCountdown(slaDueAt ?? undefined, now) ?? "SLA içinde";
     case "due-soon":
-      return countdown ?? "SLA riski";
+      return formatAiTaskSlaCountdown(slaDueAt ?? undefined, now) ?? "SLA riski";
     case "overdue":
-      return countdown ?? getAiTaskSlaStateLabel(slaState);
+      return formatAiTaskSlaCountdown(slaDueAt ?? undefined, now) ?? getAiTaskSlaStateLabel(slaState);
     case "breached":
-      return countdown ?? "SLA ihlali";
-    case "completed-within-sla":
-      return getAiTaskSlaStateLabel(slaState);
-    case "completed-after-sla":
-      return getAiTaskSlaStateLabel(slaState);
+      // Never a countdown: the remaining time to the resolution deadline is shown separately and must not
+      // read as a delay while that deadline is still in the future.
+      return getAiTaskSlaBreachLabel(slaState, breachType);
     default:
       return getAiTaskSlaStateLabel(slaState);
   }
+}
+
+export type AiTaskResolutionDeadlineSummary = Readonly<{
+  label: string;
+  value: string;
+  /** True only when the resolution deadline has actually passed. */
+  passed: boolean;
+}>;
+
+/** Shared "remaining until the resolution deadline" row: wording is a delay only after the deadline passed. */
+export function getAiTaskResolutionDeadlineSummary(
+  slaState: AiTaskSlaState | null,
+  resolutionDueAt: string | null | undefined,
+  now: Date = new Date(),
+): AiTaskResolutionDeadlineSummary | null {
+  if (!slaState || slaState === "not-applicable") {
+    return null;
+  }
+
+  if (slaState === "completed-within-sla" || slaState === "completed-after-sla") {
+    return { label: "Çözüm hedefi", value: getAiTaskSlaStateLabel(slaState), passed: slaState === "completed-after-sla" };
+  }
+
+  const target = resolutionDueAt ? new Date(resolutionDueAt) : null;
+  if (!target || Number.isNaN(target.getTime())) {
+    return null;
+  }
+
+  const diffMs = target.getTime() - now.getTime();
+  const duration = formatDuration(Math.abs(diffMs));
+  return diffMs >= 0
+    ? { label: "Çözüm hedefi", value: duration, passed: false }
+    : { label: "Çözüm hedefi", value: duration, passed: true };
+}
+
+function formatDuration(absMs: number): string {
+  const absMinutes = Math.max(1, Math.round(absMs / 60_000));
+  if (absMinutes < 60) {
+    return `${absMinutes} dk`;
+  }
+
+  const hours = Math.floor(absMinutes / 60);
+  const minutes = absMinutes % 60;
+  return minutes > 0 ? `${hours} sa ${minutes} dk` : `${hours} sa`;
 }
 
 export function formatAiTaskSlaCountdown(
@@ -125,23 +193,5 @@ export function formatAiTaskSlaCountdown(
   }
 
   const diffMs = target.getTime() - now.getTime();
-  const absMinutes = Math.max(1, Math.round(Math.abs(diffMs) / 60_000));
-
-  if (diffMs >= 0) {
-    if (absMinutes < 60) {
-      return `${absMinutes} dk kaldı`;
-    }
-
-    const hours = Math.floor(absMinutes / 60);
-    const minutes = absMinutes % 60;
-    return minutes > 0 ? `${hours} sa ${minutes} dk kaldı` : `${hours} sa kaldı`;
-  }
-
-  if (absMinutes < 60) {
-    return `${absMinutes} dk gecikti`;
-  }
-
-  const hours = Math.floor(absMinutes / 60);
-  const minutes = absMinutes % 60;
-  return minutes > 0 ? `${hours} sa ${minutes} dk gecikti` : `${hours} sa gecikti`;
+  return `${formatDuration(Math.abs(diffMs))} ${diffMs >= 0 ? "kaldı" : "gecikti"}`;
 }

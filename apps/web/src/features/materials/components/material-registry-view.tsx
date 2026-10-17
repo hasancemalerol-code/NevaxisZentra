@@ -40,6 +40,8 @@ import {
 import { MaterialLotPanel } from "./material-lot-panel";
 import { MaterialRequirementPanel } from "./material-requirement-panel";
 import "./material-registry.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type MaterialRegistryViewProps = Readonly<{
   summary: MaterialWorkspaceSummary;
@@ -292,7 +294,7 @@ export function MaterialRegistryView({
   }
 
   return (
-    <main className="material-registry-page">
+    <div className="material-registry-page">
       <section className="material-executive" aria-label="Malzeme yönetim komuta yüzeyi">
         <div className="material-executive__top">
           <div className="material-executive__intro">
@@ -343,12 +345,12 @@ export function MaterialRegistryView({
 
       {error ? (
         <div className="material-registry-error" role="alert">
-          {error}
+          {customerMessage(error)}
         </div>
       ) : null}
       {message ? (
         <div className="material-registry-empty" role="status">
-          {message}
+          {customerMessage(message)}
         </div>
       ) : null}
       {isPending ? (
@@ -370,11 +372,11 @@ export function MaterialRegistryView({
             action={(formData) => runAction(() => createMaterialAction(formData))}
           >
             <label className="material-required">
-              Malzeme Kodu
+              Malzeme Kodu <span className="zx-required" aria-hidden="true">*</span>
               <input name="code" required aria-required="true" />
             </label>
             <label className="material-required">
-              Malzeme Adı
+              Malzeme Adı <span className="zx-required" aria-hidden="true">*</span>
               <input name="name" required aria-required="true" />
             </label>
             <label>
@@ -519,14 +521,14 @@ export function MaterialRegistryView({
             ))}
           </div>
 
-          <div className="material-registry-table-wrap">
+          <div className="material-registry-table-wrap" tabIndex={0} role="region" aria-label="Malzeme sicili (kaydırılabilir)">
             {filteredMaterials.length === 0 ? (
               <div className="material-registry-empty">
                 <Package aria-hidden="true" />
                 <p>Kayıtlı malzeme bulunamadı.</p>
               </div>
             ) : (
-              <table className={`material-registry-table${detailOpen ? " material-registry-table--compact" : ""}`}>
+              <table aria-label="Malzeme sicili" className={`material-registry-table${detailOpen ? " material-registry-table--compact" : ""}`}>
                 <thead>
                   <tr>
                     <th>Malzeme</th>
@@ -796,7 +798,7 @@ export function MaterialRegistryView({
                   <input type="hidden" name="materialId" value={activeDetail.id} />
                   <input type="hidden" name="expectedVersion" value={activeDetail.version} />
                   <label className="material-required">
-                    Malzeme Adı
+                    Malzeme Adı <span className="zx-required" aria-hidden="true">*</span>
                     <input name="name" defaultValue={activeDetail.name} required />
                   </label>
                   <label>
@@ -981,7 +983,7 @@ export function MaterialRegistryView({
                   <input type="hidden" name="expectedVersion" value={activeDetail.version} />
                   <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
                   <label className="material-required">
-                    Hedef Durum
+                    Hedef Durum <span className="zx-required" aria-hidden="true">*</span>
                     <select
                       name="targetStatus"
                       required
@@ -997,7 +999,7 @@ export function MaterialRegistryView({
                     </select>
                   </label>
                   <label className="material-required full-width">
-                    Gerekçe
+                    Gerekçe <span className="zx-required" aria-hidden="true">*</span>
                     <textarea name="reason" rows={2} required placeholder="Durum değişikliği gerekçesi" />
                   </label>
                   <div className="material-registry-actions full-width">
@@ -1371,13 +1373,11 @@ export function MaterialRegistryView({
                 ) : null}
               </>
             ) : !isPending ? (
-              <div className="material-registry-error" role="alert">
-                Malzeme detayı yüklenemedi.
-              </div>
+              <InlineUnavailable subject="Malzeme detayı" />
             ) : null}
           </aside>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

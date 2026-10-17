@@ -17,6 +17,9 @@ import {
 } from "@/features/teams/server/teams-actions";
 import { TeamsMessageTaskDraftForm } from "@/features/teams/components/teams-message-task-draft-form";
 import { isHandoverChannelType, TEAMS_MESSAGE_TASK_DRAFT_DISCLAIMER } from "@/features/teams/domain/teams-constants";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { createActorLabeler } from "@/lib/presentation/display-label";
+import { Notice } from "@/components/ui/notice";
 
 type TeamsWorkspaceClientProps = Readonly<{
   channels: RawTeamsChannelListResponse;
@@ -50,6 +53,7 @@ export function TeamsWorkspaceClient({
   canCreateApproval,
   canCreateHandover,
 }: TeamsWorkspaceClientProps) {
+  const actorLabel = useMemo(() => createActorLabeler(), []);
   const router = useRouter();
   const [messageBody, setMessageBody] = useState("");
   const [selectedMentions, setSelectedMentions] = useState<string[]>([]);
@@ -131,7 +135,7 @@ export function TeamsWorkspaceClient({
         </div>
         <div className="teams-rail__list">
           {channels.items.length === 0 ? (
-            <div className="teams-empty">Erişilebilir kanal yok.</div>
+            <div className="teams-empty teams-empty--rail"><Hash aria-hidden="true" /><p><strong>Erişilebilir kanal yok</strong></p><p>Kanallar yönetici tarafından atandığında burada listelenir.</p></div>
           ) : (
             channels.items.map((channel) => (
               <button
@@ -154,7 +158,7 @@ export function TeamsWorkspaceClient({
                 </div>
                 {channel.latestMessage ? (
                   <div className="teams-rail__preview">
-                    {channel.latestMessage.authorLabel}
+                    {actorLabel(channel.latestMessage.authorLabel)}
                     {": "}
                     {channel.latestMessage.bodyPreview}
                   </div>
@@ -177,7 +181,9 @@ export function TeamsWorkspaceClient({
           ) : (
             <div className="teams-empty" data-testid="teams-selected-channel-empty">
               <MessageSquare aria-hidden="true" />
-              <p>Bir kanal seçin veya erişilebilir kanal bekleyin.</p>
+              <p><strong>Kanal seçilmedi</strong></p>
+              <p>Kanal listesinden bir kanal seçin. Erişilebilir kanal yoksa kanallar yönetici tarafından atandığında burada görünür.</p>
+              <Link href="/teams/is-kutum" className="teams-context-chip">İş kutusunu aç</Link>
             </div>
           )
         ) : (
@@ -193,7 +199,7 @@ export function TeamsWorkspaceClient({
                 <span>{selectedChannel.members.length} üye</span>
                 {selectedChannel.members.map((member) => (
                   <Badge key={member.tenantMembershipId} tone="neutral">
-                    {member.displayLabel}
+                    {actorLabel(member.displayLabel)}
                   </Badge>
                 ))}
               </div>
@@ -217,7 +223,7 @@ export function TeamsWorkspaceClient({
                   className="teams-context-chip"
                   data-testid="teams-channel-work-inbox-link"
                 >
-                  İş kutum
+                  İş kutusu
                 </Link>
                 <Link
                   href={`/teams/onaylar`}
@@ -266,7 +272,7 @@ export function TeamsWorkspaceClient({
                     data-testid={`teams-message-${message.id}`}
                   >
                     <div className="teams-message__meta">
-                      <strong>{message.authorLabel}</strong>
+                      <strong>{actorLabel(message.authorLabel)}</strong>
                       <span>{formatWhen(message.createdAt)}</span>
                     </div>
                     <button
@@ -309,7 +315,7 @@ export function TeamsWorkspaceClient({
                               style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }}
                               data-testid="teams-message-task-create-denied"
                             >
-                              Görev taslağı oluşturmak için ai-task.create yetkisi gerekir.
+                              Görev taslağı oluşturmak için görev oluşturma yetkisi gerekir.
                             </p>
                           )
                         ) : null}
@@ -326,7 +332,7 @@ export function TeamsWorkspaceClient({
                             style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }}
                             data-testid="teams-message-approval-create-denied"
                           >
-                            Onay isteği için teams.approvals.create yetkisi gerekir.
+                            Onay isteği için onay isteği oluşturma yetkisi gerekir.
                           </p>
                         )}
                         {canCreateHandover && isHandoverChannelType(selectedChannel.channelType) ? (
@@ -351,7 +357,7 @@ export function TeamsWorkspaceClient({
                       <div className="teams-message__mentions">
                         {message.mentions.map((mention) => (
                           <Badge key={mention.tenantMembershipId} tone="information">
-                            @{mention.displayLabel}
+                            @{actorLabel(mention.displayLabel)}
                           </Badge>
                         ))}
                       </div>
@@ -390,7 +396,7 @@ export function TeamsWorkspaceClient({
                         onClick={() => toggleMention(member.tenantMembershipId)}
                       >
                         <Badge tone={selectedMentions.includes(member.tenantMembershipId) ? "information" : "neutral"}>
-                          @{member.displayLabel}
+                          @{actorLabel(member.displayLabel)}
                         </Badge>
                       </button>
                     ))}
@@ -405,9 +411,7 @@ export function TeamsWorkspaceClient({
                   data-testid="teams-composer-input"
                 />
                 {error ? (
-                  <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-composer-error">
-                    {error}
-                  </p>
+                  <Notice tone="danger" alert data-testid="teams-composer-error">{customerMessage(error)}</Notice>
                 ) : null}
                 {pending ? (
                   <p style={{ margin: 0, color: "#6b7280", fontSize: "0.875rem" }} data-testid="teams-composer-pending">

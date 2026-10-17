@@ -10,6 +10,8 @@ import { AppsFactoryOperationsSection } from "./apps-factory-operations-section"
 import { AppsKaynaklarCatalogSection } from "./apps-kaynaklar-catalog-section";
 import { mapDashboardShowcaseViewModel } from "@/features/dashboard-showcase/server/dashboard-showcase-mapper";
 
+import { balanceCatalogColumns } from "../domain/catalog-columns";
+
 import "../apps-catalog-workspace.css";
 
 function buildEmptyOperationsViewModel() {
@@ -39,9 +41,10 @@ export async function AppsCatalogPageContent() {
   ]);
 
   const viewModel = operationsViewModel ?? buildEmptyOperationsViewModel();
+  const columns = balanceCatalogColumns(catalog.filter((group) => group.label !== "Kaynaklar"), 2, 3);
 
   return (
-    <main className="fact-workspace" data-testid="apps-catalog-page">
+    <div className="fact-workspace apps-catalog-workspace" data-testid="apps-catalog-page">
       <WorkspaceHeader
         context="UYGULAMALAR"
         meta="Fabrika operasyon görünümü ve uzman modül kataloğu"
@@ -50,36 +53,40 @@ export async function AppsCatalogPageContent() {
 
       <AppsFactoryOperationsSection viewModel={viewModel} />
 
-      <AppsKaynaklarCatalogSection />
-
       <header className="apps-catalog-specialist-header">
         <p className="fact-workspace__context">UZMAN UYGULAMALAR</p>
         <h2 className="fact-section__title">Modül kataloğu</h2>
       </header>
 
-      {catalog.map((group) => (
-        <section aria-label={group.label} className="fact-section" key={group.label}>
-          <header className="fact-section__header">
-            <h2 className="fact-section__title">{group.label}</h2>
-          </header>
-          <div className="fact-section__body apps-catalog-grid">
-            {group.items.map((item) => {
-              const Icon = resolveNavigationIcon(item.iconKey);
+      <div className="apps-catalog-sections">
+        {columns.map((column, index) => (
+          <div className="apps-catalog-sections__column" key={index}>
+            {index === 0 ? <AppsKaynaklarCatalogSection /> : null}
+            {column.map((group) => (
+              <section aria-label={group.label} className="fact-section" key={group.label}>
+                <header className="fact-section__header">
+                  <h2 className="fact-section__title">{group.label}</h2>
+                </header>
+                <div className="fact-section__body apps-catalog-grid">
+                  {group.items.map((item) => {
+                    const Icon = resolveNavigationIcon(item.iconKey);
 
-              return (
-                <Link key={item.href} className="apps-catalog-card" href={item.href}>
-                  <Icon aria-hidden="true" size={16} />
-                  <div>
-                    <h3>{item.label}</h3>
-                    <p>{item.href}</p>
-                  </div>
-                  <ArrowUpRight aria-hidden="true" size={16} />
-                </Link>
-              );
-            })}
+                    return (
+                      <Link key={item.href} className="apps-catalog-card" href={item.href}>
+                        <Icon aria-hidden="true" size={16} />
+                        <div>
+                          <h3>{item.label}</h3>
+                        </div>
+                        <ArrowUpRight aria-hidden="true" size={16} />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
-        </section>
-      ))}
-    </main>
+        ))}
+      </div>
+    </div>
   );
 }

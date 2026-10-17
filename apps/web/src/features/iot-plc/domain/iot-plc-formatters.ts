@@ -1,14 +1,13 @@
+import { formatDateTime } from "@/lib/presentation/format";
+
 const TR_LOCALE = "tr-TR";
 
+/** Timestamps are UTC instants; they are shown in facility local time through the central formatter. */
 export function formatIotPlcDateTime(utc: string | null | undefined): string {
   if (!utc) return "—";
-  const date = new Date(utc);
-  if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(TR_LOCALE, {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: "UTC",
-  }).format(date);
+  // A UTC field without a zone designator would otherwise be read as server-local time.
+  const instant = /T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(utc) ? `${utc}Z` : utc;
+  return formatDateTime(instant);
 }
 
 export function formatIotPlcCompactPeriod(startUtc: string, endUtc: string): string {

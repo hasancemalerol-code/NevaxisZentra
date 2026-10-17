@@ -33,9 +33,11 @@ import type {
   CommercialProfitabilityCommandCenterScopeState,
   CommercialProfitabilityCommandCenterWorkspacePayload,
 } from "../types/commercial-profitability-command-center-types";
+import { CommercialKpiCompact, isKpiSetEmpty } from "./commercial-kpi-compact";
 import { resolveProfitabilityKpiToneClass } from "./commercial-profitability-presentation";
 import { refreshCommercialProfitabilityCommandCenterAction } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { kpiValueClass } from "./commercial-no-data";
 
 type CommercialProfitabilityCommandCenterViewProps = Readonly<{
   workspace: CommercialProfitabilityCommandCenterWorkspacePayload;
@@ -70,7 +72,7 @@ function CommandCenterKpiCard({ card }: Readonly<{ card: CommercialProfitability
         <p className="commint-kpi-card__label">{card.label}</p>
         <Icon aria-hidden="true" size={16} />
       </div>
-      <p className="commint-kpi-card__value">{card.value}</p>
+      <p className={kpiValueClass(card.value)}>{card.value}</p>
       <div className="commint-kpi-card__footer">
         <p className="commint-kpi-card__detail">{card.hint}</p>
         {scopeBadge ? (
@@ -132,6 +134,7 @@ export function CommercialProfitabilityCommandCenterView({
   const [isRefreshing, startRefresh] = useTransition();
   const [isPending, startTransition] = useTransition();
 
+  const managementKpis = workspace.kpiCards.filter((card) => card.id !== "cc-scope");
   const uiFilters = readCommercialProfitabilityCommandCenterFilters(searchParams);
 
   const applyFilterUpdates = useCallback((updates: Partial<Record<string, string>>) => {
@@ -156,7 +159,7 @@ export function CommercialProfitabilityCommandCenterView({
   }, [router]);
 
   return (
-    <main className="commint-page" data-testid="commercial-profitability-command-center-workspace">
+    <div className="commint-page" data-testid="commercial-profitability-command-center-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -187,13 +190,15 @@ export function CommercialProfitabilityCommandCenterView({
           <li>Tesis: {workspace.facilityLabel}</li>
           <li>Dönem: {workspace.timeWindowLabel}</li>
           <li>Son güncelleme: {workspace.dataConfidence.lastRefreshLabel}</li>
-          <li>Kural seti: {workspace.ruleSetVersion}</li>
         </ul>
       </header>
 
-      <p className="commint-readonly-note" data-testid="commercial-profitability-command-center-readonly-note">
-        {COMMERCIAL_PROFITABILITY_COMMAND_CENTER_SCOPE_NOTE}
-      </p>
+      <details className="commint-notes">
+        <summary>Kapsam ve sınırlar</summary>
+        <p className="commint-readonly-note" data-testid="commercial-profitability-command-center-readonly-note">
+          {COMMERCIAL_PROFITABILITY_COMMAND_CENTER_SCOPE_NOTE}
+        </p>
+      </details>
 
       <div
         className="commint-filter-rail"
@@ -228,19 +233,27 @@ export function CommercialProfitabilityCommandCenterView({
         </button>
       </div>
 
-      <section className="commint-panel" aria-labelledby="command-center-kpi-heading">
-        <header className="commint-panel__header">
-          <h2 id="command-center-kpi-heading" className="commint-panel__title">Yönetim göstergeleri</h2>
-        </header>
-        <div
-          className="commint-kpi-grid"
-          data-testid="commercial-profitability-command-center-kpi-grid"
-        >
-          {workspace.kpiCards.map((card) => (
-            <CommandCenterKpiCard key={card.id} card={card} />
-          ))}
-        </div>
-      </section>
+      {isKpiSetEmpty(managementKpis) ? (
+        <CommercialKpiCompact
+          ariaLabel="Yönetim göstergeleri"
+          testId="commercial-profitability-command-center-kpi-grid"
+          items={managementKpis.map((card) => ({ id: card.id, label: card.label, value: card.value, caption: card.hint }))}
+        />
+      ) : (
+        <section className="commint-panel" aria-labelledby="command-center-kpi-heading">
+          <header className="commint-panel__header">
+            <h2 id="command-center-kpi-heading" className="commint-panel__title">Yönetim göstergeleri</h2>
+          </header>
+          <div
+            className="commint-kpi-grid"
+            data-testid="commercial-profitability-command-center-kpi-grid"
+          >
+            {managementKpis.map((card) => (
+              <CommandCenterKpiCard key={card.id} card={card} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="commint-panel" aria-labelledby="command-center-queue-heading">
         <header className="commint-panel__header">
@@ -248,14 +261,14 @@ export function CommercialProfitabilityCommandCenterView({
         </header>
         {workspace.priorityQueue.length === 0 ? (
           <p
-            className="commint-readonly-note"
+            className="commint-empty"
             data-testid="commercial-profitability-command-center-queue-empty"
           >
             {COMMERCIAL_PROFITABILITY_COMMAND_CENTER_EMPTY_QUEUE_NOTE}
           </p>
         ) : (
-          <div className="commint-table-wrap" data-testid="commercial-profitability-command-center-queue-table">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0} data-testid="commercial-profitability-command-center-queue-table">
+            <table aria-label="Öncelikli karar kuyruğu" className="commint-table">
               <thead>
                 <tr>
                   <th>Kaynak</th>
@@ -279,33 +292,32 @@ export function CommercialProfitabilityCommandCenterView({
 
       <section className="commint-panel" aria-labelledby="command-center-lenses-heading">
         <header className="commint-panel__header">
-          <h2 id="command-center-lenses-heading" className="commint-panel__title">Kârlılık mercekleri</h2>
+          <h2 id="command-center-lenses-heading" className="commint-panel__title">Kârlılık görünümleri</h2>
         </header>
-        <div
-          className="commint-kpi-grid"
-          data-testid="commercial-profitability-command-center-lenses"
-        >
+        <ul className="commint-lens-list" data-testid="commercial-profitability-command-center-lenses">
           {workspace.profitabilityLenses.map((lens) => (
-            <article key={lens.id} className="commint-kpi-card commint-kpi-card__tone--informational">
-              <p className="commint-kpi-card__label">{lens.label}</p>
-              <p className="commint-kpi-card__value">
+            <li key={lens.id} className="commint-lens-list__row">
+              <span className="commint-lens-list__text">
+                <span className="commint-lens-list__label">{lens.label}</span>
+                <span className="commint-lens-list__hint">{lens.hint}</span>
+              </span>
+              <span className="commint-lens-list__count">
                 {lens.previewCount === null ? "—" : lens.previewCount}
-              </p>
-              <p className="commint-kpi-card__detail">{lens.hint}</p>
+                {scopeBadgeLabel(lens.scopeState) ? (
+                  <span className="commint-kpi-card__badge">{scopeBadgeLabel(lens.scopeState)}</span>
+                ) : null}
+              </span>
               <Link
                 href={lens.deepLinkHref}
                 className="commint-table__link"
                 data-testid={`commercial-profitability-command-center-lens-link-${lens.id}`}
               >
-                Derin bağlantı
+                Ayrıntıya git
                 <ArrowUpRight aria-hidden="true" size={14} />
               </Link>
-              {scopeBadgeLabel(lens.scopeState) ? (
-                <span className="commint-kpi-card__badge">{scopeBadgeLabel(lens.scopeState)}</span>
-              ) : null}
-            </article>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       <div className="commint-panel-grid commint-panel-grid--overview">
@@ -314,13 +326,14 @@ export function CommercialProfitabilityCommandCenterView({
             <h2 id="command-center-pricing-heading" className="commint-panel__title">Fiyat ve onay özeti</h2>
           </header>
           <div data-testid="commercial-profitability-command-center-pricing-snapshot">
-            <ul className="commint-executive__meta">
+            <ul className="commint-summary-list">
               {workspace.pricingLifecycleSnapshots.map((snapshot) => (
                 <li key={snapshot.label}>
-                  <Link href={snapshot.deepLinkHref}>
-                    {snapshot.label}: {snapshot.count === null ? "—" : snapshot.count}
-                  </Link>
-                  {scopeBadgeLabel(snapshot.scopeState) ? ` (${scopeBadgeLabel(snapshot.scopeState)})` : null}
+                  <Link href={snapshot.deepLinkHref}>{snapshot.label}</Link>
+                  <span className="commint-summary-list__count">
+                    {snapshot.count === null ? "—" : snapshot.count}
+                    {scopeBadgeLabel(snapshot.scopeState) ? ` (${scopeBadgeLabel(snapshot.scopeState)})` : ""}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -332,13 +345,14 @@ export function CommercialProfitabilityCommandCenterView({
             <h2 id="command-center-alert-heading" className="commint-panel__title">Uyarı ve görev özeti</h2>
           </header>
           <div data-testid="commercial-profitability-command-center-alert-snapshot">
-            <ul className="commint-executive__meta">
+            <ul className="commint-summary-list">
               {workspace.alertLifecycleSnapshots.map((snapshot) => (
                 <li key={snapshot.label}>
-                  <Link href={snapshot.deepLinkHref}>
-                    {snapshot.label}: {snapshot.count === null ? "—" : snapshot.count}
-                  </Link>
-                  {scopeBadgeLabel(snapshot.scopeState) ? ` (${scopeBadgeLabel(snapshot.scopeState)})` : null}
+                  <Link href={snapshot.deepLinkHref}>{snapshot.label}</Link>
+                  <span className="commint-summary-list__count">
+                    {snapshot.count === null ? "—" : snapshot.count}
+                    {scopeBadgeLabel(snapshot.scopeState) ? ` (${scopeBadgeLabel(snapshot.scopeState)})` : ""}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -350,44 +364,48 @@ export function CommercialProfitabilityCommandCenterView({
         <header className="commint-panel__header">
           <h2 id="command-center-confidence-heading" className="commint-panel__title">Veri güveni</h2>
         </header>
-        <div
-          className="commint-readonly-note"
-          data-testid="commercial-profitability-command-center-data-confidence"
-        >
-          <p>
-            Kapsam: {workspace.dataConfidence.scopeLabel} · {workspace.dataConfidence.facilityLabel} ·{" "}
-            {workspace.dataConfidence.timeWindowLabel}
-          </p>
-          <p>Son yenileme: {workspace.dataConfidence.lastRefreshLabel}</p>
-          {workspace.dataConfidence.partialAggregationNotes.length > 0 ? (
-            <ul>
-              {workspace.dataConfidence.partialAggregationNotes.map((note) => (
-                <li key={note}>{note}</li>
-              ))}
-            </ul>
-          ) : null}
+        <ul className="commint-keyvalue" data-testid="commercial-profitability-command-center-data-confidence">
+          <li>
+            <span>Kapsam</span>
+            <span>
+              {workspace.dataConfidence.scopeLabel} · {workspace.dataConfidence.facilityLabel} ·{" "}
+              {workspace.dataConfidence.timeWindowLabel}
+            </span>
+          </li>
+          <li>
+            <span>Son yenileme</span>
+            <span>{workspace.dataConfidence.lastRefreshLabel}</span>
+          </li>
+          {workspace.dataConfidence.partialAggregationNotes.map((note) => (
+            <li key={note}>
+              <span>Kısmi toplama</span>
+              <span>{note}</span>
+            </li>
+          ))}
           {workspace.dataConfidence.evidenceInsufficiencyNotes.length > 0 ? (
-            <p>
-              Kanıt yetersizliği: {workspace.dataConfidence.evidenceInsufficiencyNotes.join("; ")}
-            </p>
+            <li>
+              <span>Kanıt yetersizliği</span>
+              <span>{workspace.dataConfidence.evidenceInsufficiencyNotes.join("; ")}</span>
+            </li>
           ) : null}
           {workspace.dataConfidence.sourceConflictNotes.length > 0 ? (
-            <p>
-              Kaynak çakışması: {workspace.dataConfidence.sourceConflictNotes.join("; ")}
-            </p>
+            <li>
+              <span>Kaynak çakışması</span>
+              <span>{workspace.dataConfidence.sourceConflictNotes.join("; ")}</span>
+            </li>
           ) : null}
           {!workspace.canReadAiTasks ? (
-            <p data-testid="commercial-profitability-command-center-ai-task-partial">
-              AI görev detayları kısmi kapsamda; tam sayım için ai-task.read yetkisi gerekir.
-            </p>
+            <li data-testid="commercial-profitability-command-center-ai-task-partial">
+              <span>Görev ayrıntıları</span>
+              <span>Kısmi kapsam; tam sayım için görev okuma yetkisi gerekir.</span>
+            </li>
           ) : null}
-        </div>
+          <li data-testid="commercial-profitability-command-center-provenance">
+            <span>Kaynak</span>
+            <span>{workspace.provenanceDisclaimer}</span>
+          </li>
+        </ul>
       </section>
-
-      <p className="commint-provenance-strip" data-testid="commercial-profitability-command-center-provenance">
-        <span className="commint-provenance-strip__badge">Kaynak</span>
-        {workspace.provenanceDisclaimer}
-      </p>
-    </main>
+    </div>
   );
 }

@@ -10,6 +10,7 @@ import type {
 } from "../server/digital-workforce-api-client";
 import { DigitalWorkforceSubnav } from "./digital-workforce-primitives";
 import "./digital-workforce-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 function ShellFrame({ children }: Readonly<{ children: ReactNode }>) {
   const runtime = useDigitalWorkforceRuntime();
@@ -29,7 +30,7 @@ function ShellFrame({ children }: Readonly<{ children: ReactNode }>) {
           Dijital iş gücü duraklatıldı. İzleme devam eder; yeni uygulama başlamaz.
         </p>
       ) : null}
-      {runtime.apiError ? <p className="dwf-api-error">{runtime.apiError}</p> : null}
+      {runtime.apiError ? <p className="dwf-api-error">{customerMessage(runtime.apiError)}</p> : null}
       {children}
     </div>
   );

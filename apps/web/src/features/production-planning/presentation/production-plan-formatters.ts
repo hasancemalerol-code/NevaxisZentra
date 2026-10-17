@@ -1,30 +1,10 @@
+import { formatDate, formatDateTime } from "@/lib/presentation/format";
 import type {
   ProductionPlan,
   ProductionPlanConfidence,
 } from "../domain/production-plan";
 
 const TURKISH_LOCALE = "tr-TR";
-
-const DATE_FORMATTER = new Intl.DateTimeFormat(
-  TURKISH_LOCALE,
-  {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  },
-);
-
-const SHORT_DATE_TIME_FORMATTER =
-  new Intl.DateTimeFormat(
-    TURKISH_LOCALE,
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
 
 const TIME_FORMATTER = new Intl.DateTimeFormat(
   TURKISH_LOCALE,
@@ -77,7 +57,7 @@ export function formatProductionPlanDate(
   const date = parseDate(value);
 
   return date
-    ? DATE_FORMATTER.format(date)
+    ? formatDate(date)
     : "Tarih belirlenmedi";
 }
 
@@ -87,7 +67,7 @@ export function formatProductionPlanDateTime(
   const date = parseDate(value);
 
   return date
-    ? SHORT_DATE_TIME_FORMATTER.format(date)
+    ? formatDateTime(date)
     : "Zaman belirlenmedi";
 }
 
@@ -199,17 +179,17 @@ export function formatProductionPlanTimeWindow(
 
   if (sameDay) {
     return [
-      DATE_FORMATTER.format(startDate),
+      formatDate(startDate),
       `${TIME_FORMATTER.format(startDate)}–${TIME_FORMATTER.format(endDate)}`,
     ].join(" ");
   }
 
   return [
-    SHORT_DATE_TIME_FORMATTER.format(
+    formatDateTime(
       startDate,
     ),
     "–",
-    SHORT_DATE_TIME_FORMATTER.format(
+    formatDateTime(
       endDate,
     ),
   ].join(" ");

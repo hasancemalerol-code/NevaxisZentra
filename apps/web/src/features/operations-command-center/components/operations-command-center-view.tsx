@@ -21,6 +21,7 @@ import {
 } from "../application/operations-command-center-filter";
 import {
   getOperationsCommandCenterAvailabilityLabel,
+  getOperationsCommandCenterStatusParts,
   OPERATIONS_COMMAND_CENTER_COMMERCIAL_LINK_LABEL,
   OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE,
   OPERATIONS_COMMAND_CENTER_NO_ACCESS_NOTE,
@@ -36,6 +37,7 @@ import type {
 } from "../types/operations-command-center-types";
 import { refreshOperationsCommandCenterAction } from "../server/operations-command-center-actions";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
+import "./operations-command-center.css";
 
 type OperationsCommandCenterViewProps = Readonly<{
   workspace: OperationsCommandCenterWorkspacePayload;
@@ -65,7 +67,7 @@ function KpiCard({ card }: Readonly<{ card: OperationsCommandCenterKpiCard }>) {
         <p className="commint-kpi-card__label">{card.label}</p>
         <Icon aria-hidden="true" size={16} />
       </div>
-      <p className="commint-kpi-card__value">{card.value}</p>
+      <p className={`commint-kpi-card__value${/^[\d%.,\-\s]+$/.test(card.value) ? "" : " occ-kpi-value--text"}`}>{card.value}</p>
       <div className="commint-kpi-card__footer">
         <p className="commint-kpi-card__detail">{card.hint}</p>
         {scopeBadge ? (
@@ -76,25 +78,34 @@ function KpiCard({ card }: Readonly<{ card: OperationsCommandCenterKpiCard }>) {
   );
 }
 
+function StatusPills({ statusLabel }: Readonly<{ statusLabel: string }>) {
+  return (
+    <span className="occ-status-pills">
+      {getOperationsCommandCenterStatusParts(statusLabel).map((part) => (
+        <span key={part.label} className={`occ-status-pill occ-status-pill--${part.tone}`}>
+          {part.label}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function QueueRow({ item }: Readonly<{ item: OperationsCommandCenterQueueItem }>) {
   return (
-    <tr
-      data-testid={`operations-command-center-queue-row-${item.id}`}
-      className={item.humanReviewRequired ? "commint-variance--negative" : undefined}
-    >
+    <tr data-testid={`operations-command-center-queue-row-${item.id}`}>
       <td>
-        <span className="commint-table__secondary" data-testid="operations-command-center-module-badge">
+        <span className="commint-table__secondary occ-queue-reference" data-testid="operations-command-center-module-badge">
           {item.moduleLabel}
+          {item.sourceReference && !/^[0-9a-f]{8}$/i.test(item.sourceReference.trim()) ? ` · ${item.sourceReference}` : ""}
         </span>
-        <p className="commint-table__secondary">{item.sourceReference}</p>
       </td>
       <td>
         <Link href={item.deepLinkHref} className="commint-table__link">
-          {item.title}
+          {item.title?.trim() || `${item.sourceReference || "Kaydı"} aç`}
           <ArrowUpRight aria-hidden="true" size={14} />
         </Link>
       </td>
-      <td>{item.statusLabel}</td>
+      <td><StatusPills statusLabel={item.statusLabel} /></td>
       <td>{item.evidenceLabel}</td>
       <td>{item.freshnessLabel}</td>
       <td>
@@ -121,7 +132,7 @@ function ModuleHealthRow({ entry }: Readonly<{ entry: OperationsCommandCenterMod
       <td>{entry.moduleLabel}</td>
       <td>{getOperationsCommandCenterAvailabilityLabel(entry.availability)}</td>
       <td>{entry.countLabel ?? "—"}</td>
-      <td>{entry.hint}</td>
+      <td className="occ-hide-narrow">{entry.hint}</td>
     </tr>
   );
 }
@@ -158,8 +169,16 @@ export function OperationsCommandCenterView({
     });
   }, [router]);
 
+  const hasActiveFilters = Boolean(uiFilters.module || uiFilters.state);
+  const factoryCaseEmptyNote = hasActiveFilters
+    ? OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE
+    : "Şu anda aktif fabrika vakası bulunmuyor.";
+  const queueEmptyNote = hasActiveFilters
+    ? OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE
+    : "Şu anda öncelikli kayıt bulunmuyor.";
+
   return (
-    <main className="commint-page" data-testid="operations-command-center-workspace">
+    <div className="commint-page occ-page" data-testid="operations-command-center-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -180,12 +199,12 @@ export function OperationsCommandCenterView({
               ) : (
                 <RefreshCw aria-hidden="true" size={16} />
               )}
-              Yenile
+              Veriyi yenile
             </button>
           </div>
         </div>
         <ul className="commint-executive__meta" data-testid="operations-command-center-scope-strip">
-          <li>Tesis: {workspace.facilityLabel}</li>
+          {workspace.facilityLabel !== "Yetkili tesis" ? <li>Tesis: {workspace.facilityLabel}</li> : null}
           <li>Veri güveni: {workspace.dataConfidenceLabel}</li>
           {scopeBadgeLabel(workspace.scopeState) ? (
             <li>Kapsam: {scopeBadgeLabel(workspace.scopeState)}</li>
@@ -195,10 +214,9 @@ export function OperationsCommandCenterView({
 
       <p className="commint-readonly-note" data-testid="operations-command-center-readonly-note">
         {OPERATIONS_COMMAND_CENTER_READONLY_NOTE}
-      </p>
-
-      <p className="commint-readonly-note" data-testid="operations-command-center-automation-disclaimer">
-        {workspace.automationDisclaimer}
+        <span data-testid="operations-command-center-automation-disclaimer" hidden>
+          {workspace.automationDisclaimer}
+        </span>
       </p>
 
       {workspace.partialScopeNote ? (
@@ -217,7 +235,7 @@ export function OperationsCommandCenterView({
         </div>
       ) : null}
 
-      <div className="commint-filter-rail" data-testid="operations-command-center-filter-rail">
+      <div className="commint-filter-rail occ-filter-rail" data-testid="operations-command-center-filter-rail">
         <label className="commint-filter-field">
           <span>Dönem başlangıcı</span>
           <input
@@ -245,7 +263,7 @@ export function OperationsCommandCenterView({
           >
             <option value="">Tümü</option>
             <option value="factory">Fabrika vakası</option>
-            <option value="production-manager">AI Üretim Yöneticisi</option>
+            <option value="production-manager">Yapay zekâ üretim yöneticisi</option>
             <option value="production">Üretim</option>
             <option value="quality">Kalite</option>
             <option value="maintenance">Bakım</option>
@@ -271,7 +289,7 @@ export function OperationsCommandCenterView({
         </label>
         <button
           type="button"
-          className="commint-button commint-button--ghost"
+          className="commint-button commint-button--ghost occ-filter-rail__clear"
           onClick={clearFilters}
           disabled={isPending}
           data-testid="operations-command-center-clear-filters"
@@ -299,38 +317,40 @@ export function OperationsCommandCenterView({
             Aktif fabrika vakaları
           </h2>
         </header>
-        <table className="commint-table" data-testid="operations-command-center-factory-case-table">
+        {workspace.queueItems.filter((item) => item.moduleCode === "factory").length === 0 ? (
+          <p className="commint-readonly-note occ-empty-cell" data-testid="operations-command-center-factory-case-empty">
+            {factoryCaseEmptyNote}
+          </p>
+        ) : (
+        <div className="commint-table-wrap occ-table-wrap" tabIndex={0} role="region" aria-label="Aktif fabrika vakaları (kaydırılabilir)">
+        <table aria-label="Aktif fabrika vakaları" className="commint-table occ-table" data-testid="operations-command-center-factory-case-table">
           <thead>
             <tr>
               <th>Vaka</th>
               <th>Önem</th>
-              <th>Bloker</th>
+              <th>Engel</th>
               <th>Son Aktivite</th>
             </tr>
           </thead>
           <tbody>
-            {workspace.queueItems.filter((item) => item.moduleCode === "factory").length === 0 ? (
-              <tr>
-                <td colSpan={4}>{OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE}</td>
-              </tr>
-            ) : (
-              workspace.queueItems
+            {workspace.queueItems
                 .filter((item) => item.moduleCode === "factory")
                 .map((item) => (
                   <tr key={item.id} data-testid={`operations-command-center-factory-row-${item.id}`}>
                     <td>
                       <Link href={item.deepLinkHref} className="commint-table__link">
-                        {item.title}
+                        {item.title?.trim() || `${item.sourceReference || "Kaydı"} aç`}
                       </Link>
                     </td>
-                    <td>{item.statusLabel}</td>
+                    <td><StatusPills statusLabel={item.statusLabel} /></td>
                     <td>{item.evidenceLabel}</td>
                     <td>{item.freshnessLabel}</td>
                   </tr>
-                ))
-            )}
+                ))}
           </tbody>
         </table>
+        </div>
+        )}
       </section>
 
       <section className="commint-panel" aria-labelledby="operations-command-center-queue-heading">
@@ -341,11 +361,11 @@ export function OperationsCommandCenterView({
         </header>
         {workspace.queueItems.length === 0 ? (
           <p className="commint-readonly-note" data-testid="operations-command-center-queue-empty">
-            {OPERATIONS_COMMAND_CENTER_EMPTY_QUEUE_NOTE}
+            {queueEmptyNote}
           </p>
         ) : (
-          <div className="commint-table-wrap" data-testid="operations-command-center-queue-table">
-            <table className="commint-table">
+          <div className="commint-table-wrap occ-table-wrap" tabIndex={0} role="region" aria-label="Öncelik kuyruğu (kaydırılabilir)" data-testid="operations-command-center-queue-table">
+            <table aria-label="Öncelik kuyruğu" className="commint-table occ-table">
               <thead>
                 <tr>
                   <th>Modül / referans</th>
@@ -366,20 +386,16 @@ export function OperationsCommandCenterView({
         )}
       </section>
 
-      <section className="commint-panel" aria-labelledby="operations-command-center-health-heading">
-        <header className="commint-panel__header">
-          <h2 id="operations-command-center-health-heading" className="commint-panel__title">
-            Modül kapsamı ve erişim
-          </h2>
-        </header>
-        <div className="commint-table-wrap" data-testid="operations-command-center-module-health">
-          <table className="commint-table">
+      <details className="occ-disclosure" data-testid="operations-command-center-module-health-disclosure">
+        <summary>Modül kapsamı ve erişim</summary>
+        <div className="commint-table-wrap occ-table-wrap" tabIndex={0} role="region" aria-label="Modül kapsamı ve erişim (kaydırılabilir)" data-testid="operations-command-center-module-health">
+          <table aria-label="Modül kapsamı ve erişim" className="commint-table occ-table">
             <thead>
               <tr>
                 <th>Modül</th>
                 <th>Erişim</th>
                 <th>Kayıt</th>
-                <th>Açıklama</th>
+                <th className="occ-hide-narrow">Açıklama</th>
               </tr>
             </thead>
             <tbody>
@@ -389,14 +405,10 @@ export function OperationsCommandCenterView({
             </tbody>
           </table>
         </div>
-      </section>
+      </details>
 
-      <section className="commint-panel" aria-labelledby="operations-command-center-commercial-heading">
-        <header className="commint-panel__header">
-          <h2 id="operations-command-center-commercial-heading" className="commint-panel__title">
-            Ticari kârlılık
-          </h2>
-        </header>
+      <section className="commint-panel occ-commercial-link" aria-label="Ticari kârlılık">
+        <h2 className="commint-panel__title">Ticari kârlılık</h2>
         <Link
           href={workspace.commercialDeepLinkHref}
           className="commint-table__link"
@@ -406,6 +418,6 @@ export function OperationsCommandCenterView({
           <ArrowUpRight aria-hidden="true" size={14} />
         </Link>
       </section>
-    </main>
+    </div>
   );
 }

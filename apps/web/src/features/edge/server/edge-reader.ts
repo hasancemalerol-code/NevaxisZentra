@@ -4,6 +4,7 @@ import { parseProductionExecutionRuntimeConfig } from "../../production-executio
 import { resolveProductionOrderRequestContextForIncomingRequest } from "../../production-execution/server/production-order-request-context";
 import type { EdgeMachineDetailBundle, EdgeWorkspaceData } from "../domain/edge-types";
 import { buildEdgeWorkspaceFixture } from "../presentation/edge-workspace-fixtures";
+import { fixtureDataVisible } from "@/lib/runtime/fixture-data";
 import type {
   ActiveAlarmReadModel,
   AlarmObservationReadModel,
@@ -167,8 +168,39 @@ async function loadMachineDetail(
   };
 }
 
+/** A Production tenant with no connected gateways: nothing synthetic, only empty collections. */
+function buildEmptyEdgeWorkspace(): EdgeWorkspaceData {
+  const base = buildEdgeWorkspaceFixture();
+  return {
+    gateways: [],
+    machines: [],
+    recentEvents: [],
+    machineDetails: {},
+    deliveryHealth: {
+      ...base.deliveryHealth,
+      apiConnected: false,
+      deliveryStatus: "unknown",
+      pendingCount: 0,
+      retryCount: 0,
+      deadLetterCount: 0,
+      oldestPendingAgeMs: undefined,
+      lastSuccessfulDeliveryAtUtc: undefined,
+      lastDeliveryAttemptAtUtc: undefined,
+      bufferUtilization: 0,
+      replayStatus: "idle",
+    },
+    bufferedEvents: [],
+    deadLetters: [],
+    offlineMessage: null,
+    replayMessage: null,
+    isSimulatorFixture: false,
+    loadError: null,
+  };
+}
+
 export async function readEdgeWorkspace(): Promise<EdgeWorkspaceData> {
-  const fixture = buildEdgeWorkspaceFixture();
+  const isolated = fixtureDataVisible();
+  const fixture = isolated ? buildEdgeWorkspaceFixture() : buildEmptyEdgeWorkspace();
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
     return { ...fixture, loadError: null };
@@ -183,7 +215,7 @@ export async function readEdgeWorkspace(): Promise<EdgeWorkspaceData> {
   const [gatewaysResult, machinesResult, reliability] = await Promise.all([
     listEdgeGateways(context),
     listEdgeMachines(context),
-    fetchSimulatorReliability(),
+    isolated ? fetchSimulatorReliability() : Promise.resolve(null),
   ]);
 
   if (gatewaysResult.status === "failure" || machinesResult.status === "failure") {
@@ -191,12 +223,15 @@ export async function readEdgeWorkspace(): Promise<EdgeWorkspaceData> {
     return {
       ...fixture,
       ...resolvedReliability,
-      loadError: "Edge API kullanılamıyor — simülatör verisi gösteriliyor.",
+      loadError: isolated ? "Makine veri servisine ulaşılamıyor — örnek veri gösteriliyor." : "Makine veri servisine şu anda ulaşılamıyor.",
     };
   }
 
-  const machines = compact<MachineRegistryReadModel>(machinesResult.value);
-  const gateways = compact<EdgeGatewayReadModel>(gatewaysResult.value);
+  const simulatedGatewayCodes = new Set<string>();
+  const allGateways = compact<EdgeGatewayReadModel>(gatewaysResult.value);
+  for (const g of allGateways) if (g.vendorKey === "simulator") simulatedGatewayCodes.add(g.gatewayCode);
+  const gateways = isolated ? allGateways : allGateways.filter((g) => g.vendorKey !== "simulator");
+  const machines = compact<MachineRegistryReadModel>(machinesResult.value).filter((m) => isolated || !(m.activeGatewayCode && simulatedGatewayCodes.has(m.activeGatewayCode)));
   if (machines.length === 0) {
     return {
       ...fixture,
@@ -204,7 +239,7 @@ export async function readEdgeWorkspace(): Promise<EdgeWorkspaceData> {
       machines: [],
       recentEvents: [],
       machineDetails: {},
-      isSimulatorFixture: true,
+      isSimulatorFixture: isolated,
       loadError: null,
     };
   }

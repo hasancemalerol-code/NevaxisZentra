@@ -1,14 +1,22 @@
 "use client";
 
+import { Inbox } from "lucide-react";
+
 import {
   BULK_DATA_ONBOARDING_SUBTITLE,
   BULK_DATA_ONBOARDING_TITLE,
   BULK_ONBOARDING_WORKFLOW_STEPS,
+  bulkJobStatusLabel,
+  bulkProviderKindLabel,
+  bulkSafetyModeLabel,
 } from "../domain/bulk-data-onboarding-labels";
 import type { BulkImportJobWorkspaceApi } from "../server/bulk-data-onboarding-api-client";
+import { Notice } from "@/components/ui/notice";
+import { PageHeader } from "@/components/ui/page";
 import { BulkDataOnboardingWorkflowClient } from "./bulk-data-onboarding-workflow-client";
 
 import "./bulk-data-onboarding-workspace.css";
+import "./bulk-onboarding-workspace.css";
 
 type BulkDataOnboardingWorkspaceViewProps = Readonly<{
   workspace: BulkImportJobWorkspaceApi | null;
@@ -20,27 +28,25 @@ export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkD
 
   return (
     <div className="bulk-onboarding-workspace" data-testid="bulk-data-onboarding-workspace">
-      <header className="bulk-onboarding-workspace__hero commint-panel">
-        <p className="commint-kpi-card__eyebrow">Fabrika Veri Aktarımı</p>
-        <h1 className="bulk-onboarding-workspace__title">{BULK_DATA_ONBOARDING_TITLE}</h1>
-        <p className="bulk-onboarding-workspace__subtitle">{BULK_DATA_ONBOARDING_SUBTITLE}</p>
-        {job ? (
-          <div className="bulk-onboarding-workspace__status-row">
-            <span className="bulk-onboarding-workspace__status-chip" data-testid="bulk-onboarding-job-status">
-              {job.status}
-            </span>
-            <span>{job.sourceSystem}</span>
-            <span>{job.sourceProviderKind}</span>
-            <span className="bulk-onboarding-workspace__safety-mode">{job.safetyMode}</span>
-          </div>
-        ) : null}
-      </header>
+      <PageHeader eyebrow="Ayarlar" title={BULK_DATA_ONBOARDING_TITLE} description={BULK_DATA_ONBOARDING_SUBTITLE} />
+      {job ? (
+        <div className="bulk-onboarding-workspace__status-row">
+          <span className="bulk-onboarding-workspace__status-chip" data-testid="bulk-onboarding-job-status">
+            {bulkJobStatusLabel(job.status)}
+          </span>
+          <span>{bulkProviderKindLabel(job.sourceProviderKind)}</span>
+          <span className="bulk-onboarding-workspace__safety-mode">{bulkSafetyModeLabel(job.safetyMode)}</span>
+        </div>
+      ) : null}
 
-      <section className="commint-panel" data-testid="bulk-onboarding-workflow">
+      <section className="commint-panel bulk-onboarding-workflow-panel" data-testid="bulk-onboarding-workflow">
         <h2>İş Akışı</h2>
         <ol className="bulk-onboarding-workflow">
-          {BULK_ONBOARDING_WORKFLOW_STEPS.map((step) => (
-            <li key={step}>{step}</li>
+          {BULK_ONBOARDING_WORKFLOW_STEPS.map((step, index) => (
+            <li key={step} className="bulk-onboarding-workflow__step" aria-current={!job && index === 0 ? "step" : undefined}>
+              <span className="bulk-onboarding-workflow__index" aria-hidden="true">{index + 1}</span>
+              <span className="bulk-onboarding-workflow__label">{step}</span>
+            </li>
           ))}
         </ol>
       </section>
@@ -49,6 +55,11 @@ export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkD
 
       {job ? (
         <>
+          {job.failedRows > 0 ? (
+            <Notice tone="warning" alert data-testid="bulk-onboarding-failure-notice">
+              {job.failedRows} kayıt içe aktarılamadı. Üst kayıtları (alan, hat, istasyon) ve karantina listesini kontrol edip yeniden deneyin.
+            </Notice>
+          ) : null}
           <section className="commint-panel bulk-onboarding-kpi-grid" data-testid="bulk-onboarding-kpis">
             <article className="commint-kpi-card">
               <p className="commint-kpi-card__label">Kaynak Satır</p>
@@ -65,6 +76,14 @@ export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkD
             <article className="commint-kpi-card">
               <p className="commint-kpi-card__label">İçe Aktarılan</p>
               <p className="commint-kpi-card__value">{job.importedRows}</p>
+            </article>
+            <article className="commint-kpi-card">
+              <p className="commint-kpi-card__label">Güncellenen</p>
+              <p className="commint-kpi-card__value">{job.updatedRows}</p>
+            </article>
+            <article className="commint-kpi-card">
+              <p className="commint-kpi-card__label">Başarısız</p>
+              <p className="commint-kpi-card__value" data-testid="bulk-onboarding-failed-rows">{job.failedRows}</p>
             </article>
           </section>
 
@@ -116,7 +135,8 @@ export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkD
               <h2>Mutabakat</h2>
               <p>
                 Kaynak {workspace.reconciliation.sourceRows} · Sahnelenen {workspace.reconciliation.stagedRows} ·
-                Geçerli {workspace.reconciliation.validRows} · İçe aktarılan {workspace.reconciliation.importedRows}
+                Geçerli {workspace.reconciliation.validRows} · İçe aktarılan {workspace.reconciliation.importedRows} ·
+                Güncellenen {workspace.reconciliation.updatedRows} · Başarısız {workspace.reconciliation.failedRows}
               </p>
               <p>{workspace.reconciliation.balanced ? "Dengeli" : "Dengesiz"}</p>
             </section>
@@ -150,11 +170,12 @@ export function BulkDataOnboardingWorkspaceView({ workspace, facilityId }: BulkD
           ) : null}
         </>
       ) : (
-        <section className="commint-panel" data-testid="bulk-onboarding-empty">
-          <p>Henüz bir toplu veri aktarım işi seçilmedi.</p>
+        <section className="commint-panel bulk-onboarding-empty" data-testid="bulk-onboarding-empty">
+          <span className="bulk-onboarding-empty__icon" aria-hidden="true"><Inbox size={22} /></span>
+          <h2>Henüz bir veri aktarım işi yok</h2>
           <p>
-            Yeni müşteri kurulumunda makine ve kaynakları toplu yüklemek için aşağıdaki akışı başlatın veya örnek
-            CSV şablonlarını indirin.
+            Makine ve kaynakları toplu yüklemek için yukarıdan yeni bir içe aktarma başlatın ya da CSV şablonlarını
+            indirin.
           </p>
         </section>
       )}

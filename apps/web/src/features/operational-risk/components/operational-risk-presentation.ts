@@ -11,6 +11,7 @@ import type {
   OperationalRiskEvidenceItem,
   OperationalRiskKpiCard,
   OperationalRiskKpiTone,
+  OperationalRiskSourceAdapterCoverage,
 } from "../types/operational-risk-types";
 
 const DONUT_OUTER_RADIUS = 68;
@@ -31,7 +32,7 @@ const VISIBLE_TOKEN_LABELS: Record<string, string> = {
   "quality-risk": "Kalite riski",
   "source-stale": "Kaynak bayat",
   "missing-threshold": "Eşik eksik",
-  "missing-denominator": "Payda eksik",
+  "missing-denominator": "Karşılaştırılan toplam eksik",
   "insufficient-evidence": "Yetersiz kanıt",
   "source-conflict": "Kaynak uyuşmazlığı",
   "within-threshold": "Eşik içinde",
@@ -45,12 +46,12 @@ const VISIBLE_TOKEN_LABELS: Record<string, string> = {
   "iot-unavailable": "IoT kaynağı kullanılamıyor",
   "energy-unavailable": "Enerji kaynağı kullanılamıyor",
   "maintenance-unavailable": "Bakım kaynağı kullanılamıyor",
-  simulated: "Simülasyon",
+  simulated: "Örnek veri",
   calculated: "Hesaplanmış",
   measured: "Ölçülmüş",
   estimated: "Tahmini",
-  "development-simulator": "Geliştirme simülatörü",
-  "development-pilot": "Geliştirme pilot kaynağı",
+  "development-simulator": "Örnek veri kaynağı",
+  "development-pilot": "Örnek veri kaynağı",
 };
 
 export const KNOWN_RAW_VISIBLE_CODES = Object.keys(VISIBLE_TOKEN_LABELS);
@@ -157,6 +158,52 @@ export type OperationalRiskDonutArc = Readonly<{
 
 export function resolveOperationalRiskKpiToneClass(tone: OperationalRiskKpiTone): string {
   return `oprisk-kpi-card__tone--${tone}`;
+}
+
+const COVERAGE_DEPENDENT_KPI_IDS: ReadonlySet<string> = new Set(["open-cases", "critical-high"]);
+
+export type OperationalRiskCoverageSummary = "none" | "partial" | "full";
+
+export function summarizeOperationalRiskSourceCoverage(
+  coverage: readonly OperationalRiskSourceAdapterCoverage[],
+): OperationalRiskCoverageSummary {
+  const covered = coverage.filter((source) => source.state === "active").length;
+  if (covered === 0) return "none";
+  return covered === coverage.length ? "full" : "partial";
+}
+
+/**
+ * A zero count is only reassuring when source modules can actually evidence it.
+ * Zero-count "controlled" KPI cards are downgraded to neutral wording when
+ * coverage is missing (none) or incomplete (partial). Non-zero counts and
+ * all other cards are returned unchanged.
+ */
+export function applyOperationalRiskCoverageToKpis(
+  kpis: readonly OperationalRiskKpiCard[],
+  coverage: readonly OperationalRiskSourceAdapterCoverage[],
+): readonly OperationalRiskKpiCard[] {
+  const summary = summarizeOperationalRiskSourceCoverage(coverage);
+  if (summary === "full") return kpis;
+
+  return kpis.map((kpi) => {
+    if (!COVERAGE_DEPENDENT_KPI_IDS.has(kpi.id) || kpi.tone !== "controlled") return kpi;
+    if (summary === "none") {
+      return {
+        ...kpi,
+        value: "—",
+        tone: "insufficient",
+        stateBadge: "Veri yetersiz",
+        detail: "Kaynak modül kanıtı yok; sonuç değerlendirilemiyor",
+        unavailableReason: "Kaynak modül kapsamı yetersiz",
+      };
+    }
+    return {
+      ...kpi,
+      tone: "neutral",
+      stateBadge: "Kısmi kapsam",
+      detail: "Yalnızca kanıtı olan kaynak modüllerde vaka yok",
+    };
+  });
 }
 
 export function buildOperationalRiskDonutArcs(

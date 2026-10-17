@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { RefreshCw, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { AssistantOriginBadge } from "@/components/ui/assistant-origin";
 import { Card } from "@/components/ui/card";
 import type { MaintenanceAiDraftDetail } from "../domain/maintenance-ai-agent";
 import {
@@ -14,7 +15,6 @@ import {
   getMaintenanceAiPriorityLabel,
   getMaintenanceAiRequestTypeLabel,
   MAINTENANCE_AI_LOCAL_PROVIDER_DISCLAIMER,
-  MAINTENANCE_AI_RULES_BASED_LABEL,
   MAINTENANCE_AI_SAFETY_COPY,
 } from "../presentation/maintenance-ai-agent-labels";
 import {
@@ -24,6 +24,7 @@ import {
   updateMaintenanceAiDraftAction,
 } from "../server/maintenance-ai-agent-writer";
 import { MaintenanceSectionHeader } from "./maintenance-table-primitives";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenanceAiAssistantSectionProps = Readonly<{
   assetReference: string;
@@ -68,7 +69,7 @@ export function MaintenanceAiAssistantSection({
   return (
     <Card className="maintenance-ai-section">
       <MaintenanceSectionHeader
-        title="AI Bakım Asistanı"
+        title="Bakım Asistanı"
         subtitle="Güvenilir bakım kanıtına dayalı bakım talebi taslağı — yalnızca yetkili onay sonrası oluşturulur."
       />
 
@@ -82,18 +83,15 @@ export function MaintenanceAiAssistantSection({
         <p className="maintenance-ai-disclaimer">{MAINTENANCE_AI_LOCAL_PROVIDER_DISCLAIMER}</p>
       ) : null}
 
-      {draftError ? <p className="maintenance-ai-message error">{draftError}</p> : null}
-      {message ? <p className="maintenance-ai-message">{message}</p> : null}
+      {draftError ? <p className="maintenance-ai-message error" role="alert">{customerMessage(draftError)}</p> : null}
+      {message ? <p className="maintenance-ai-message">{customerMessage(message)}</p> : null}
 
       {draft ? (
         <div className="maintenance-ai-grid">
           <div className="maintenance-ai-meta">
             <Badge tone="neutral">{getMaintenanceAiDraftStatusLabel(draft.status)}</Badge>
             <Badge tone="neutral">Kanıt Güveni: {getMaintenanceAiConfidenceLabel(draft.qualitativeConfidence)}</Badge>
-            <span className="maintenance-ai-meta-line">
-              Sağlayıcı: {draft.isDevelopmentProvider ? MAINTENANCE_AI_RULES_BASED_LABEL : draft.providerIdentifier}
-            </span>
-            <span className="maintenance-ai-meta-line">Şablon: {draft.promptVersion}</span>
+            <AssistantOriginBadge origin={draft.isDevelopmentProvider ? "rules" : "model"} />
           </div>
 
           {draft.status === "stale" ? (
@@ -101,7 +99,7 @@ export function MaintenanceAiAssistantSection({
           ) : null}
 
           <div className="maintenance-ai-block">
-            <h4>AI Özeti</h4>
+            <h4>Asistan özeti</h4>
             <p>{draft.validatedOutput.summary}</p>
             <p className="maintenance-ai-muted">{draft.validatedOutput.uncertaintyExplanation}</p>
           </div>

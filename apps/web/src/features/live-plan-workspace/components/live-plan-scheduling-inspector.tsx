@@ -4,12 +4,16 @@ import Link from "next/link";
 
 import { DecisionCard } from "@/components/workspace/decision-card";
 import {
-  formatAdaptivePercent,
+  formatAdaptiveCountForPlan,
+  formatAdaptivePercentForPlan,
   getAutonomyModeLabel,
+  getDeadlineRiskLevelLabel,
   getReplanActionLabel,
+  hasAdaptivePlanData,
 } from "@/features/adaptive-production-planning/domain/adaptive-planning-labels";
 
 import type { LivePlanWorkspacePayload } from "../domain/live-plan-workspace-types";
+import { formatPercent } from "@/lib/presentation/format";
 
 type LivePlanSchedulingInspectorProps = Readonly<{
   workspace: LivePlanWorkspacePayload;
@@ -18,6 +22,7 @@ type LivePlanSchedulingInspectorProps = Readonly<{
 export function LivePlanSchedulingInspector({ workspace }: LivePlanSchedulingInspectorProps) {
   const { adaptiveWorkspace, replanEvaluation, lineContexts, selection, selectedProductionPlan } = workspace;
   const metrics = adaptiveWorkspace?.metrics;
+  const hasPlan = adaptiveWorkspace ? hasAdaptivePlanData(adaptiveWorkspace) : false;
   const policy = adaptiveWorkspace?.policy;
   const selectedLine = lineContexts.find((line) => line.lineId === selection.lineId);
 
@@ -33,8 +38,8 @@ export function LivePlanSchedulingInspector({ workspace }: LivePlanSchedulingIns
         {selectedProductionPlan ? (
           <section className="live-plan-inspector__section">
             <h3>Seçili plan</h3>
-            <p className="text-sm font-medium">{selectedProductionPlan.referenceCode}</p>
-            <p className="text-xs text-[color:var(--fact-text-secondary)]">{selectedProductionPlan.title}</p>
+            <p className="zx-text-strong">{selectedProductionPlan.referenceCode}</p>
+            <p className="zx-text-meta">{selectedProductionPlan.title}</p>
             <Link href={`/planlama/${selectedProductionPlan.id}`} className="fact-link-button">
               Plan detayına git
             </Link>
@@ -46,14 +51,14 @@ export function LivePlanSchedulingInspector({ workspace }: LivePlanSchedulingIns
             <h3>Canlı metrikler</h3>
             <div className="live-plan-inspector__metric">
               <span>Plan uyumu</span>
-              <strong>{formatAdaptivePercent(metrics.planAdherencePercent)}</strong>
+              <strong>{formatAdaptivePercentForPlan(metrics.planAdherencePercent, hasPlan)}</strong>
             </div>
             <div className="live-plan-inspector__metric">
               <span>Termin riski</span>
-              <strong>{metrics.ordersAtRisk}</strong>
+              <strong>{formatAdaptiveCountForPlan(metrics.ordersAtRisk, hasPlan)}</strong>
             </div>
             <div className="live-plan-inspector__metric">
-              <span>Bugünkü replan</span>
+              <span>Bugünkü yeniden planlama</span>
               <strong>{metrics.replansToday}</strong>
             </div>
           </section>
@@ -92,10 +97,10 @@ export function LivePlanSchedulingInspector({ workspace }: LivePlanSchedulingIns
         {selectedLine ? (
           <section className="live-plan-inspector__section">
             <h3>Hat kısıtı</h3>
-            <p className="text-sm">{selectedLine.constraintSummary ?? "Aktif kısıt yok"}</p>
+            <p className="zx-text-body">{selectedLine.constraintSummary ?? "Aktif kısıt yok"}</p>
             {selectedLine.throughputGapPercent !== undefined ? (
-              <p className="text-xs text-[color:var(--fact-text-secondary)]">
-                Throughput sapması: {selectedLine.throughputGapPercent}%
+              <p className="zx-text-meta">
+                Hat verimliliği sapması: {formatPercent(selectedLine.throughputGapPercent, 0)}
               </p>
             ) : null}
             <Link
@@ -110,10 +115,10 @@ export function LivePlanSchedulingInspector({ workspace }: LivePlanSchedulingIns
         {(adaptiveWorkspace?.risks.deadlineRisks.length ?? 0) > 0 ? (
           <section className="live-plan-inspector__section">
             <h3>Termin riskleri</h3>
-            <ul className="text-xs">
+            <ul className="zx-text-meta">
               {adaptiveWorkspace?.risks.deadlineRisks.slice(0, 4).map((risk) => (
                 <li key={`${risk.orderId}-${risk.riskLevel}`}>
-                  {risk.orderId} · {risk.riskLevel}
+                  {risk.orderId} · {getDeadlineRiskLevelLabel(risk.riskLevel)}
                 </li>
               ))}
             </ul>

@@ -44,6 +44,17 @@ export function resolveFactoryCopilotContext(
   };
 }
 
+const ENTRY_POINT_LABELS: Readonly<Record<string, string>> = {
+  BUGUN: "Bugün",
+  FABRIKA: "Fabrika",
+  PLAN: "Plan",
+  ISLER: "İşler",
+  SCENARIO: "Senaryo",
+  MACHINE: "Makine",
+  LINE: "Hat",
+  ORDER: "Sipariş",
+};
+
 export function formatFactoryCopilotContextHeader(
   header: Readonly<{
     entryPoint: string;
@@ -66,7 +77,7 @@ export function formatFactoryCopilotContextHeader(
     header.scenarioLabel ? `Senaryo: ${header.scenarioLabel}` : null,
   ].filter(Boolean);
 
-  return parts.length > 0 ? parts.join(" · ") : header.entryPoint;
+  return parts.length > 0 ? parts.join(" · ") : (ENTRY_POINT_LABELS[header.entryPoint] ?? "Genel bağlam");
 }
 
 export function isFactoryCopilotSurface(pathname: string): boolean {

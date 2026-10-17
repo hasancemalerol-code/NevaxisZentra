@@ -5,10 +5,8 @@ import {
   FileStack,
   Plus,
   ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ExportCaseCard } from "@/features/export/components/export-case-card";
 import type { ExportCaseSummary } from "@/features/export/domain/export-case";
@@ -17,6 +15,7 @@ import {
   readComplianceSummary,
   readExportCases,
 } from "@/features/export/server/export-case-reader";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 function countActive(cases: ExportCaseSummary[]): number {
   return cases.filter((c) => c.status !== "closed").length;
@@ -44,25 +43,14 @@ export default async function ExportCasesPage() {
 
   if (result.status === "failure") {
     return (
-      <main className="export-page">
+      <div className="export-page">
         <header className="export-header">
-          <p>İHRACAT YÖNETİMİ</p>
+          <p>İHRACAT</p>
           <h1>İhracat</h1>
         </header>
 
-        <div role="alert" className="state-panel error-state">
-          <div className="state-icon">
-            <ShieldCheck aria-hidden="true" />
-          </div>
-          <div>
-            <h3>İhracat dosyaları yüklenemedi</h3>
-            <p>
-              Veriler alınırken bir hata oluştu. Lütfen sayfayı yenileyin veya
-              sistem yöneticinize başvurun.
-            </p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="İhracat dosyaları yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -104,11 +92,11 @@ export default async function ExportCasesPage() {
   const blockedCount = countBlocked(cases);
 
   return (
-    <main className="export-page">
+    <div className="export-page">
       <header className="export-header">
         <div className="export-header__top">
           <div className="export-header__intro">
-            <p>İHRACAT YÖNETİMİ</p>
+            <p>İHRACAT</p>
             <h1>İhracat</h1>
           </div>
           <div className="export-header__actions">
@@ -150,42 +138,23 @@ export default async function ExportCasesPage() {
           <div>
             <span>Eksik Belgeli</span>
             <strong>{missingCount}</strong>
-            <small>Dikkat veya eksik gereksinim</small>
+            <small>Eksik gereksinim</small>
           </div>
         </Card>
 
-        <Card className="export-kpis__item--blocked">
+        <Card className={blockedCount === 0 ? "export-kpis__item--calm" : "export-kpis__item--blocked"}>
           <ShieldAlert aria-hidden="true" />
           <div>
             <span>Blokeli</span>
             <strong>{blockedCount}</strong>
-            <small>Bloke eden sorunlu dosyalar</small>
+            <small>Bloke dosyalar</small>
           </div>
         </Card>
-      </section>
-
-      <section className="export-safety" aria-label="Operasyon bilgisi">
-        <div>
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <p>EXPORT DOCUMENT READINESS</p>
-            <h2>
-              İhracat dosyaları belge doğrulama ile kontrollü ilerler
-            </h2>
-            <span>
-              Ticari fatura, çeki listesi ve diğer temel belgeler kaydedilir,
-              doğrulanır ve denetlenebilir aktivite geçmişiyle izlenir.
-            </span>
-          </div>
-        </div>
-
-        <Badge tone="information">İzlenebilir İhracat</Badge>
       </section>
 
       <section className="export-workspace" aria-label="İhracat dosyaları listesi">
         <div className="export-workspace__heading">
           <div>
-            <p>İHRACAT ÇALIŞMA ALANI</p>
             <h2>Aktif ihracat dosyaları</h2>
             <span>
               Hazırlık yüzdesini, eksik belgeleri ve bloke eden gereksinimleri
@@ -207,6 +176,9 @@ export default async function ExportCasesPage() {
               İhracat siparişlerinden oluşturulan dosyalar burada
               listelenir. Sipariş detayından ihracat dosyası açabilirsiniz.
             </p>
+            <Link href="/siparisler" className="button button-secondary button-medium">
+              Siparişlere git
+            </Link>
           </div>
         ) : (
           <div className="export-workspace__list">
@@ -223,6 +195,6 @@ export default async function ExportCasesPage() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

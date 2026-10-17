@@ -11,7 +11,7 @@ export async function IslerHubPageContent() {
   const workspace = await readIslerHubWorkspace();
 
   return (
-    <main className="fact-workspace" data-testid="isler-hub-page">
+    <div className="fact-workspace" data-testid="isler-hub-page">
       <WorkspaceHeader
         context="İŞLER"
         meta="İş · Sorun · Aksiyon · Karar · Sonuç · Doğrulama"
@@ -43,6 +43,6 @@ export async function IslerHubPageContent() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

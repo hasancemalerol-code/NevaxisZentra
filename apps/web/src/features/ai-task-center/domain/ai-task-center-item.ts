@@ -12,7 +12,7 @@ export type AiTaskCenterClosureBadgeKey =
   | "closureReady";
 
 export const AI_TASK_CENTER_SOURCE_LABELS = {
-  "ai-analysis": "AI Analizi",
+  "ai-analysis": "Yapay Zekâ Analizi",
   "manual-task": "Manuel Görev",
   "teams-message": "Teams Mesajı",
   "operational-task": "Operasyonel Görev",
@@ -39,8 +39,8 @@ export const AI_TASK_CENTER_VIEWS = {
   "team-assigned": "Ekibe Atananlar",
   unassigned: "Atanmamış",
   overdue: "Gecikenler",
-  "sla-risk": "SLA Riski",
-  escalated: "Eskale Edilenler",
+  "sla-risk": "Hizmet Seviyesi Riski",
+  escalated: "Üst Seviyeye Aktarılanlar",
   "all-tasks": "Tüm Görevler",
   "approvals-handovers": "Onay ve Teslimler",
   mentions: "Etiketlemeler",
@@ -55,7 +55,7 @@ export type AiTaskCenterView = keyof typeof AI_TASK_CENTER_VIEWS;
 
 export const AI_TASK_CENTER_TASK_ORIGIN_FILTERS = {
   all: "Tümü",
-  teams: "Teams mesajından oluşturulan",
+  teams: "Operasyon iletişimi kaynaklı",
 } as const;
 
 export type AiTaskCenterTaskOriginFilter = keyof typeof AI_TASK_CENTER_TASK_ORIGIN_FILTERS;
@@ -74,6 +74,7 @@ export type AiTaskCenterItem = Readonly<{
   teamLabel: string | null;
   slaLabel: string | null;
   slaState: AiTaskSlaState | null;
+  slaBreachType: string | null;
   dueAt: string | null;
   dueAtLabel: string | null;
   escalationLabel: string | null;

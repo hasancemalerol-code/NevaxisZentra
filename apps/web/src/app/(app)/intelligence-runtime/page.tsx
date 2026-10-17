@@ -1,5 +1,6 @@
 import { IntelligenceRuntimeControlCenterView } from "@/features/intelligence-runtime/components/intelligence-runtime-control-center-view";
 import { loadIntelligenceRuntimeControlCenter } from "@/features/intelligence-runtime/server/intelligence-runtime-reader";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export default async function IntelligenceRuntimePage() {
   const result = await loadIntelligenceRuntimeControlCenter();
@@ -7,7 +8,7 @@ export default async function IntelligenceRuntimePage() {
   if (result.status === "failure") {
     return (
       <div className="fact-workspace" data-testid="intelligence-runtime-control-center">
-        <p>{result.message}</p>
+        <p>{customerMessage(result.message)}</p>
       </div>
     );
   }

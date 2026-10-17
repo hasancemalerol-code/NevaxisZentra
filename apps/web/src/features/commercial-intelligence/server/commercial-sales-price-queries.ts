@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import {
@@ -106,7 +107,7 @@ function mapAssessmentSummary(item: RawCommercialSalesPriceAssessmentSummary): C
     leadingDriverCode: item.leadingDriverCode,
     leadingDriverLabel: getCommercialIntelligenceDriverReasonLabel(item.leadingDriverCode),
     evidenceStatus: "simulated",
-    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+    evidenceLabel: getCommercialWorkspaceEvidenceLabel(item.isPilotData, true),
     ruleSetVersion: item.ruleSetVersion,
     evaluatedAtUtc: item.evaluatedAtUtc,
     evaluatedLabel: formatDateTime(item.evaluatedAtUtc),
@@ -148,7 +149,7 @@ function mapComparisonSummary(item: RawCommercialSalesPriceComparisonSummary): C
     leadingDriverCode: item.leadingDriverCode,
     leadingDriverLabel: getCommercialIntelligenceDriverReasonLabel(item.leadingDriverCode),
     evidenceStatus: "simulated",
-    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+    evidenceLabel: getCommercialWorkspaceEvidenceLabel(item.isPilotData, true),
     ruleSetVersion: item.ruleSetVersion,
     evaluatedAtUtc: item.evaluatedAtUtc,
     evaluatedLabel: formatDateTime(item.evaluatedAtUtc),
@@ -468,13 +469,15 @@ export async function readCommercialSalesPriceWorkspace(
       });
 
   const workspace: CommercialSalesPriceWorkspacePayload = {
-    facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+    facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
     reportingPeriodLabel: reportingPeriodLabel(assessments, comparisons),
     freshnessLabel: freshnessLabel(assessments, comparisons),
-    evidenceLabel: hasPilot ? "Simülasyon kanıtı" : "Satış fiyat kanıtı",
-    provenanceDisclaimer: localizeCommercialSalesPriceProvenance(
+    evidenceLabel: hasPilot ? "Örnek veri kanıtı" : "Satış fiyat kanıtı",
+    provenanceDisclaimer: resolveCommercialProvenance(
       workspaceResult.value.provenanceDisclaimer
         || profilesResult.value.provenanceDisclaimer,
+      hasPilot,
+      localizeCommercialSalesPriceProvenance,
     ),
     ruleSetVersion: workspaceResult.value.ruleSetVersion
       || assessmentsResult.value.ruleSetVersion
@@ -510,7 +513,7 @@ export async function readCommercialSalesPriceWorkspace(
       evaluatedLabel: selectedTemporalComparison?.evaluatedLabel ?? null,
       unavailableReason: selectedTemporalComparison
         ? null
-        : "Karşılaştırılabilir dönemsel satış sapma çalıştırması yok",
+        : "Karşılaştırılabilir dönemsel satış sapma çalışması yok",
     },
     customerComparison: {
       rows: customerRows,

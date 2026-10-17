@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  CircleAlert,
-  RotateCcw,
-  Search,
-  ShieldCheck,
-} from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 
 import type { OrderDraftFilter } from "../application/order-draft-query";
 import type {
@@ -66,20 +59,6 @@ const TRANSFER_OPTIONS:
     "completed",
     "failed",
   ];
-
-function hasActiveFilters(
-  filter: OrderDraftFilter,
-): boolean {
-  return Boolean(
-    filter.search ||
-      filter.source ||
-      filter.status ||
-      filter.confidenceLevel ||
-      filter.transferStatus ||
-      filter.hasBlockingIssues !== undefined ||
-      filter.awaitingApproval !== undefined,
-  );
-}
 
 export function OrderDraftFilterBar({
   filter,
@@ -177,7 +156,7 @@ export function OrderDraftFilterBar({
       </label>
 
       <label className="order-draft-filter-bar__field">
-        <span>AI güveni</span>
+        <span>Yapay zekâ güveni</span>
 
         <select
           onChange={(event) => {
@@ -243,57 +222,6 @@ export function OrderDraftFilterBar({
           )}
         </select>
       </label>
-
-      <div className="order-draft-filter-bar__toggles">
-        <button
-          aria-pressed={
-            filter.hasBlockingIssues === true
-          }
-          className="order-draft-filter-bar__toggle"
-          onClick={() => {
-            updateFilter({
-              hasBlockingIssues:
-                filter.hasBlockingIssues === true
-                  ? undefined
-                  : true,
-            });
-          }}
-          type="button"
-        >
-          <CircleAlert aria-hidden="true" />
-          Engelleyici sorunlar
-        </button>
-
-        <button
-          aria-pressed={
-            filter.awaitingApproval === true
-          }
-          className="order-draft-filter-bar__toggle"
-          onClick={() => {
-            updateFilter({
-              awaitingApproval:
-                filter.awaitingApproval === true
-                  ? undefined
-                  : true,
-            });
-          }}
-          type="button"
-        >
-          <ShieldCheck aria-hidden="true" />
-          Onay bekleyenler
-        </button>
-      </div>
-
-      <Button
-        disabled={!hasActiveFilters(filter)}
-        leadingIcon={<RotateCcw />}
-        onClick={() => {
-          onFilterChange({});
-        }}
-        variant="secondary"
-      >
-        Temizle
-      </Button>
     </div>
   );
 }

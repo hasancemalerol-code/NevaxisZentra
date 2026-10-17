@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
+import { displayTenantName } from "@/lib/presentation/display-name";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   Activity,
+  BarChart3,
   Building2,
   Clock3,
   Gauge,
@@ -102,7 +105,7 @@ function ShowcaseSparkline({
   sparklineTone?: DashboardShowcaseTone;
 }>) {
   if (series.length === 0) {
-    return <div className="factory-showcase-kpi__sparkline-empty" data-chart-empty="true" />;
+    return null;
   }
 
   const toneClass = sparklineTone ?? tone;
@@ -158,7 +161,11 @@ function KpiIcon({
   }
 }
 
-function KpiCard({ card }: Readonly<{ card: DashboardShowcaseKpiCard }>) {
+function KpiCard({ card: source }: Readonly<{ card: DashboardShowcaseKpiCard }>) {
+  /* A zero figure with no series is the same "no data" state as a pending card, so all six cards share one layout. */
+  const card = !source.pending && source.sparklines.length === 0 && /^0([.,]0+)?$/.test(String(source.value))
+    ? { ...source, pending: true }
+    : source;
   return (
     <article className={`factory-showcase-kpi factory-showcase-kpi--${card.tone}`} data-kpi-id={card.id}>
       <div className="factory-showcase-kpi__header">
@@ -166,23 +173,23 @@ function KpiCard({ card }: Readonly<{ card: DashboardShowcaseKpiCard }>) {
           <p className="factory-showcase-kpi__label">{card.label}</p>
           <div className="factory-showcase-kpi__value-row">
             <strong className="factory-showcase-kpi__value">{card.pending ? "—" : card.value}</strong>
-            {card.unit ? <span className="factory-showcase-kpi__unit">{card.unit}</span> : null}
+            {card.unit && !card.pending ? <span className="factory-showcase-kpi__unit">{card.unit}</span> : null}
           </div>
-          {card.comparisonLabel ? (
-            <span className="factory-showcase-kpi__comparison">{card.comparisonLabel}</span>
-          ) : null}
-          {card.supportingText ? (
-            <span className="factory-showcase-kpi__supporting">{card.supportingText}</span>
-          ) : null}
+          <div className="factory-showcase-kpi__meta">
+            {card.comparisonLabel && !card.pending ? (
+              <span className="factory-showcase-kpi__comparison">{card.comparisonLabel}</span>
+            ) : null}
+            {card.supportingText && !card.pending ? (
+              <span className="factory-showcase-kpi__supporting">{card.supportingText}</span>
+            ) : null}
+          </div>
         </div>
         <span aria-hidden="true" className="factory-showcase-kpi__icon">
           <KpiIcon iconKey={card.iconKey} />
         </span>
       </div>
       <div className="factory-showcase-kpi__chart-area">
-        {card.pending ? (
-          <p className="factory-showcase-kpi__pending">Veri bekleniyor</p>
-        ) : (
+        {card.pending ? null : (
           <ShowcaseSparkline series={card.sparklines} sparklineTone={card.sparklineTone} tone={card.tone} />
         )}
         {card.showSparklineLegend && !card.pending ? (
@@ -207,7 +214,7 @@ function HourlyProductionChart({
   const innerHeight = chartHeight - padding.top - padding.bottom;
 
   if (pending || points.length === 0) {
-    return <p className="factory-showcase-chart__pending" data-chart-empty="true">Veri bekleniyor</p>;
+    return <p className="factory-showcase-chart__pending" data-chart-empty="true"><BarChart3 aria-hidden="true" size={18} strokeWidth={1.6} />Henüz veri yok</p>;
   }
 
   const actualValues = points.map((point) => point.actual ?? 0);
@@ -304,7 +311,7 @@ function OeeComponentsChart({
   pending,
 }: Readonly<{ components: readonly DashboardShowcaseOeeComponent[]; pending: boolean }>) {
   if (pending) {
-    return <p className="factory-showcase-chart__pending" data-chart-empty="true">Veri bekleniyor</p>;
+    return <p className="factory-showcase-chart__pending" data-chart-empty="true"><BarChart3 aria-hidden="true" size={18} strokeWidth={1.6} />Henüz veri yok</p>;
   }
 
   const chartWidth = 360;
@@ -331,7 +338,7 @@ function OeeComponentsChart({
                   className="factory-showcase-chart__grid-line"
                 />
                 <text className="factory-showcase-chart__axis-label" x={padding.left - 8} y={y + 4} textAnchor="end">
-                  {tick}%
+                  %{tick}
                 </text>
               </g>
             );
@@ -385,7 +392,7 @@ function DistributionChart({
   pending: boolean;
 }>) {
   if (pending || rows.length === 0 || !hasNumeric(total)) {
-    return <p className="factory-showcase-chart__pending" data-chart-empty="true">Veri bekleniyor</p>;
+    return <p className="factory-showcase-chart__pending" data-chart-empty="true"><BarChart3 aria-hidden="true" size={18} strokeWidth={1.6} />Henüz veri yok</p>;
   }
 
   const radius = 54;
@@ -466,10 +473,17 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
   const [, startTransition] = useTransition();
   const refreshInFlightRef = useRef(false);
 
+  const isCardEmpty = (card: DashboardShowcaseKpiCard) =>
+    card.pending || (card.sparklines.length === 0 && /^0([.,]0+)?$/.test(String(card.value)));
   const orderedCards = KPI_CARD_ORDER
     .map((id) => viewModel.kpiCards.find((card) => card.id === id))
     .filter((card): card is DashboardShowcaseKpiCard => Boolean(card));
 
+  const kpiSetEmpty = orderedCards.length > 0 && orderedCards.every(isCardEmpty);
+  const hasStreamData = !kpiSetEmpty
+    || (!viewModel.hourlyPending && viewModel.hourlyProduction.some((point) => (point.actual ?? 0) > 0))
+    || (!viewModel.distributionPending && viewModel.distributionRows.some((row) => row.quantity > 0))
+    || (!viewModel.oeeComponentsPending && viewModel.oeeComponents.some((component) => (component.percent ?? 0) > 0));
   const refreshData = useCallback(async () => {
     if (refreshInFlightRef.current) {
       return;
@@ -524,12 +538,12 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
         <div className="factory-showcase__brand">
           <FactosBrandLockup className="factory-showcase__brand-lockup" />
           <span aria-hidden="true" className="factory-showcase__brand-divider" />
-          <span>Fabrika Operasyon Görünümü</span>
+          <h1 className="factory-showcase__title">Fabrika Operasyon Görünümü</h1>
         </div>
 
         <div className="factory-showcase__facility">
           <Building2 aria-hidden="true" size={16} strokeWidth={1.8} />
-          <span>{viewModel.facilityDisplayName}</span>
+          <span>{displayTenantName(viewModel.facilityDisplayName)}</span>
         </div>
 
         <div className="factory-showcase__status">
@@ -542,14 +556,16 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
           </div>
 
           <div className="factory-showcase__refresh">
-            <span>Son güncelleme: {formatShowcaseRefreshLabel(viewModel.lastRefreshedAtUtc)}</span>
-            <span aria-hidden="true" className="factory-showcase__status-dot" />
+            <span>{hasStreamData ? `Son güncelleme: ${formatShowcaseRefreshLabel(viewModel.lastRefreshedAtUtc)}` : "Veri bekleniyor"}</span>
+            <span aria-hidden="true" className={hasStreamData ? "factory-showcase__status-dot" : "factory-showcase__status-dot factory-showcase__status-dot--idle"} />
           </div>
 
           <div className="factory-showcase__live">
             <Radio aria-hidden="true" size={15} strokeWidth={1.8} />
-            <span>Operasyon akışı izleniyor</span>
+            <span>{hasStreamData ? "Operasyon akışı izleniyor" : "Operasyon akışı bekleniyor"}</span>
           </div>
+
+          <Link className="factory-showcase__back" href="/fabrika">Fabrikaya dön</Link>
 
           <button
             aria-label={isFullscreen ? "Tam ekrandan çık" : "Tam ekrana geç"}
@@ -565,28 +581,42 @@ export function FactoryShowcaseView({ initialViewModel }: FactoryShowcaseViewPro
       </header>
 
       {viewModel.developmentPilotBanner ? (
-        <p className="factory-showcase__pilot-banner">Yerel geliştirme / tanıtım verisi</p>
+        <p className="factory-showcase__pilot-banner">Örnek veri</p>
       ) : null}
 
-      <section aria-label="Temel operasyon göstergeleri" className="factory-showcase__kpi-grid">
-        {orderedCards.map((card) => (
-          <KpiCard card={card} key={card.id} />
-        ))}
-      </section>
+      {kpiSetEmpty ? (
+        <section aria-label="Temel operasyon göstergeleri" className="factory-showcase__panel factory-showcase-kpi-compact">
+          <h2>Göstergeler</h2>
+          <ul className="factory-showcase-kpi-compact__list">
+            {orderedCards.map((card) => (
+              <li className="factory-showcase-kpi-compact__row" data-kpi-id={card.id} key={card.id}>
+                <span>{card.label}</span>
+                <span>—</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <section aria-label="Temel operasyon göstergeleri" className="factory-showcase__kpi-grid">
+          {orderedCards.map((card) => (
+            <KpiCard card={card} key={card.id} />
+          ))}
+        </section>
+      )}
 
       <section aria-label="Saatlik üretim performansı" className="factory-showcase__panel factory-showcase__hourly">
-        <h2>Saatlik Üretim Performansı</h2>
+        <h2>Saatlik üretim performansı</h2>
         <HourlyProductionChart pending={viewModel.hourlyPending} points={viewModel.hourlyProduction} />
       </section>
 
       <section aria-label="Alt grafikler" className="factory-showcase__bottom-grid">
         <article className="factory-showcase__panel">
-          <h2>OEE Bileşenleri</h2>
+          <h2>OEE bileşenleri</h2>
           <OeeComponentsChart components={viewModel.oeeComponents} pending={viewModel.oeeComponentsPending} />
         </article>
 
         <article className="factory-showcase__panel">
-          <h2>Üretim Dağılımı</h2>
+          <h2>Üretim dağılımı</h2>
           <DistributionChart
             pending={viewModel.distributionPending}
             rows={viewModel.distributionRows}

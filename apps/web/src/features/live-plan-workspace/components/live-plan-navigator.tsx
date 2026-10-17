@@ -18,10 +18,9 @@ export function LivePlanNavigator({ workspace }: LivePlanNavigatorProps) {
   const { selection, productionPlans, lineContexts } = workspace;
 
   return (
-    <aside className="live-plan-workspace__panel" data-testid="live-plan-navigator">
+    <aside className="live-plan-workspace__panel" data-testid="live-plan-navigator" aria-label="Plan gezgini">
       <div className="live-plan-workspace__panel-header">
         <h2>Planlar</h2>
-        <Link href="/planlama/yeni" className="fact-link-button">Yeni</Link>
       </div>
       <div className="live-plan-workspace__panel-body">
         <input

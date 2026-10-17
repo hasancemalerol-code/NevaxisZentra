@@ -2,7 +2,7 @@ export const ZENTRA_BRAND = {
   productName: "Zentra",
   fullProductName: "Nevaxis Zentra",
   endorsement: "by NEVAXIS",
-  descriptor: "Production Intelligence & Autonomous Operations",
+  descriptor: "Fabrikanızın Akıllı Operasyon Sistemi",
   documentTitleSuffix: "Nevaxis Zentra",
   heroBackgroundColor: "#e9eef2",
   heroAlt:

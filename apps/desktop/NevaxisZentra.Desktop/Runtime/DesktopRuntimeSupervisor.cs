@@ -592,6 +592,13 @@ public sealed class DesktopRuntimeSupervisor : IAsyncDisposable
         if (packagedBundle is not null)
         {
             RuntimePaths.MergePackagedConfiguration(environment, packagedBundle);
+
+            // The web layer hides deferred and demo-only surfaces unless the deployment channel is Demo or Presentation.
+            var channel = packagedBundle.TryReadManifest()?.DeploymentChannel;
+            if (!string.IsNullOrWhiteSpace(channel))
+            {
+                environment["NEVAXIS_FACTOS_DEPLOYMENT_CHANNEL"] = channel;
+            }
         }
         else if (!string.IsNullOrWhiteSpace(runtimeRoot))
         {

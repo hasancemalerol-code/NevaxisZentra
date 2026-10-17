@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { displayDataName } from "@/lib/presentation/display-name";
 import { getMaintenanceAssetTypeLabel } from "../presentation/maintenance-labels";
 
 type MaintenanceAssetCellProps = Readonly<{
@@ -17,7 +18,7 @@ export function MaintenanceAssetCell({
   href,
 }: MaintenanceAssetCellProps) {
   const typeLabel = assetType ? getMaintenanceAssetTypeLabel(assetType) : undefined;
-  const secondaryParts = [typeLabel, assetName].filter(Boolean);
+  const secondaryParts = [typeLabel, assetName ? displayDataName(assetName) : undefined].filter(Boolean);
   const secondary = secondaryParts.length > 0 ? secondaryParts.join(" · ") : undefined;
 
   return (

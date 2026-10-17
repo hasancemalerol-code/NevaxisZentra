@@ -341,7 +341,7 @@ function OeeComponentsChart({
                   className="factory-showcase-chart__grid-line"
                 />
                 <text className="factory-showcase-chart__axis-label" x={padding.left - 8} y={y + 4} textAnchor="end">
-                  {tick}%
+                  %{tick}
                 </text>
               </g>
             );

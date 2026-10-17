@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/presentation/format";
 import {
   ArrowLeft,
   Bot,
@@ -6,7 +7,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { PageFrame, PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -81,7 +83,22 @@ export default async function ProductionPlanDetailPage({
   }
 
   if (result.status === "not-found") {
-    notFound();
+    return (
+      <PageFrame>
+        <PageHeader
+          eyebrow="Üretim Planlama"
+          title="Plan Detayı"
+          description="İstenen plan bu çalışma alanında bulunamadı."
+        />
+        <StatePage
+          kind="empty"
+          inline
+          title="Plan bulunamadı"
+          description="Plan mevcut değil, kaldırılmış ya da yetki alanınızın dışında olabilir."
+          actions={<StatePageLink href="/planlama" primary>Planlara dön</StatePageLink>}
+        />
+      </PageFrame>
+    );
   }
 
   const { productionPlan } = result;
@@ -127,7 +144,7 @@ export default async function ProductionPlanDetailPage({
     );
 
   return (
-    <main className="production-plan-detail-page">
+    <div className="production-plan-detail-page">
       <div className="production-plan-detail-page__back">
         <Link href="/planlama">
           <ArrowLeft aria-hidden="true" />
@@ -140,10 +157,6 @@ export default async function ProductionPlanDetailPage({
           <p>Üretim Planı Detayı</p>
 
           <h1>{productionPlan.title}</h1>
-
-          <span>
-            {productionPlan.id}
-          </span>
         </div>
 
         <div className="production-plan-detail-page__badges">
@@ -185,10 +198,10 @@ export default async function ProductionPlanDetailPage({
           <div>
             <span>Plan dönemi</span>
             <strong>
-              {productionPlan.timeWindow.plannedStartAt}
+              {formatDateTime(productionPlan.timeWindow.plannedStartAt)}
             </strong>
             <small>
-              {productionPlan.timeWindow.plannedEndAt}
+              Bitiş: {formatDateTime(productionPlan.timeWindow.plannedEndAt)}
             </small>
           </div>
         </Card>
@@ -204,7 +217,7 @@ export default async function ProductionPlanDetailPage({
               )}
             </strong>
             <small>
-              {productionPlan.facilityId ?? getProductionPlanFallbackLabel("facility")}
+              {getProductionPlanFallbackLabel("facility")}
             </small>
           </div>
         </Card>
@@ -240,7 +253,7 @@ export default async function ProductionPlanDetailPage({
         </Card>
 
         <Card>
-          <p>Human-in-the-Loop</p>
+          <p>İnsan Onayı</p>
 
           <h2>
             Plan yetkili onayı olmadan üretime
@@ -342,6 +355,6 @@ export default async function ProductionPlanDetailPage({
       <ProductionPlanHistoryPanel
         viewModel={historyViewModel}
       />
-    </main>
+    </div>
   );
 }

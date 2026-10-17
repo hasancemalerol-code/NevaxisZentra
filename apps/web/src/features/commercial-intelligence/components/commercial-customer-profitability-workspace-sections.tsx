@@ -143,8 +143,8 @@ export function CommercialCustomerProfitabilityComparisonTable({
   onSelect,
 }: CustomerProfitabilityComparisonTableProps) {
   return (
-    <div className="commint-table-wrap" data-testid="commercial-customer-profitability-table">
-      <table className="commint-table">
+    <div className="commint-table-wrap" tabIndex={0} data-testid="commercial-customer-profitability-table">
+      <table aria-label="Müşteri kârlılık karşılaştırmaları" className="commint-table">
         <thead>
           <tr>
             <th>Müşteri</th>

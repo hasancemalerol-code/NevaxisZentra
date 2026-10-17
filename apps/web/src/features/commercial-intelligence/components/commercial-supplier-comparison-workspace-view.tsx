@@ -43,6 +43,9 @@ import {
   refreshCommercialSupplierComparisonWorkspaceAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { localizeCommercialSalesPriceProvenance } from "../domain/commercial-intelligence-labels";
+import { kpiValueClass, detailValueClass } from "./commercial-no-data";
+import { CommercialKpiCompact, isKpiSetEmpty } from "./commercial-kpi-compact";
 
 type CommercialSupplierComparisonWorkspaceViewProps = Readonly<{
   workspace: CommercialSupplierComparisonWorkspacePayload;
@@ -221,7 +224,7 @@ export function CommercialSupplierComparisonWorkspaceView({
   );
 
   return (
-    <main className="commint-page" data-testid="commercial-supplier-comparison-workspace">
+    <div className="commint-page" data-testid="commercial-supplier-comparison-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -229,7 +232,7 @@ export function CommercialSupplierComparisonWorkspaceView({
             <h1>Tedarikçi Karşılaştırması</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_SUPPLIER_COMPARISON_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Kanıt penceresi: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Kanıt: {workspace.evidenceLabel}</li>
@@ -249,52 +252,63 @@ export function CommercialSupplierComparisonWorkspaceView({
             </button>
           </div>
         </div>
-        {workspace.hasDevelopmentPilotData ? (
-          <p className="commint-provenance-strip" data-testid="commercial-supplier-comparison-provenance-strip">
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER}
-          </p>
-        ) : null}
-        {!canManage ? (
-          <p className="commint-readonly-note" data-testid="commercial-supplier-comparison-readonly-note">
-            {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
-          </p>
-        ) : null}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          {workspace.hasDevelopmentPilotData ? (
+            <p className="commint-provenance-strip" data-testid="commercial-supplier-comparison-provenance-strip">
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!canManage ? (
+            <p className="commint-readonly-note" data-testid="commercial-supplier-comparison-readonly-note">
+              {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
+            </p>
+          ) : null}
+        </details>
         {feedback ? <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p> : null}
       </header>
 
-      <section
-        className="commint-kpi-grid"
-        data-testid="commercial-supplier-comparison-kpi-grid"
-        aria-label="Tedarikçi karşılaştırma göstergeleri"
-      >
-        {workspace.kpis.map((kpi) => {
-          const Icon = KPI_ICONS[kpi.id] ?? BarChart3;
-          return (
-            <article
-              key={kpi.id}
-              className={`commint-kpi-card ${resolveCommercialIntelligenceKpiToneClass(kpi.tone)}`}
-              data-kpi-id={kpi.id}
-              data-kpi-scope={kpi.scopeLabel}
-              data-kpi-source={kpi.sourceDataset}
-              aria-label={`${kpi.label}: ${kpi.accessibleSummary}`}
-            >
-              <div className="commint-kpi-card__header">
-                <p className="commint-kpi-card__label">{kpi.label}</p>
-                <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
-              </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
-              <p className="commint-kpi-card__detail">{kpi.detail}</p>
-              <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
-              <div className="commint-kpi-card__footer">
-                <span>{kpi.scopeLabel}</span>
-                <span className="commint-kpi-card__badge">{kpi.stateBadge}</span>
-                <span>{kpi.evidenceLabel}</span>
-              </div>
-            </article>
-          );
-        })}
-      </section>
+      {isKpiSetEmpty(workspace.kpis) ? (
+        <CommercialKpiCompact
+          ariaLabel="Tedarikçi karşılaştırma göstergeleri"
+          testId="commercial-supplier-comparison-kpi-grid"
+          items={workspace.kpis.map((kpi) => ({ id: kpi.id, label: kpi.label, value: kpi.value, caption: kpi.detail }))}
+        />
+      ) : (
+        <section
+          className="commint-kpi-grid"
+          data-testid="commercial-supplier-comparison-kpi-grid"
+          aria-label="Tedarikçi karşılaştırma göstergeleri"
+        >
+          {workspace.kpis.map((kpi) => {
+            const Icon = KPI_ICONS[kpi.id] ?? BarChart3;
+            return (
+              <article
+                key={kpi.id}
+                className={`commint-kpi-card ${resolveCommercialIntelligenceKpiToneClass(kpi.tone)}`}
+                data-kpi-id={kpi.id}
+                data-kpi-scope={kpi.scopeLabel}
+                data-kpi-source={kpi.sourceDataset}
+                aria-label={`${kpi.label}: ${kpi.accessibleSummary}`}
+              >
+                <div className="commint-kpi-card__header">
+                  <p className="commint-kpi-card__label">{kpi.label}</p>
+                  <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
+                </div>
+                <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
+                <p className="commint-kpi-card__detail">{kpi.detail}</p>
+                <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
+                <div className="commint-kpi-card__footer">
+                  <span>{kpi.scopeLabel}</span>
+                  <span className="commint-kpi-card__badge">{kpi.stateBadge}</span>
+                  <span>{kpi.evidenceLabel}</span>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+      )}
 
       <div
         className="commint-tab-rail"
@@ -353,6 +367,7 @@ export function CommercialSupplierComparisonWorkspaceView({
           <section className="commint-panel commint-panel--spread" data-testid="commercial-supplier-comparison-spread-panel">
             <h2 className="commint-panel__title">Fiyat yayılımı ve kanıt</h2>
             <div className="commint-spread-panel">
+              {spreadMedians.lowest !== null && spreadMedians.highest !== null ? (
               <div className="commint-spread-meter" aria-hidden="true">
                 <span className="commint-spread-meter__low">
                   {spreadMedians.lowest !== null && workspace.supplierPosition.currencyCode
@@ -366,18 +381,18 @@ export function CommercialSupplierComparisonWorkspaceView({
                     : "—"}
                 </span>
               </div>
-              <div className="commint-detail-grid">
-                <DetailField label="Yayılım oranı" value={workspace.supplierPosition.spreadLabel} />
-                <DetailField label="Profil eşiği" value={workspace.supplierSpreadThresholdLabel} />
-                <DetailField label="Sonuç" value={workspace.supplierPosition.outcomeLabel ?? "—"} />
-                <DetailField label="Kanıt durumu" value={workspace.evidenceLabel} />
-                <DetailField
-                  label="Karşılaştırılabilir / dışlanan"
-                  value={`${formatCount(workspace.supplierPosition.comparableObservationCount)} / ${formatCount(workspace.supplierPosition.excludedObservationCount)}`}
-                />
-                <DetailField label="Önde gelen sürücü" value={workspace.supplierPosition.leadingDriverLabel ?? "—"} />
-              </div>
-              <p className="commint-supplier-row__meta">{workspace.provenanceDisclaimer}</p>
+              ) : null}
+              <ul className="commint-keyvalue commint-keyvalue--compact">
+                <li><span>Yayılım oranı</span><span className={detailValueClass(workspace.supplierPosition.spreadLabel)}>{workspace.supplierPosition.spreadLabel}</span></li>
+                <li><span>Profil eşiği</span><span className={detailValueClass(workspace.supplierSpreadThresholdLabel)}>{workspace.supplierSpreadThresholdLabel}</span></li>
+                <li><span>Sonuç</span><span className={detailValueClass(workspace.supplierPosition.outcomeLabel ?? "—")}>{workspace.supplierPosition.outcomeLabel ?? "—"}</span></li>
+                <li><span>Kanıt durumu</span><span className={detailValueClass(workspace.evidenceLabel)}>{workspace.evidenceLabel}</span></li>
+                <li><span>Dahil / dışlanan</span><span className={detailValueClass(`${formatCount(workspace.supplierPosition.comparableObservationCount)} / ${formatCount(workspace.supplierPosition.excludedObservationCount)}`)}>{`${formatCount(workspace.supplierPosition.comparableObservationCount)} / ${formatCount(workspace.supplierPosition.excludedObservationCount)}`}</span></li>
+                <li><span>Başlıca etken</span><span className={detailValueClass(workspace.supplierPosition.leadingDriverLabel ?? "—")}>{workspace.supplierPosition.leadingDriverLabel ?? "—"}</span></li>
+              </ul>
+              {workspace.supplierPosition.rows.length > 0 ? (
+                <p className="commint-supplier-row__meta">{localizeCommercialSalesPriceProvenance(workspace.provenanceDisclaimer)}</p>
+              ) : null}
             </div>
           </section>
         </div>
@@ -390,7 +405,7 @@ export function CommercialSupplierComparisonWorkspaceView({
             <select
               value={workspace.selectedComparisonId ?? ""}
               onChange={(event) => setSelectedComparison(event.target.value)}
-              aria-label="Karşılaştırma çalıştırması seç"
+              aria-label="Karşılaştırma çalışması seç"
             >
               <option value="">Çalıştırma seçin</option>
               {workspace.comparisons.map((item) => (
@@ -462,8 +477,8 @@ export function CommercialSupplierComparisonWorkspaceView({
       {activeTab === "history" ? (
         <section className="commint-panel" data-testid="commercial-supplier-comparison-history-workspace">
           <h2 className="commint-panel__title">Karşılaştırma geçmişi</h2>
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Karşılaştırma geçmişi" className="commint-table">
               <thead>
                 <tr>
                   <th>Analiz</th>
@@ -538,7 +553,7 @@ export function CommercialSupplierComparisonWorkspaceView({
           </aside>
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -546,7 +561,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }

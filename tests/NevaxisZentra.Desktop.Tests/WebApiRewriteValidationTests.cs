@@ -41,6 +41,7 @@ public sealed class WebApiRewriteValidationTests : IDisposable
         ("/api/identity/:path*", $"{Api}/api/identity/:path*"),
         ("/api/admin-access/:path*", $"{Api}/api/admin-access/:path*"),
         ("/api/saas-subscription/:path*", $"{Api}/api/saas-subscription/:path*"),
+        ("/api/bulk-data-onboarding/:path*", $"{Api}/api/bulk-data-onboarding/:path*"),
         ("/api/public/ai-task-access/:path*", $"{Api}/api/public/ai-task-access/:path*"),
     ];
 

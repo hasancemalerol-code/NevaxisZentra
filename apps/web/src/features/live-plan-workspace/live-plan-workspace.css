@@ -5,9 +5,9 @@
 
 .live-plan-workspace__layout {
   display: grid;
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(280px, 340px);
+  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(260px, 300px);
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
   min-width: 0;
 }
 
@@ -79,7 +79,7 @@
 
 .live-plan-navigator__meta {
   color: var(--fact-text-secondary);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .live-plan-line-list {
@@ -124,13 +124,14 @@
 }
 
 .live-plan-inspector__metric {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: max-content max-content;
+  justify-content: start;
+  column-gap: 1rem;
   font-size: 0.78rem;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .live-plan-workspace__layout {
     grid-template-columns: minmax(220px, 1fr) minmax(0, 1.4fr);
   }
@@ -144,4 +145,195 @@
   .live-plan-workspace__layout {
     grid-template-columns: 1fr;
   }
+}
+
+.live-plan-workspace .fact-workspace__header > div:first-child {
+  display: grid;
+  gap: 8px;
+}
+
+.live-plan-workspace .fact-workspace__header p,
+.live-plan-workspace .fact-workspace__header h1 {
+  margin: 0;
+}
+
+/* Round 4 */
+.live-plan-workspace .fact-workspace__header > div:first-child {
+  gap: 10px;
+}
+
+.live-plan-workspace .fact-command-bar__group {
+  align-items: center;
+}
+
+.live-plan-workspace .fact-command-bar__group .fact-link-button,
+.live-plan-workspace .fact-command-bar__group .factory-copilot-header-action {
+  box-sizing: border-box;
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-block: 0;
+  border-radius: 0.65rem;
+}
+
+/* Very wide screens: capped and centred; panels share one height */
+@media (min-width: 1700px) {
+  .live-plan-workspace {
+    max-width: 1440px;
+    margin-inline: auto;
+  }
+}
+.live-plan-navigator__search {
+  font-size: 0.8125rem;
+}
+
+.live-plan-navigator__button,
+.live-plan-line-button,
+.live-plan-inspector__metric {
+  font-size: 0.8125rem;
+}
+
+.live-plan-line-button {
+  align-items: baseline;
+}
+
+.live-plan-line-button > span:first-child {
+  flex: 0 0 auto;
+  font-weight: 650;
+}
+
+.live-plan-line-button > .live-plan-navigator__meta {
+  min-width: 0;
+  text-align: right;
+}
+
+/* Status strip column count comes from the shared count-aware KPI rules (zentra-premium.css). */
+@media (min-width: 880px) {
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+
+  body .live-plan-workspace .fact-status-strip > .fact-status-strip__item {
+    grid-column: auto;
+    min-width: 0;
+  }
+}
+
+/* Tablet (640-879px): five equal cards in one row; phones: 2-up with a full-width last card */
+@media (max-width: 879px) {
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) > .fact-status-strip__item {
+    grid-column: auto !important;
+    min-width: 0;
+    padding: 12px 10px;
+  }
+}
+
+@media (max-width: 639px) {
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) > .fact-status-strip__item {
+    padding: 14px 16px;
+  }
+
+  body .live-plan-workspace .fact-status-strip:has(> :nth-child(5):last-child) > .fact-status-strip__item:last-child {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* One flat surface language: KPI cards carry no shadow, like the panels below them */
+.live-plan-workspace .fact-status-strip__item {
+  box-shadow: none;
+}
+
+/* Inspector under the grid: scannable columns instead of 800px label/value gaps */
+@media (max-width: 1280px) {
+  .live-plan-workspace__panel--inspector .live-plan-workspace__panel-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 4px 32px;
+    align-items: start;
+  }
+
+  .live-plan-inspector__section {
+    margin-bottom: 8px;
+  }
+}
+
+/* Round 10: equal-height panels whose bodies fill them; the workspace paints no lighter block over the page */
+.live-plan-workspace {
+  background: transparent;
+}
+
+/* Equal-height panels; the centre body fills: empty strip centred vertically, freshness note pinned to the bottom */
+.live-plan-workspace .live-plan-workspace__layout {
+  align-items: stretch;
+}
+
+.live-plan-workspace .live-plan-workspace__panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.live-plan-workspace .live-plan-workspace__panel:not(.live-plan-workspace__panel--inspector) > .live-plan-workspace__panel-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.live-plan-workspace__panel-body > .adaptive-planning-workspace {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.live-plan-workspace__panel-body > .adaptive-planning-workspace > [data-testid="adaptive-planning-live-plan"] {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.live-plan-workspace__panel-body > .adaptive-planning-workspace > .adaptive-planning-workspace__freshness {
+  margin: auto 0 0;
+  padding-top: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .live-plan-workspace__panel--inspector .live-plan-workspace__panel-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Sub-navigation row: full width above the three panels */
+.live-plan-workspace__tabs-row:empty {
+  display: none;
+}
+
+.live-plan-workspace__tabs-row .adaptive-planning-workspace__tabs {
+  margin-bottom: 0;
+}
+
+/* Panels use the product's rounded card shape; sub-labels share one style */
+.live-plan-workspace__panel {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.live-plan-line-list h3 {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fact-text-secondary);
 }

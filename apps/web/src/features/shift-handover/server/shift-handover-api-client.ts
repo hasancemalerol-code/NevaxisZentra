@@ -120,10 +120,11 @@ async function readResponseBody(response: Response): Promise<unknown> {
 
 function mapFailurePayload(payload: unknown, status: number): ShiftHandoverApiFailure {
   const body = (payload ?? {}) as { title?: string; code?: string };
+  const fallbackCode = status === 404 ? "not-found" : "request-failed";
   return {
     status: "failure",
-    code: body.code ?? "request-failed",
-    message: body.title ?? `─░stek ba┼şar─▒s─▒z (${status})`,
+    code: body.code ?? fallbackCode,
+    message: body.title ?? "İstek başarısız oldu.",
   };
 }
 
@@ -180,7 +181,7 @@ async function request<T>(
     return {
       status: "failure",
       code: "request-failed",
-      message: "Vardiya devri API'sine ula┼ş─▒lamad─▒.",
+      message: "Vardiya devri servisine ulaşılamadı.",
     };
   }
 }

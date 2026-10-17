@@ -17,8 +17,10 @@ import {
   TEAMS_HANDOVER_SHIFT_TYPES,
   TEAMS_HANDOVER_STATUSES,
 } from "@/features/teams/domain/teams-constants";
-import { readTeamsHandovers } from "@/features/teams/server/teams-queries";
+import { isHandoverChannelType } from "@/features/teams/domain/teams-constants";
+import { readTeamsHandovers, readTeamsWorkspace } from "@/features/teams/server/teams-queries";
 import "@/features/teams/components/teams-workspace.css";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -35,16 +37,19 @@ export default async function TeamsHandoversPage() {
   const result = await readTeamsHandovers();
   const access = await fetchEffectiveAccessCapabilities();
   const canCreate = hasGrantedPermission(access, "teams.handover.create");
+  const workspace = canCreate ? await readTeamsWorkspace(null) : null;
+  const hasEligibleChannel = workspace?.status === "success"
+    && workspace.channels.items.some((channel) => isHandoverChannelType(channel.channelType));
 
   if (result.status === "failure") {
     return (
       <PageContent>
         <PageHeader
           description="Sonraki vardiyaya insan kontrollü operasyon bağlamı."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Vardiya devri"
         />
-        <EmptyState description={result.message} title="Vardiya devirleri yüklenemedi" />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Vardiya devirleri yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -52,11 +57,11 @@ export default async function TeamsHandoversPage() {
   return (
     <PageContent data-testid="teams-handovers-page">
       <PageHeader
-        description="Kanal kapsamlı, yayımlanınca salt okunur vardiya devir kayıtları."
-        eyebrow="Teams"
+        description="Kanal kapsamlı vardiya devir kayıtları; yayımlandıktan sonra düzenlenemez."
+        eyebrow="Operasyon iletişimi"
         title="Vardiya devri"
-        actions={canCreate ? (
-          <Link href="/teams/devretme/yeni" className="teams-context-chip" data-testid="teams-handover-create-link">
+        actions={canCreate && hasEligibleChannel ? (
+          <Link href="/teams/devretme/yeni" className="button button-primary button-medium" data-testid="teams-handover-create-link">
             Yeni vardiya devri
           </Link>
         ) : undefined}
@@ -65,8 +70,11 @@ export default async function TeamsHandoversPage() {
       <Section title="Devirler">
         {result.value.items.length === 0 ? (
           <EmptyState
-            description="Görüntüleyebileceğiniz vardiya devri yok."
+            description={hasEligibleChannel || !canCreate ? "Görüntüleyebileceğiniz vardiya devri yok." : "Görüntüleyebileceğiniz vardiya devri yok. Devir oluşturmak için erişilebilir bir operasyon veya departman kanalı gerekir."}
             title="Vardiya devri yok"
+            action={canCreate && !hasEligibleChannel ? (
+              <Link className="button button-primary button-medium" href="/teams">Kanallara git</Link>
+            ) : undefined}
           />
         ) : (
           <ul className="teams-approval-list" data-testid="teams-handovers-list">

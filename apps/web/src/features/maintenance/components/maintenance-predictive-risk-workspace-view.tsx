@@ -4,18 +4,31 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
+  Activity,
   AlertTriangle,
+  CircleOff,
   ClipboardList,
   ExternalLink,
+  Gauge,
   LoaderCircle,
   RefreshCw,
   ShieldAlert,
+  ShieldCheck,
+  Siren,
+  Eye,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { DetailBlock, DetailList } from "@/components/ui/detail-list";
+import { EmptyPanel } from "@/components/ui/empty-panel";
+import { MetricCard, MetricGrid } from "@/components/ui/metric";
+import { Notice } from "@/components/ui/notice";
+import { PageHeader } from "@/components/ui/page";
+import { Panel } from "@/components/ui/panel";
+import { SeverityBadge, type SeverityLevel } from "@/components/ui/severity-badge";
 import type {
   MaintenancePredictiveRiskAssessment,
+  MaintenancePredictiveRiskAssetRow,
   MaintenancePredictiveRiskWorkspacePayload,
 } from "../domain/maintenance-predictive-risk";
 import {
@@ -24,20 +37,25 @@ import {
   transitionMaintenancePredictiveRiskFollowUpAction,
 } from "../server/maintenance-predictive-risk-actions";
 import {
+  getMaintenanceDataFreshnessLabel,
+  getMaintenanceDataSufficiencyLabel,
+} from "../presentation/maintenance-condition-labels";
+import {
   formatMaintenancePredictiveDriverLabel,
   formatMaintenancePredictiveEvidenceTypeLabel,
   getMaintenancePredictiveRecommendationCategoryLabel,
   getMaintenancePredictiveReviewPriorityLabel,
+  getMaintenancePredictiveReviewPriorityTone,
   getMaintenancePredictiveRiskBandLabel,
-  getMaintenancePredictiveRiskBandTone,
   getMaintenancePredictiveRiskFollowUpStatusLabel,
   MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY,
   MAINTENANCE_PREDICTIVE_RISK_TASK_DISCLAIMER,
 } from "../presentation/maintenance-predictive-risk-labels";
-import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
 import { MaintenanceEvaluateControl } from "./maintenance-evaluate-control";
-import { MaintenanceSectionHeader } from "./maintenance-table-primitives";
+import { MAINTENANCE_RISK_BAND_ORDER, MaintenanceRiskBandBadge } from "./maintenance-risk-badge";
 import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
+import "./maintenance-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenancePredictiveRiskWorkspaceViewProps = Readonly<{
   workspace: MaintenancePredictiveRiskWorkspacePayload;
@@ -57,11 +75,30 @@ function formatDateTime(iso?: string): string {
   });
 }
 
-function RiskBandBadge({ band }: Readonly<{ band: MaintenancePredictiveRiskAssessment["riskBand"] }>) {
-  const tone = getMaintenancePredictiveRiskBandTone(band);
-  const badgeTone =
-    tone === "danger" ? "danger" : tone === "warning" ? "warning" : tone === "ready" ? "success" : "neutral";
-  return <Badge tone={badgeTone}>{getMaintenancePredictiveRiskBandLabel(band)}</Badge>;
+const PRIORITY_LEVEL: Record<ReturnType<typeof getMaintenancePredictiveReviewPriorityTone>, SeverityLevel> = {
+  danger: "critical",
+  warning: "high",
+  paused: "medium",
+  ready: "low",
+  neutral: "neutral",
+};
+
+function ReviewPriorityBadge({ priority }: Readonly<{ priority: MaintenancePredictiveRiskAssetRow["reviewPriority"] }>) {
+  return (
+    <SeverityBadge level={PRIORITY_LEVEL[getMaintenancePredictiveReviewPriorityTone(priority)]}>
+      {getMaintenancePredictiveReviewPriorityLabel(priority)}
+    </SeverityBadge>
+  );
+}
+
+function groupRowsByBand(rows: readonly MaintenancePredictiveRiskAssetRow[]) {
+  return MAINTENANCE_RISK_BAND_ORDER.map((band) => ({
+    band,
+    rows: rows
+      .filter((row) => row.riskBand === band)
+      .slice()
+      .sort((left, right) => (right.assessedAtUtc ?? "").localeCompare(left.assessedAtUtc ?? "")),
+  })).filter((group) => group.rows.length > 0);
 }
 
 export function MaintenancePredictiveRiskWorkspaceView({
@@ -86,6 +123,7 @@ export function MaintenancePredictiveRiskWorkspaceView({
     () => workspace.assets.find((row) => row.assetReference === selectedAsset),
     [workspace.assets, selectedAsset],
   );
+  const groups = useMemo(() => groupRowsByBand(workspace.assets), [workspace.assets]);
 
   const selectAsset = useCallback(
     (assetReference: string) => {
@@ -143,165 +181,231 @@ export function MaintenancePredictiveRiskWorkspaceView({
       ? "Veri inceleme görev taslağı oluştur"
       : "Bakım görev taslağı oluştur";
 
+  const overview = workspace.overview;
+
   return (
-    <main className="production-execution-page" data-testid="maintenance-predictive-risk-workspace">
-      <header className="production-execution-header">
-        <p>BAKIM &amp; ARIZA</p>
-        <h1>Kestirimci Bakım Riskleri</h1>
-        <p className="production-execution-subtitle">
-          Makine durumu ve deterministik risk değerlendirmeleri için insan incelemeli görev akışı.
-        </p>
-      </header>
+    <div className="zx-page" data-testid="maintenance-predictive-risk-workspace" aria-busy={isPending}>
+      <PageHeader
+        eyebrow="BAKIM VE ARIZA"
+        title="Kestirimci Riskler"
+        description="Makine durumu ve kural tabanlı risk değerlendirmeleri için insan incelemeli görev akışı."
+        actions={
+          <button
+            type="button"
+            className="zx-button"
+            onClick={handleRefresh}
+            disabled={isPending}
+            data-testid="maintenance-predictive-risk-refresh-button"
+          >
+            {isPending ? <LoaderCircle aria-hidden="true" className="zx-spin" /> : <RefreshCw aria-hidden="true" />}
+            Yenile
+          </button>
+        }
+      />
 
       <MaintenanceWorkspaceNav active="predictive-risks" />
 
-      <p className="maintenance-readonly-note" data-testid="maintenance-predictive-risk-readonly-note">
+      <Notice tone="info" title="Karar desteği — otomatik işlem yok" data-testid="maintenance-predictive-risk-readonly-note">
         {MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY}
-      </p>
+      </Notice>
 
-      <div className="maintenance-kpi-grid" data-testid="maintenance-predictive-risk-kpi-grid">
-        <MaintenanceDashboardKpi label="Aktif risk" value={workspace.kpis.activeRiskCount} description="Açık takip durumu" tone="in-progress" icon={<AlertTriangle />} />
-        <MaintenanceDashboardKpi label="Görev bağlantısı" value={workspace.kpis.taskLinkedCount} description="AI görev taslağı bağlı" tone="ready" icon={<ClipboardList />} />
-        <MaintenanceDashboardKpi label="İnsan incelemesi" value={workspace.kpis.humanReviewedCount} description="İnceleme kaydı" tone="paused" icon={<ShieldAlert />} />
-      </div>
+      <section className="zx-stack maintenance-risk-metrics" aria-labelledby="risk-distribution-heading">
+        <div className="zx-section-head">
+          <h2 id="risk-distribution-heading" className="zx-section-title">Risk dağılımı</h2>
+          <span className="zx-count-chip" data-testid="maintenance-predictive-risk-monitored-count">
+            {overview.monitoredAssetCount} varlık izleniyor
+          </span>
+        </div>
+        <MetricGrid label="Risk bandı dağılımı" data-testid="maintenance-predictive-risk-distribution">
+          <MetricCard label="Kritik risk" value={overview.criticalRiskCount} hint="Acil inceleme" tone={overview.criticalRiskCount > 0 ? "critical" : "neutral"} icon={<Siren />} />
+          <MetricCard label="Yüksek risk" value={overview.highRiskCount} hint="Planlı inceleme" tone={overview.highRiskCount > 0 ? "high" : "neutral"} icon={<AlertTriangle />} />
+          <MetricCard label="İzlenmeli" value={overview.watchCount} hint="Yakın izleme" tone={overview.watchCount > 0 ? "medium" : "neutral"} icon={<Eye />} />
+          <MetricCard label="Düşük risk" value={overview.lowRiskCount} hint="Rutin izleme" tone={overview.lowRiskCount > 0 ? "low" : "neutral"} icon={<ShieldCheck />} />
+          <MetricCard label="Yetersiz veri" value={overview.insufficientDataCount} hint="Veri gerekli" icon={<CircleOff />} />
+        </MetricGrid>
+      </section>
+
+      <section className="zx-stack maintenance-risk-metrics" aria-labelledby="risk-followup-heading">
+        <h2 id="risk-followup-heading" className="zx-section-title">Takip akışı</h2>
+        <MetricGrid label="Takip özeti" data-testid="maintenance-predictive-risk-kpi-grid">
+          <MetricCard label="Aktif risk" value={workspace.kpis.activeRiskCount} hint="Açık takip durumu" tone={workspace.kpis.activeRiskCount > 0 ? "high" : "neutral"} icon={<Activity />} />
+          <MetricCard label="Görev bağlantısı" value={workspace.kpis.taskLinkedCount} hint="Görev taslağı bağlı" tone="info" icon={<ClipboardList />} />
+          <MetricCard label="İnsan incelemesi" value={workspace.kpis.humanReviewedCount} hint="İnceleme kaydı" tone="low" icon={<ShieldAlert />} />
+        </MetricGrid>
+      </section>
 
       <MaintenanceEvaluateControl
         lastEvaluatedAtUtc={workspace.overview.lastAssessedAtUtc}
         canManage={workspace.capabilities.canManage}
       />
 
-      <div className="maintenance-workspace-toolbar">
-        <button type="button" onClick={handleRefresh} disabled={isPending} data-testid="maintenance-predictive-risk-refresh-button">
-          <RefreshCw aria-hidden="true" />
-          Yenile
-        </button>
-      </div>
-
       {actionError ? (
-        <div role="alert" className="state-panel error-state">
-          <AlertTriangle aria-hidden="true" />
-          <p>{actionError}</p>
-        </div>
+        <Notice tone="danger" alert>
+          {customerMessage(actionError)}
+        </Notice>
       ) : null}
 
-      <section className="maintenance-panel-grid">
-        <Card className="maintenance-panel">
-          <MaintenanceSectionHeader title="Risk envanteri" subtitle="Yetkili kestirimci bakım riskleri" />
-          <div className="maintenance-table-wrap" data-testid="maintenance-predictive-risk-table">
-            <table>
+      <div className="zx-split maintenance-risk-split">
+        <Panel
+          flush
+          headingId="risk-inventory-heading"
+          title="Risk envanteri"
+          subtitle="Yetkili kestirimci bakım riskleri — en yüksek risk üstte"
+        >
+          {workspace.assets.length === 0 ? (
+            <div className="zx-panel__body">
+              <EmptyPanel
+                icon={<ShieldCheck />}
+                title="Henüz risk değerlendirmesi yok"
+                description="Makine durum verisi geldikten sonra Değerlendirmeyi güncelle düğmesiyle ilk değerlendirmeyi çalıştırın."
+                data-testid="maintenance-predictive-risk-empty"
+              />
+            </div>
+          ) : (
+            <DataTable label="Kestirimci bakım risk envanteri" data-testid="maintenance-predictive-risk-table" minWidth={620}>
               <thead>
                 <tr>
-                  <th>Varlık</th>
-                  <th>Risk bandı</th>
-                  <th>Takip durumu</th>
-                  <th>Değerlendirme</th>
+                  <th scope="col">Varlık</th>
+                  <th scope="col">Risk bandı</th>
+                  <th scope="col">Takip durumu</th>
+                  <th scope="col">Değerlendirme</th>
                 </tr>
               </thead>
-              <tbody>
-                {workspace.assets.map((row) => (
-                  <tr
-                    key={row.assetReference}
-                    data-testid={`maintenance-predictive-risk-row-${row.assetReference}`}
-                    aria-selected={row.assetReference === selectedAsset}
-                  >
-                    <td>
-                      <button type="button" className="maintenance-table-link" onClick={() => selectAsset(row.assetReference)}>
-                        {row.machineName ?? row.assetName ?? row.assetReference}
-                      </button>
-                      <div className="maintenance-table-meta">{row.machineCode ?? row.assetReference}</div>
-                    </td>
-                    <td><RiskBandBadge band={row.riskBand} /></td>
-                    <td>
-                      {row.followUpStatus
-                        ? getMaintenancePredictiveRiskFollowUpStatusLabel(row.followUpStatus)
-                        : "—"}
-                    </td>
-                    <td>{formatDateTime(row.assessedAtUtc)}</td>
+              {groups.map((group) => (
+                <tbody key={group.band} aria-label={`${getMaintenancePredictiveRiskBandLabel(group.band)} grubu`}>
+                  <tr className="zx-table-group">
+                    <th scope="colgroup" colSpan={4}>
+                      {getMaintenancePredictiveRiskBandLabel(group.band)} · {group.rows.length} varlık
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Card>
+                  {group.rows.map((row) => (
+                    <tr
+                      key={row.assetReference}
+                      data-testid={`maintenance-predictive-risk-row-${row.assetReference}`}
+                      aria-selected={row.assetReference === selectedAsset}
+                    >
+                      <td>
+                        <div className="zx-table-primary">
+                          <button
+                            type="button"
+                            className="zx-table-link"
+                            aria-pressed={row.assetReference === selectedAsset}
+                            onClick={() => selectAsset(row.assetReference)}
+                          >
+                            {row.machineName ?? row.assetName ?? row.assetReference}
+                          </button>
+                          <span className="zx-table-meta">{row.machineCode ?? row.assetReference}</span>
+                        </div>
+                      </td>
+                      <td><MaintenanceRiskBandBadge band={row.riskBand} /></td>
+                      <td>
+                        {row.followUpStatus
+                          ? getMaintenancePredictiveRiskFollowUpStatusLabel(row.followUpStatus)
+                          : "—"}
+                      </td>
+                      <td>{formatDateTime(row.assessedAtUtc)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
+            </DataTable>
+          )}
+        </Panel>
 
-        <Card className="maintenance-panel" data-testid="maintenance-predictive-risk-detail-panel">
-          <MaintenanceSectionHeader
-            title="Risk kanıtı ve öneri"
-            subtitle={selectedRow ? selectedRow.assetReference : "Varlık seçin"}
-          />
-
+        <Panel
+          className="zx-sticky"
+          headingId="risk-detail-heading"
+          title="Risk kanıtı ve öneri"
+          subtitle={selectedRow ? (selectedRow.machineName ?? selectedRow.assetName ?? selectedRow.assetReference) : "Varlık seçin"}
+          data-testid="maintenance-predictive-risk-detail-panel"
+        >
           {assessmentError ? (
-            <p role="alert">{assessmentError}</p>
+            <Notice tone="danger" alert>
+              {customerMessage(assessmentError)}
+            </Notice>
           ) : !assessment ? (
-            <p data-testid="maintenance-predictive-risk-detail-empty">Seçili varlık için risk değerlendirmesi yok.</p>
+            <EmptyPanel
+              compact
+              icon={<Gauge />}
+              title="Değerlendirme seçilmedi"
+              description="Seçili varlık için risk değerlendirmesi yok."
+              data-testid="maintenance-predictive-risk-detail-empty"
+            />
           ) : (
-            <div data-testid="maintenance-predictive-risk-detail-ready">
-              <dl className="maintenance-detail-grid">
-                <div><dt>Makine</dt><dd>{assessment.machineName ?? assessment.assetReference}</dd></div>
-                <div><dt>Risk bandı</dt><dd><RiskBandBadge band={assessment.riskBand} /></dd></div>
-                <div><dt>İnceleme önceliği</dt><dd>{getMaintenancePredictiveReviewPriorityLabel(assessment.reviewPriority)}</dd></div>
-                <div><dt>Veri yeterliliği</dt><dd>{assessment.dataSufficiency}</dd></div>
-                <div><dt>Veri tazeliği</dt><dd>{assessment.dataFreshness}</dd></div>
-                <div><dt>Değerlendirme zamanı</dt><dd>{formatDateTime(assessment.assessedAtUtc)}</dd></div>
-                <div><dt>Takip durumu</dt><dd>{assessment.followUpStatus ? getMaintenancePredictiveRiskFollowUpStatusLabel(assessment.followUpStatus) : "—"}</dd></div>
-              </dl>
+            <div className="zx-stack" data-testid="maintenance-predictive-risk-detail-ready">
+              <div className="zx-detail-head">
+                <MaintenanceRiskBandBadge band={assessment.riskBand} />
+                <ReviewPriorityBadge priority={assessment.reviewPriority} />
+              </div>
 
-              <section aria-labelledby="risk-explanation-heading">
-                <h3 id="risk-explanation-heading">Açıklama</h3>
+              <DetailList
+                items={[
+                  { label: "Makine", value: assessment.machineName ?? assessment.assetReference },
+                  { label: "Veri yeterliliği", value: getMaintenanceDataSufficiencyLabel(assessment.dataSufficiency as Parameters<typeof getMaintenanceDataSufficiencyLabel>[0]) },
+                  { label: "Veri tazeliği", value: getMaintenanceDataFreshnessLabel(assessment.dataFreshness as Parameters<typeof getMaintenanceDataFreshnessLabel>[0]) },
+                  { label: "Değerlendirme zamanı", value: formatDateTime(assessment.assessedAtUtc) },
+                  { label: "Takip durumu", value: assessment.followUpStatus ? getMaintenancePredictiveRiskFollowUpStatusLabel(assessment.followUpStatus) : "—" },
+                ]}
+              />
+
+              <DetailBlock title="Açıklama" headingId="risk-explanation-heading">
                 <p>{assessment.explanation}</p>
-              </section>
+              </DetailBlock>
 
               {assessment.recommendation ? (
-                <section aria-labelledby="risk-recommendation-heading">
-                  <h3 id="risk-recommendation-heading">Öneri</h3>
+                <DetailBlock title="Öneri" headingId="risk-recommendation-heading">
                   <p>
                     <strong>{getMaintenancePredictiveRecommendationCategoryLabel(assessment.recommendation.category)}</strong>
                     {" — "}
                     {assessment.recommendation.explanation}
                   </p>
-                </section>
+                </DetailBlock>
               ) : null}
 
               {assessment.riskDrivers.length > 0 ? (
-                <section aria-labelledby="risk-drivers-heading">
-                  <h3 id="risk-drivers-heading">Risk sürücüleri</h3>
-                  <ul>
+                <DetailBlock title="Risk sürücüleri" headingId="risk-drivers-heading">
+                  <ul className="zx-bullet-list">
                     {assessment.riskDrivers.map((driver) => (
                       <li key={driver.driverCode}>
-                        <strong>{formatMaintenancePredictiveDriverLabel(driver.driverCode)}</strong>: {driver.summary}
+                        <strong>{formatMaintenancePredictiveDriverLabel(driver.driverCode)}</strong>
+                        <span>{driver.summary}</span>
                       </li>
                     ))}
                   </ul>
-                </section>
+                </DetailBlock>
               ) : null}
 
               {assessment.evidence.length > 0 ? (
-                <section aria-labelledby="risk-evidence-heading">
-                  <h3 id="risk-evidence-heading">Kanıt</h3>
-                  <ul>
+                <DetailBlock title="Kanıt" headingId="risk-evidence-heading">
+                  <ul className="zx-bullet-list">
                     {assessment.evidence.map((item) => (
                       <li key={`${item.evidenceType}-${item.evidenceReference}`}>
-                        <strong>{formatMaintenancePredictiveEvidenceTypeLabel(item.evidenceType)}</strong>: {item.summary}
+                        <strong>{formatMaintenancePredictiveEvidenceTypeLabel(item.evidenceType)}</strong>
+                        <span>{item.summary}</span>
                       </li>
                     ))}
                   </ul>
-                </section>
+                </DetailBlock>
               ) : null}
 
-              <p className="maintenance-automation-disclaimer" data-testid="maintenance-predictive-risk-automation-disclaimer">
-                <ShieldAlert aria-hidden="true" />
+              <Notice
+                tone="neutral"
+                icon={<ShieldAlert aria-hidden="true" />}
+                data-testid="maintenance-predictive-risk-automation-disclaimer"
+              >
                 {workspace.automationDisclaimer || MAINTENANCE_PREDICTIVE_RISK_TASK_DISCLAIMER}
-              </p>
+              </Notice>
 
-              <div className="maintenance-action-row">
+              <div className="zx-action-bar zx-action-bar--bordered">
                 {canCreateTask ? (
                   <button
                     type="button"
+                    className="zx-button zx-button--primary"
                     onClick={handleCreateTask}
                     disabled={isPending}
                     data-testid="maintenance-predictive-risk-create-task-button"
                   >
-                    {isPending ? <LoaderCircle aria-hidden="true" className="spin" /> : <ClipboardList aria-hidden="true" />}
+                    {isPending ? <LoaderCircle aria-hidden="true" className="zx-spin" /> : <ClipboardList aria-hidden="true" />}
                     {taskButtonLabel}
                   </button>
                 ) : null}
@@ -309,6 +413,7 @@ export function MaintenancePredictiveRiskWorkspaceView({
                 {assessment.linkedAiTaskId ? (
                   <Link
                     href={`/ai-gorevleri/${assessment.linkedAiTaskId}`}
+                    className="zx-button"
                     data-testid="maintenance-predictive-risk-linked-task-link"
                   >
                     <ExternalLink aria-hidden="true" />
@@ -321,6 +426,7 @@ export function MaintenancePredictiveRiskWorkspaceView({
                 assessment.followUpStatus !== "resolved" ? (
                   <button
                     type="button"
+                    className="zx-button"
                     onClick={handleMarkReviewed}
                     disabled={isPending}
                     data-testid="maintenance-predictive-risk-mark-reviewed-button"
@@ -331,8 +437,8 @@ export function MaintenancePredictiveRiskWorkspaceView({
               </div>
             </div>
           )}
-        </Card>
-      </section>
-    </main>
+        </Panel>
+      </div>
+    </div>
   );
 }

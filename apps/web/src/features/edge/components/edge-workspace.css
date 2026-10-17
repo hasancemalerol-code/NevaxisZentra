@@ -1,7 +1,9 @@
 /* Edge Gateway workspace — follows ERP workspace rhythm */
 
 .edge-workspace-page {
-  gap: 12px;
+  display: grid;
+  padding: 24px;
+  gap: 24px;
   width: 100%;
   max-width: none;
 }
@@ -38,7 +40,7 @@
 /* KPI grid */
 .edge-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 10px;
 }
 
@@ -132,7 +134,7 @@
 }
 
 .edge-card__meta {
-  font-size: 11px;
+  font-size: 0.75rem;
   color: #7a8fa0;
   display: flex;
   gap: 8px;
@@ -144,7 +146,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   padding: 2px 8px;
@@ -173,7 +175,7 @@
 
 .edge-status--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 .machine-status--running {
@@ -203,7 +205,7 @@
 
 .machine-status--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 /* Capabilities list */
@@ -273,8 +275,8 @@
 
 .edge-event__seq {
   font-family: monospace;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   min-width: 48px;
 }
 
@@ -284,8 +286,8 @@
 }
 
 .edge-event__time {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   text-align: right;
   white-space: nowrap;
 }
@@ -317,8 +319,8 @@
 }
 
 .edge-telemetry-card__metric {
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -333,13 +335,13 @@
 
 .edge-telemetry-card__unit {
   font-size: 13px;
-  color: #64748b;
+  color: #566478;
   font-weight: 500;
 }
 
 .edge-telemetry-card__meta {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   margin-top: 2px;
 }
 
@@ -348,7 +350,7 @@
   display: inline-block;
   padding: 1px 7px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -371,7 +373,7 @@
 
 .telemetry-quality--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 /* ── EDGE-2: Cycle section ──────────────────────────────── */
@@ -391,7 +393,7 @@
 }
 
 .edge-cycle-kpi__label {
-  font-size: 11px;
+  font-size: 0.75rem;
   color: #0369a1;
   font-weight: 600;
   text-transform: uppercase;
@@ -429,9 +431,9 @@
 
 .edge-cycle-table th {
   text-align: left;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 4px 8px;
@@ -451,7 +453,7 @@
 
 .edge-cycle-identity {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 0.75rem;
   color: #475569;
   max-width: 180px;
   overflow: hidden;
@@ -491,7 +493,7 @@
 }
 
 .edge-signal-item__label {
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #166534;
   text-transform: uppercase;
@@ -505,7 +507,7 @@
 }
 
 .edge-signal-disclaimer {
-  font-size: 11px;
+  font-size: 0.75rem;
   color: #166534;
   margin-top: 8px;
   font-style: italic;
@@ -527,7 +529,7 @@
 }
 
 .edge-state-row__from {
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-state-row__to {
@@ -536,16 +538,16 @@
 }
 
 .edge-state-row__time {
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   text-align: right;
   white-space: nowrap;
 }
 
 .edge-state-row__seq {
   font-family: monospace;
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .edge-state-row--oor {
@@ -572,9 +574,9 @@
 }
 
 .edge-ops-summary-card__label {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -587,8 +589,8 @@
 }
 
 .edge-ops-summary-card__meta {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .edge-ops-summary-card--scrap {
@@ -614,9 +616,9 @@
 
 .edge-ops-table th {
   text-align: left;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 4px 8px;
@@ -647,7 +649,7 @@
   display: inline-block;
   padding: 1px 7px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   background: #fef3c7;
   color: #92400e;
@@ -656,7 +658,7 @@
 
 .edge-alarm-code {
   font-family: monospace;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #334155;
 }
@@ -665,7 +667,7 @@
   display: inline-block;
   padding: 1px 7px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -689,7 +691,7 @@
   display: inline-block;
   padding: 1px 7px;
   border-radius: 10px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -717,7 +719,7 @@
 
 .alarm-severity--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-scrap-qty {
@@ -824,8 +826,8 @@
 
 .edge-reliability-kpi__label {
   display: block;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   margin-bottom: 2px;
 }
 
@@ -855,8 +857,8 @@
 
 .edge-reliability-status-item__label {
   display: block;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .edge-reliability-status-item__value {
@@ -898,8 +900,8 @@
 }
 
 .edge-reliability-table th {
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
 }
 
@@ -907,7 +909,7 @@
   display: inline-block;
   padding: 2px 6px;
   border-radius: 4px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -972,10 +974,10 @@
 }
 
 .edge-exec-kpi__label {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
 }
 
@@ -991,8 +993,8 @@
 }
 
 .edge-exec-kpi__meta {
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .edge-exec-kpi--ok .edge-exec-kpi__value {
@@ -1030,9 +1032,9 @@
 }
 
 .edge-machine-table th {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
   background: #f8fafc;
 }
 
@@ -1043,7 +1045,7 @@
 
 .edge-machine-table__code {
   font-family: ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 0.75rem;
   color: #475569;
 }
 
@@ -1062,7 +1064,7 @@
 
 .edge-machine-open-btn {
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #155eef;
   background: #eef4ff;
@@ -1084,7 +1086,7 @@
   display: inline-block;
   padding: 2px 7px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1100,7 +1102,7 @@
 
 .edge-conn-badge--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-freshness--fresh {
@@ -1115,14 +1117,14 @@
 
 .edge-freshness--unknown {
   background: #f1f5f9;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-sim-badge {
   margin-left: 6px;
   padding: 1px 6px;
   border-radius: 4px;
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 700;
   background: #fef3c7;
   color: #92400e;
@@ -1179,13 +1181,13 @@
 .edge-detail-panel__code {
   font-size: 12px;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-detail-panel__subtitle {
   margin: 4px 0 0;
   font-size: 12px;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-detail-panel__close {
@@ -1215,9 +1217,9 @@
 
 .edge-detail-tab {
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
@@ -1256,9 +1258,9 @@
 }
 
 .edge-detail-summary-item__label {
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
 }
 
@@ -1276,9 +1278,9 @@
 
 .edge-live-status-group__title {
   display: block;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
   margin-bottom: 6px;
 }
 
@@ -1354,14 +1356,14 @@
 
 .edge-gateway-table__name {
   display: block;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .edge-gateway-table__meta {
   padding: 8px 12px;
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .edge-timeline {
@@ -1392,8 +1394,8 @@
 }
 
 .edge-timeline__time {
-  font-size: 11px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .edge-timeline__kind {
@@ -1403,8 +1405,8 @@
 
 .edge-timeline__meta,
 .edge-timeline__machine {
-  font-size: 11px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .edge-empty-state {
@@ -1429,7 +1431,7 @@
 .edge-empty-state__text {
   margin: 4px 0 0;
   font-size: 12px;
-  color: #94a3b8;
+  color: #5d6b7f;
 }
 
 .alarm-severity--prominent {
@@ -1488,7 +1490,7 @@
 
 .edge-sim-badge--header {
   margin-left: 0;
-  font-size: 10px;
+  font-size: 0.75rem;
 }
 
 .edge-sim-badge--inline {
@@ -1498,7 +1500,7 @@
 .edge-simulator-notice--inline {
   margin-top: 4px;
   padding: 4px 8px;
-  font-size: 11px;
+  font-size: 0.75rem;
   background: transparent;
   border: none;
   color: #92400e;
@@ -1547,7 +1549,7 @@
 .edge-attention-panel__empty {
   margin: 0;
   font-size: 12px;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-attention-list {
@@ -1565,7 +1567,7 @@
   gap: 6px;
   padding: 4px 8px;
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 0.75rem;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
 }
@@ -1587,11 +1589,11 @@
 
 .edge-attention-item__machine {
   font-family: ui-monospace, monospace;
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-attention-item__detail {
-  color: #64748b;
+  color: #566478;
 }
 
 .edge-machine-table__cell-name .edge-machine-table__name {
@@ -1601,8 +1603,8 @@
 
 .edge-machine-table__cell-muted,
 .edge-machine-table__cell-time {
-  color: #94a3b8;
-  font-size: 11px;
+  color: #5d6b7f;
+  font-size: 0.75rem;
 }
 
 .edge-machine-table__cell-alarm {
@@ -1619,7 +1621,7 @@
   display: inline-block;
   padding: 2px 6px;
   border-radius: 6px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.3;
 }
@@ -1627,15 +1629,15 @@
 .edge-status-pill--conn-online { background: #ecfdf5; color: #047857; }
 .edge-status-pill--conn-offline { background: #fef2f2; color: #b91c1c; }
 .edge-status-pill--conn-degraded { background: #fff7ed; color: #c2410c; }
-.edge-status-pill--conn-unknown { background: #f1f5f9; color: #64748b; }
+.edge-status-pill--conn-unknown { background: #f1f5f9; color: #566478; }
 .edge-status-pill--fresh-fresh { background: #ecfdf5; color: #047857; }
 .edge-status-pill--fresh-stale { background: #fffbeb; color: #92400e; }
-.edge-status-pill--fresh-unknown { background: #f1f5f9; color: #64748b; }
+.edge-status-pill--fresh-unknown { background: #f1f5f9; color: #566478; }
 .edge-status-pill--state-running { background: #eff6ff; color: #1d4ed8; }
 .edge-status-pill--state-idle { background: #f1f5f9; color: #475569; }
-.edge-status-pill--state-stopped { background: #f8fafc; color: #64748b; }
+.edge-status-pill--state-stopped { background: #f8fafc; color: #566478; }
 .edge-status-pill--state-fault { background: #fef2f2; color: #b91c1c; }
-.edge-status-pill--state-unknown { background: #f1f5f9; color: #64748b; }
+.edge-status-pill--state-unknown { background: #f1f5f9; color: #566478; }
 .edge-status-pill--delivery-warn { background: #fffbeb; color: #92400e; }
 .edge-status-pill--delivery-critical { background: #fef2f2; color: #b91c1c; }
 
@@ -1657,9 +1659,9 @@
 
 .edge-gateway-summary__label {
   display: block;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
 }
 
@@ -1682,8 +1684,8 @@
 
 .edge-gateway-reliability-meta__label {
   display: block;
-  font-size: 10px;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
 }
 
@@ -1703,13 +1705,13 @@
 
 .edge-gateway-util-bar__fill {
   height: 100%;
-  background: #155eef;
+  background: #2463a7;
   border-radius: 999px;
 }
 
 .edge-gateway-table__muted {
-  color: #94a3b8;
-  font-size: 11px;
+  color: #5d6b7f;
+  font-size: 0.75rem;
 }
 
 .edge-text-ok { color: #15803d; font-weight: 600; }
@@ -1729,14 +1731,14 @@
   align-items: center;
   min-height: 28px;
   padding: 2px 4px;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .edge-timeline__dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #155eef;
+  background: #2463a7;
 }
 
 .edge-timeline__row--dup .edge-timeline__dot {
@@ -1744,8 +1746,8 @@
 }
 
 .edge-timeline__hint {
-  font-size: 10px;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .edge-detail-summary-grid--primary {
@@ -1863,4 +1865,32 @@
   .edge-workspace-page {
     gap: 10px;
   }
+}
+
+/* Round 3: the page header carries the same divider and rhythm as the other module headers. */
+.edge-workspace-header--executive {
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--fact-border, #d5dde8);
+}
+
+.edge-workspace-header--executive .edge-header__intro {
+  gap: 8px;
+}
+
+.edge-workspace-header--executive .edge-header__subtitle {
+  margin: 0;
+}
+
+/* Round 9: header action beside the title; the empty-state eyebrow uses the same blue, tracking and weight as the other modules. */
+.edge-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.edge-workspace-page .zx-state-code {
+  color: var(--color-accent, #2463a7);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
 }

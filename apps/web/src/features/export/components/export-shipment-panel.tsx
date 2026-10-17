@@ -22,6 +22,7 @@ import type {
   transitionShipmentAction,
   updateShipmentAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -249,7 +250,7 @@ export function ExportShipmentPanel({
           className="export-shipment-panel__flash export-shipment-panel__flash--error"
           role="alert"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
       {state.kind === "success" && (
@@ -257,7 +258,7 @@ export function ExportShipmentPanel({
           className="export-shipment-panel__flash export-shipment-panel__flash--success"
           role="status"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 
@@ -268,7 +269,7 @@ export function ExportShipmentPanel({
         </div>
         <div className="export-shipment-panel__fields">
           <label>
-            Referans
+            Referans <span className="zx-required" aria-hidden="true">*</span>
             <input
               className="input"
               value={shipmentReference}
@@ -293,7 +294,7 @@ export function ExportShipmentPanel({
             </select>
           </label>
           <label>
-            Hedef ülke
+            Hedef ülke <span className="zx-required" aria-hidden="true">*</span>
             <input
               className="input"
               value={destinationCountryCode}

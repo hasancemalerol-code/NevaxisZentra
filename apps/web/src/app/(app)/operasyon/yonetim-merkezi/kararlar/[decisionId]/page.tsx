@@ -1,5 +1,5 @@
 import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
-import { ShieldAlert } from "lucide-react";
+import { RecordFailureState, StatePage, StatePageLink } from "@/components/ui/state-page";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { FactoryDecisionDetailView } from "@/features/production-manager/components/factory-decision-detail-view";
@@ -14,15 +14,16 @@ export default async function FactoryDecisionDetailPage({
   const authorization = await denyUnlessGranted("production-manager.read");
   if (authorization.status === "failure") {
     return (
-      <main className="commint-page">
-        <div role="alert" className="commint-error-banner" data-testid="factory-decision-forbidden">
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{authorization.code === "authorization-denied" ? "Bu karara erişim yetkiniz yok" : "Yetki doğrulanamadı"}</h3>
-            <p>{authorization.message}</p>
-          </div>
-        </div>
-      </main>
+      <StatePage
+        kind={authorization.code === "authorization-denied" ? "forbidden" : "unavailable"}
+        title={authorization.code === "authorization-denied" ? "Bu karara erişim yetkiniz yok" : "Yetki doğrulanamadı"}
+        description={
+          authorization.code === "authorization-denied"
+            ? "Hesabınızın rolü bu karar kaydını görüntülemeye izin vermiyor. Erişim gerekiyorsa yöneticinizle iletişime geçin."
+            : "Yetki doğrulaması şu anda yapılamıyor. Lütfen biraz sonra yeniden deneyin."
+        }
+        actions={<StatePageLink href="/operasyon/yonetim-merkezi" primary>Yönetim Merkezi’ne dön</StatePageLink>}
+      />
     );
   }
 
@@ -30,15 +31,14 @@ export default async function FactoryDecisionDetailPage({
   const result = await readProductionManagerDecisionDetail(decisionId);
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
-        <div role="alert" className="commint-error-banner">
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Kayıt bulunamadı" : "Karar yüklenemedi"}</h3>
-            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "İstenen karar kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+      <RecordFailureState
+        notFound={isNotFoundFailureCode("code" in result ? result.code : undefined)}
+        entityLabel="karar kaydı"
+        failedTitle="Karar yüklenemedi"
+        message={result.message}
+        backHref="/operasyon/yonetim-merkezi"
+        backLabel="Yönetim Merkezi’ne dön"
+      />
     );
   }
 

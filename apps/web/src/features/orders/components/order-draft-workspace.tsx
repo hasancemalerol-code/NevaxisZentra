@@ -48,7 +48,7 @@ export function OrderDraftWorkspace({
 
           <p>
             E-posta, WhatsApp, ERP veya diğer bağlı
-            kanallardan sipariş verisi geldiğinde AI
+            kanallardan sipariş verisi geldiğinde yapay zekâ
             tarafından hazırlanan taslaklar burada
             listelenecek.
           </p>

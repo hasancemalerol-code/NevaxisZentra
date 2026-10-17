@@ -93,10 +93,32 @@ function includesSearchValue(
 }
 
 export function isAiTaskOverdue(
-  task: Pick<AiTask, "dueAt" | "status">,
+  task: Pick<AiTask, "dueAt" | "status"> & Partial<Pick<AiTask, "slaState" | "sla">>,
   now: Date = new Date(),
 ): boolean {
-  if (!task.dueAt || isAiTaskFinalStatus(task.status)) {
+  if (isAiTaskFinalStatus(task.status)) {
+    return false;
+  }
+
+  // Canonical SLA truth wins: the backend-derived state decides overdue so card, list, detail and KPIs agree.
+  // A task whose SLA is not applicable (no target) is never overdue.
+  // "Overdue" means the due / resolution deadline passed; an acknowledgement/response breach with the deadline
+  // still ahead is an SLA breach, not a delay.
+  if (task.slaState !== undefined) {
+    if (task.slaState === "overdue") {
+      return true;
+    }
+
+    if (task.slaState !== "breached") {
+      return false;
+    }
+
+    if (task.sla?.breachType === "resolution") {
+      return true;
+    }
+  }
+
+  if (!task.dueAt) {
     return false;
   }
 

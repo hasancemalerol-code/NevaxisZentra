@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
-  Bot,
   CheckCircle2,
   Coins,
   ShieldAlert,
@@ -25,7 +24,6 @@ import {
   formatAiConfidence,
   getCrossModuleRiskSeverityLabel,
   getExportAiFindingSeverityLabel,
-  getExportAiProviderLabel,
   getExportAiRecommendationPriorityLabel,
   getExportAiRecommendationStatusLabel,
   getExportAiRunStatusLabel,
@@ -40,6 +38,8 @@ import type {
   rejectExportAiRecommendationAction,
   suggestExportNextActionsAction,
 } from "../server/export-4l-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { AssistantOriginBadge } from "@/components/ui/assistant-origin";
 
 type BadgeTone =
   | "neutral"
@@ -231,18 +231,16 @@ export function ExportAiCopilotPanel({
     <section className="export-ai-copilot-panel">
       <header className="export-ai-copilot-panel__header">
         <div>
-          <p>AI EXPORT COPILOT</p>
           <h2>
             <Sparkles aria-hidden="true" />
-            İhracat AI asistanı
+            İhracat asistanı
           </h2>
           <span>Kaynak tabanlı analiz, hazırlık açıklaması ve kontrollü öneriler</span>
         </div>
         <div className="export-ai-copilot-panel__badges">
-          <Badge tone="ai">
-            <Bot aria-hidden="true" />
-            {getExportAiProviderLabel(provider)}
-          </Badge>
+          <AssistantOriginBadge
+            origin={provider === EXPORT_AI_DEVELOPMENT_PROVIDER ? "rules" : provider === "unavailable" ? "unavailable" : "model"}
+          />
           {run ? (
             <Badge tone={run.status === "completed" ? "success" : "warning"}>
               {getExportAiRunStatusLabel(run.status)}
@@ -256,7 +254,7 @@ export function ExportAiCopilotPanel({
           className="export-ai-copilot-panel__feedback export-ai-copilot-panel__feedback--error"
           role="alert"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
       {state.kind === "success" ? (
@@ -265,10 +263,11 @@ export function ExportAiCopilotPanel({
           role="status"
         >
           <CheckCircle2 aria-hidden="true" />
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
 
+      {provider !== EXPORT_AI_DEVELOPMENT_PROVIDER && provider !== "unavailable" ? (
       <div className="export-ai-copilot-panel__usage">
         <Coins aria-hidden="true" />
         <div>
@@ -281,9 +280,10 @@ export function ExportAiCopilotPanel({
           ) : null}
         </div>
       </div>
+      ) : null}
 
       <div className="export-ai-copilot-panel__actions">
-        <button type="button" disabled={isPending} onClick={() => void handleAnalyze()}>
+        <button type="button" disabled={isPending || provider === "unavailable"} onClick={() => void handleAnalyze()}>
           İhracat dosyasını analiz et
         </button>
         <button

@@ -260,7 +260,7 @@ export async function readMaintenanceAssetHistory(
 
   const result = await getMaintenanceAssetHistory(contextResult.context, assetReference);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", history: result.value };
@@ -351,7 +351,7 @@ export async function readMaintenanceAssetReliability(
 
   const result = await getMaintenanceAssetReliability(contextResult.context, assetReference);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", message: result.message, code: result.code };
   }
 
   return { status: "success", reliability: result.value };

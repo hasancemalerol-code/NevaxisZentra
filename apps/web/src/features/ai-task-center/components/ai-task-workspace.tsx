@@ -98,7 +98,7 @@ export function AiTaskWorkspace({
 
       {visibleTasks.length > 0 ? (
         <div
-          aria-label="Filtrelenmiş AI görevleri"
+          aria-label="Filtrelenmiş yapay zekâ görevleri"
           className="ai-task-list"
         >
           {visibleTasks.map((task) => (
@@ -115,7 +115,7 @@ export function AiTaskWorkspace({
           description={
             hasActiveFilters
               ? "Seçili filtrelerle eşleşen görev bulunamadı. Filtreleri temizleyerek tüm görevleri yeniden görüntüleyebilirsiniz."
-              : "Gösterilecek AI görevi bulunmuyor."
+              : "Gösterilecek yapay zekâ görevi bulunmuyor."
           }
           title="Görev bulunamadı"
         />

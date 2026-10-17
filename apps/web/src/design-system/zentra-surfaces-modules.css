@@ -1,0 +1,101 @@
+/*
+ * Zentra surface bridge — module screens (part 3). See zentra-surfaces.css for the rationale.
+ * Only classes that previously had no rule anywhere are defined here.
+ */
+
+/* shared section header used by the intelligence control centers */
+.fact-section__eyebrow { margin: 0 0 4px; color: var(--zx-accent-strong); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.fact-section__subtitle { max-width: 820px; margin: 6px 0 0; color: var(--zx-text); font-size: 0.9rem; line-height: 1.55; }
+.fact-section__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fact-link-button { display: inline-flex; min-height: 32px; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid var(--zx-line-strong); border-radius: var(--zx-radius-sm); color: var(--zx-accent-strong); background: var(--zx-surface); font-size: 0.8125rem; font-weight: 650; text-decoration: none; cursor: pointer; }
+.fact-link-button:hover { border-color: var(--zx-accent); background: var(--zx-accent-soft); }
+.shell-focus-ring:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-focus-ring, #1675d1) 38%, transparent); outline-offset: 2px; }
+.text-muted { color: var(--zx-text-muted); }
+
+/* generic form helpers */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px 18px; }
+.button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+
+/* production execution detail pages */
+.production-order-card__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 14px; }
+.production-order-card__meta { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.production-order-detail-page__health,
+.production-order-detail-page__quantity,
+.production-order-detail-page__exceptions,
+.production-order-detail-page__actions,
+.production-order-detail-page__history,
+.production-handover-panel,
+.production-operator-panel,
+.production-shift-panel { display: grid; min-width: 0; gap: 12px; padding: 18px 20px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); box-shadow: var(--zx-shadow); }
+.production-execution-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+
+/* process OEE failure header */
+.process-oee-header { display: grid; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--zx-line); }
+.process-oee-header__intro { display: grid; gap: 6px; }
+.process-oee-header__eyebrow { margin: 0; color: var(--zx-accent-strong); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.process-oee-header__subtitle { max-width: 820px; margin: 0; color: var(--zx-text); font-size: 0.9rem; line-height: 1.55; }
+
+/* shift workforce panels embedded in shift screens */
+.shift-workforce-assignment,
+.shift-workforce-detail { display: grid; min-width: 0; gap: 12px; padding: 16px 18px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.shift-workforce-detail__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 14px; }
+.shift-workforce-detail__metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0; }
+.shift-workforce-reason-list { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; color: var(--zx-text); font-size: 0.8125rem; }
+.shift-workforce-error-inline { margin: 0; color: var(--zx-critical); font-size: 0.8125rem; font-weight: 600; }
+.shift-workforce-readonly-notice { margin: 0; padding: 10px 14px; border: 1px solid var(--zx-info-line); border-radius: var(--zx-radius-sm); color: var(--zx-text); background: var(--zx-info-soft); font-size: 0.8125rem; }
+.shift-workforce-filter--checkbox { display: inline-flex; align-items: center; gap: 8px; }
+.shift-plan-tab { cursor: pointer; }
+
+/* IoT / PLC quality workspace */
+.iot-plc-quality-hero__intro { display: grid; gap: 6px; min-width: 0; }
+.iot-plc-quality-hero__thresholds { display: flex; flex-wrap: wrap; gap: 8px 14px; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.iot-plc-quality-profile-rail { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.iot-plc-quality-results { display: grid; min-width: 0; gap: 12px; }
+.iot-plc-dialog-backdrop { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 20px; background: rgb(15 23 42 / 45%); }
+
+/* operational risk profiles and runs */
+.oprisk-profile-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.oprisk-runs-composer,
+.oprisk-runs-history { display: grid; min-width: 0; gap: 12px; padding: 16px 18px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.oprisk-detail-field { display: grid; gap: 3px; }
+@media (max-width: 1100px) { .oprisk-profile-workspace { grid-template-columns: minmax(0, 1fr); } }
+
+/* edge gateway */
+.edge-gateway-summary__item,
+.edge-gateway-reliability-meta__block,
+.edge-reliability-status-item { display: grid; gap: 3px; padding: 10px 14px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); }
+
+/* export */
+.export-case-card__readiness-values { display: flex; flex-wrap: wrap; gap: 4px 12px; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.export-country-research-workspace__link { color: var(--zx-accent-strong); font-weight: 650; text-decoration: none; }
+.export-country-research-workspace__link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.order-export-summary-panel--empty { color: var(--zx-text-muted); }
+.order-transfer-execution-preview__audit-description { margin: 0; color: var(--zx-text); font-size: 0.8125rem; }
+.order-transfer-execution-preview__audit-reference { margin: 0; color: var(--zx-text-muted); font-size: 0.75rem; font-family: var(--fact-text-mono, ui-monospace, monospace); }
+
+/* planning workflow result states */
+.workflow-action-result,
+.workflow-action-request-created,
+.workflow-action-uncertain-state { display: grid; gap: 4px; padding: 10px 14px; border: 1px solid var(--zx-info-line); border-radius: var(--zx-radius-sm); color: var(--zx-text); background: var(--zx-info-soft); font-size: 0.8125rem; line-height: 1.5; }
+.workflow-action-request-created { border-color: var(--zx-low-line); background: var(--zx-low-soft); }
+.workflow-action-uncertain-state { border-color: var(--zx-high-line); background: var(--zx-high-soft); }
+
+/* admin console */
+.saas-admin-field__label { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.saas-admin-field--search { min-width: 220px; flex: 1 1 260px; }
+
+/* digital workforce */
+.dwf-api-error { margin: 0; padding: 12px 16px; border: 1px solid var(--zx-critical-line); border-radius: var(--zx-radius-sm); color: var(--zx-text); background: var(--zx-critical-soft); font-size: 0.875rem; }
+
+/* commercial comparison metrics */
+.commint-comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.commint-metric-card { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); }
+.commint-metric-card__label { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.commint-metric-card__value { color: var(--zx-text-strong); font-size: 1.125rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+
+/* authentication shell */
+.auth-shell__body { display: grid; gap: 16px; }
+
+/* secondary pages that follow a control-center view */
+.commint-page--related { padding-top: 0 !important; }
+.shift-ops-cta { justify-self: start; }

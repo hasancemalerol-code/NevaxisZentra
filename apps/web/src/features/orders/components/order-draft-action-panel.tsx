@@ -115,7 +115,7 @@ export function OrderDraftActionPanel({
     <Card className="order-draft-action-panel">
       <div className="order-draft-action-panel__heading">
         <div>
-          <p>Human-in-the-Loop</p>
+          <p>İnsan Onayı</p>
           <h2>Onay ve sistem uygulaması</h2>
         </div>
 
@@ -193,7 +193,7 @@ export function OrderDraftActionPanel({
       </div>
 
       <p className="order-draft-action-panel__notice">
-        AI sipariş içeriğini kullanıcı onayı olmadan
+        Yapay zekâ sipariş içeriğini kullanıcı onayı olmadan
         kesinleştiremez veya bağlı ERP sistemine
         aktaramaz.
       </p>

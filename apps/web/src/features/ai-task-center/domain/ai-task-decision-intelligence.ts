@@ -144,5 +144,10 @@ export type AiTaskDecisionCapabilities = Readonly<{
 export function getAiTaskProviderLabel(providerName: string): string {
   return providerName === "deterministic-development"
     ? "Kural tabanlı (yapay zekâ modeli değil)"
-    : providerName;
+    : "Model destekli";
+}
+
+/** True when the analysis was produced by the deterministic (rules-based) assistant. */
+export function isAiTaskRulesBasedProvider(providerName: string): boolean {
+  return providerName === "deterministic-development";
 }

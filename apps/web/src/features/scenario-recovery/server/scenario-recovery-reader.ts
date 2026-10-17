@@ -35,6 +35,7 @@ export type ScenarioRecoveryPageResult =
       canSimulate: boolean;
       history: readonly ScenarioRecoveryHistoryItemApi[];
     }>
+  | Readonly<{ status: "empty"; message: string }>
   | Readonly<{ status: "forbidden"; message: string }>
   | Readonly<{ status: "failure"; message: string }>;
 
@@ -78,7 +79,8 @@ export async function readScenarioRecoveryPage(
   }
 
   if (!params.lineId) {
-    return { status: "failure", message: "Senaryo kurtarma bir üretim hattı bağlamı gerektirir: bir hat veya mevcut bir senaryo çalıştırması seçilmeden başlatılamaz." };
+    // No line context is not a failure: nothing was requested and nothing is broken. It is the calm "no scenario yet" state.
+    return { status: "empty", message: "Senaryo kurtarma bir üretim hattı bağlamı gerektirir: bir hat veya mevcut bir senaryo çalışması seçilmeden başlatılamaz." };
   }
 
   // A line without a run: viewing is read-only. Creating a scenario is an explicit action (scenario-recovery-actions.ts),

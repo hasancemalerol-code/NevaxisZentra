@@ -68,7 +68,7 @@ requireText(primitives, "Sağlığı Kontrol Et", "connection secondary action")
 requireText(primitives, "Senkronizasyon Merkezi", "sync action routing");
 
 requireText(css, ".erp-workspace-page", "erp css");
-requireText(css, ".erp-kpi-grid", "erp css");
+requireText(css, ".erp-metrics", "erp css");
 requireText(css, ".erp-connection-card", "connection card styling");
 requireText(baglanti, "ErpWorkspacePage", "baglanti route");
 requireText(nav, "/erp-entegrasyonlari/baglanti", "existing ERP nav reused");

@@ -76,7 +76,7 @@ export function buildOperationalAttentionItems(
     items.push({
       id: "edge-api-down",
       severity: "critical",
-      label: "Edge API bağlantısı kesik",
+      label: "Makine veri servisi bağlantısı kesik",
       detail: "Olay teslimatı etkilenebilir",
     });
   }
@@ -86,7 +86,7 @@ export function buildOperationalAttentionItems(
     items.push({
       id: "edge-pending",
       severity: "warning",
-      label: "Bekleyen Edge olayı",
+      label: "Bekleyen saha olayı",
       detail: `${pending} olay kuyrukta`,
     });
   }
@@ -95,7 +95,7 @@ export function buildOperationalAttentionItems(
     items.push({
       id: "edge-dead-letter",
       severity: "critical",
-      label: "Dead Letter",
+      label: "Teslim edilemeyen olay",
       detail: `${deliveryHealth.deadLetterCount} olay teslim edilemedi`,
     });
   }

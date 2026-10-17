@@ -1,5 +1,7 @@
 import type { HTMLAttributes } from "react";
 
+import { knownStateLabel } from "@/lib/presentation/enum-labels";
+
 export type OperationalStatusVariant =
   | "running"
   | "warning"
@@ -35,7 +37,7 @@ type OperationalBadgeProps = HTMLAttributes<HTMLSpanElement> & Readonly<{
 export function OperationalBadge({ status, label, className = "", ...props }: OperationalBadgeProps) {
   return (
     <span className={`fact-operational-badge fact-operational-badge--${status} ${className}`.trim()} {...props}>
-      {label}
+      {knownStateLabel(label) ?? label}
     </span>
   );
 }

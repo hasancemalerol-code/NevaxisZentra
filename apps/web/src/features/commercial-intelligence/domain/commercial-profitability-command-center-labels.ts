@@ -11,7 +11,7 @@ export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_PARTIAL_NOTE =
   "Bazı özetler sayfalanmış kaynak listelerinden türetildi; tam küresel toplam iddia edilmez.";
 
 export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_AI_TASK_PARTIAL_NOTE =
-  "Bağlı AI görev sayısı için ai-task.read yetkisi gerekir; yetki yoksa kısmi kapsam gösterilir.";
+  "Bağlı yapay zekâ görev sayısı için görev okuma yetkisi gerekir; yetki yoksa kısmi kapsam gösterilir.";
 
 export const COMMERCIAL_PROFITABILITY_COMMAND_CENTER_ROUTE_PATH =
   "/ticari-zeka/karlilik-yonetim-merkezi";

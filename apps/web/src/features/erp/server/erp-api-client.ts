@@ -1,3 +1,4 @@
+import { stripFixtureRecords } from "@/lib/runtime/fixture-data";
 import { classifyFailedResponse, failureForRefusal } from "@/lib/api/api-failure-classifier";
 import "./erp-server-boundary";
 
@@ -130,7 +131,11 @@ async function getJson<T>(
     }
 
     const payload: unknown = await response.json();
-    return { status: "success", value: parser(payload) };
+    const parsed = stripFixtureRecords(parser(payload));
+    if (parsed === null) {
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false };
+    }
+    return { status: "success", value: parsed };
   } catch {
     return {
       status: "failure",

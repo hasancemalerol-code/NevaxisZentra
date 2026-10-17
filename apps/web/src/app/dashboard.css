@@ -56,7 +56,7 @@
 .dashboard-section-heading__eyebrow {
   margin: 0 0 5px;
   color: var(--dashboard-text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   line-height: 1.2;
@@ -111,7 +111,7 @@
   gap: 24px;
   padding: 4px 2px 16px;
   color: var(--dashboard-text-muted);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -151,7 +151,7 @@
 .dashboard-header__eyebrow {
   margin: 0 0 8px;
   color: var(--dashboard-primary);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -277,7 +277,7 @@
 .dashboard-metric-card__description {
   margin: 8px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -287,7 +287,7 @@
   gap: 5px;
   margin-top: 12px;
   color: var(--dashboard-text-soft);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -313,7 +313,7 @@
 .daily-operation-metric__label {
   display: block;
   color: var(--dashboard-text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -330,7 +330,7 @@
   display: block;
   margin-top: 5px;
   color: var(--dashboard-text-soft);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -357,7 +357,7 @@
 
 .daily-operation-shift__detail {
   color: var(--dashboard-text-soft);
-  font-size: 0.73rem;
+  font-size: 0.75rem;
 }
 
 .daily-operation-shift__status {
@@ -369,7 +369,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -432,7 +432,7 @@
 .ai-task-card__description {
   margin: 5px 0 0;
   color: var(--dashboard-text-soft);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -448,7 +448,7 @@
   border-radius: 999px;
   background: #ffffff;
   color: var(--dashboard-text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -460,7 +460,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.67rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -533,7 +533,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.63rem;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -551,7 +551,7 @@
 .critical-risk-card__description {
   margin: 8px 0 0;
   color: var(--dashboard-text-soft);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -562,7 +562,7 @@
   gap: 10px;
   margin-top: 11px;
   color: var(--dashboard-text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 /* Plan confidence */
@@ -603,7 +603,7 @@
 .plan-confidence__score-label {
   margin-top: 4px;
   color: var(--dashboard-text-muted);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -619,7 +619,7 @@
   gap: 5px;
   margin: 7px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
 }
 
 .plan-confidence__review {
@@ -632,7 +632,7 @@
   border-radius: 999px;
   background: var(--dashboard-positive-soft);
   color: var(--dashboard-positive);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -644,7 +644,7 @@
 .plan-confidence__review p {
   margin: 7px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .plan-confidence__progress {
@@ -660,7 +660,7 @@
   gap: 10px;
   margin-bottom: 7px;
   color: var(--dashboard-text-soft);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
 }
 
 .plan-confidence__progress-track,
@@ -697,7 +697,7 @@
 .plan-confidence__subheading p {
   margin: 5px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -744,18 +744,18 @@
 .plan-confidence-factor__label {
   display: block;
   color: var(--dashboard-text-muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .plan-confidence-factor__content strong {
   display: block;
   margin-top: 3px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .plan-confidence-factor__impact {
   color: var(--dashboard-text-muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -773,7 +773,7 @@
   border-top: 1px solid var(--dashboard-border);
   background: var(--dashboard-panel-soft);
   color: var(--dashboard-text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -809,7 +809,7 @@
 .maintenance-status__summary-label {
   display: block;
   color: var(--dashboard-text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .machine-status__summary-item strong,
@@ -887,7 +887,7 @@
 .material-risk-card__title {
   margin: 3px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 550;
   line-height: 1.35;
 }
@@ -903,7 +903,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -935,7 +935,7 @@
 .machine-status-card__job-label {
   display: block;
   color: var(--dashboard-text-muted);
-  font-size: 0.61rem;
+  font-size: 0.75rem;
 }
 
 .machine-status-card__job strong {
@@ -948,7 +948,7 @@
   display: block;
   margin-top: 5px;
   color: var(--dashboard-text-soft);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
 }
 
 .machine-status-card__details,
@@ -973,7 +973,7 @@
   align-items: center;
   gap: 5px;
   color: var(--dashboard-text-muted);
-  font-size: 0.59rem;
+  font-size: 0.75rem;
 }
 
 .machine-status-card__detail dd,
@@ -981,7 +981,7 @@
 .material-risk-card__detail dd {
   margin: 5px 0 0;
   color: var(--dashboard-text);
-  font-size: 0.69rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1012,7 +1012,7 @@
 .production-orders__table th {
   background: var(--dashboard-panel-soft);
   color: var(--dashboard-text-muted);
-  font-size: 0.63rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.025em;
   white-space: nowrap;
@@ -1020,7 +1020,7 @@
 
 .production-orders__table td {
   color: var(--dashboard-text-soft);
-  font-size: 0.69rem;
+  font-size: 0.75rem;
 }
 
 .production-orders__table tbody tr:hover {
@@ -1051,7 +1051,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.61rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -1153,14 +1153,14 @@
 .material-risk-card__recommendation-label {
   display: block;
   color: var(--dashboard-text-muted);
-  font-size: 0.61rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .material-risk-card__recommendation p {
   margin: 5px 0 0;
   color: var(--dashboard-text-soft);
-  font-size: 0.69rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -1174,7 +1174,7 @@
 
 .material-risk-card__source {
   color: var(--dashboard-text-muted);
-  font-size: 0.61rem;
+  font-size: 0.75rem;
 }
 
 .material-risk-card__action {
@@ -1185,7 +1185,7 @@
   background: #ffffff;
   color: var(--dashboard-text-muted);
   font: inherit;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: not-allowed;
   opacity: 0.7;
@@ -1244,11 +1244,11 @@
 
 .mold-status-card__condition-label {
   color: var(--dashboard-text-muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
 }
 
 .mold-status-card__condition strong {
-  font-size: 0.69rem;
+  font-size: 0.75rem;
 }
 
 .mold-status-card__progress {
@@ -1264,7 +1264,7 @@
   border-radius: 9px;
   background: var(--dashboard-warning-soft);
   color: var(--dashboard-warning);
-  font-size: 0.63rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -1311,13 +1311,13 @@
 .maintenance-status-card__asset {
   margin: 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .maintenance-status-card__title {
   margin: 3px 0 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 740;
   line-height: 1.4;
 }
@@ -1331,7 +1331,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1364,13 +1364,13 @@
   align-items: center;
   gap: 4px;
   color: var(--dashboard-text-muted);
-  font-size: 0.57rem;
+  font-size: 0.75rem;
 }
 
 .maintenance-status-card__detail dd {
   margin: 4px 0 0;
   color: var(--dashboard-text-soft);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -1441,7 +1441,7 @@
 
 .quick-action-card__title {
   margin: 0;
-  font-size: 0.73rem;
+  font-size: 0.75rem;
   font-weight: 740;
 }
 
@@ -1452,7 +1452,7 @@
 .quick-action-card__description {
   margin: 5px 0 0;
   color: var(--dashboard-text-soft);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -1463,7 +1463,7 @@
   border-radius: 999px;
   background: var(--dashboard-positive-soft);
   color: var(--dashboard-positive);
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1517,14 +1517,14 @@
 
 .system-health-row__name {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 720;
 }
 
 .system-health-row__description {
   margin: 3px 0 0;
   color: var(--dashboard-text-muted);
-  font-size: 0.59rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -1537,7 +1537,7 @@
   border-radius: 999px;
   background: var(--dashboard-neutral-soft);
   color: var(--dashboard-neutral);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1591,7 +1591,7 @@
 .dashboard-state__eyebrow {
   margin: 0 0 7px;
   color: var(--dashboard-text-muted);
-  font-size: 0.69rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1620,7 +1620,7 @@
   border-radius: 10px;
   background: var(--dashboard-panel-soft);
   color: var(--dashboard-text-muted);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 
 .dashboard-state__retry {
@@ -1635,7 +1635,7 @@
   background: #ffffff;
   color: var(--dashboard-text-muted);
   font: inherit;
-  font-size: 0.69rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: not-allowed;
 }

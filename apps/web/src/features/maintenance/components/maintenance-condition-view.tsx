@@ -20,7 +20,6 @@ import {
   getMaintenancePredictiveConditionStatusTone,
   getMaintenanceTrendStateLabel,
   MAINTENANCE_CONDITION_ANOMALY_EXPLANATION,
-  MAINTENANCE_CONDITION_SIMULATOR_DISCLAIMER,
   MAINTENANCE_CONDITION_STALE_WARNING,
 } from "../presentation/maintenance-condition-labels";
 import type {
@@ -38,13 +37,14 @@ import {
   getMaintenancePredictiveReviewPriorityTone,
   getMaintenancePredictiveRiskBandLabel,
   getMaintenancePredictiveRiskBandTone,
-  MAINTENANCE_PREDICTIVE_RISK_RULE_SET_VERSION,
   MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY,
   MAINTENANCE_PREDICTIVE_RISK_SIMULATOR_COPY,
 } from "../presentation/maintenance-predictive-risk-labels";
 import { MaintenanceDashboardKpi } from "./maintenance-dashboard-kpi";
-import { MaintenanceSectionHeader, MaintenanceTableActionLink } from "./maintenance-table-primitives";
+import { MaintenanceEmptyState, MaintenanceSectionHeader, MaintenanceTableActionLink } from "./maintenance-table-primitives";
 import { MaintenanceWorkspaceNav } from "./maintenance-workspace-nav";
+import "./maintenance-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenanceConditionViewProps = Readonly<{
   workspace: MaintenanceConditionWorkspace;
@@ -127,15 +127,24 @@ export function MaintenanceConditionView({
       ? riskAssessment
       : undefined;
   const selectedRiskRow = riskRowsByAsset.get(selectedReference);
+  const hasConditionData = overview.monitoredAssetCount > 0 || workspace.assets.length > 0;
+  const hasRiskData =
+    riskOverview !== undefined &&
+    ((riskWorkspace?.assets.length ?? 0) > 0 ||
+      riskOverview.insufficientDataCount +
+        riskOverview.lowRiskCount +
+        riskOverview.watchCount +
+        riskOverview.highRiskCount +
+        riskOverview.criticalRiskCount >
+        0);
 
   return (
-    <main className="production-execution-page maintenance-dashboard-page maintenance-condition-page">
+    <div className="production-execution-page maintenance-dashboard-page maintenance-condition-page">
       <header className="maintenance-dashboard-header production-execution-header">
         <div className="maintenance-dashboard-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>Kestirici Bakım</h1>
-          <span>Kestirici bakım altyapısı — gözlemlenen makine davranışından deterministik anomali tespiti.</span>
-          <p className="maintenance-condition-disclaimer">{MAINTENANCE_CONDITION_SIMULATOR_DISCLAIMER}</p>
+          <p>BAKIM VE ARIZA</p>
+          <h1>Durum Zekâsı</h1>
+          <span>Gözlemlenen makine davranışından kural tabanlı anomali tespiti ve bakım durum profilleri.</span>
         </div>
       </header>
 
@@ -146,6 +155,7 @@ export function MaintenanceConditionView({
         canManage={canManageMaintenance}
       />
 
+      {hasConditionData ? (
       <section
         className="production-execution-kpis maintenance-dashboard-kpis maintenance-condition-kpis"
         aria-label="Makine ve varlık durumu"
@@ -157,20 +167,23 @@ export function MaintenanceConditionView({
         <MaintenanceDashboardKpi label="Kritik" value={overview.criticalCount} description="Kritik sapma" tone="critical" icon={<AlertTriangle />} />
         <MaintenanceDashboardKpi label="Yetersiz Veri" value={overview.insufficientDataCount} description="Yetersiz örnek" tone="paused" icon={<Info />} />
       </section>
+      ) : null}
 
       <Card className="maintenance-predictive-risk-card production-execution-panel">
         <MaintenanceSectionHeader
           title="Bakım Riski ve Öneriler"
-          subtitle="Deterministik bakım riski sınıflandırması ve bağlayıcı olmayan inceleme önerileri."
+          subtitle="Kural tabanlı bakım riski sınıflandırması ve bağlayıcı olmayan inceleme önerileri."
         />
-        <p className="maintenance-predictive-risk-safety-copy">{MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY}</p>
-        <p className="maintenance-predictive-risk-simulator-copy">{MAINTENANCE_PREDICTIVE_RISK_SIMULATOR_COPY}</p>
+        <div className="maintenance-predictive-risk-copy">
+          <p className="maintenance-predictive-risk-safety-copy">{MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY}</p>
+          <p className="maintenance-predictive-risk-simulator-copy">{MAINTENANCE_PREDICTIVE_RISK_SIMULATOR_COPY}</p>
+        </div>
         {riskError ? (
           <div role="alert" className="maintenance-predictive-risk-error">
-            <p>{riskError}</p>
+            <p>{customerMessage(riskError)}</p>
           </div>
         ) : null}
-        {riskOverview ? (
+        {riskOverview && hasRiskData ? (
           <section className="maintenance-predictive-risk-kpis" aria-label="Bakım riski özeti">
             <MaintenanceDashboardKpi label="Yetersiz Veri" value={riskOverview.insufficientDataCount} description="Güvenli sınıflandırma yok" tone="paused" icon={<Info />} />
             <MaintenanceDashboardKpi label="Düşük Risk" value={riskOverview.lowRiskCount} description="Rutin izleme uygun" tone="ready" icon={<ShieldAlert />} />
@@ -178,12 +191,12 @@ export function MaintenanceConditionView({
             <MaintenanceDashboardKpi label="Yüksek Risk" value={riskOverview.highRiskCount} description="Teknik inceleme" tone="in-progress" icon={<AlertTriangle />} />
             <MaintenanceDashboardKpi label="Kritik Risk" value={riskOverview.criticalRiskCount} description="Acil yetkili inceleme" tone="critical" icon={<AlertTriangle />} />
           </section>
-        ) : !riskError ? (
+        ) : !riskError && hasConditionData ? (
           <p className="maintenance-empty-inline">Bakım riski değerlendirmesi henüz oluşturulmadı.</p>
         ) : null}
         {riskWorkspace && riskWorkspace.assets.length > 0 ? (
-          <div className="maintenance-table-scroll">
-            <table className="maintenance-table maintenance-predictive-risk-table">
+          <div className="maintenance-table-scroll maintenance-table-wrap" tabIndex={0} role="region" aria-label="Kritik Risk (kaydırılabilir)">
+            <table aria-label="Kritik Risk" className="maintenance-table maintenance-predictive-risk-table">
               <thead>
                 <tr>
                   <th>Varlık</th>
@@ -246,7 +259,6 @@ export function MaintenanceConditionView({
                 <span>
                   Değerlendirme: {formatDateTime(selectedRisk?.assessedAtUtc ?? selectedRiskRow?.assessedAtUtc)}
                 </span>
-                <span>Kural seti: {selectedRisk?.ruleSetVersion ?? MAINTENANCE_PREDICTIVE_RISK_RULE_SET_VERSION}</span>
               </div>
               {selectedRisk ? <p className="maintenance-predictive-risk-explanation">{selectedRisk.explanation}</p> : null}
               {selectedRisk ? (
@@ -256,7 +268,7 @@ export function MaintenanceConditionView({
 
             {selectedRisk?.recommendation ? (
               <Card className="maintenance-predictive-risk-detail-card">
-                <MaintenanceSectionHeader title="Bakım Önerisi" subtitle="Bağlayıcı olmayan deterministik öneri" />
+                <MaintenanceSectionHeader title="Bakım Önerisi" subtitle="Bağlayıcı olmayan kural tabanlı öneri" />
                 <div className="maintenance-predictive-risk-detail-summary">
                   <strong>{getMaintenancePredictiveRecommendationCategoryLabel(selectedRisk.recommendation.category)}</strong>
                   <Badge
@@ -308,36 +320,47 @@ export function MaintenanceConditionView({
 
       <Card className="maintenance-condition-table-card">
         <MaintenanceSectionHeader
-          title="Durum Zekâsı"
-          subtitle="Edge gözlemlerinden türetilen bakım durum profilleri."
+          title="Varlık Durum Profilleri"
+          subtitle="Saha gözlemlerinden türetilen bakım durum profilleri."
         />
-        <div className="maintenance-table-scroll">
-          <table className="maintenance-table">
+        {workspace.assets.length === 0 ? (
+          <MaintenanceEmptyState
+            icon={<Gauge aria-hidden="true" size={18} />}
+            title="Henüz izlenen varlık yok"
+            description={
+              canManageMaintenance
+                ? "Durum profilleri, eşleştirilmiş makine ve varlıklar değerlendirildiğinde listelenir. Başlatmak için üstteki Değerlendirmeyi güncelle düğmesini kullanın."
+                : "Durum profilleri, eşleştirilmiş makine ve varlıklar değerlendirildiğinde burada listelenir."
+            }
+          />
+        ) : (
+        <div className="maintenance-table-scroll maintenance-table-wrap" tabIndex={0} role="region" aria-label="Saha gözlemlerinden türetilen bakım durum profilleri. (kaydırılabilir)">
+          <table aria-label="Saha gözlemlerinden türetilen bakım durum profilleri." className="maintenance-table">
             <thead>
               <tr>
                 <th>Varlık</th>
-                <th>Makine</th>
+                <th className="maintenance-col--low">Makine</th>
                 <th>Durum</th>
                 <th>Aktif Anomali</th>
-                <th>En Yüksek Seviye</th>
+                <th className="maintenance-col--low">En Yüksek Seviye</th>
                 <th>Veri Güncelliği</th>
-                <th>Veri Yeterliliği</th>
+                <th className="maintenance-col--low">Veri Yeterliliği</th>
                 <th>Son Değerlendirme</th>
-                <th />
+                <th><span className="visually-hidden">Ayrıntı</span></th>
               </tr>
             </thead>
             <tbody>
               {workspace.assets.map((row) => (
                 <tr key={row.assetReference}>
                   <td>{formatMaintenanceConditionAssetLabel(row.assetReference, row.assetName)}</td>
-                  <td>{row.machineCode ?? row.machineName ?? "—"}</td>
+                  <td className="maintenance-col--low">{row.machineCode ?? row.machineName ?? "—"}</td>
                   <td>
                     <ConditionStatusBadge status={row.conditionStatus} />
                   </td>
                   <td>{row.activeAnomalyCount}</td>
-                  <td>{row.highestAnomalySeverity ? getMaintenanceAnomalySeverityLabel(row.highestAnomalySeverity) : "—"}</td>
+                  <td className="maintenance-col--low">{row.highestAnomalySeverity ? getMaintenanceAnomalySeverityLabel(row.highestAnomalySeverity) : "—"}</td>
                   <td>{getMaintenanceDataFreshnessLabel(row.dataFreshness)}</td>
-                  <td>{getMaintenanceDataSufficiencyLabel(row.dataSufficiency)}</td>
+                  <td className="maintenance-col--low">{getMaintenanceDataSufficiencyLabel(row.dataSufficiency)}</td>
                   <td>{formatDateTime(row.lastEvaluatedAtUtc)}</td>
                   <td>
                     <button
@@ -361,6 +384,7 @@ export function MaintenanceConditionView({
             </tbody>
           </table>
         </div>
+        )}
       </Card>
 
       {selectedRow ? (
@@ -437,7 +461,7 @@ export function MaintenanceConditionView({
                       </div>
                       <div>
                         <dt>Sapma</dt>
-                        <dd>%{anomaly.deviationPercent.toFixed(1)}</dd>
+                        <dd>%{anomaly.deviationPercent.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</dd>
                       </div>
                       <div>
                         <dt>Algılama</dt>
@@ -451,7 +475,7 @@ export function MaintenanceConditionView({
           </Card>
 
           <Card className="maintenance-condition-detail-card">
-            <MaintenanceSectionHeader title="Edge & Bakım Bağlamı" />
+            <MaintenanceSectionHeader title="Saha ve bakım bağlamı" />
             <ul className="maintenance-condition-context-list">
               <li>Son 24 saat alarm: {profile?.context.alarmContext.recentAlarmCount24h ?? 0}</li>
               <li>Son 24 saat duruş: {profile?.context.downtimeContext.episodeCount24h ?? 0}</li>
@@ -483,6 +507,6 @@ export function MaintenanceConditionView({
           .
         </p>
       ) : null}
-    </main>
+    </div>
   );
 }

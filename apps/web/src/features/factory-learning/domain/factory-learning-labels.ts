@@ -18,7 +18,7 @@ export function getFactoryLossCategoryLabel(category: string): string {
     case "quality-hold":
       return "Kalite Bekletme";
     case "changeover":
-      return "Kalıp/Setup Değişimi";
+      return "Kalıp/Kurulum Değişimi";
     case "material-shortage":
       return "Malzeme Eksikliği";
     case "supplier-delay":
@@ -179,7 +179,7 @@ export function formatLossMinutes(minutes: number): string {
   if (minutes >= 60) {
     const hours = Math.floor(minutes / 60);
     const remainder = Math.round(minutes % 60);
-    return remainder > 0 ? `${hours}s ${remainder}dk` : `${hours}s`;
+    return remainder > 0 ? `${hours} sa ${remainder} dk` : `${hours} sa`;
   }
-  return `${Math.round(minutes)}dk`;
+  return `${Math.round(minutes)} dk`;
 }

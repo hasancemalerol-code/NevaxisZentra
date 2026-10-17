@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw } from "lucide-react";
+import { LoaderCircle, RefreshCw } from "lucide-react";
 
 import { evaluateMaintenanceConditionAction } from "../server/maintenance-evaluation-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 /** An assessment older than this is shown as possibly outdated (the evaluation's own freshness threshold). */
 export const MAINTENANCE_EVALUATION_STALE_AFTER_MINUTES = 30;
@@ -38,6 +39,9 @@ export function MaintenanceEvaluateControl({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const outdated = isMaintenanceEvaluationOutdated(lastEvaluatedAtUtc);
+  // A page that was never evaluated is a neutral starting state, not a warning; only an aged evaluation is flagged.
+  const neverEvaluated = !lastEvaluatedAtUtc;
+  const showStaleWarning = outdated && !neverEvaluated;
 
   const update = () =>
     startTransition(async () => {
@@ -52,24 +56,40 @@ export function MaintenanceEvaluateControl({
     });
 
   return (
-    <div className="maintenance-evaluate-control" data-testid="maintenance-evaluate-control">
-      <p className="maintenance-ai-muted">
-        Son değerlendirme: {formatEvaluatedAt(lastEvaluatedAtUtc)}. Bu sayfayı açmak değerlendirmeyi çalıştırmaz.
-      </p>
-      {outdated ? (
-        <p className="maintenance-ai-stale-warning" role="status">
-          Değerlendirme güncel olmayabilir. Makine verisi değiştiyse değerlendirmeyi güncelleyin.
+    <div
+      className={`zx-notice zx-notice--${showStaleWarning ? "warning" : "neutral"} zx-notice--with-actions maintenance-evaluate-control`}
+      data-testid="maintenance-evaluate-control"
+    >
+      <RefreshCw aria-hidden="true" />
+      <div className="zx-notice__body">
+        <span className="zx-notice__title">Kural tabanlı değerlendirme</span>
+        <p className="maintenance-ai-muted">
+          Son değerlendirme: {formatEvaluatedAt(lastEvaluatedAtUtc)}. Bu sayfayı açmak değerlendirmeyi çalıştırmaz.
         </p>
-      ) : null}
+        {showStaleWarning ? (
+          <p className="maintenance-ai-stale-warning" role="status">
+            Değerlendirme güncel olmayabilir. Makine verisi değiştiyse değerlendirmeyi güncelleyin.
+          </p>
+        ) : null}
+        {error ? (
+          <p role="alert" className="maintenance-ai-message error">
+            {customerMessage(error)}
+          </p>
+        ) : null}
+      </div>
       {canManage ? (
-        <button type="button" onClick={update} disabled={isPending} data-testid="maintenance-evaluate-button">
-          <RefreshCw aria-hidden="true" /> Değerlendirmeyi güncelle
-        </button>
-      ) : null}
-      {error ? (
-        <p role="alert" className="maintenance-ai-message error">
-          {error}
-        </p>
+        <div className="zx-notice__actions">
+          <button
+            type="button"
+            className="zx-button zx-button--primary"
+            onClick={update}
+            disabled={isPending}
+            data-testid="maintenance-evaluate-button"
+          >
+            {isPending ? <LoaderCircle aria-hidden="true" className="zx-spin" /> : <RefreshCw aria-hidden="true" />}
+            Değerlendirmeyi güncelle
+          </button>
+        </div>
       ) : null}
     </div>
   );

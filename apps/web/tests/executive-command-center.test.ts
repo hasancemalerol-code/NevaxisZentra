@@ -202,7 +202,7 @@ test("verified value counts only passed verification state", () => {
 test("executive narrative includes throughput optimizer context", () => {
   const narrative = buildExecutiveNarrative(createWorkspace(), undefined, createThroughputSummary());
   assert.match(narrative, /MIX-01/);
-  assert.match(narrative, /VERIFIED iyileşme/i);
+  assert.match(narrative, /doğrulanmış iyileşme/i);
 });
 
 test("verified value includes only passed decision and throughput improvements", () => {

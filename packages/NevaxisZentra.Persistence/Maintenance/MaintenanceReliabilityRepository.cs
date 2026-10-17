@@ -605,8 +605,7 @@ public sealed class MaintenanceReliabilityRepository(
     }
 
     private static bool IsOverdueOpenDue(PreventiveMaintenanceDue due, DateTimeOffset now) =>
-        due.DueAtUtc < now &&
-        due.Status is PreventiveMaintenanceDueStatus.Due or PreventiveMaintenanceDueStatus.WorkOrderCreated;
+        MaintenanceOverdueRule.IsOverdueOpenDue(due, now);
 
     private static MaintenanceBacklogAgingReadModel CalculateBacklogAging(
         IReadOnlyList<MaintenanceRequest> openRequests,
@@ -620,24 +619,8 @@ public sealed class MaintenanceReliabilityRepository(
             Bucketize(openWorkOrders.Where(w => w.Status == MaintenanceWorkOrderStatus.Waiting).Select(w => w.UpdatedAtUtc), now));
     }
 
-    private static MaintenanceAgingBucketsReadModel Bucketize(IEnumerable<DateTimeOffset> timestamps, DateTimeOffset now)
-    {
-        var buckets = new MaintenanceAgingBucketsReadModel(0, 0, 0, 0, 0);
-        foreach (var timestamp in timestamps)
-        {
-            var ageDays = (now - timestamp).TotalDays;
-            buckets = ageDays switch
-            {
-                <= 1 => buckets with { Day0To1 = buckets.Day0To1 + 1 },
-                <= 3 => buckets with { Day2To3 = buckets.Day2To3 + 1 },
-                <= 7 => buckets with { Day4To7 = buckets.Day4To7 + 1 },
-                <= 14 => buckets with { Day8To14 = buckets.Day8To14 + 1 },
-                _ => buckets with { Day15Plus = buckets.Day15Plus + 1 },
-            };
-        }
-
-        return buckets;
-    }
+    private static MaintenanceAgingBucketsReadModel Bucketize(IEnumerable<DateTimeOffset> timestamps, DateTimeOffset now) =>
+        MaintenanceAgingRule.Bucketize(timestamps, now);
 
     private static List<MaintenanceRepeatFailureReadModel> CalculateRepeatFailures(
         IReadOnlyList<FaultEventRow> events,

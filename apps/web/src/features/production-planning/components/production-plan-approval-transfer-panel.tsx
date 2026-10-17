@@ -110,7 +110,7 @@ export function ProductionPlanApprovalTransferPanel({
           <p>Onay ve aktarım hazırlığı</p>
 
           <h2>
-            Human-in-the-Loop karar kapıları
+            İnsan Onayı Kapıları
           </h2>
 
           <span>

@@ -14,6 +14,8 @@ import {
   updateTeamsHandoverDraftAction,
 } from "@/features/teams/server/teams-actions";
 import type { TeamsHandoverItemWriteBody } from "@/features/teams/server/teams-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { Notice } from "@/components/ui/notice";
 
 type ChannelOption = Readonly<{
   id: string;
@@ -139,7 +141,7 @@ export function TeamsHandoverForm({
       onSubmit={submit}
     >
       <label>
-        Kanal
+        Kanal <span className="zx-required" aria-hidden="true">*</span>
         <select
           data-testid="teams-handover-channel-input"
           disabled={pending || Boolean(lockedChannelId)}
@@ -156,7 +158,7 @@ export function TeamsHandoverForm({
       </label>
 
       <label>
-        Vardiya tarihi
+        Vardiya tarihi <span className="zx-required" aria-hidden="true">*</span>
         <input
           data-testid="teams-handover-shift-date-input"
           disabled={pending}
@@ -168,7 +170,7 @@ export function TeamsHandoverForm({
       </label>
 
       <label>
-        Vardiya türü
+        Vardiya türü <span className="zx-required" aria-hidden="true">*</span>
         <select
           data-testid="teams-handover-shift-type-input"
           disabled={pending}
@@ -185,7 +187,7 @@ export function TeamsHandoverForm({
       </label>
 
       <label>
-        Özet
+        Özet <span className="zx-required" aria-hidden="true">*</span>
         <textarea
           data-testid="teams-handover-summary-input"
           disabled={pending}
@@ -320,9 +322,7 @@ export function TeamsHandoverForm({
       <p className="teams-task-draft-form__disclaimer">{TEAMS_HANDOVER_DISCLAIMER}</p>
 
       {error ? (
-        <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-handover-form-error">
-          {error}
-        </p>
+        <Notice tone="danger" alert data-testid="teams-handover-form-error">{customerMessage(error)}</Notice>
       ) : null}
 
       <div>
@@ -332,6 +332,9 @@ export function TeamsHandoverForm({
           type="submit"
         >
           {mode === "edit" ? "Taslağı kaydet" : "Vardiya devri oluştur"}
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => router.push("/teams/devretme")}>
+          Vazgeç
         </Button>
       </div>
     </form>

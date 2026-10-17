@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/presentation/format";
 export type ProductionDowntimeCategory = "planned" | "unplanned";
 
 export type ProductionDowntimeReasonCode =
@@ -155,12 +156,7 @@ export function formatElapsedSince(isoUtc: string): string {
 
 export function formatUtcShort(isoUtc: string): string {
   try {
-    return new Date(isoUtc).toLocaleString("tr-TR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      day: "2-digit",
-      month: "2-digit",
-    });
+    return formatDateTime(isoUtc);
   } catch {
     return isoUtc;
   }

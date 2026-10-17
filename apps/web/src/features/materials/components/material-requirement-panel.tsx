@@ -36,6 +36,7 @@ import {
   evaluateMaterialRequirementAssessmentsAction,
   updateMaterialRequirementProfileAction,
 } from "../server/material-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaterialRequirementPanelProps = Readonly<{
   materialId: string;
@@ -239,8 +240,8 @@ export function MaterialRequirementPanel({
     }
 
     return (
-      <div className="material-registry-table-wrap">
-        <table className="material-registry-table">
+      <div className="material-registry-table-wrap" tabIndex={0} role="region" aria-label="Malzeme tüketim gözlemleri (kaydırılabilir)">
+        <table aria-label="Malzeme tüketim gözlemleri" className="material-registry-table">
           <thead>
             <tr>
               <th>Tür</th>
@@ -338,12 +339,12 @@ export function MaterialRequirementPanel({
     <div className="material-requirement-panel" role="tabpanel">
       {error ? (
         <div className="material-registry-error" role="alert">
-          {error}
+          {customerMessage(error)}
         </div>
       ) : null}
       {message ? (
         <div className="material-registry-empty" role="status">
-          {message}
+          {customerMessage(message)}
         </div>
       ) : null}
       {isPending ? (
@@ -489,11 +490,11 @@ export function MaterialRequirementPanel({
                   <input name="moldReference" />
                 </label>
                 <label className="material-required">
-                  Hedef Sağlam Parça
+                  Hedef Sağlam Parça <span className="zx-required" aria-hidden="true">*</span>
                   <input name="goodPartTargetQuantity" type="number" step="1" min="0" required />
                 </label>
                 <label className="material-required">
-                  Parça Ağırlığı (g)
+                  Parça Ağırlığı (g) <span className="zx-required" aria-hidden="true">*</span>
                   <input name="partWeightGrams" type="number" step="0.0001" min="0" required />
                 </label>
                 <label>
@@ -650,7 +651,7 @@ export function MaterialRequirementPanel({
                   </select>
                 </label>
                 <label className="material-required">
-                  Miktar
+                  Miktar <span className="zx-required" aria-hidden="true">*</span>
                   <input name="quantity" type="number" step="0.001" min="0" required />
                 </label>
                 <label>
@@ -715,8 +716,8 @@ export function MaterialRequirementPanel({
                     <p>Kayıtlı ihtiyaç profili bulunamadı.</p>
                   </div>
                 ) : (
-                  <div className="material-registry-table-wrap">
-                    <table className="material-registry-table">
+                  <div className="material-registry-table-wrap" tabIndex={0} role="region" aria-label="İhtiyaç Profilleri (kaydırılabilir)">
+                    <table aria-label="İhtiyaç Profilleri" className="material-registry-table">
                       <thead>
                         <tr>
                           <th>Tür</th>
@@ -775,7 +776,6 @@ export function MaterialRequirementPanel({
                       {getMaterialRequirementAssessmentStatusLabel(requirementAssessment.status)}
                     </span>
                     <small>{formatMaterialDateTime(requirementAssessment.evaluatedAtUtc)}</small>
-                    <small>Kural seti: {requirementAssessment.ruleSetVersion}</small>
                   </div>
                 ) : null}
                 {hasInsufficientRequirementData ? (

@@ -74,18 +74,18 @@
 }
 
 .commint-kpi-grid {
-  gap: 1px !important;
-  background: var(--fact-border) !important;
-  border: 1px solid var(--fact-border) !important;
-  border-radius: var(--fact-radius-md) !important;
-  overflow: hidden;
+  gap: 12px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: visible;
 }
 
 .commint-kpi-card {
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  border: 0 !important;
-  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 2px rgb(20 37 58 / 4%), 0 6px 18px rgb(20 37 58 / 4%) !important;
+  border: 1px solid var(--fact-border) !important;
+  padding: 14px 16px !important;
 }
 
 .commint-kpi-card::before {
@@ -93,7 +93,7 @@
 }
 
 .commint-kpi-card__value {
-  font-size: 1rem !important;
+  font-size: 1.375rem !important;
   font-variant-numeric: tabular-nums;
 }
 
@@ -196,14 +196,14 @@
 /* Reduce decorative badge chains in dashboard panels */
 .dashboard-panel .badge:not([data-semantic="true"]) {
   padding: 1px 6px !important;
-  font-size: 0.68rem !important;
+  font-size: 0.75rem !important;
   border-radius: var(--fact-radius-xs) !important;
 }
 
 /* 1366 sidebar usability */
 @media (max-width: 1400px) {
   .navigation-label {
-    font-size: 10.5px;
+    font-size: 0.75rem;
   }
 
   .navigation-link {

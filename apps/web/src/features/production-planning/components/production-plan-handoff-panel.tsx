@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 import type { prepareHandoffAction } from "../server/production-plan-handoff-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ProductionPlanHandoffPanelProps = Readonly<{
   planId: string;
@@ -141,7 +142,7 @@ export function ProductionPlanHandoffPanel({
           <h2>Üretime aktarım hazırlığı</h2>
           <span>
             Zamanlanmış planın üretim modülü tarafından alınabilmesi için
-            idempotent aktarım kaydı oluşturur. Gerçek üretim emri bu
+            tekrarlanamaz (çift kayıt oluşturmayan) bir aktarım kaydı oluşturur. Gerçek üretim emri bu
             modül tarafından oluşturulur.
           </span>
         </div>
@@ -163,7 +164,7 @@ export function ProductionPlanHandoffPanel({
 
       {state.kind === "error" ? (
         <div className="workflow-action-error" role="alert">
-          <strong>İşlem başarısız:</strong> {state.message}
+          <strong>İşlem başarısız:</strong> {customerMessage(state.message)}
           <button
             type="button"
             className="button button-ghost button-small"

@@ -54,6 +54,8 @@ import {
   rejectAiTaskRecommendationAction,
   reviewAiTaskClosureAction,
 } from "../server/ai-task-decision-intelligence-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type AiTaskDecisionIntelligencePanelClientProps = Readonly<{
   taskId: string;
@@ -192,21 +194,25 @@ export function AiTaskDecisionIntelligencePanelClient({
       <Card className="ai-task-decision-panel ai-task-decision-panel--unavailable" data-testid="ai-task-decision-panel">
         <div className="ai-task-decision-panel__header">
           <Sparkles aria-hidden="true" />
-          <h3>AI Değerlendirmesi</h3>
+          <h3>Canlı Yapay Zekâ Değerlendirmesi</h3>
+          <Badge tone="neutral">Kullanılamıyor</Badge>
         </div>
-        <p>{initialWorkspace.providerStatusMessage ?? "AI değerlendirmesi şu anda kullanılamıyor."}</p>
+        <p>
+          Güncel yapay zekâ değerlendirmesi şu anda alınamıyor. Yukarıdaki kayıtlı görev önerisi
+          görev oluşturulurken saklanmıştır; canlı bir değerlendirme sonucu değildir.
+        </p>
       </Card>
     );
   }
 
   return (
     <div className="ai-task-decision-panel" data-testid="ai-task-decision-panel">
-      {error ? <p className="ai-task-decision-panel__error" role="alert">{error}</p> : null}
+      {error ? <p className="ai-task-decision-panel__error" role="alert">{customerMessage(error)}</p> : null}
 
       <Card className="ai-task-decision-panel__card" data-testid="ai-task-decision-triage">
         <div className="ai-task-decision-panel__header">
           <Sparkles aria-hidden="true" />
-          <h3>AI Değerlendirmesi</h3>
+          <h3>Yapay Zekâ Değerlendirmesi</h3>
           {capabilities.canAnalyze ? (
             <Button
               disabled={isPending}
@@ -270,14 +276,14 @@ export function AiTaskDecisionIntelligencePanelClient({
             ) : null}
           </>
         ) : (
-          <p className="ai-task-decision-panel__muted">Henüz AI analizi çalıştırılmadı.</p>
+          <p className="ai-task-decision-panel__muted">Henüz yapay zekâ analizi çalıştırılmadı.</p>
         )}
       </Card>
 
       {policyView ? (
         <Card className="ai-task-decision-panel__card ai-task-decision-panel__card--policy" data-testid="ai-task-decision-policy-vs-ai">
           <p className="ai-task-decision-panel__policy-banner">
-            Politika sonucu bağlayıcıdır; AI değerlendirmesi tavsiye niteliğindedir.
+            Politika sonucu bağlayıcıdır; yapay zekâ değerlendirmesi tavsiye niteliğindedir.
           </p>
           <div className="ai-task-decision-panel__split">
             <div className="ai-task-decision-panel__compare-column">
@@ -297,7 +303,7 @@ export function AiTaskDecisionIntelligencePanelClient({
             <div className="ai-task-decision-panel__compare-column">
               <div className="ai-task-decision-panel__subheader">
                 <Bot aria-hidden="true" />
-                <h4>AI Değerlendirmesi</h4>
+                <h4>Yapay Zekâ Değerlendirmesi</h4>
               </div>
               <dl className="ai-task-decision-panel__compare-rows">
                 {policyView.aiRows.map((row) => (
@@ -422,7 +428,7 @@ export function AiTaskDecisionIntelligencePanelClient({
             {triage.evidenceRecommendations.map((item) => (
               <div key={item.title} className="ai-task-decision-panel__evidence-item">
                 <Badge tone={item.policyMandatory ? "warning" : "ai"}>
-                  {item.policyMandatory ? "POLİTİKA GEREĞİ ZORUNLU" : "AI ÖNERİSİ"}
+                  {item.policyMandatory ? "POLİTİKA GEREĞİ ZORUNLU" : "YAPAY ZEKÂ ÖNERİSİ"}
                 </Badge>
                 <strong>{item.title}</strong>
                 <p>{item.rationale}</p>
@@ -504,8 +510,8 @@ function RelatedCandidateRow({
           </Link>
         </div>
         <div className="ai-task-decision-panel__chips">
-          {display.status ? <Badge tone="neutral">Durum: {display.status}</Badge> : null}
-          {display.priority ? <Badge tone="information">Öncelik: {display.priority}</Badge> : null}
+          {display.status ? <Badge tone="neutral">Durum: {enumLabel(display.status)}</Badge> : null}
+          {display.priority ? <Badge tone="information">Öncelik: {enumLabel(display.priority)}</Badge> : null}
           <Badge tone="neutral">{getAiTaskDecisionRelationshipLabel(candidate.relationshipType)}</Badge>
           <Badge tone={confidenceTone(candidate.confidenceBand)}>
             Güven: {getAiTaskDecisionConfidenceLabel(candidate.confidenceBand)}

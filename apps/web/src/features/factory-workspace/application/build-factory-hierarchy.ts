@@ -3,6 +3,7 @@ import type { MixedProductionLineSummaryApi } from "@/features/mixed-production/
 import type { ProductionResourceRowApi } from "@/features/production-resources/server/production-resources-api-client";
 
 import type { FactoryHierarchyNode } from "../domain/factory-workspace-types";
+import { displayLabel } from "@/lib/presentation/display-label";
 
 function resourceStateTone(resource: ProductionResourceRowApi): OperationalStatusVariant {
   if (resource.isBlocked) return "blocked";
@@ -132,10 +133,30 @@ export function buildFactoryHierarchy(
   return {
     id: "factory:root",
     kind: "factory",
-    label: facilityLabel,
-    code: facilityLabel,
+    label: displayLabel(facilityLabel, "Fabrika"),
+    code: displayLabel(facilityLabel, "Fabrika"),
     children: areaNodes,
   };
+}
+
+/**
+ * Canonical line state per lineId, taken from the same line summary that feeds the hierarchy tree.
+ * Every list that shows a line state (tree, "Hatlar" panel) must read it from here so they never disagree.
+ */
+export function collectLineStates(root: FactoryHierarchyNode): ReadonlyMap<string, string> {
+  const states = new Map<string, string>();
+
+  function walk(node: FactoryHierarchyNode) {
+    if (node.kind === "line" && node.lineId && node.state && !states.has(node.lineId)) {
+      states.set(node.lineId, node.state);
+    }
+    for (const child of node.children ?? []) {
+      walk(child);
+    }
+  }
+
+  walk(root);
+  return states;
 }
 
 export function findHierarchyNode(

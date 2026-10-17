@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+
 
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { CommercialProfitabilityCommandCenterView } from "@/features/commercial-intelligence/components/commercial-profitability-command-center-view";
@@ -8,6 +8,8 @@ import {
 } from "@/features/commercial-intelligence/application/commercial-profitability-command-center-filter";
 import { COMMERCIAL_PROFITABILITY_COMMAND_CENTER_SUBTITLE } from "@/features/commercial-intelligence/domain/commercial-profitability-command-center-labels";
 import { readCommercialProfitabilityCommandCenterWorkspace } from "@/features/commercial-intelligence/server/commercial-profitability-command-center-queries";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageSearchParams = Readonly<Record<string, string | string[] | undefined>>;
 
@@ -37,7 +39,7 @@ export default async function CommercialProfitabilityCommandCenterPage({
       result.code === "permission-denied" || result.code === "unauthenticated";
 
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">TİCARİ ZEKÂ</p>
@@ -47,18 +49,8 @@ export default async function CommercialProfitabilityCommandCenterPage({
             </p>
           </div>
         </header>
-        <div
-          role="alert"
-          className={isUnauthorized ? "commint-error-banner" : "commint-partial-error"}
-          data-testid={isUnauthorized ? "commercial-profitability-command-center-forbidden" : "commercial-profitability-command-center-server-error"}
-        >
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{isUnauthorized ? "Bu modüle erişim yetkiniz yok" : "Yönetim merkezi verisi yüklenemedi"}</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <div data-testid={isUnauthorized ? "commercial-profitability-command-center-forbidden" : "commercial-profitability-command-center-server-error"}><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Yönetim merkezi verisi yüklenemedi" inline /></div>
+      </div>
     );
   }
 

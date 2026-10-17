@@ -552,6 +552,10 @@ public sealed class BulkDataOnboardingService(
                     await dbContext.SaveChangesAsync(cancellationToken);
                 }
             }
+
+            // Dependent types (lines -> stations -> resources) look their parents up in the database,
+            // so each entity type must be persisted before the next one is committed.
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
 
         job.ImportedRows = imported;
@@ -559,7 +563,12 @@ public sealed class BulkDataOnboardingService(
         job.FailedRows = failed;
         job.Status = BulkDataImportJobStatuses.Reconciling;
         job.ReconciliationJson = JsonSerializer.Serialize(BulkReconciliationEngine.Build(job));
-        job.Status = BulkDataImportJobStatuses.Completed;
+        // A commit that could not persist every valid row is reported as such: never "completed" while rows failed.
+        job.Status = failed == 0
+            ? BulkDataImportJobStatuses.Completed
+            : imported + updated > 0
+                ? BulkDataImportJobStatuses.Partial
+                : BulkDataImportJobStatuses.Failed;
         job.CompletedAtUtc = DateTimeOffset.UtcNow;
         job.UpdatedAtUtc = DateTimeOffset.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -924,6 +933,8 @@ public sealed class BulkDataOnboardingService(
             job.ValidRows,
             job.QuarantinedRows,
             job.ImportedRows,
+            job.UpdatedRows,
+            job.FailedRows,
             job.SafetyMode,
             job.CreatedAtUtc,
             job.UpdatedAtUtc);

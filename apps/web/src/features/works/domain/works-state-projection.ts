@@ -1,3 +1,5 @@
+import { FACTORY_BLOCKER_LABELS } from "@/features/factory-orchestration/domain/factory-orchestration-labels";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 import type { WorksListItem } from "./works-types";
 
 export type WorksDisplayTone =
@@ -64,9 +66,14 @@ export function formatWorksApprovalStatus(hasPendingApproval: boolean): string {
   return hasPendingApproval ? "Onay bekliyor" : "—";
 }
 
+/** Machine blocker codes ("waiting-human") read as Turkish words; already-readable labels pass through. */
+export function blockerText(value: string): string {
+  return FACTORY_BLOCKER_LABELS[value] ?? (/^[a-z0-9]+([-_][a-z0-9]+)+$/.test(value) ? enumLabel(value) : value);
+}
+
 export function formatWorksBlockerStatus(item: WorksListItem): string {
   if (item.isBlocked) {
-    return item.blockerLabel ?? "Engelli";
+    return item.blockerLabel ? blockerText(item.blockerLabel) : "Engelli";
   }
   return "—";
 }

@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import {
@@ -9,7 +10,6 @@ import {
 } from "../components/commercial-profitability-presentation";
 import type { CommercialCustomerProfitabilityApiFilters } from "../application/commercial-customer-profitability-filter";
 import type { CommercialCustomerProfitabilityWorkspacePayload } from "../types/commercial-customer-profitability-types";
-import { getCommercialIntelligenceEvidenceStatusLabel } from "../domain/commercial-intelligence-labels";
 import { localizeCommercialProfitabilityProvenance } from "../domain/commercial-profitability-labels";
 import {
   getCommercialProfitabilityWorkspace,
@@ -90,12 +90,12 @@ export async function readCommercialCustomerProfitabilityWorkspace(
     status: "success",
     canManage,
     workspace: {
-      facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
-      evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+      facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
+      evidenceLabel: getCommercialWorkspaceEvidenceLabel(hasPilot),
       hasDevelopmentPilotData: hasPilot,
       ruleSetVersion: workspaceResult.value.ruleSetVersion,
       comparisonRuleSetVersion: comparisonsResult.value.ruleSetVersion,
-      provenanceDisclaimer: localizeCommercialProfitabilityProvenance(workspaceResult.value.provenanceDisclaimer),
+      provenanceDisclaimer: resolveCommercialProvenance(workspaceResult.value.provenanceDisclaimer, hasPilot, localizeCommercialProfitabilityProvenance),
       realProfitabilityMappingComplete: workspaceResult.value.realProfitabilityMappingComplete,
       reportingPeriodLabel: reportingPeriodLabel(customerComparisons),
       freshnessLabel: freshnessLabel(customerComparisons),

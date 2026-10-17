@@ -26,7 +26,7 @@ export function describeFactoryCopilotRequestFailure(
   if (failure.failureCode?.includes("insufficient-context")) {
     return {
       category: "insufficient-context",
-      message: "Copilot için hat veya üretim bağlamı bulunamadı. Bir hat seçip tekrar deneyin.",
+      message: "Bu soru için yeterli hat veya üretim bağlamı yok. Fabrika ekranında bir hat ya da kaynak seçip yeniden sorun.",
     };
   }
 
@@ -53,21 +53,21 @@ export function describeFactoryCopilotRequestFailure(
 export function describeFactoryCopilotAiState(state: string | null | undefined): string | null {
   switch (state) {
     case "AI_NOT_CONFIGURED":
-      return "AI servisi bu kurulumda yapılandırılmamış (yönetici işlemi gerekir).";
+      return "Asistan bu kurulumda etkin değil (yönetici işlemi gerekir).";
     case "AI_AUTHENTICATION_FAILED":
-      return "AI sağlayıcı kimlik doğrulaması reddedildi (yönetici işlemi gerekir).";
+      return "Asistan servisine erişilemedi (yönetici işlemi gerekir).";
     case "AI_RATE_LIMITED":
-      return "AI sağlayıcı istek sınırına ulaştı; kısa süre sonra tekrar deneyin.";
+      return "Asistan şu an yoğun; kısa süre sonra tekrar deneyin.";
     case "AI_TIMEOUT":
-      return "AI sağlayıcı zamanında yanıt vermedi; tekrar deneyin.";
+      return "Asistan zamanında yanıt vermedi; tekrar deneyin.";
     case "AI_PROVIDER_UNAVAILABLE":
-      return "AI sağlayıcıya geçici olarak ulaşılamıyor; tekrar deneyin.";
+      return "Asistana geçici olarak ulaşılamıyor; tekrar deneyin.";
     case "AI_INVALID_OUTPUT":
     case "AI_UNGROUNDED_RESPONSE":
-      return "AI yanıtı doğrulanamadığı için gösterilmedi.";
+      return "Yanıt doğrulanamadığı için gösterilmedi.";
     case "AI_BUDGET_LIMITED":
     case "AI_POLICY_REJECTED":
-      return "AI kullanımı politika veya bütçe nedeniyle kapalı.";
+      return "Asistan yanıtı bu kurulumda kapalı. Yöneticinizle iletişime geçin.";
     case "INSUFFICIENT_DATA":
       return "Bu soru için yeterli üretim verisi yok; tahmin yürütülmedi.";
     case "prompt-injection-detected":

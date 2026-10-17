@@ -1,3 +1,4 @@
+import { displayDataName } from "@/lib/presentation/display-name";
 import type { AiTask } from "../domain/ai-task";
 import { AI_TASK_CATEGORIES, type AiTaskCategory, type AiTaskPriority, type AiTaskStatus } from "../domain/ai-task";
 import type {
@@ -60,7 +61,7 @@ const DEPARTMENT_LABELS: Readonly<Record<string, string>> = {
 const ACTION_TYPE_LABELS: Readonly<Record<string, string>> = {
   "assign-team": "Ekip ataması",
   "set-priority": "Öncelik güncelleme",
-  escalate: "Eskalasyon",
+  escalate: "Üst Seviyeye Aktarım",
   "request-evidence": "Kanıt isteme",
   "request-closure-approval": "Kapanış onayı",
   "review-production-order": "Üretim emri incelemesi",
@@ -84,7 +85,7 @@ export function localizeAiTaskFixtureText(text: string | null | undefined): stri
   const trimmed = text.trim();
   if (!trimmed) return "—";
   if (FIXTURE_TEXT_LABELS[trimmed]) return FIXTURE_TEXT_LABELS[trimmed];
-  return localizeDecisionText(trimmed);
+  return displayDataName(localizeDecisionText(trimmed));
 }
 
 const KEY_TOKEN_LABELS: Readonly<Record<string, string>> = {
@@ -267,7 +268,12 @@ export function buildPolicyComparisonView(
     : "Uygulanmadı";
 
   const slaLabel = (task.sla
-    ? getAiTaskSlaDisplayText(task.sla.state, task.sla.resolutionDueAt ?? task.sla.responseDueAt)
+    ? getAiTaskSlaDisplayText(
+        task.sla.state,
+        task.sla.resolutionDueAt ?? task.sla.responseDueAt,
+        undefined,
+        task.sla.breachType,
+      )
     : getAiTaskSlaDisplayText(task.slaState, null)) ?? localizeDecisionToken(task.slaState);
 
   const evidenceRequired = task.closurePolicy?.minimumEvidenceCount ?? 0;
@@ -311,7 +317,7 @@ export function buildPolicyComparisonView(
   return {
     policyRows,
     aiRows,
-    policyNote: comparison?.policySummary ?? "Deterministik otomasyon politikası uygulandı.",
+    policyNote: comparison?.policySummary ?? "Kural tabanlı otomasyon politikası uygulandı.",
     aiNote: comparison?.aiSummary ?? "Bağlamsal değerlendirme ve ek öneriler.",
     differences: (comparison?.aiDifferences ?? []).map(localizeDecisionText),
   };

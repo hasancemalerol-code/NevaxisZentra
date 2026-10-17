@@ -9,8 +9,8 @@ export type AcceptanceRoleRoute = Readonly<{
   simulatePermissionKey?: string;
   forbiddenPermissionKey?: string;
   preparePermissionKeys?: readonly string[];
-  nav: "primary" | "contextual" | "apps" | "shell" | "direct";
-  acceptance: "required";
+  nav: "primary" | "contextual" | "apps" | "shell" | "direct" | "deferred";
+  acceptance: "required" | "deferred";
   api: string | null;
 }>;
 

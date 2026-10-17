@@ -1,26 +1,22 @@
-import { Warehouse } from "lucide-react";
+
 
 import { ErpInventoryView } from "@/features/erp/components/erp-inventory-view";
 import { readErpInventoryWorkspace } from "@/features/erp/server/erp-inventory-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function ErpStokPage() {
   const result = await readErpInventoryWorkspace();
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
+      <div className="production-execution-page erp-workspace-page">
         <header className="production-execution-header">
           <p>ERP ENTEGRASYONLARI</p>
-          <h1>Stok & Depolar</h1>
+          <h1>Stok ve Depolar</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <Warehouse aria-hidden="true" />
-          <div>
-            <h3>ERP stok verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="ERP stok verisi yüklenemedi" inline />
+      </div>
     );
   }
 

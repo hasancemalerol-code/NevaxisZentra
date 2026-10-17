@@ -121,7 +121,7 @@ export function ScenarioRecoveryWorkspaceView({ workspace, history }: ScenarioRe
           </section>
         </aside>
 
-        <main className="scenario-recovery-workspace__center" data-testid="scenario-recovery-comparison">
+        <div className="scenario-recovery-workspace__center" data-testid="scenario-recovery-comparison">
           <section className="fact-section">
             <header className="fact-section__header">
               <h2 className="fact-section__title">Baseline + Seçenek A/B/C</h2>
@@ -179,7 +179,7 @@ export function ScenarioRecoveryWorkspaceView({ workspace, history }: ScenarioRe
               )}
             </div>
           </section>
-        </main>
+        </div>
 
         <aside className="scenario-recovery-workspace__right" data-testid="scenario-recovery-decision">
           <section className="fact-section">
@@ -253,8 +253,8 @@ export function ScenarioRecoveryWorkspaceView({ workspace, history }: ScenarioRe
           <header className="fact-section__header">
             <h2 className="fact-section__title">Senaryo geçmişi</h2>
           </header>
-          <div className="fact-section__body scenario-recovery-history-table-wrap">
-            <table className="scenario-recovery-history-table">
+          <div className="fact-section__body scenario-recovery-history-table-wrap" tabIndex={0} role="region" aria-label="Senaryo geçmişi (kaydırılabilir)">
+            <table aria-label="Senaryo geçmişi" className="scenario-recovery-history-table">
               <thead>
                 <tr>
                   <th>Problem</th>

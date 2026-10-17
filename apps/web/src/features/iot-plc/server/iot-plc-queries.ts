@@ -102,8 +102,8 @@ const QUALITY_COLORS: Record<string, string> = {
 };
 
 function evidenceModeLabel(provenance: string, isPilot: boolean): string {
-  if (isPilot || provenance.toLowerCase().includes("simul")) return "Simülasyon";
-  if (provenance.toLowerCase().includes("measured")) return "Ölçülmüş";
+  if (isPilot || provenance.toLowerCase().includes("simul")) return "Örnek veri";
+  if (provenance.toLowerCase().includes("measured")) return "Ölçülen";
   return getIotPlcEvidenceLabel(isPilot ? "simulated" : "measured");
 }
 
@@ -476,7 +476,7 @@ function buildKpis(input: {
           : allCurrentUnknown
             ? "unavailable"
             : "warning",
-      badgeLabel: onlineCount === null ? null : allCurrentUnknown ? "Kanıt yok" : "Kanıtlı",
+      badgeLabel: onlineCount === null ? null : allCurrentUnknown ? "Kanıt yok" : onlineCount > 0 ? "Kanıtlı" : null,
     },
     "degraded-offline-endpoints": {
       id: "degraded-offline-endpoints",
@@ -510,7 +510,7 @@ function buildKpis(input: {
     },
     "attention-assessments": {
       id: "attention-assessments",
-      label: "Dikkat gerektiren değerlendirmeler",
+      label: "Dikkat gerektirenler",
       value: attentionAssessments === null ? "—" : formatIotPlcCount(attentionAssessments),
       comparisonLabel: totalAssessments > 0
         ? `${totalAssessments} kayıtlı değerlendirme · dikkat gerektiren sonuçlar`
@@ -694,7 +694,7 @@ export async function readIotPlcWorkspace(): Promise<IotPlcWorkspaceResult> {
 
   const workspace: IotPlcWorkspacePayload = {
     meta: {
-      facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+      facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
       organizationLabel: "dev-pilot-tenant",
       refreshedAtUtc: new Date().toISOString(),
       refreshedLabel: formatIotPlcDateTime(new Date().toISOString()),

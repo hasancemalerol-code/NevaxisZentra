@@ -54,33 +54,33 @@ export function DigitalWorkforceCompletedView() {
 
       <section className="dwf-panel">
         <div className="dwf-filters">
-          <select className="dwf-select" onChange={(event) => setWorkerId(event.target.value)} value={workerId}>
+          <select aria-label="Dijital Çalışan" className="dwf-select" onChange={(event) => setWorkerId(event.target.value)} value={workerId}>
             <option value="all">Dijital Çalışan: tümü</option>
             {DIGITAL_WORKERS.map((worker) => (
               <option key={worker.id} value={worker.id}>{worker.name.replace(" Dijital Çalışanı", "")}</option>
             ))}
           </select>
-          <select className="dwf-select" onChange={(event) => setDate(event.target.value)} value={date}>
+          <select aria-label="Tarih" className="dwf-select" onChange={(event) => setDate(event.target.value)} value={date}>
             <option value="all">Tarih: tümü</option>
             <option value="today">Bugün</option>
             <option value="yesterday">Dün</option>
           </select>
-          <select className="dwf-select" onChange={(event) => setFacility(event.target.value)} value={facility}>
+          <select aria-label="Fabrika" className="dwf-select" onChange={(event) => setFacility(event.target.value)} value={facility}>
             <option value="all">Fabrika: tümü</option>
             <option value="Pilot Enjeksiyon Tesisi">Pilot Enjeksiyon Tesisi</option>
           </select>
-          <select className="dwf-select" onChange={(event) => setModuleName(event.target.value)} value={moduleName}>
+          <select aria-label="Modül" className="dwf-select" onChange={(event) => setModuleName(event.target.value)} value={moduleName}>
             <option value="all">Modül: tümü</option>
             {modules.map((item) => (
               <option key={item} value={item}>{item}</option>
             ))}
           </select>
-          <select className="dwf-select" onChange={(event) => setVerified(event.target.value)} value={verified}>
+          <select aria-label="Sonuç" className="dwf-select" onChange={(event) => setVerified(event.target.value)} value={verified}>
             <option value="all">Sonuç: tümü</option>
             <option value="verified">Doğrulandı</option>
             <option value="unverified">Doğrulanmadı</option>
           </select>
-          <select className="dwf-select" onChange={(event) => setRisk(event.target.value)} value={risk}>
+          <select aria-label="Risk" className="dwf-select" onChange={(event) => setRisk(event.target.value)} value={risk}>
             <option value="all">Risk: tümü</option>
             <option value="critical">Kritik</option>
             <option value="high">Yüksek</option>
@@ -88,8 +88,8 @@ export function DigitalWorkforceCompletedView() {
           </select>
         </div>
 
-        <div className="dwf-table-wrap">
-          <table className="dwf-table">
+        <div className="dwf-table-wrap" tabIndex={0} role="region" aria-label="Tamamlanan İşler (kaydırılabilir)">
+          <table aria-label="Tamamlanan İşler" className="dwf-table">
             <thead>
               <tr>
                 <th>Case</th>

@@ -217,3 +217,48 @@
 .factory-network-cross-link__stats strong {
   color: #10213d;
 }
+
+/* Page header: same flat rhythm as the other executive pages (eyebrow, title, subtitle with air between). */
+.factory-network-page .commint-executive__intro {
+  gap: 4px;
+}
+
+.factory-network-page .commint-executive__subtitle {
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* Round 4: header rhythm matches the other module pages. */
+.factory-network-page .commint-executive__intro {
+  gap: 4px;
+}
+
+.factory-network-page .commint-executive__subtitle {
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* Header action sits in the header row, right-aligned at every width. */
+body .content-viewport .factory-network-page .commint-executive {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+body .content-viewport .factory-network-page .commint-executive > .commint-executive__intro {
+  flex: 1 1 360px;
+  min-width: 0;
+}
+
+body .content-viewport .factory-network-page .commint-executive > .commint-executive__actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.factory-network-page .state-panel {
+  min-height: 360px;
+}

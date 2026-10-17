@@ -7,6 +7,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { LinkedNonconformanceSummary, QualityInspectionDetail } from "../domain/quality-control";
 import type { createQualityNcrAction } from "../server/quality-control-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 export type QualityInspectionNcrLinkProps = Readonly<{
   inspection: QualityInspectionDetail;
@@ -61,7 +63,7 @@ export function QualityInspectionNcrLink({
               <Link href={`/kalite/ncr/${linked.id}`}>
                 <strong>{linked.ncrNumber}</strong>
               </Link>
-              <span>{linked.status}</span>
+              <span>{enumLabel(linked.status)}</span>
             </div>
           </li>
         ))}
@@ -77,7 +79,7 @@ export function QualityInspectionNcrLink({
     <div className="quality-form-stack">
       {message ? (
         <div role="alert" className="quality-error-panel">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
       <Button type="button" variant="secondary" disabled={pending} onClick={() => void createFromInspection()}>

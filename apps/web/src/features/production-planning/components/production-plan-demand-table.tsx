@@ -1,3 +1,4 @@
+import { displayReferenceCode } from "@/lib/presentation/display-name";
 import {
   CalendarClock,
   PackageSearch,
@@ -101,8 +102,8 @@ export function ProductionPlanDemandTable({
         </Card>
       ) : (
         <Card className="production-plan-demand-table__card">
-          <div className="production-plan-demand-table__scroll">
-            <table>
+          <div className="production-plan-demand-table__scroll" tabIndex={0} role="region" aria-label="Talep tablosu (kaydırılabilir)">
+            <table aria-label="Üretim talepleri">
               <thead>
                 <tr>
                   <th>Sipariş</th>
@@ -121,7 +122,7 @@ export function ProductionPlanDemandTable({
                         {item.orderReference}
                       </strong>
 
-                      <span>{item.id}</span>
+                      <span>{displayReferenceCode(item.id)}</span>
                     </td>
 
                     <td>
@@ -129,7 +130,7 @@ export function ProductionPlanDemandTable({
                         {item.productName}
                       </strong>
 
-                      <span>{item.productId}</span>
+                      <span>{displayReferenceCode(item.productId)}</span>
                     </td>
 
                     <td>

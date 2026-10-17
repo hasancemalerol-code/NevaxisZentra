@@ -163,7 +163,7 @@ export function OrderDraftClarificationPanel({
     <Card className="order-draft-clarification-panel">
       <div className="order-draft-clarification-panel__heading">
         <div>
-          <p>AI iletişim taslağı</p>
+          <p>Yapay zekâ iletişim taslağı</p>
 
           <h2>Müşteriden bilgi iste</h2>
         </div>
@@ -240,7 +240,7 @@ export function OrderDraftClarificationPanel({
 
       <div className="order-draft-clarification-panel__actions">
         <p>
-          AI yalnızca mesaj taslağı hazırlar. Gönderim,
+          Yapay zekâ yalnızca mesaj taslağı hazırlar. Gönderim,
           yetkili kullanıcı onayı olmadan yapılamaz.
         </p>
 

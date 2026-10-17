@@ -1,6 +1,7 @@
 import { DecisionCard } from "@/components/workspace/decision-card";
 import type { FactoryIntelligenceRiskCardApi } from "@/features/factory-intelligence/server/factory-intelligence-api-client";
 import type { EdgeMachineDetailBundle } from "@/features/edge/domain/edge-types";
+import { formatPercent } from "@/lib/presentation/format";
 
 type FactoryMachineIntelligenceProps = Readonly<{
   machineCode: string;
@@ -17,7 +18,7 @@ export function FactoryMachineIntelligence({
   const avgCycle = detail?.cycleProjection?.averageRecentCycleDurationMs;
   const cycleDelta =
     cycleMs && avgCycle && avgCycle > 0
-      ? `${(((cycleMs - avgCycle) / avgCycle) * 100).toFixed(1)}%`
+      ? formatPercent(((cycleMs - avgCycle) / avgCycle) * 100, 1)
       : null;
 
   const signal = detail?.signalProjection?.observedState ?? "—";

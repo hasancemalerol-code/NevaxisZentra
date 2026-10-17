@@ -7,12 +7,15 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { TeamsApprovalDecisionForm } from "@/features/teams/components/teams-approval-decision-form";
 import { TEAMS_APPROVAL_DISCLAIMER, TEAMS_APPROVAL_STATUSES } from "@/features/teams/domain/teams-constants";
 import { readTeamsApproval, readTeamsWorkspace } from "@/features/teams/server/teams-queries";
 import "@/features/teams/components/teams-workspace.css";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { displayActor } from "@/lib/presentation/display-label";
 
 export const dynamic = "force-dynamic";
 
@@ -38,10 +41,10 @@ export default async function TeamsApprovalDetailPage({
       <PageContent>
         <PageHeader
           description="Onay isteği detayı."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Onay isteği"
         />
-        <EmptyState description={result.message} title="Onay isteği yüklenemedi" />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Onay isteği yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -63,14 +66,14 @@ export default async function TeamsApprovalDetailPage({
     <PageContent data-testid="teams-approval-detail-page">
       <PageHeader
         description={detail.channelName}
-        eyebrow="Teams onay isteği"
+        eyebrow="Onay isteği"
         title={detail.title}
         actions={<Badge tone="neutral">{statusLabel(detail.status)}</Badge>}
       />
 
       <Section title="Kaynak bağlam">
         <p data-testid="teams-approval-source-kind">
-          {detail.source.sourceKind === "ai-task" ? "AI görevi" : "Teams mesajı"}
+          {detail.source.sourceKind === "ai-task" ? "Görev" : "Kanal mesajı"}
         </p>
         {detail.source.canOpen && detail.source.deepLinkPath ? (
           <Link href={detail.source.deepLinkPath} data-testid="teams-approval-source-link">
@@ -121,7 +124,7 @@ export default async function TeamsApprovalDetailPage({
         <ul data-testid="teams-approval-audit">
           {detail.auditEvents.map((event) => (
             <li key={event.id}>
-              {event.actorLabel}: {event.eventType}
+              {displayActor(event.actorLabel, "Ekip üyesi")}: {enumLabel(event.eventType)}
             </li>
           ))}
         </ul>

@@ -59,6 +59,9 @@ import {
   refreshCommercialSalesPriceWorkspaceAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { kpiValueClass, detailValueClass } from "./commercial-no-data";
+import { CommercialKpiCompact, isKpiSetEmpty } from "./commercial-kpi-compact";
 
 type CommercialSalesPriceWorkspaceViewProps = Readonly<{
   workspace: CommercialSalesPriceWorkspacePayload;
@@ -345,7 +348,7 @@ export function CommercialSalesPriceWorkspaceView({
   );
 
   return (
-    <main className="commint-page" data-testid="commercial-sales-price-workspace">
+    <div className="commint-page" data-testid="commercial-sales-price-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -353,7 +356,7 @@ export function CommercialSalesPriceWorkspaceView({
             <h1>Satış Fiyat Analizi</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_SALES_PRICE_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Kanıt penceresi: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Kanıt: {workspace.evidenceLabel}</li>
@@ -373,57 +376,68 @@ export function CommercialSalesPriceWorkspaceView({
             </button>
           </div>
         </div>
-        {workspace.hasDevelopmentPilotData ? (
-          <p className="commint-provenance-strip" data-testid="commercial-sales-price-provenance-strip">
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_SALES_PRICE_DEVELOPMENT_BANNER}
-          </p>
-        ) : null}
-        {!workspace.realTransactionMappingComplete ? (
-          <p className="commint-readonly-note" data-testid="commercial-sales-price-mapping-note">
-            {REAL_TRANSACTION_MAPPING_NOTE}
-          </p>
-        ) : null}
-        {!canManage ? (
-          <p className="commint-readonly-note" data-testid="commercial-sales-price-readonly-note">
-            {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
-          </p>
-        ) : null}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          {workspace.hasDevelopmentPilotData ? (
+            <p className="commint-provenance-strip" data-testid="commercial-sales-price-provenance-strip">
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_SALES_PRICE_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!workspace.realTransactionMappingComplete ? (
+            <p className="commint-readonly-note" data-testid="commercial-sales-price-mapping-note">
+              {REAL_TRANSACTION_MAPPING_NOTE}
+            </p>
+          ) : null}
+          {!canManage ? (
+            <p className="commint-readonly-note" data-testid="commercial-sales-price-readonly-note">
+              {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
+            </p>
+          ) : null}
+        </details>
         {feedback ? <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p> : null}
       </header>
 
-      <section
-        className="commint-kpi-grid"
-        data-testid="commercial-sales-price-kpi-grid"
-        aria-label="Satış fiyat göstergeleri"
-      >
-        {workspace.kpis.map((kpi) => {
-          const Icon = KPI_ICONS[kpi.id] ?? BarChart3;
-          return (
-            <article
-              key={kpi.id}
-              className={`commint-kpi-card ${resolveCommercialIntelligenceKpiToneClass(kpi.tone)}`}
-              data-kpi-id={kpi.id}
-              data-kpi-scope={kpi.scopeLabel}
-              data-kpi-source={kpi.sourceDataset}
-              aria-label={`${kpi.label}: ${kpi.accessibleSummary}`}
-            >
-              <div className="commint-kpi-card__header">
-                <p className="commint-kpi-card__label">{kpi.label}</p>
-                <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
-              </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
-              <p className="commint-kpi-card__detail">{kpi.detail}</p>
-              <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
-              <div className="commint-kpi-card__footer">
-                <span>{kpi.scopeLabel}</span>
-                <span className="commint-kpi-card__badge">{kpi.stateBadge}</span>
-                <span>{kpi.evidenceLabel}</span>
-              </div>
-            </article>
-          );
-        })}
-      </section>
+      {isKpiSetEmpty(workspace.kpis) ? (
+        <CommercialKpiCompact
+          ariaLabel="Satış fiyat göstergeleri"
+          testId="commercial-sales-price-kpi-grid"
+          items={workspace.kpis.map((kpi) => ({ id: kpi.id, label: kpi.label, value: kpi.value, caption: kpi.detail }))}
+        />
+      ) : (
+        <section
+          className="commint-kpi-grid"
+          data-testid="commercial-sales-price-kpi-grid"
+          aria-label="Satış fiyat göstergeleri"
+        >
+          {workspace.kpis.map((kpi) => {
+            const Icon = KPI_ICONS[kpi.id] ?? BarChart3;
+            return (
+              <article
+                key={kpi.id}
+                className={`commint-kpi-card ${resolveCommercialIntelligenceKpiToneClass(kpi.tone)}`}
+                data-kpi-id={kpi.id}
+                data-kpi-scope={kpi.scopeLabel}
+                data-kpi-source={kpi.sourceDataset}
+                aria-label={`${kpi.label}: ${kpi.accessibleSummary}`}
+              >
+                <div className="commint-kpi-card__header">
+                  <p className="commint-kpi-card__label">{kpi.label}</p>
+                  <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
+                </div>
+                <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
+                <p className="commint-kpi-card__detail">{kpi.detail}</p>
+                <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
+                <div className="commint-kpi-card__footer">
+                  <span>{kpi.scopeLabel}</span>
+                  <span className="commint-kpi-card__badge">{kpi.stateBadge}</span>
+                  <span>{kpi.evidenceLabel}</span>
+                </div>
+              </article>
+            );
+          })}
+        </section>
+      )}
 
       <div
         className="commint-tab-rail"
@@ -519,17 +533,17 @@ export function CommercialSalesPriceWorkspaceView({
             ) : (
               <p className="commint-empty">{workspace.customerComparison.unavailableReason}</p>
             )}
-            <div className="commint-evidence-summary">
-              <p className="commint-priority-row__title">
-                Aday: {formatCount(workspace.temporalComparison.candidateObservationCount || workspace.customerComparison.candidateObservationCount)} ·
-                Karşılaştırılabilir: {formatCount(workspace.temporalComparison.comparableObservationCount || workspace.customerComparison.comparableObservationCount)} ·
-                Dışlanan: {formatCount(workspace.temporalComparison.excludedObservationCount || workspace.customerComparison.excludedObservationCount)}
-              </p>
-              <p className="commint-supplier-row__meta">
-                Eşit sıra: {formatCount(tiedCustomerCount)} · Yayılım: {workspace.customerComparison.spreadLabel} · {workspace.evidenceLabel}
-              </p>
-              <p className="commint-supplier-row__meta">{workspace.provenanceDisclaimer}</p>
-            </div>
+            <ul className="commint-keyvalue commint-keyvalue--compact" data-testid="commercial-sales-price-evidence-summary">
+              <li><span>Aday gözlem</span><span className={detailValueClass(formatCount(workspace.temporalComparison.candidateObservationCount || workspace.customerComparison.candidateObservationCount))}>{formatCount(workspace.temporalComparison.candidateObservationCount || workspace.customerComparison.candidateObservationCount)}</span></li>
+              <li><span>Karşılaştırılabilir</span><span className={detailValueClass(formatCount(workspace.temporalComparison.comparableObservationCount || workspace.customerComparison.comparableObservationCount))}>{formatCount(workspace.temporalComparison.comparableObservationCount || workspace.customerComparison.comparableObservationCount)}</span></li>
+              <li><span>Dışlanan</span><span className={detailValueClass(formatCount(workspace.temporalComparison.excludedObservationCount || workspace.customerComparison.excludedObservationCount))}>{formatCount(workspace.temporalComparison.excludedObservationCount || workspace.customerComparison.excludedObservationCount)}</span></li>
+              <li><span>Eşit sıra</span><span className={detailValueClass(formatCount(tiedCustomerCount))}>{formatCount(tiedCustomerCount)}</span></li>
+              <li><span>Yayılım</span><span className={detailValueClass(workspace.customerComparison.spreadLabel)}>{workspace.customerComparison.spreadLabel}</span></li>
+              <li><span>Kanıt</span><span className={detailValueClass(workspace.evidenceLabel)}>{workspace.evidenceLabel}</span></li>
+              {workspace.customerComparison.rows.length > 0 ? (
+                <li><span>Kaynak</span><span>{workspace.provenanceDisclaimer}</span></li>
+              ) : null}
+            </ul>
           </section>
 
           <SalesPriceExecutiveDriverSummary
@@ -541,9 +555,9 @@ export function CommercialSalesPriceWorkspaceView({
 
       {activeTab === "temporal" ? (
         <section className="commint-panel" data-testid="commercial-sales-price-temporal-workspace">
-          <h2 className="commint-panel__title">Dönemsel sapma çalıştırmaları</h2>
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <h2 className="commint-panel__title">Dönemsel sapma çalışmaları</h2>
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Dönemsel sapma çalışmaları" className="commint-table">
               <thead>
                 <tr>
                   <th>Analiz</th>
@@ -681,10 +695,10 @@ export function CommercialSalesPriceWorkspaceView({
                 <DetailField label="Sonuç" value={workspace.customerComparison.outcomeLabel ?? "—"} />
                 <DetailField label="Kanıt durumu" value={workspace.evidenceLabel} />
                 <DetailField
-                  label="Karşılaştırılabilir / dışlanan"
+                  label="Dahil / dışlanan"
                   value={`${formatCount(workspace.customerComparison.comparableObservationCount)} / ${formatCount(workspace.customerComparison.excludedObservationCount)}`}
                 />
-                <DetailField label="Önde gelen sürücü" value={workspace.customerComparison.leadingDriverLabel ?? "—"} />
+                <DetailField label="Başlıca etken" value={workspace.customerComparison.leadingDriverLabel ?? "—"} />
               </div>
             </div>
           </section>
@@ -744,8 +758,8 @@ export function CommercialSalesPriceWorkspaceView({
             onFilterChange={updateHistoryFilters}
             onClearFilters={clearHistoryFilters}
           />
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Değerlendirme geçmişi" className="commint-table">
               <thead>
                 <tr>
                   <th>Sonuç türü</th>
@@ -827,13 +841,13 @@ export function CommercialSalesPriceWorkspaceView({
                 />
               ) : null}
               {detailStatus === "error" ? (
-                <p className="commint-empty" role="alert">Detay yüklenemedi.</p>
+                <InlineUnavailable subject="Ayrıntı" />
               ) : null}
             </div>
           </aside>
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -841,7 +855,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }

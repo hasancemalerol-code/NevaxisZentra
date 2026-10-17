@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 
 import {
   PageContent,
@@ -32,12 +34,13 @@ export default async function TeamsApprovalCreatePage({
     return (
       <PageContent>
         <PageHeader
-          description="Mevcut bir kanal mesajı veya AI görev bağlamından onay isteyin."
-          eyebrow="Teams"
+          description="Mevcut bir kanal mesajı veya görev bağlamından onay isteyin."
+          eyebrow="Operasyon iletişimi"
           title="Onay isteği oluştur"
         />
         <EmptyState
-          description="Onay isteği için bir Teams mesajı veya bir AI görevi seçin."
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/onaylar">Listeye dön</Link></div>}
+          description="Onay isteği için bir kanal mesajı veya bir görev seçin."
           title="Kaynak bağlam gerekli"
         />
       </PageContent>
@@ -48,8 +51,9 @@ export default async function TeamsApprovalCreatePage({
   if (workspace.status === "failure" || !workspace.selectedChannel) {
     return (
       <PageContent>
-        <PageHeader eyebrow="Teams" title="Onay isteği oluştur" description="Kanal yüklenemedi." />
+        <PageHeader eyebrow="Operasyon iletişimi" title="Onay isteği oluştur" description="Kanal yüklenemedi." />
         <EmptyState
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/onaylar">Listeye dön</Link></div>}
           description={workspace.status === "failure" ? workspace.message : "Kanal bulunamadı."}
           title="Kanal erişimi yok"
         />
@@ -64,8 +68,8 @@ export default async function TeamsApprovalCreatePage({
   if (params.message && !message) {
     return (
       <PageContent>
-        <PageHeader eyebrow="Teams" title="Onay isteği oluştur" description="Mesaj bulunamadı." />
-        <EmptyState description="Seçilen mesaja erişiminiz yok." title="Mesaj bulunamadı" />
+        <PageHeader eyebrow="Operasyon iletişimi" title="Onay isteği oluştur" description="Mesaj bulunamadı." />
+        <EmptyState action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/onaylar">Listeye dön</Link></div>} description="Seçilen mesaja erişiminiz yok." title="Mesaj bulunamadı" />
       </PageContent>
     );
   }
@@ -76,9 +80,10 @@ export default async function TeamsApprovalCreatePage({
     if (taskResult.status === "failure") {
       return (
         <PageContent>
-          <PageHeader eyebrow="Teams" title="Onay isteği oluştur" description="Görev bulunamadı." />
+          <PageHeader eyebrow="Operasyon iletişimi" title="Onay isteği oluştur" description="Görev bulunamadı." />
           <EmptyState
-            description="Seçilen AI görevine erişiminiz yok."
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/onaylar">Listeye dön</Link></div>}
+            description="Seçilen göreve erişiminiz yok."
             title="Görev bulunamadı"
           />
         </PageContent>
@@ -97,7 +102,7 @@ export default async function TeamsApprovalCreatePage({
     <PageContent data-testid="teams-approval-create-page">
       <PageHeader
         description={`${channel.name} kanalından insan kararı isteyin.`}
-        eyebrow="Teams"
+        eyebrow="Operasyon iletişimi"
         title="Onay isteği oluştur"
       />
       <Section title="İstek">

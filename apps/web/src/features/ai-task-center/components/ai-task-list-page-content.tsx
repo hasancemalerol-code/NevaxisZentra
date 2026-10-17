@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import {
   BookOpen,
   Plus,
@@ -7,16 +7,16 @@ import {
   Workflow,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   PageContent,
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { AiTaskCenterUnifiedWorkspace } from "@/features/ai-task-center/components/ai-task-center-unified-workspace";
-import { AiTaskKpiLinks } from "@/features/ai-task-center/components/ai-task-kpi-links";
+import { AiTaskKpiLinks, type AiTaskExtraKpi } from "@/features/ai-task-center/components/ai-task-kpi-links";
+import { deriveAiTaskCenterKpis } from "@/features/ai-task-center/application/ai-task-center-kpis";
 import { AiTaskKpiLoading } from "@/features/ai-task-center/components/ai-task-kpi-loading";
 import {
   parseAiTaskCenterTaskOriginFilter,
@@ -29,12 +29,26 @@ import {
   TASK_CENTER_PRODUCT_NAME,
 } from "@/features/ai-task-center/domain/ai-task-product-labels";
 import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-task-center-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
+
+import "./ai-task-list-page-content.css";
+import "@/features/ai-task-center/components/ai-task-center-round3.css";
 
 type AiTaskListPageContentProps = Readonly<{
   listPath?: string;
   showCreateAction?: boolean;
+  /** True when rendered inside another screen (the Today page) that already owns the page h1. */
+  embedded?: boolean;
   initialView?: string;
   initialOriginFilter?: string;
+  /** Hosts that merge this screen with their own summary (the Today page) add actions, KPIs and sections here. */
+  extraActions?: ReactNode;
+  extraKpis?: readonly AiTaskExtraKpi[];
+  beforeWorkspace?: ReactNode;
+  /** Optional header overrides for hosts (for example the Teams work inbox). */
+  eyebrow?: string;
+  title?: string;
+  description?: string;
 }>;
 
 async function RefreshButton() {
@@ -44,7 +58,7 @@ async function RefreshButton() {
   }
 
   return (
-    <form action={refresh}>
+    <form action={refresh} className="zx-inline-form">
       <Button leadingIcon={<RefreshCw />} type="submit" variant="secondary">
         Veriyi yenile
       </Button>
@@ -55,8 +69,15 @@ async function RefreshButton() {
 export async function AiTaskListPageContent({
   listPath = "/ai-gorevleri",
   showCreateAction = true,
+  embedded = false,
   initialView,
   initialOriginFilter,
+  extraActions,
+  extraKpis,
+  beforeWorkspace,
+  eyebrow = TASK_CENTER_PRODUCT_NAME,
+  title = TASK_CENTER_PRODUCT_NAME,
+  description = TASK_CENTER_PRODUCT_DESCRIPTION,
 }: AiTaskListPageContentProps) {
   const result = await readAiTaskCenterUnified();
 
@@ -64,16 +85,17 @@ export async function AiTaskListPageContent({
     return (
       <PageContent>
         <PageHeader
-          description={TASK_CENTER_PRODUCT_DESCRIPTION}
-          eyebrow={TASK_CENTER_PRODUCT_NAME}
-          title={TASK_CENTER_PRODUCT_NAME}
+          headingLevel={embedded ? 2 : 1}
+          description={description}
+          eyebrow={eyebrow}
+          title={title}
         />
 
-        <EmptyState
-          data-testid="ai-task-center-list-error"
-          description={result.message}
-          title={`${TASK_CENTER_PRODUCT_NAME} yüklenemedi`}
-        />
+        {beforeWorkspace}
+
+        <div data-testid="ai-task-center-list-error">
+          <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle={`${TASK_CENTER_PRODUCT_NAME} şu anda alınamıyor`} inline />
+        </div>
       </PageContent>
     );
   }
@@ -81,8 +103,9 @@ export async function AiTaskListPageContent({
   const { center } = result;
 
   return (
-    <PageContent data-testid="ai-task-center-list">
+    <PageContent data-list-path={listPath} data-testid="ai-task-center-list">
       <PageHeader
+        headingLevel={embedded ? 2 : 1}
         actions={
           <>
             {showCreateAction && center.canCreate ? (
@@ -93,7 +116,6 @@ export async function AiTaskListPageContent({
                 <Plus aria-hidden="true" />
                 <span>
                   <strong>{TASK_CENTER_CREATE_ACTION}</strong>
-                  <small>Yeni taslak görev oluştur</small>
                 </span>
               </Link>
             ) : null}
@@ -111,29 +133,28 @@ export async function AiTaskListPageContent({
               href="/ai-gorevleri/playbooklar"
             >
               <BookOpen aria-hidden="true" />
-              <span>Playbooklar</span>
+              <span>Operasyon rehberleri</span>
             </Link>
+
+            {extraActions}
 
             <RefreshButton />
           </>
         }
-        description={TASK_CENTER_PRODUCT_DESCRIPTION}
-        eyebrow={TASK_CENTER_PRODUCT_NAME}
-        title={TASK_CENTER_PRODUCT_NAME}
+        description={description}
+        eyebrow={eyebrow}
+        title={title}
       />
 
       {center.canReadTasks ? (
         <Suspense fallback={<AiTaskKpiLoading />}>
-          <AiTaskKpiLinks kpis={center.kpis} listPath={listPath} />
+          <AiTaskKpiLinks extraKpis={extraKpis} kpis={deriveAiTaskCenterKpis(center.items, center.kpis)} listPath={listPath} />
         </Suspense>
       ) : null}
 
+      {beforeWorkspace}
+
       <Section
-        action={
-          <Badge tone="neutral">
-            İnsan onayı
-          </Badge>
-        }
         description="Görevleri, onayları, vardiya teslimlerini ve etiketlemeleri tek merkezden inceleyin."
         title="Birleşik çalışma alanı"
       >
@@ -141,7 +162,7 @@ export async function AiTaskListPageContent({
           <AiTaskCenterUnifiedWorkspace
             assignedTaskIds={center.assignedTaskIds}
             initialOriginFilter={parseAiTaskCenterTaskOriginFilter(initialOriginFilter)}
-            initialView={parseAiTaskCenterView(initialView)}
+            initialView={initialView ? parseAiTaskCenterView(initialView) : undefined}
             closureQueueCounts={center.closureQueueCounts}
             items={center.items}
             listPath={listPath}

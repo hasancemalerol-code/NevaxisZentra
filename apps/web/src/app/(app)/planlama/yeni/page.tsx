@@ -101,7 +101,7 @@ export default async function ProductionPlanCreatePage() {
   }
 
   return (
-    <main className="production-plan-create-page">
+    <div className="production-plan-create-page">
       <div className="production-plan-create-page__back">
         <Link href="/planlama">
           <ArrowLeft aria-hidden="true" />
@@ -123,6 +123,6 @@ export default async function ProductionPlanCreatePage() {
         previewWriteBlocked={previewWriteBlocked}
         onSubmit={handleCreate}
       />
-    </main>
+    </div>
   );
 }

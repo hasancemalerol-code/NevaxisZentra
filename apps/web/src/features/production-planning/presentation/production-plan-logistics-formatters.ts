@@ -47,14 +47,14 @@ export function formatExportReadinessLabel(
   exportHandoffBlocked?: boolean,
 ): string {
   if (exportHandoffBlocked) {
-    return "Export readiness blocked";
+    return "İhracat hazırlığı engelli";
   }
 
   if (exportHandoffReady) {
-    return "Export readiness ready";
+    return "İhracat hazırlığı tamam";
   }
 
-  return "Export readiness attention";
+  return "İhracat hazırlığı dikkat gerektiriyor";
 }
 
 export type PlanningLogisticsCardSummary = Readonly<{
@@ -100,7 +100,7 @@ export function formatPlanningLogisticsIndicatorLabel(
           (60 * 60 * 1000),
       ),
     );
-    return `Pickup'a ${pickupHours} saat`;
+    return `Çıkışa ${pickupHours} saat`;
   }
 
   if (evaluation.riskLevel === "medium") {

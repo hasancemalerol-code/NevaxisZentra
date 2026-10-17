@@ -1,5 +1,9 @@
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { localizeAiTaskFixtureText } from "@/features/ai-task-center/presentation/ai-task-decision-intelligence-presentation";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  ArrowLeft,
   Bot,
   Database,
   Gauge,
@@ -8,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { PageContent, Section } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { AiTaskClosurePanelClient } from "@/features/ai-task-center/components/ai-task-closure-panel-client";
 import { AiTaskActionPanelClient } from "@/features/ai-task-center/components/ai-task-action-panel-client";
 import { AiTaskDetailTimeline } from "@/features/ai-task-center/components/ai-task-detail-timeline";
@@ -45,6 +49,8 @@ import {
 } from "@/features/ai-task-center/presentation/ai-task-sla-labels";
 import type { AiTask } from "@/features/ai-task-center/domain/ai-task";
 import { formatAiTaskShortDateTime } from "@/features/ai-task-center/presentation/ai-task-formatters";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import "@/features/ai-task-center/components/ai-task-detail-polish.css";
 
 type PageParams = Readonly<{
   taskId: string;
@@ -56,10 +62,9 @@ const PERCENT_FORMATTER = new Intl.NumberFormat("tr-TR", {
 });
 
 function buildContextChips(
-  taskReference: string,
   task: AiTask,
 ): readonly string[] {
-  const chips: string[] = [taskReference];
+  const chips: string[] = [];
 
   if (task.productionOrderId) {
     chips.push(`Üretim emri: ${task.productionOrderId}`);
@@ -108,10 +113,7 @@ export default async function AiTaskDetailPage({
 
     return (
       <PageContent>
-        <EmptyState
-          description={result.message}
-          title="Görev yüklenemedi"
-        />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Görev yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -122,14 +124,23 @@ export default async function AiTaskDetailPage({
     ?? task.sla?.responseDueAt
     ?? task.sla?.acknowledgmentDueAt
     ?? task.dueAt;
-  const slaDisplay = getAiTaskSlaDisplayText(task.slaState, slaDueAt);
+  const slaDisplay = getAiTaskSlaDisplayText(
+    task.slaState,
+    slaDueAt,
+    undefined,
+    task.sla?.breachType,
+  );
   const escalationBadge = task.escalationLevel > 0
     ? getAiTaskEscalationBadgeLabel(task.escalationLevel)
     : null;
-  const contextChips = buildContextChips(taskReference, task);
+  const contextChips = buildContextChips(task);
 
   return (
     <PageContent data-testid="ai-task-detail-page">
+      <Link className="ai-task-detail-back-link" href="/ai-gorevleri">
+        <ArrowLeft aria-hidden="true" />
+        <span>Görev listesi</span>
+      </Link>
       <header className="ai-task-detail-header">
         <div className="ai-task-detail-header__main">
           <p className="ai-task-detail-header__eyebrow">
@@ -137,7 +148,14 @@ export default async function AiTaskDetailPage({
           </p>
           <h1 className="ai-task-detail-header__title">{task.title}</h1>
           <p className="ai-task-detail-header__summary">{task.summary}</p>
+          <p className="ai-task-detail-header__assignee" data-testid="ai-task-detail-assignee-summary">
+            <span>Sorumlu</span>
+            <strong>{task.assignee?.displayName ?? "Atanmamış"}</strong>
+          </p>
           <div className="ai-task-detail-header__chips">
+            <span className="ai-task-detail-header__chip">
+              Görev No <code className="ai-task-detail-header__code">{taskReference}</code>
+            </span>
             {contextChips.map((chip) => (
               <span className="ai-task-detail-header__chip" key={chip}>
                 {chip}
@@ -147,19 +165,31 @@ export default async function AiTaskDetailPage({
         </div>
 
         <div className="ai-task-detail-header__badges">
-          <Badge tone={AI_TASK_STATUS_TONES[task.status]}>
-            {getAiTaskStatusLabel(task.status)}
-          </Badge>
-          <Badge tone={AI_TASK_PRIORITY_TONES[task.priority]}>
-            {getAiTaskPriorityLabel(task.priority)}
-          </Badge>
-          <Badge tone={AI_TASK_RISK_LEVEL_TONES[task.riskLevel]}>
-            {getAiTaskRiskLevelLabel(task.riskLevel)}
-          </Badge>
-          {slaDisplay ? (
-            <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
-              {slaDisplay}
+          <span className="ai-task-detail-header__badge-group">
+            <small>Durum</small>
+            <Badge tone={AI_TASK_STATUS_TONES[task.status]}>
+              {getAiTaskStatusLabel(task.status)}
             </Badge>
+          </span>
+          <span className="ai-task-detail-header__badge-group">
+            <small>Öncelik</small>
+            <Badge tone={AI_TASK_PRIORITY_TONES[task.priority]}>
+              {getAiTaskPriorityLabel(task.priority)}
+            </Badge>
+          </span>
+          <span className="ai-task-detail-header__badge-group">
+            <small>Risk</small>
+            <Badge tone={AI_TASK_RISK_LEVEL_TONES[task.riskLevel]}>
+              {getAiTaskRiskLevelLabel(task.riskLevel)}
+            </Badge>
+          </span>
+          {slaDisplay ? (
+            <span className="ai-task-detail-header__badge-group">
+              <small>SLA</small>
+              <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
+                {slaDisplay}
+              </Badge>
+            </span>
           ) : null}
           {escalationBadge && task.escalationState === "active" ? (
             <Badge tone={AI_TASK_ESCALATION_STATE_TONES[task.escalationState]}>
@@ -172,7 +202,7 @@ export default async function AiTaskDetailPage({
       <div className="ai-task-detail-workspace">
         <div className="ai-task-detail-workspace__main">
           <Section
-            description="Görev özeti, AI değerlendirmesi ve operasyonel bağlam."
+            description="Görev özeti, önerilen işlem ve operasyonel bağlam."
             title="Görev genel bakış"
           >
             <div className="ai-task-detail-overview">
@@ -180,11 +210,11 @@ export default async function AiTaskDetailPage({
                 <div className="ai-task-detail-overview__metric">
                   <Gauge aria-hidden="true" />
                   <div>
-                    <span>AI güveni</span>
+                    <span>Öneri güveni</span>
                     <strong>{PERCENT_FORMATTER.format(task.confidence.score)}</strong>
                   </div>
                 </div>
-                <p>{task.confidence.explanation}</p>
+                <p>{localizeAiTaskFixtureText(task.confidence.explanation)}</p>
               </Card>
 
               <AiTaskDetailOverviewAiCardClient
@@ -200,7 +230,7 @@ export default async function AiTaskDetailPage({
 
           {decisionResult.status === "success" ? (
             <Section
-              description="AI triage, SLA riski, ilişkili görevler ve sonraki aksiyon önerileri."
+              description="Yapay zekâ ön değerlendirmesi, SLA riski, ilişkili görevler ve sonraki adım önerileri."
               title="Karar desteği"
             >
               <AiTaskDecisionIntelligencePanelClient
@@ -214,6 +244,7 @@ export default async function AiTaskDetailPage({
           ) : null}
 
           <AiTaskSourceReferenceSection
+            evidenceSourceCount={task.sources.length}
             sourceEntityId={sourceEntityId}
             sourceModule={sourceModule}
             taskReference={taskReference}
@@ -225,23 +256,22 @@ export default async function AiTaskDetailPage({
             }
           />
 
-          <AiTaskTeamsContextSection taskId={taskId} />
+          <CollapsibleSection title="Teams bağlamı" hint="Bağlı mesaj yoksa boş kalır">
+            <AiTaskTeamsContextSection taskId={taskId} />
+          </CollapsibleSection>
 
-          <AiTaskActionPanelClient
-            canReview={result.canReview}
-            task={task}
-            version={version}
-          />
+          <CollapsibleSection title="Kapanış kuralları ve çözüm kaydı" hint="Çözüm girildiğinde burada görünür">
+            <AiTaskClosurePanelClient
+              operations={operations}
+              task={task}
+              version={version}
+            />
+          </CollapsibleSection>
 
-          <AiTaskClosurePanelClient
-            operations={operations}
-            task={task}
-            version={version}
-          />
-
-          <AiTaskImpactPanel impact={task.impact} />
-
-          <AiTaskExecutionPanel task={task} />
+          <CollapsibleSection title="Operasyonel etki ve sistem uygulaması" hint="Henüz veri yok">
+            <AiTaskImpactPanel impact={task.impact} />
+            <AiTaskExecutionPanel task={task} />
+          </CollapsibleSection>
 
           {task.sources.length > 0 ? (
             <Section
@@ -251,7 +281,7 @@ export default async function AiTaskDetailPage({
                   {task.sources.length} kaynak
                 </Badge>
               }
-              description="AI değerlendirmesinde kullanılan operasyon verileri."
+              description="Görev önerisinde kullanılan operasyon verileri."
               title="Kaynak veriler"
             >
               <div className="ai-task-detail__source-list">
@@ -277,6 +307,25 @@ export default async function AiTaskDetailPage({
               </div>
             </Section>
           ) : null}
+        </div>
+
+        <div className="ai-task-detail-rail">
+          <AiTaskActionPanelClient
+            canReview={result.canReview}
+            task={task}
+            version={version}
+          />
+
+          <AiTaskOperationsPanelClient
+            operations={operations}
+            task={task}
+            teamChannelLabels={operations.teamChannelLabels}
+            version={version}
+          />
+        </div>
+      </div>
+
+      <div className="ai-task-detail-lower">
 
           <Section
             action={
@@ -291,6 +340,7 @@ export default async function AiTaskDetailPage({
             <AiTaskDetailTimeline events={task.auditTrail} />
           </Section>
 
+          <CollapsibleSection title="Teslim ve güvenli paylaşım" hint="Henüz paylaşım yok">
           <AiTaskDeliverySectionClient
             taskId={taskId}
             deliveries={deliveryWorkspace.deliveries}
@@ -298,14 +348,7 @@ export default async function AiTaskDetailPage({
             channels={deliveryWorkspace.channels}
             canManage={deliveryWorkspace.canManage}
           />
-        </div>
-
-        <AiTaskOperationsPanelClient
-          operations={operations}
-          task={task}
-          teamChannelLabels={operations.teamChannelLabels}
-          version={version}
-        />
+          </CollapsibleSection>
       </div>
     </PageContent>
   );

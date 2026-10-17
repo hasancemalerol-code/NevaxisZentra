@@ -1,4 +1,5 @@
-import { ShoppingCart } from "lucide-react";
+import { keepCode } from "@/lib/presentation/format";
+import { PackageOpen, Rows3, ShoppingCart } from "lucide-react";
 
 import type { CanonicalErpPurchaseOrderSummary } from "../domain/erp";
 import {
@@ -9,6 +10,8 @@ import {
   ErpDataTable,
   ErpEmptyState,
   ErpFreshnessBadge,
+  ErpKpiCard,
+  ErpKpiGrid,
   ErpPageHeader,
   ErpProviderBadge,
   ErpReadonlyNotice,
@@ -26,14 +29,14 @@ type ErpPurchasingViewProps = Readonly<{
 
 export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Satın Alma"
-        description="Harici ERP satın alma siparişi projeksiyonları — salt okunur. Onay veya mal kabul işlemi yoktur."
+        description="Harici ERP satın alma siparişi özetleri — salt okunur. Onay veya mal kabul işlemi yoktur."
         notice={
           <>
             <ErpReadonlyNotice>
-              ERP-3L yalnızca ERP Simulator satın alma kayıtlarını içe aktarır.
+              Bu bağlantı ERP satın alma kayıtlarını salt okunur olarak içe aktarır.
             </ErpReadonlyNotice>
             <ErpSimulatorNotice />
           </>
@@ -41,6 +44,28 @@ export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
       />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/satin-alma" />
+
+      <ErpKpiGrid columns={3}>
+        <ErpKpiCard
+          label="Siparişler"
+          value={purchaseOrders.length}
+          description="İçe aktarılan sipariş"
+          icon={<ShoppingCart aria-hidden="true" />}
+        />
+        <ErpKpiCard
+          label="Açık Siparişler"
+          value={purchaseOrders.filter((purchaseOrder) => purchaseOrder.openLineCount > 0).length}
+          description="Açık satırı bulunan"
+          icon={<PackageOpen aria-hidden="true" />}
+          tone="info"
+        />
+        <ErpKpiCard
+          label="Açık Satır"
+          value={purchaseOrders.reduce((total, purchaseOrder) => total + purchaseOrder.openLineCount, 0)}
+          description="Teslim bekleyen satır"
+          icon={<Rows3 aria-hidden="true" />}
+        />
+      </ErpKpiGrid>
 
       <section className="erp-section">
         <ErpSectionHeader
@@ -50,10 +75,12 @@ export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
         {purchaseOrders.length === 0 ? (
           <ErpEmptyState
             title="Henüz satın alma siparişi yok."
-            description="Önce satın alma senkronizasyonu çalıştırın."
+            description="Önce satın alma eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable>
+          <ErpDataTable label="ERP satın alma siparişleri">
             <thead>
               <tr>
                 <th>PO No</th>
@@ -71,7 +98,7 @@ export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
             <tbody>
               {purchaseOrders.map((purchaseOrder) => (
                 <tr key={purchaseOrder.id}>
-                  <td>{purchaseOrder.purchaseOrderNumber}</td>
+                  <td>{keepCode(purchaseOrder.purchaseOrderNumber)}</td>
                   <td>
                     {purchaseOrder.supplierName ??
                       purchaseOrder.externalSupplierCode ??
@@ -100,12 +127,6 @@ export function ErpPurchasingView({ purchaseOrders }: ErpPurchasingViewProps) {
           </ErpDataTable>
         )}
       </section>
-
-      {purchaseOrders.length === 0 ? (
-        <div className="erp-empty" aria-hidden="true">
-          <ShoppingCart />
-        </div>
-      ) : null}
-    </main>
+    </div>
   );
 }

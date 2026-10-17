@@ -9,7 +9,6 @@ import {
   ExternalLink,
   FileWarning,
   LoaderCircle,
-  RefreshCw,
   ShieldAlert,
 } from "lucide-react";
 
@@ -22,7 +21,6 @@ import type {
 import {
   acknowledgeQualityNcrFollowUpAction,
   createQualityNcrFollowUpTaskDraftAction,
-  refreshQualityNcrFollowUpWorkspaceAction,
 } from "../server/quality-ncr-follow-up-actions";
 import {
   getQualityNcrFollowUpSeverityTone,
@@ -30,6 +28,10 @@ import {
   QUALITY_NCR_FOLLOW_UP_TASK_DISCLAIMER,
 } from "../presentation/quality-ncr-follow-up-labels";
 import { QualityDashboardKpi } from "./quality-dashboard-kpi";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { getQualityStatusLabel } from "../domain/quality-control";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type QualityNcrFollowUpWorkspaceViewProps = Readonly<{
   workspace: QualityNcrFollowUpWorkspacePayload;
@@ -48,10 +50,19 @@ function formatDateTime(iso?: string): string {
   });
 }
 
+function formatEvidenceSummary(summary?: string, description?: string): string[] {
+  const shown = (description ?? "").trim();
+  const lines = (summary ?? "")
+    .split("|")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0 && part !== shown);
+  return lines.length > 0 ? lines : ["Ek kanıt kaydı yok."];
+}
+
 function SeverityBadge({ severity }: Readonly<{ severity: string }>) {
   const tone = getQualityNcrFollowUpSeverityTone(severity);
   const badgeTone = tone === "danger" ? "danger" : tone === "warning" ? "warning" : "neutral";
-  return <Badge tone={badgeTone}>{severity}</Badge>;
+  return <Badge tone={badgeTone}>{enumLabel(severity)}</Badge>;
 }
 
 export function QualityNcrFollowUpWorkspaceView({
@@ -85,14 +96,6 @@ export function QualityNcrFollowUpWorkspaceView({
     },
     [pathname, router, searchParams],
   );
-
-  const handleRefresh = () => {
-    startTransition(async () => {
-      setActionError(null);
-      await refreshQualityNcrFollowUpWorkspaceAction();
-      router.refresh();
-    });
-  };
 
   const handleCreateTask = () => {
     if (!finding?.id) return;
@@ -133,7 +136,7 @@ export function QualityNcrFollowUpWorkspaceView({
     return (
       <div className="quality-empty-panel" data-testid="quality-ncr-follow-up-empty">
         <FileWarning aria-hidden="true" />
-        <h3>Takip edilecek uygunsuzluk kaydı yok</h3>
+        <strong>Takip edilecek uygunsuzluk kaydı yok</strong>
         <p>Yetkili tesis kapsamında açık NCR bulunamadı.</p>
       </div>
     );
@@ -170,7 +173,7 @@ export function QualityNcrFollowUpWorkspaceView({
         <QualityDashboardKpi
           label="Görev bağlantısı"
           value={workspace.kpis.taskLinkedCount}
-          description="AI görev taslağı"
+          description="Yapay zekâ görev taslağı"
           tone="ready"
           icon={<ExternalLink />}
         />
@@ -183,22 +186,10 @@ export function QualityNcrFollowUpWorkspaceView({
         />
       </div>
 
-      <div className="quality-workspace-toolbar">
-        <button
-          type="button"
-          onClick={handleRefresh}
-          disabled={isPending}
-          data-testid="quality-ncr-follow-up-refresh-button"
-        >
-          <RefreshCw aria-hidden="true" />
-          Yenile
-        </button>
-      </div>
-
       {actionError ? (
         <div role="alert" className="quality-error-panel">
           <AlertTriangle aria-hidden="true" />
-          <p>{actionError}</p>
+          <p>{customerMessage(actionError)}</p>
         </div>
       ) : null}
 
@@ -208,12 +199,12 @@ export function QualityNcrFollowUpWorkspaceView({
             <h2>Uygunsuzluk envanteri</h2>
             <p>Yetkili NCR takip kayıtları</p>
           </header>
-          <div className="quality-table-wrap" data-testid="quality-ncr-follow-up-table">
-            <table>
+          <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="Uygunsuzluk envanteri tablosu" data-testid="quality-ncr-follow-up-table">
+            <table aria-label="Uygunsuzluk envanteri">
               <thead>
                 <tr>
                   <th>NCR</th>
-                  <th>Şiddet</th>
+                  <th>Kritiklik</th>
                   <th>Takip durumu</th>
                   <th>Tespit</th>
                 </tr>
@@ -252,45 +243,49 @@ export function QualityNcrFollowUpWorkspaceView({
           </header>
 
           {findingError ? (
-            <p role="alert" data-testid="quality-ncr-follow-up-detail-error">{findingError}</p>
+            <p role="alert" data-testid="quality-ncr-follow-up-detail-error">{customerMessage(findingError)}</p>
           ) : !finding ? (
-            <p data-testid="quality-ncr-follow-up-detail-empty">Seçili uygunsuzluk kaydı yüklenemedi.</p>
+            <InlineUnavailable subject="Seçili uygunsuzluk kaydı" testId="quality-ncr-follow-up-detail-empty" />
           ) : (
             <div data-testid="quality-ncr-follow-up-detail-ready">
-              <dl className="quality-detail-grid">
+              <dl className="quality-detail-dl quality-followup-fields">
                 <div><dt>NCR numarası</dt><dd>{finding.ncrNumber}</dd></div>
                 <div><dt>Başlık</dt><dd>{finding.title}</dd></div>
-                <div><dt>Şiddet</dt><dd><SeverityBadge severity={finding.severity} /></dd></div>
-                <div><dt>NCR durumu</dt><dd>{finding.status}</dd></div>
-                <div><dt>Takip durumu</dt><dd>{getQualityNcrFollowUpStatusLabel(finding.followUpStatus)}</dd></div>
+                <div><dt>Kritiklik</dt><dd><SeverityBadge severity={finding.severity} /></dd></div>
+                <div><dt>NCR durumu</dt><dd><Badge tone="information">{getQualityStatusLabel(finding.status)}</Badge></dd></div>
+                <div><dt>Takip durumu</dt><dd><Badge tone={finding.followUpStatus === "requires-review" ? "warning" : "neutral"}>{getQualityNcrFollowUpStatusLabel(finding.followUpStatus)}</Badge></dd></div>
                 <div><dt>Ürün referansı</dt><dd>{finding.productReference ?? "—"}</dd></div>
                 <div><dt>Operasyon</dt><dd>{finding.operationReference ?? "—"}</dd></div>
                 <div><dt>Tespit zamanı</dt><dd>{formatDateTime(finding.detectedAtUtc)}</dd></div>
               </dl>
 
-              <section aria-labelledby="ncr-description-heading">
+              <section aria-labelledby="ncr-description-heading" className="quality-followup-block">
                 <h3 id="ncr-description-heading">Açıklama</h3>
                 <p>{finding.description}</p>
               </section>
 
-              <section aria-labelledby="ncr-evidence-heading">
+              <section aria-labelledby="ncr-evidence-heading" className="quality-followup-block">
                 <h3 id="ncr-evidence-heading">Kanıt özeti</h3>
                 {finding.hasInsufficientEvidence ? (
                   <p data-testid="quality-ncr-follow-up-insufficient-evidence">
                     Kanıt yetersiz veya çelişkili — yalnızca veri inceleme görev taslağı oluşturulabilir.
                   </p>
                 ) : (
-                  <p>{finding.evidenceSummary || "—"}</p>
+                  <ul className="quality-evidence-list">
+                    {formatEvidenceSummary(finding.evidenceSummary, finding.description).map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
                 )}
               </section>
 
               {finding.auditEvents.length > 0 ? (
-                <section aria-labelledby="ncr-audit-heading">
+                <section aria-labelledby="ncr-audit-heading" className="quality-followup-block">
                   <h3 id="ncr-audit-heading">Takip denetim kaydı</h3>
                   <ul className="quality-audit-list">
                     {finding.auditEvents.map((event) => (
                       <li key={`${event.eventType}-${event.occurredAtUtc}`}>
-                        <strong>{event.eventType}</strong> — {event.actor} ({formatDateTime(event.occurredAtUtc)})
+                        <strong>{enumLabel(event.eventType)}</strong> — {event.actor} ({formatDateTime(event.occurredAtUtc)})
                       </li>
                     ))}
                   </ul>

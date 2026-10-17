@@ -1,4 +1,5 @@
-import { ShieldAlert } from "lucide-react";
+import { AuthorizationGateState } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { SystemStatusWorkspacePanel } from "@/features/enterprise-reliability/components/system-status-workspace-panel";
@@ -13,39 +14,17 @@ export default async function SistemDurumuPage() {
   const authorization = await denyUnlessGranted("operability.read");
   if (authorization.status === "failure") {
     return (
-      <main className="commint-page">
-        <header className="commint-executive">
-          <div className="commint-executive__intro">
-            <p className="commint-executive__eyebrow">YÖNETİM</p>
-            <h1>{ENTERPRISE_RELIABILITY_TITLE}</h1>
-            <p className="commint-executive__subtitle">{ENTERPRISE_RELIABILITY_SUBTITLE}</p>
-          </div>
-        </header>
-        <div
-          role="alert"
-          className="commint-error-banner"
-          data-testid="system-status-forbidden"
-        >
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{authorization.code === "authorization-denied" ? "Bu merkeze erişim yetkiniz yok" : "Yetki doğrulanamadı"}</h3>
-            <p>{authorization.message}</p>
-          </div>
-        </div>
-      </main>
+      <div className="commint-page">
+        <PageHeader eyebrow="Ayarlar" title={ENTERPRISE_RELIABILITY_TITLE} description={ENTERPRISE_RELIABILITY_SUBTITLE} />
+        <AuthorizationGateState code={authorization.code} />
+      </div>
     );
   }
 
   return (
-    <main className="commint-page">
-      <header className="commint-executive">
-        <div className="commint-executive__intro">
-          <p className="commint-executive__eyebrow">YÖNETİM</p>
-          <h1>{ENTERPRISE_RELIABILITY_TITLE}</h1>
-          <p className="commint-executive__subtitle">{ENTERPRISE_RELIABILITY_SUBTITLE}</p>
-        </div>
-      </header>
+    <div className="commint-page">
+      <PageHeader eyebrow="Ayarlar" title={ENTERPRISE_RELIABILITY_TITLE} description={ENTERPRISE_RELIABILITY_SUBTITLE} />
       <SystemStatusWorkspacePanel />
-    </main>
+    </div>
   );
 }

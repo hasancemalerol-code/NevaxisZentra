@@ -1,6 +1,5 @@
-import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
-import Link from "next/link";
-import { TriangleAlert } from "lucide-react";
+
+
 
 import { GoldenDemoCustomsFileWorkspaceView } from "@/features/golden-demo-customs-file/components/golden-demo-customs-file-workspace-view";
 import {
@@ -9,6 +8,7 @@ import {
 } from "@/features/golden-demo-customs-file/domain/golden-demo-customs-file-labels";
 import { readGoldenDemoCustomsFileWorkspace } from "@/features/golden-demo-customs-file/server/golden-demo-customs-file-reader";
 import { forbidUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function GoldenDemoCustomsFilePage() {
   await forbidUnlessPresentationModeAccess();
@@ -17,7 +17,7 @@ export default async function GoldenDemoCustomsFilePage() {
 
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">ALTIN DEMO</p>
@@ -25,15 +25,8 @@ export default async function GoldenDemoCustomsFilePage() {
             <p className="commint-executive__subtitle">{GOLDEN_DEMO_CUSTOMS_FILE_SUBTITLE}</p>
           </div>
         </header>
-        <div role="alert" className="commint-error-banner" data-testid="golden-demo-customs-file-forbidden">
-          <TriangleAlert aria-hidden="true" />
-          <div>
-            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Demo verisi bulunamadı" : "Veri yüklenemedi"}</h3>
-            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Bu tesis için henüz altın demo verisi oluşturulmadı; gösterilecek bir sonuç yok." : result.message}</p>
-            <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
-          </div>
-        </div>
-      </main>
+        <div data-testid="golden-demo-customs-file-forbidden"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Veri yüklenemedi" inline /></div>
+      </div>
     );
   }
 

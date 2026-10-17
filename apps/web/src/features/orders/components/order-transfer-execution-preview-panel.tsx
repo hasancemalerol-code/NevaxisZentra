@@ -380,7 +380,7 @@ export function OrderTransferExecutionPreviewPanel({
           </span>
 
           <span>
-            Yeniden denenebilir:{" "}
+            Yeniden Denenebilir:{" "}
             <strong>
               {retryDecision?.retryAllowed
                 ? "Evet"

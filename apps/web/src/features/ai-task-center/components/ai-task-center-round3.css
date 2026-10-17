@@ -1,0 +1,325 @@
+/* Round 3 polish shared by the Görev Merkezi list, automation and delivery pages. */
+
+/* Automation page: no card-in-card wrapper around the module cards. */
+.content-viewport .section.ai-task-flat-section {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.content-viewport .section.ai-task-flat-section > .section-heading {
+  margin-bottom: 12px;
+}
+
+/* Policy rows: long values wrap and stay readable instead of truncating. */
+.ai-task-automation-workspace .ai-task-automation-policy-card__kv > div {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.ai-task-automation-workspace .ai-task-automation-policy-card__kv dt {
+  flex: 0 0 auto;
+}
+
+.ai-task-automation-workspace .ai-task-automation-policy-card__kv dd {
+  flex: 1 1 8rem;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+/* Simulation controls: the task select gets the widest column. */
+body .content-viewport .ai-task-automation-workspace .ai-task-automation-simulation__controls > :first-child {
+  flex: 2 1 320px;
+}
+
+.ai-task-automation-workspace .ai-task-automation-simulation__controls select {
+  width: 100%;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+/* Empty states stay compact for one line of text. */
+.ai-task-automation-module .empty-state,
+.ai-task-automation-history-panel .empty-state {
+  min-height: 0;
+  padding-block: 14px;
+}
+
+/* Delivery channels: name never wraps; the status pill drops below instead. */
+.ai-task-delivery-channels .zx-channel {
+  flex-wrap: wrap;
+}
+
+.ai-task-delivery-channels .zx-channel__name {
+  white-space: nowrap;
+}
+
+/* Delivery channels: count-aware tiles (5 in a row, 3+2 centred, 2-up) with identical stacked tiles. */
+body .content-viewport .ai-task-delivery-channels {
+  justify-content: center;
+}
+
+body .content-viewport .ai-task-delivery-channels > .zx-channel {
+  flex: 1 1 calc(20% - 10px);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+}
+
+@media (min-width: 821px) and (max-width: 1279px) {
+  body .content-viewport .ai-task-delivery-channels > .zx-channel {
+    flex: 0 1 calc(33.333% - 8px);
+  }
+}
+
+@media (max-width: 820px) {
+  body .content-viewport .ai-task-delivery-channels > .zx-channel {
+    flex: 1 1 calc(50% - 6px);
+  }
+}
+
+/* Task list header actions: left-aligned natural buttons, never a centred lone button. */
+@media (max-width: 900px) {
+  .content-viewport [data-testid="ai-task-center-list"] .zx-page-header__actions {
+    justify-content: flex-start;
+  }
+
+  .content-viewport [data-testid="ai-task-center-list"] .zx-page-header__actions {
+    flex: 1 1 100%;
+  }
+
+  /* Five actions fill their rows evenly (3 + 2), never a lone trailing button. */
+  .content-viewport [data-testid="ai-task-center-list"] .zx-page-header__actions > * {
+    flex: 1 1 calc(33.333% - 10px);
+    justify-content: center;
+    min-width: 150px;
+  }
+}
+
+/* Simulation: the run action is a compact button on the right of the control row. */
+body .content-viewport .ai-task-automation-simulation__controls > button {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+/* Round 5: policy tiles are flat tinted blocks inside the module card (no card-in-card), their label/value rows are full-width lines with dividers. */
+body .content-viewport .ai-task-automation-workspace .ai-task-automation-policy-card {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: var(--zx-surface-soft, #f6f8fb) !important;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv > div {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  min-width: 0;
+  padding: 8px 0;
+  border: 0;
+  border-top: 1px solid var(--zx-line, #e2e8f0);
+  background: transparent;
+  box-shadow: none;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv > div:first-child {
+  border-top: 0;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv dt {
+  font-size: 0.8125rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv dd {
+  flex: 0 1 auto;
+  margin-left: auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Evidence types render as chips so the full list reads as complete, never as a clipped sentence. */
+.ai-task-automation-policy-card__chips {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+/* Task center (embedded in Bugün) at tablet widths: the context column stays and KPI labels reserve two lines. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  body .content-viewport .bugun-page .ai-task-center-unified__table :is(th, td):nth-last-child(2) {
+    display: table-cell;
+  }
+}
+
+@media (max-width: 900px) {
+  body .content-viewport .bugun-page .kpi-card .kpi-label {
+    display: block;
+    min-height: 2.6em;
+  }
+}
+
+/* Task list: the Kart/Liste toggle hugs its buttons, and table cells stay on one line (only the title column wraps). */
+.ai-task-center-unified .ai-task-center-unified__layout-toggle {
+  align-self: flex-start;
+  width: fit-content;
+  max-width: 100%;
+}
+
+body .content-viewport .bugun-page .ai-task-center-unified__table :is(th, td):not(:nth-child(2)) {
+  white-space: nowrap;
+}
+
+/* Deliveries: same header baseline as the sibling task-center pages. */
+.content-viewport .zx-page[data-page="ai-task-deliveries"] {
+  padding-top: 30px;
+}
+
+/* View tabs: every tab is one line of the same height. Columns are wide enough for the longest label
+   ("Üst Seviyeye Aktarılanlar" plus its count), so nothing wraps or is cut and every row is even. */
+@media (min-width: 700px) {
+  body .content-viewport .bugun-page .ai-task-center-unified .ai-task-center-unified__view-rail {
+    grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+  }
+}
+
+body .content-viewport .bugun-page .ai-task-center-unified .ai-task-center-unified__view-tab {
+  white-space: nowrap;
+}
+
+body .content-viewport .bugun-page .ai-task-center-unified .ai-task-center-unified__view-tab > span:first-child {
+  min-width: 0;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* Automation page intro: balanced lines, no single orphan word. */
+.content-viewport [data-testid="ai-task-automation-page"] .zx-page-header__description {
+  max-width: none;
+  text-wrap: balance;
+}
+
+/* Header actions of the task list share the row in equal-width buttons. */
+body .content-viewport .bugun-page .zx-page-header__actions > * {
+  flex: 1 1 0;
+  min-width: 150px;
+}
+
+/* Tablet: the five header actions split 3 + 2 in equal thirds (never 4 + 1); icons never shrink to a dot. */
+@media (max-width: 900px) {
+  body .content-viewport .bugun-page .zx-page-header__actions > * {
+    flex: 1 1 calc(33.333% - 10px);
+    min-width: 0;
+  }
+}
+
+.ai-task-automation-nav-link svg,
+.ai-task-create-button svg {
+  flex: 0 0 1rem;
+}
+
+/* View tabs flow as auto-width, left-aligned chips of one height (no fixed grid, so no short ragged last row). */
+body .content-viewport .bugun-page .ai-task-center-unified .ai-task-center-unified__view-rail {
+  display: flex;
+  flex-wrap: wrap;
+  grid-template-columns: none;
+  gap: 6px;
+  align-items: center;
+}
+
+body .content-viewport .bugun-page .ai-task-center-unified .ai-task-center-unified__view-tab {
+  flex: 0 0 auto;
+  min-height: 36px;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+/* The record link of the task table is an accent link with an arrow, not body-coloured text. */
+body .content-viewport .ai-task-center-unified__table td:last-child a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--zx-accent-strong, #1d4ed8);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+body .content-viewport .ai-task-center-unified__table td:last-child a::after {
+  content: "→";
+}
+
+/* Frozen checklist C4: the simulation form sits directly in the Simülasyon card (no second border), and policy rows share one minimum height so sibling cards align. */
+body .content-viewport .ai-task-automation-workspace .ai-task-automation-simulation__form {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body .content-viewport .ai-task-automation-workspace dl.ai-task-automation-policy-card__kv > div {
+  min-height: 3rem;
+  align-items: center;
+}
+
+/* Frozen checklist C14/C4: task table headers use the shared uppercase tracked style; the tab group, table and attention rows carry no second border; the attention strip uses the shared card radius. */
+body .content-viewport .bugun-page .ai-task-center-unified__table thead th {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--zx-text-muted, #5b6b80);
+}
+
+body .content-viewport .bugun-page .ai-task-center-unified__view-rail,
+body .content-viewport .bugun-page .ai-task-center-unified__table-wrap {
+  border: 0;
+}
+
+body .content-viewport .bugun-page .bugun-sections .fact-section {
+  border-radius: var(--zx-radius, 14px);
+}
+
+body .content-viewport .bugun-page .bugun-attention-list li {
+  border: 0;
+  border-bottom: 1px solid var(--zx-line, #e2e8f0);
+  background: transparent;
+  padding: 12px 0;
+}
+
+/* Frozen checklist C5: at tablet widths the task table fits its card (no clipped "Bağlantı" header): the context column is dropped, headers and cells may wrap. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  body .content-viewport .ai-task-center-unified__table {
+    min-width: 0;
+  }
+
+  body .content-viewport .bugun-page .ai-task-center-unified__table :is(th, td):nth-last-child(2) {
+    display: none;
+  }
+
+  body .content-viewport .bugun-page .ai-task-center-unified__table :is(th, td):not(:nth-child(2)) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { LayoutGrid, List } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
+import { useScrollFade } from "@/lib/hooks/use-scroll-fade";
 import { EmptyState } from "@/components/ui/states";
 
 import {
@@ -25,6 +25,8 @@ import {
 } from "../domain/ai-task-center-item";
 import { TASK_CENTER_VIEW_ARIA_LABEL } from "../domain/ai-task-product-labels";
 import { AiTaskCenterItemCard } from "./ai-task-center-item-card";
+import "./ai-task-center-view-select.css";
+import { AiTaskSourceLabel } from "./ai-task-source-label";
 
 type AiTaskCenterUnifiedWorkspaceProps = Readonly<{
   items: readonly AiTaskCenterItem[];
@@ -126,7 +128,7 @@ function AiTaskCenterUnifiedRow({
   return (
     <tr data-testid={`ai-task-center-item-${item.nativeSourceKind}-${item.nativeSourceId}`}>
       <td>
-        <Badge tone="neutral">{item.sourceLabel}</Badge>
+        <AiTaskSourceLabel label={item.sourceLabel} />
       </td>
       <td>
         <Link href={item.deepLinkPath}>{item.title}</Link>
@@ -155,9 +157,11 @@ export function AiTaskCenterUnifiedWorkspace({
   initialView,
   initialOriginFilter,
 }: AiTaskCenterUnifiedWorkspaceProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const railRef = useScrollFade<HTMLDivElement>(initialView ?? searchParams.get("gorunum") ?? "");
 
-  const view = parseAiTaskCenterView(initialView ?? searchParams.get("gorunum"));
+  const explicitView = initialView ?? searchParams.get("gorunum");
   const originFilter = parseAiTaskCenterTaskOriginFilter(
     initialOriginFilter ?? searchParams.get("kaynak"),
   );
@@ -166,11 +170,6 @@ export function AiTaskCenterUnifiedWorkspace({
   const assignedIds = useMemo(
     () => new Set(assignedTaskIds),
     [assignedTaskIds],
-  );
-
-  const visibleItems = useMemo(
-    () => filterAiTaskCenterItems(items, view, assignedIds, originFilter),
-    [assignedIds, items, originFilter, view],
   );
 
   const viewCounts = useMemo(() => {
@@ -188,6 +187,17 @@ export function AiTaskCenterUnifiedWorkspace({
 
     return counts;
   }, [assignedIds, closureQueueCounts, items, originFilter]);
+
+  // Without an explicit view, open the first tab that actually holds records instead of an empty one.
+  const view: AiTaskCenterView = explicitView
+    ? parseAiTaskCenterView(explicitView)
+    : ((Object.keys(AI_TASK_CENTER_VIEWS) as AiTaskCenterView[]).find((key) => viewCounts[key] > 0)
+      ?? parseAiTaskCenterView(null));
+
+  const visibleItems = useMemo(
+    () => filterAiTaskCenterItems(items, view, assignedIds, originFilter),
+    [assignedIds, items, originFilter, view],
+  );
 
   const showOriginFilters =
     view === "all-tasks"
@@ -234,9 +244,26 @@ export function AiTaskCenterUnifiedWorkspace({
   return (
     <div className="ai-task-center-unified" data-testid="ai-task-center-unified-workspace">
       <div className="ai-task-center-unified__toolbar">
+        <label className="ai-task-center-unified__view-select">
+          <span>Görünüm</span>
+          <select
+            data-testid="ai-task-center-view-select"
+            onChange={(event) => {
+              router.push(buildCenterHref(listPath, event.target.value as AiTaskCenterView, originFilter, presentationMode));
+            }}
+            value={view}
+          >
+            {(Object.entries(AI_TASK_CENTER_VIEWS) as Array<[AiTaskCenterView, string]>).map(([viewKey, label]) => (
+              <option key={viewKey} value={viewKey}>
+                {label} ({viewCounts[viewKey]})
+              </option>
+            ))}
+          </select>
+        </label>
         <div
           aria-label={TASK_CENTER_VIEW_ARIA_LABEL}
           className="ai-task-center-unified__view-rail"
+          ref={railRef}
           role="tablist"
         >
           {(Object.entries(AI_TASK_CENTER_VIEWS) as Array<[AiTaskCenterView, string]>).map(
@@ -270,7 +297,7 @@ export function AiTaskCenterUnifiedWorkspace({
           role="group"
         >
           <Link
-            aria-pressed={presentationMode === "cards"}
+            aria-current={presentationMode === "cards" ? "true" : undefined}
             className="ai-task-center-unified__layout-button"
             data-testid="ai-task-center-view-cards"
             href={cardsHref}
@@ -279,7 +306,7 @@ export function AiTaskCenterUnifiedWorkspace({
             Kart
           </Link>
           <Link
-            aria-pressed={presentationMode === "list"}
+            aria-current={presentationMode === "list" ? "true" : undefined}
             className="ai-task-center-unified__layout-button"
             data-testid="ai-task-center-view-list"
             href={listHref}
@@ -303,7 +330,7 @@ export function AiTaskCenterUnifiedWorkspace({
 
             return (
               <Link
-                aria-pressed={active}
+                aria-current={active ? "true" : undefined}
                 className="ai-task-center-unified__origin-filter"
                 data-testid={`ai-task-center-origin-${filterKey}`}
                 href={href}
@@ -322,8 +349,8 @@ export function AiTaskCenterUnifiedWorkspace({
 
       {visibleItems.length > 0 ? (
         presentationMode === "list" ? (
-          <div className="ai-task-center-unified__table-wrap">
-            <table className="ai-task-center-unified__table">
+          <div className="ai-task-center-unified__table-wrap" tabIndex={0} role="region" aria-label="Görev listesi (kaydırılabilir)">
+            <table aria-label="Görev listesi" className="ai-task-center-unified__table">
               <thead>
                 <tr>
                   <th>Kaynak</th>
@@ -333,7 +360,7 @@ export function AiTaskCenterUnifiedWorkspace({
                   {showTeamColumn ? <th>Ekip</th> : null}
                   {showSlaColumn ? <th>SLA</th> : null}
                   {showDueDateColumn ? <th>Son Tarih</th> : null}
-                  {showEscalationColumn ? <th>Eskalasyon</th> : null}
+                  {showEscalationColumn ? <th>Üst Seviyeye Aktarım</th> : null}
                   <th>Öncelik</th>
                   <th>Durum</th>
                   <th>İlişkili bağlam</th>
@@ -368,8 +395,16 @@ export function AiTaskCenterUnifiedWorkspace({
         )
       ) : (
         <EmptyState
+          className="state-panel empty-state ai-task-center-unified__empty"
           description="Seçili görünümde gösterilecek kayıt bulunmuyor."
-          title="Kayıt bulunamadı"
+          title="Kayıt yok"
+          action={
+            view !== "all-tasks" ? (
+              <Link className="ai-task-automation-nav-link" href={buildCenterHref(listPath, "all-tasks", originFilter, presentationMode)}>
+                Tüm görevleri göster
+              </Link>
+            ) : undefined
+          }
         />
       )}
     </div>

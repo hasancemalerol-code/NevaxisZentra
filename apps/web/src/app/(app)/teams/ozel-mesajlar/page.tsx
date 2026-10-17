@@ -3,7 +3,7 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import {
   fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
@@ -16,6 +16,7 @@ import {
   readTeamsDirectConversations,
   readTeamsDirectRecipients,
 } from "@/features/teams/server/teams-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -33,10 +34,10 @@ export default async function TeamsDirectMessagesPage({ searchParams }: TeamsDir
       <PageContent>
         <PageHeader
           description="Aynı tesis kapsamındaki üyelerle kalıcı bire bir mesajlaşma."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Özel mesajlar"
         />
-        <EmptyState description={conversationsResult.message} title="Konuşmalar yüklenemedi" />
+        <FailureStatePage code={"code" in conversationsResult ? conversationsResult.code : undefined} message={conversationsResult.message} failedTitle="Konuşmalar yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -57,10 +58,10 @@ export default async function TeamsDirectMessagesPage({ searchParams }: TeamsDir
       <PageContent>
         <PageHeader
           description="Aynı tesis kapsamındaki üyelerle kalıcı bire bir mesajlaşma."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Özel mesajlar"
         />
-        <EmptyState description={selectedConversationResult.message} title="Konuşma yüklenemedi" />
+        <FailureStatePage code={"code" in selectedConversationResult ? selectedConversationResult.code : undefined} message={selectedConversationResult.message} failedTitle="Konuşma yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -69,10 +70,10 @@ export default async function TeamsDirectMessagesPage({ searchParams }: TeamsDir
     <PageContent>
       <PageHeader
         description="Kalıcı, salt metin bire bir operasyon mesajlaşması."
-        eyebrow="Teams"
+        eyebrow="Operasyon iletişimi"
         title="Özel mesajlar"
       />
-      <Section title="Konuşmalar">
+      <Section title="Bire bir mesajlaşma">
         <TeamsDirectMessagesClient
           canWrite={canWrite && conversationsResult.value.capabilities.canWrite}
           conversations={conversationsResult.value}

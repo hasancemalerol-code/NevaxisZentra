@@ -23,8 +23,9 @@ public static class ProductionManagerEndpointRouteBuilderExtensions
         return endpoints;
     }
 
-    public static IServiceCollection AddNevaxisZentraProductionManager(this IServiceCollection services)
+    public static IServiceCollection AddNevaxisZentraProductionManager(this IServiceCollection services, bool scenarioEnginesEnabled)
     {
+        services.AddSingleton(new ProductionManagerScenarioGate(scenarioEnginesEnabled));
         services.AddScoped<IProductionManagerRepository, ProductionManagerRepository>();
         services.AddScoped<IProductionManagerService, ProductionManagerService>();
         return services;

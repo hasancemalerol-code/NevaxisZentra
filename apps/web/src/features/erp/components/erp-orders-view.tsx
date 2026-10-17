@@ -1,4 +1,4 @@
-import { ClipboardList } from "lucide-react";
+import { CircleCheck, ClipboardList, TriangleAlert } from "lucide-react";
 
 import type { CanonicalErpOrderSummary } from "../domain/erp";
 import {
@@ -11,6 +11,8 @@ import {
   ErpDataTable,
   ErpEmptyState,
   ErpFreshnessBadge,
+  ErpKpiCard,
+  ErpKpiGrid,
   ErpMappingBadge,
   ErpPageHeader,
   ErpProviderBadge,
@@ -39,14 +41,14 @@ function getReadinessBadgeClass(ready: boolean, blockingCodes: readonly string[]
 
 export function ErpOrdersView({ orders }: ErpOrdersViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="ERP Siparişleri"
-        description="Harici ERP sisteminden içe aktarılan kanonik sipariş kayıtları, eşleştirme durumu ve operasyonel hazırlık."
+        description="Harici ERP sisteminden içe aktarılan sipariş kayıtları, eşleştirme durumu ve operasyonel hazırlık."
         notice={
           <>
             <ErpReadonlyNotice>
-              ERP-2L yalnızca ERP Simulator siparişlerini içe aktarır. Üretim kaydı otomatik
+              Bu bağlantı ERP siparişlerini salt okunur olarak içe aktarır. Üretim kaydı otomatik
               oluşturulmaz.
             </ErpReadonlyNotice>
             <ErpSimulatorNotice />
@@ -56,6 +58,29 @@ export function ErpOrdersView({ orders }: ErpOrdersViewProps) {
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/siparisler" />
 
+      <ErpKpiGrid columns={3}>
+        <ErpKpiCard
+          label="ERP Siparişleri"
+          value={orders.length}
+          description="İçe aktarılan sipariş"
+          icon={<ClipboardList aria-hidden="true" />}
+        />
+        <ErpKpiCard
+          label="Operasyona Hazır"
+          value={orders.filter((order) => order.readyForOperationalUse).length}
+          description="Eşleştirmesi tamamlanmış"
+          icon={<CircleCheck aria-hidden="true" />}
+          tone="success"
+        />
+        <ErpKpiCard
+          label="İnceleme Gerekiyor"
+          value={orders.filter((order) => !order.readyForOperationalUse).length}
+          description="Eşleştirme veya veri eksiği"
+          icon={<TriangleAlert aria-hidden="true" />}
+          tone="warning"
+        />
+      </ErpKpiGrid>
+
       <section className="erp-section">
         <ErpSectionHeader
           title="Sipariş Listesi"
@@ -64,10 +89,12 @@ export function ErpOrdersView({ orders }: ErpOrdersViewProps) {
         {orders.length === 0 ? (
           <ErpEmptyState
             title="Henüz ERP siparişi yok."
-            description="Önce sipariş senkronizasyonu çalıştırın."
+            description="Önce sipariş eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable className="erp-table--orders">
+          <ErpDataTable label="ERP siparişleri" className="erp-table--orders">
             <thead>
               <tr>
                 <th>ERP Sipariş No</th>
@@ -128,12 +155,6 @@ export function ErpOrdersView({ orders }: ErpOrdersViewProps) {
           </ErpDataTable>
         )}
       </section>
-
-      {orders.length === 0 ? (
-        <div className="erp-empty" aria-hidden="true">
-          <ClipboardList />
-        </div>
-      ) : null}
-    </main>
+    </div>
   );
 }

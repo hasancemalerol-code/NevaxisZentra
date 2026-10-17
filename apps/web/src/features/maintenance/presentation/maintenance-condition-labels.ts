@@ -91,7 +91,7 @@ export function getMaintenanceAnomalySeverityLabel(severity: string): string {
 }
 
 export const MAINTENANCE_CONDITION_SIMULATOR_DISCLAIMER =
-  "Bu değerlendirme simülatör verisiyle doğrulanmıştır; gerçek makine kestirici bakım doğrulaması henüz yapılmamıştır.";
+  "Değerlendirme, kayıtlı makine gözlemlerinden kural tabanlı olarak üretilir; sahada doğrulamanın yerine geçmez.";
 
 export const MAINTENANCE_CONDITION_ANOMALY_EXPLANATION =
   "Normal davranıştan sapma algılandı.";

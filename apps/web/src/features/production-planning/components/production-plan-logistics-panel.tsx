@@ -22,6 +22,7 @@ import {
   type PlanningLogisticsEvaluationView,
 } from "../presentation/production-plan-logistics-formatters";
 import type { evaluatePlanningLogisticsAction } from "../server/production-plan-logistics-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ProductionPlanLogisticsPanelProps = Readonly<{
   planId: string;
@@ -100,10 +101,8 @@ export function ProductionPlanLogisticsPanel({
 
             <h2>Fabrika sevkiyat termin kısıtları</h2>
 
-            <p>
-              Pickup ve hazırlık deadline&apos;ları Export/Shipment kaynağından
-              salt okunur tüketilir. Planning dış lojistik veya broker
-              operasyonlarını yönetmez.
+            <p className="production-plan-card__note">
+              Alım ve hazırlık termin tarihleri ihracat/sevkiyat kaydından salt okunur alınır. Planlama, dış lojistik veya broker operasyonlarını yönetmez.
             </p>
           </div>
 
@@ -119,13 +118,12 @@ export function ProductionPlanLogisticsPanel({
         </div>
 
         {state === "error" && errorMessage ? (
-          <p>{errorMessage}</p>
+          <p>{customerMessage(errorMessage)}</p>
         ) : null}
 
         {!linked ? (
           <p>
-            Bağlı ihracat/sevkiyat kaydı bulunamadı (
-            {evaluation.linkageStatus}).
+            Bağlı ihracat/sevkiyat kaydı bulunamadı.
           </p>
         ) : (
           <>
@@ -145,9 +143,9 @@ export function ProductionPlanLogisticsPanel({
               <div>
                 <CalendarClock aria-hidden="true" />
                 <div>
-                  <span>Pickup deadline</span>
+                  <span>Fabrika çıkış termini</span>
                   <strong>{formatDateTime(evaluation.pickupDeadlineUtc)}</strong>
-                  <small>Fabrika dışı pickup tarihi (Export kaynağı)</small>
+                  <small>Fabrika dışı alım tarihi (ihracat kaydı)</small>
                 </div>
               </div>
 
@@ -168,7 +166,7 @@ export function ProductionPlanLogisticsPanel({
               <div>
                 <AlertTriangle aria-hidden="true" />
                 <div>
-                  <span>Slack / kalan süre</span>
+                  <span>Termin payı</span>
                   <strong>
                     {formatPlanningLogisticsSlackLabel(evaluation.slackMinutes)}
                   </strong>
@@ -181,7 +179,7 @@ export function ProductionPlanLogisticsPanel({
               <div>
                 <ShieldCheck aria-hidden="true" />
                 <div>
-                  <span>Export readiness</span>
+                  <span>İhracat hazırlığı</span>
                   <strong>
                     {formatExportReadinessLabel(
                       evaluation.exportHandoffReady,
@@ -197,13 +195,12 @@ export function ProductionPlanLogisticsPanel({
             </div>
 
             {evaluation.exportHandoffBlocked ? (
-              <p>
-                <strong>Export readiness blocked.</strong> Ayrıntılar Export
-                modülünde görüntülenir.
+              <p className="production-plan-card__note">
+                <strong>İhracat hazırlığı engelli.</strong> Ayrıntılar ihracat modülünde görüntülenir.
               </p>
             ) : null}
 
-            <p>
+            <p className="production-plan-card__note">
               Son değerlendirme: {formatDateTime(evaluation.evaluatedAtUtc)} ·
               kaynak sürüm {evaluation.sourceVersion}
             </p>

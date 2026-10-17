@@ -2,22 +2,23 @@ import { ContinuousImprovementShiftBriefPanel } from "@/features/factory-learnin
 import { ProductionManagerShiftBriefPanel } from "@/features/production-manager/components/production-manager-shift-brief-panel";
 import { ShiftOperationsHandoverView } from "@/features/shift-operations/components/shift-operations-handover-view";
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export default async function VardiyalarTeslimPage() {
   const workspace = await readShiftOperationsWorkspace();
   if (workspace.status === "failure") {
-    return <p role="alert">{workspace.message}</p>;
+    return <p role="alert">{customerMessage(workspace.message)}</p>;
   }
 
   return (
     <>
-      <ProductionManagerShiftBriefPanel mode="handover" />
-      <ContinuousImprovementShiftBriefPanel mode="handover" />
       <ShiftOperationsHandoverView
         openItems={workspace.openItems}
         preview={workspace.preview}
         shift={workspace.currentShift}
       />
+      <ProductionManagerShiftBriefPanel mode="handover" />
+      <ContinuousImprovementShiftBriefPanel mode="handover" />
     </>
   );
 }

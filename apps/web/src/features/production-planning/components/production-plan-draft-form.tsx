@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import "./production-plan-draft-form.css";
 import type { ProductionPlanDraftFieldError } from "../domain/production-plan";
 
 export type ProductionPlanDraftFormValues = Readonly<{
@@ -96,7 +97,14 @@ export function ProductionPlanDraftForm({
   const isDirty = useRef(false);
   const submitted = useRef(false);
 
+  const firstRender = useRef(true);
+
   useEffect(() => {
+    // An untouched form is not dirty: only changes after the first render count.
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
     isDirty.current = true;
   }, [values]);
 
@@ -186,8 +194,8 @@ export function ProductionPlanDraftForm({
   if (previewWriteBlocked) {
     return (
       <div className="production-plan-form-blocked">
-        <p>Geliştirme önizleme modunda yazma işlemleri devre dışı bırakılmıştır.</p>
-        <p>Gerçek plan oluşturmak için development-api modunu kullanın.</p>
+        <p>Bu ortamda yazma işlemleri devre dışıdır.</p>
+        <p>Gerçek plan oluşturmak için canlı bağlantı kipini kullanın.</p>
       </div>
     );
   }
@@ -225,7 +233,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="referenceCode">
-            Referans Kodu <span aria-hidden="true">*</span>
+            Referans Kodu <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="referenceCode"
@@ -255,7 +263,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="title">
-            Plan Başlığı <span aria-hidden="true">*</span>
+            Plan Başlığı <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="title"
@@ -308,17 +316,18 @@ export function ProductionPlanDraftForm({
             <option value="manual">Manuel</option>
             <option value="approved-order">Onaylı Sipariş</option>
             <option value="erp-production-request">ERP Üretim Talebi</option>
-            <option value="ai-recommendation">AI Önerisi</option>
+            <option value="ai-recommendation">Yapay Zekâ Önerisi</option>
           </select>
         </div>
       </section>
 
       <section className="production-plan-draft-form__section">
         <h2>Zaman Penceresi</h2>
+        <p className="production-plan-draft-form__section-hint">Saatler UTC olarak girilir.</p>
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="plannedStartAtUtc">
-            Planlanan Başlangıç (UTC) <span aria-hidden="true">*</span>
+            Planlanan Başlangıç (UTC) <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="plannedStartAtUtc"
@@ -347,7 +356,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="plannedEndAtUtc">
-            Planlanan Bitiş (UTC) <span aria-hidden="true">*</span>
+            Planlanan Bitiş (UTC) <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="plannedEndAtUtc"
@@ -378,7 +387,7 @@ export function ProductionPlanDraftForm({
       <section className="production-plan-draft-form__section">
         <h2>Talepler</h2>
         <p className="production-plan-draft-form__section-hint">
-          En az bir talep gereklidir. Şu an tek talep girişi desteklenmektedir.
+          En az bir talep gereklidir. Plan ilk talep ile oluşturulur; ek talepler plan ekranından eklenir.
         </p>
 
         {getFieldError(fieldErrors, "demands") ? (
@@ -392,7 +401,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="demandProductId">
-            Ürün / Parça ID <span aria-hidden="true">*</span>
+            Ürün / parça kodu <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="demandProductId"
@@ -407,7 +416,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="demandProductName">
-            Ürün Adı <span aria-hidden="true">*</span>
+            Ürün Adı <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="demandProductName"
@@ -422,7 +431,7 @@ export function ProductionPlanDraftForm({
 
         <div className="production-plan-draft-form__field">
           <label htmlFor="demandQuantity">
-            Miktar <span aria-hidden="true">*</span>
+            Miktar <span className="zx-required" aria-hidden="true">*</span>
           </label>
           <input
             id="demandQuantity"
@@ -461,18 +470,9 @@ export function ProductionPlanDraftForm({
       </section>
 
       <section className="production-plan-draft-form__section">
-        <h2>Kaynaklar</h2>
+        <h2>Sonraki Adımlar</h2>
         <p className="production-plan-draft-form__section-hint">
-          Makine, kalıp ve malzeme atamaları isteğe bağlıdır.
-          Gerçek kaynak kataloğu entegrasyonu bu sürümde henüz mevcut değildir.
-        </p>
-      </section>
-
-      <section className="production-plan-draft-form__section">
-        <h2>Riskler</h2>
-        <p className="production-plan-draft-form__section-hint">
-          Bu sürümde risk girişi basit form üzerinden desteklenmemektedir.
-          Riskler API üzerinden eklenebilir.
+          Makine, kalıp ve malzeme atamaları isteğe bağlıdır. Kaynak atamaları ve riskler, plan oluşturulduktan sonra plan ekranından eklenir.
         </p>
       </section>
 
@@ -488,6 +488,12 @@ export function ProductionPlanDraftForm({
             : mode === "create"
               ? "Taslak Oluştur"
               : "Değişiklikleri Kaydet"}
+        </button>
+        <button type="button" className="button button-secondary button-medium" onClick={() => {
+            isDirty.current = false;
+            router.push("/planlama");
+          }}>
+          Vazgeç
         </button>
       </div>
     </form>

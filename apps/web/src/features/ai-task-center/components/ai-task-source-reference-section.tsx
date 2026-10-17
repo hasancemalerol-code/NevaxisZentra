@@ -8,6 +8,7 @@ type AiTaskSourceReferenceSectionProps = Readonly<{
   sourceModule: string | null;
   sourceEntityId: string | null;
   taskReference: string;
+  evidenceSourceCount?: number;
   taskTitle?: string | null;
   teamsMessageSourceLink?: ReactNode;
 }>;
@@ -43,15 +44,17 @@ function formatSourceModuleLabel(sourceModule: string): string {
     "production-planning": "Üretim planlama",
     teams: "Teams mesajı",
     "shift-handover": "Vardiya teslimi",
+    "factory-decision-center": "Fabrika karar merkezi",
+    "golden-demo-p1": "Senaryo kaydı",
   };
 
-  return labels[sourceModule] ?? sourceModule;
+  return labels[sourceModule] ?? "Diğer modül";
 }
 
 export function AiTaskSourceReferenceSection({
   sourceModule,
   sourceEntityId,
-  taskReference,
+  evidenceSourceCount = 0,
   taskTitle = null,
   teamsMessageSourceLink = null,
 }: AiTaskSourceReferenceSectionProps) {
@@ -111,35 +114,22 @@ export function AiTaskSourceReferenceSection({
       <header className="ai-task-detail-context__header">
         <Link2 aria-hidden="true" />
         <div>
-          <p className="ai-task-detail-context__eyebrow">Related Context</p>
-          <h2 className="ai-task-detail-context__title">İlişkili Bağlam</h2>
+          <h2 className="ai-task-detail-context__title">İlgili Bağlam</h2>
         </div>
       </header>
 
       <dl className="ai-task-detail-context__grid">
         <div>
-          <dt>Görev referansı</dt>
-          <dd>{taskReference}</dd>
-        </div>
-        <div>
-          <dt>Modül</dt>
+          <dt>Kaynak Modül</dt>
           <dd>
             {sourceModule
               ? formatSourceModuleLabel(sourceModule)
-              : "Bağlı değil"}
+              : "Doğrudan modül bağlantısı yok"}
           </dd>
         </div>
         <div>
-          <dt>Kaynak kayıt</dt>
-          <dd>{sourceEntityId ?? "Tanımlanmadı"}</dd>
-        </div>
-        <div>
-          <dt>Kaynak türü</dt>
-          <dd>
-            {sourceModule
-              ? formatSourceModuleLabel(sourceModule)
-              : "Belirtilmemiş"}
-          </dd>
+          <dt>Bağlı Kayıt</dt>
+          <dd>{sourceEntityId ? "Bağlı kayıt mevcut" : "Doğrudan bağlı kayıt yok"}</dd>
         </div>
       </dl>
 
@@ -148,7 +138,6 @@ export function AiTaskSourceReferenceSection({
           <Badge tone="neutral">
             {formatSourceModuleLabel(sourceModule!)}
           </Badge>
-          <span className="ai-task-detail-context__entity">{sourceEntityId}</span>
           {sourceLink ? (
             <Link className="ai-task-detail-context__link" href={sourceLink.href}>
               <ExternalLink aria-hidden="true" />
@@ -159,7 +148,9 @@ export function AiTaskSourceReferenceSection({
         </div>
       ) : (
         <p className="ai-task-detail-context__empty">
-          Bu görev henüz bir kaynak modülüne bağlanmadı.
+          {evidenceSourceCount > 0
+            ? `Bu görev doğrudan bir modül kaydına bağlı değil; dayanak olarak kullanılan ${evidenceSourceCount} kaynak veri aşağıdaki Kaynak veriler bölümünde listelenir.`
+            : "Bu görev henüz bir kaynak modülüne bağlanmadı."}
         </p>
       )}
     </section>

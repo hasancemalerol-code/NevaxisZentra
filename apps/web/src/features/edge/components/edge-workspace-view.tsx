@@ -1,5 +1,6 @@
 "use client";
 
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 import { useMemo, useState } from "react";
 import "./edge-workspace.css";
 import { EdgeExecutiveKpis } from "./edge-executive-kpis";
@@ -34,6 +35,8 @@ import type {
 } from "../presentation/edge-reliability-fixtures";
 import { EDGE_RELIABILITY_FIXTURE } from "../presentation/edge-reliability-fixtures";
 import type { EdgeMachineDetailBundle } from "../domain/edge-types";
+import { displayDataName } from "@/lib/presentation/display-name";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 // ---------------------------------------------------------------------------
 // Types (mirrors EdgeModels.cs read models — EDGE-1 + EDGE-2 + EDGE-3)
@@ -303,7 +306,7 @@ function GatewayCard({ gateway }: { gateway: EdgeGatewayReadModel }) {
         <span className="edge-card__code">{gateway.gatewayCode}</span>
         <EdgeStatusBadge status={gateway.status} />
       </div>
-      <p className="edge-card__name">{gateway.name}</p>
+      <p className="edge-card__name">{displayDataName(gateway.name)}</p>
       <div className="edge-card__meta">
         <span>{getEdgeGatewayVendorLabel(gateway.vendorKey)}</span>
         <span>·</span>
@@ -450,7 +453,7 @@ function CycleRow({ cycle }: { cycle: ObservedCycleReadModel }) {
       <td>
         <TelemetryQualityBadge quality={cycle.quality} />
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11, color: "#94a3b8" }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12, color: "#94a3b8" }}>
         {new Date(cycle.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
       </td>
     </tr>
@@ -491,10 +494,10 @@ function DowntimeEpisodeRow({ episode }: { episode: DowntimeEpisodeReadModel }) 
 
   return (
     <tr className={episode.isOutOfOrder ? "edge-ops-table__oor" : undefined}>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(episode.startedAtSourceUtc).toLocaleTimeString("tr-TR")}
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {episode.endedAtSourceUtc
           ? new Date(episode.endedAtSourceUtc).toLocaleTimeString("tr-TR")
           : "—"}
@@ -530,7 +533,7 @@ function ActiveAlarmRow({ alarm }: { alarm: ActiveAlarmReadModel }) {
       <td>
         <AlarmSeverityBadge severity={alarm.severity} />
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(alarm.raisedAtSourceUtc).toLocaleTimeString("tr-TR")}
       </td>
       <td>
@@ -558,7 +561,7 @@ function AlarmHistoryRow({ obs }: { obs: AlarmObservationReadModel }) {
       <td>
         <AlarmSeverityBadge severity={obs.severity} />
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(obs.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
       </td>
       <td>
@@ -577,10 +580,10 @@ function AlarmHistoryRow({ obs }: { obs: AlarmObservationReadModel }) {
 function SetupEpisodeRow({ episode }: { episode: SetupEpisodeReadModel }) {
   return (
     <tr className={episode.isOutOfOrder ? "edge-ops-table__oor" : undefined}>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(episode.startedAtSourceUtc).toLocaleTimeString("tr-TR")}
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {episode.completedAtSourceUtc
           ? new Date(episode.completedAtSourceUtc).toLocaleTimeString("tr-TR")
           : "—"}
@@ -615,7 +618,7 @@ function ScrapObservationRow({ scrap }: { scrap: ScrapObservationReadModel }) {
       </td>
       <td>{scrap.unit}</td>
       <td>{reason}</td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(scrap.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
       </td>
       <td>
@@ -630,10 +633,10 @@ function BufferedEventRow({ event }: { event: EdgeBufferedEventReadModel }) {
     <tr>
       <td>{getMachineEventKindLabel(event.eventType)}</td>
       <td>{event.machineCode}</td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(event.sourceTimestampUtc).toLocaleTimeString("tr-TR")}
       </td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {new Date(event.queueTimeUtc).toLocaleTimeString("tr-TR")}
       </td>
       <td>{event.attempts}</td>
@@ -642,7 +645,7 @@ function BufferedEventRow({ event }: { event: EdgeBufferedEventReadModel }) {
           {getEdgeBufferStatusLabel(event.status)}
         </span>
       </td>
-      <td style={{ fontSize: 11, color: "#64748b" }}>
+      <td style={{ fontSize: 12, color: "#64748b" }}>
         {getEdgeBufferErrorLabel(event.lastError)}
       </td>
     </tr>
@@ -654,11 +657,11 @@ function DeadLetterRow({ record }: { record: EdgeDeadLetterReadModel }) {
     <tr>
       <td>{getMachineEventKindLabel(record.eventType)}</td>
       <td>{record.machineCode}</td>
-      <td style={{ fontSize: 11, color: "#64748b" }}>
+      <td style={{ fontSize: 12, color: "#64748b" }}>
         {getEdgeBufferErrorLabel(record.reason)}
       </td>
       <td>{record.attempts}</td>
-      <td style={{ whiteSpace: "nowrap", fontSize: 11 }}>
+      <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
         {record.lastFailureAtUtc
           ? new Date(record.lastFailureAtUtc).toLocaleTimeString("tr-TR")
           : "—"}
@@ -711,7 +714,7 @@ export function EdgeWorkspaceView({
   offlineMessage = EDGE_RELIABILITY_FIXTURE.offlineMessage,
   replayMessage = EDGE_RELIABILITY_FIXTURE.replayMessage,
   machineDetails = {},
-  isSimulatorFixture = true,
+  isSimulatorFixture = false,
   loadError = null,
 }: EdgeWorkspaceViewProps) {
   const [selectedMachineId, setSelectedMachineId] = useState<string | null>(null);
@@ -729,31 +732,69 @@ export function EdgeWorkspaceView({
   const resolvedDeliveryHealth =
     deliveryHealth ?? EDGE_RELIABILITY_FIXTURE.deliveryHealth;
 
+  if (machines.length === 0 && gateways.length === 0) {
+    return (
+      <div className="edge-workspace-page">
+        <div className="edge-workspace-header edge-workspace-header--executive">
+          <div className="edge-header__intro">
+            <p className="zx-page-header__eyebrow">Üretim</p>
+            <div className="edge-header__title-row">
+              <h1>Makineler</h1>
+            </div>
+            <p className="edge-header__subtitle">
+              Makine bağlantıları, operasyonel sinyaller ve saha veri akışının merkezi.
+            </p>
+          </div>
+          <div className="edge-header__actions">
+            <StatePageLink href="/uretim/kaynaklar">Makineler ve Kaynaklar</StatePageLink>
+          </div>
+        </div>
+        {loadError ? (
+          <div className="edge-load-error" role="alert">
+            {customerMessage(loadError)}
+          </div>
+        ) : null}
+        <StatePage
+          kind="empty"
+          inline
+          code="MAKİNE YOK"
+          title="Henüz bağlı makine yok"
+          description="Makineler ağ geçidi bağlantısı kurulduğunda ya da makine listesi veri aktarımıyla yüklendiğinde burada izlenir."
+          actions={<StatePageLink href="/ayarlar/veri-aktarim-merkezi" primary>Veri Aktarım Merkezi</StatePageLink>}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="edge-workspace-page">
       {/* Executive header */}
       <div className="edge-workspace-header edge-workspace-header--executive">
         <div className="edge-header__intro">
+          <p className="zx-page-header__eyebrow">Üretim</p>
           <div className="edge-header__title-row">
-            <h1>Makine & Edge</h1>
+            <h1>Makineler</h1>
             {isSimulatorFixture && (
-              <span className="edge-sim-badge edge-sim-badge--header">Simülatör</span>
+              <span className="edge-sim-badge edge-sim-badge--header">Örnek veri</span>
             )}
           </div>
           <p className="edge-header__subtitle">
-            Makine bağlantıları, operasyonel sinyaller ve Edge veri akışının merkezi.
+            Makine bağlantıları, operasyonel sinyaller ve saha veri akışının merkezi.
           </p>
           {isSimulatorFixture && (
             <p className="edge-simulator-notice edge-simulator-notice--inline" data-testid="edge-simulator-page-notice">
-              Simülatör verisi — gerçek makine bağlantısı değildir.
+              Örnek veri — gerçek makine bağlantısı değildir.
             </p>
           )}
+        </div>
+        <div className="edge-header__actions">
+          <StatePageLink href="/uretim/kaynaklar">Makineler ve Kaynaklar</StatePageLink>
         </div>
       </div>
 
       {loadError && (
         <div className="edge-load-error" role="alert">
-          {loadError}
+          {customerMessage(loadError)}
         </div>
       )}
 
@@ -801,7 +842,7 @@ export function EdgeWorkspaceView({
 
       <div className="edge-landing-secondary">
         <section className="edge-landing-section">
-          <h2 className="edge-section-title edge-section-title--compact">Edge Gateway Durumu</h2>
+          <h2 className="edge-section-title edge-section-title--compact">Saha ağ geçidi durumu</h2>
           <EdgeGatewayWorkspace gateways={gateways} deliveryHealth={resolvedDeliveryHealth} />
         </section>
 

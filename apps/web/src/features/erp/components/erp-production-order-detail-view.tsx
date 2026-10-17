@@ -28,10 +28,10 @@ export function ErpProductionOrderDetailView({
   productionOrder,
 }: ErpProductionOrderDetailViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense erp-workspace-page--readonly">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense erp-workspace-page--readonly">
       <ErpPageHeader
         title={productionOrder.productionOrderNumber}
-        description="ERP kaynaklı salt okunur üretim projeksiyonu"
+        description="ERP kaynaklı salt okunur üretim özeti"
         notice={
           <ErpReadonlyNotice>
             Bu ekran yalnızca ERP&apos;den senkronize edilen üretim verisini gösterir. Zentra
@@ -122,6 +122,6 @@ export function ErpProductionOrderDetailView({
         {" · "}
         <Link href="/erp-entegrasyonlari/belgeler">Belgeler</Link>
       </p>
-    </main>
+    </div>
   );
 }

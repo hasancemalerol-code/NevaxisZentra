@@ -12,7 +12,6 @@ import {
   Play,
   Power,
   PowerOff,
-  RefreshCw,
   ShieldCheck,
   Zap,
 } from "lucide-react";
@@ -55,7 +54,6 @@ import {
 } from "../presentation/ai-task-automation-presentation";
 import { getAiTaskAutomationTriggerLabel } from "../presentation/ai-task-automation-labels";
 import { getAiTaskEvidenceTypeLabel } from "../presentation/ai-task-closure-labels";
-import { getAiTaskPriorityLabel } from "../presentation/ai-task-labels";
 import {
   createAiTaskAutomationRuleAction,
   disableAiTaskAutomationRuleAction,
@@ -68,6 +66,7 @@ import {
 import type { AiTaskAutomationCapabilities } from "../server/ai-task-automation-queries";
 import { AiTaskDetailField, AiTaskDetailSelect } from "./ai-task-detail-form-controls";
 import { AiTaskAutomationRuleBuilder } from "./ai-task-automation-rule-builder";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskAutomationWorkspaceClientProps = Readonly<{
   rules: readonly AiTaskAutomationRuleSummary[];
@@ -113,7 +112,7 @@ export function AiTaskAutomationWorkspaceClient({
   capabilities,
 }: AiTaskAutomationWorkspaceClientProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [builderMode, setBuilderMode] = useState<BuilderMode>("hidden");
   const [editingRule, setEditingRule] = useState<AiTaskAutomationRuleDetail | null>(null);
   const [historyRuleId, setHistoryRuleId] = useState<string | null>(null);
@@ -232,7 +231,7 @@ export function AiTaskAutomationWorkspaceClient({
   return (
     <div className="ai-task-automation-workspace" data-testid="ai-task-automation-workspace">
       {actionError ? (
-        <p className="ai-task-automation-workspace__error" role="alert">{actionError}</p>
+        <p className="ai-task-automation-workspace__error" role="alert">{customerMessage(actionError)}</p>
       ) : null}
 
       {builderMode === "create" && capabilities.canManage ? (
@@ -266,7 +265,7 @@ export function AiTaskAutomationWorkspaceClient({
           {historyLoading ? (
             <p className="ai-task-automation-muted">Yükleniyor…</p>
           ) : historyItems.length === 0 ? (
-            <EmptyState description="Bu kural için revizyon kaydı bulunamadı." title="Geçmiş boş" />
+            <EmptyState description="Bu kural için revizyon kaydı bulunamadı." title="Kayıt Bulunamadı" />
           ) : (
             <div className="ai-task-automation-activity">
               {historyItems.map((item) => (
@@ -301,8 +300,7 @@ export function AiTaskAutomationWorkspaceClient({
         <section className="ai-task-automation-section">
           <div className="ai-task-automation-section__header">
             <div>
-              <p className="ai-task-automation-module__eyebrow">Modül 1</p>
-              <h2>Otomasyon Kuralları</h2>
+              <h2>Otomasyon kuralları</h2>
               <p>Tetikleyici, koşul ve aksiyon tabanlı kuralları yönetin.</p>
             </div>
             <div className="ai-task-automation-section__actions">
@@ -315,25 +313,16 @@ export function AiTaskAutomationWorkspaceClient({
                     setHistoryRuleId(null);
                   }}
                 >
-                  Yeni Kural
+                  Yeni kural
                 </Button>
               ) : null}
-              <Button
-                disabled={isPending}
-                leadingIcon={<RefreshCw />}
-                type="button"
-                variant="quiet"
-                onClick={refresh}
-              >
-                Yenile
-              </Button>
             </div>
           </div>
 
           {rules.length === 0 ? (
             <EmptyState
               description="Henüz otomasyon kuralı tanımlanmadı."
-              title="Kural bulunamadı"
+              title="Henüz kural yok"
             />
           ) : (
             <div className="ai-task-automation-rule-list">
@@ -465,7 +454,6 @@ export function AiTaskAutomationWorkspaceClient({
         <section className="ai-task-automation-section">
           <div className="ai-task-automation-section__header">
             <div>
-              <p className="ai-task-automation-module__eyebrow">Modül 2</p>
               <h2>Politikalar</h2>
               <p>SLA ve kapanış politika kütüphanesi — otomasyon aksiyonlarında referans.</p>
             </div>
@@ -483,11 +471,7 @@ export function AiTaskAutomationWorkspaceClient({
                     <header className="ai-task-automation-policy-card__header">
                       <div>
                         <h4>{getSlaPolicyDisplayName(policy.policyKey)}</h4>
-                        <code className="ai-task-automation-policy-card__key">{policy.policyKey}</code>
                       </div>
-                      <Badge tone="ai">
-                        {getAiTaskPriorityLabel(policy.priority as "low" | "medium" | "high" | "critical")}
-                      </Badge>
                     </header>
                     <dl className="ai-task-automation-policy-card__kv">
                       <div>
@@ -519,7 +503,6 @@ export function AiTaskAutomationWorkspaceClient({
                     <header className="ai-task-automation-policy-card__header">
                       <div>
                         <h4>{getClosurePolicyDisplayName(policy.policyKey)}</h4>
-                        <code className="ai-task-automation-policy-card__key">{policy.policyKey}</code>
                       </div>
                     </header>
                     <dl className="ai-task-automation-policy-card__kv">
@@ -531,16 +514,22 @@ export function AiTaskAutomationWorkspaceClient({
                         <dt>Kanıt türleri</dt>
                         <dd>
                           {policy.requiredEvidenceTypes.length > 0
-                            ? policy.requiredEvidenceTypes
-                              .map((type) => getAiTaskEvidenceTypeLabel(type as AiTaskEvidenceType))
-                              .join(", ")
+                            ? (
+                              <span className="ai-task-automation-policy-card__chips">
+                                {policy.requiredEvidenceTypes.map((type) => (
+                                  <Badge key={type} tone="neutral">
+                                    {getAiTaskEvidenceTypeLabel(type as AiTaskEvidenceType)}
+                                  </Badge>
+                                ))}
+                              </span>
+                            )
                             : "—"}
                         </dd>
                       </div>
                       <div>
                         <dt>Onay gereksinimi</dt>
                         <dd>
-                          <Badge tone={policy.approvalRequired ? "warning" : "neutral"}>
+                          <Badge tone="neutral">
                             {policy.approvalRequired ? "Zorunlu" : "Yok"}
                           </Badge>
                         </dd>
@@ -548,7 +537,7 @@ export function AiTaskAutomationWorkspaceClient({
                       <div>
                         <dt>Çift göz</dt>
                         <dd>
-                          <Badge tone={policy.fourEyesRequired ? "warning" : "neutral"}>
+                          <Badge tone="neutral">
                             {policy.fourEyesRequired ? "Zorunlu" : "Yok"}
                           </Badge>
                         </dd>
@@ -567,7 +556,6 @@ export function AiTaskAutomationWorkspaceClient({
           <section className="ai-task-automation-section">
             <div className="ai-task-automation-section__header">
               <div>
-                <p className="ai-task-automation-module__eyebrow">Modül 3</p>
                 <h2>Simülasyon</h2>
                 <p>Görev ve kural seçerek eşleşmeleri ve önerilen değişiklikleri önizleyin.</p>
               </div>
@@ -626,7 +614,7 @@ export function AiTaskAutomationWorkspaceClient({
               </div>
 
               {simulationError ? (
-                <p className="ai-task-automation-workspace__error" role="alert">{simulationError}</p>
+                <p className="ai-task-automation-workspace__error" role="alert">{customerMessage(simulationError)}</p>
               ) : null}
 
               {simulationResult ? (
@@ -735,14 +723,13 @@ export function AiTaskAutomationWorkspaceClient({
         <section className="ai-task-automation-section">
           <div className="ai-task-automation-section__header">
             <div>
-              <p className="ai-task-automation-module__eyebrow">Modül 4</p>
-              <h2>Çalışma Geçmişi</h2>
+              <h2>Çalışma geçmişi</h2>
               <p>Otomasyon kuralı çalıştırma kayıtları.</p>
             </div>
           </div>
 
           {executions.length === 0 ? (
-            <EmptyState description="Henüz çalıştırma kaydı yok." title="Geçmiş boş" />
+            <EmptyState description="Henüz çalıştırma kaydı yok." title="Çalışma kaydı yok" />
           ) : (
             <div className="ai-task-automation-activity">
               {executions.map((execution) => (

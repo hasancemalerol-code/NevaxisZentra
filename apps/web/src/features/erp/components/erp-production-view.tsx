@@ -1,4 +1,4 @@
-import { AlertTriangle, CircleGauge, Factory, PackageCheck } from "lucide-react";
+import { AlertTriangle, CircleGauge, Factory, PackageCheck, RefreshCw } from "lucide-react";
 
 import type {
   CanonicalErpProductionOrderSummary,
@@ -35,14 +35,14 @@ type ErpProductionViewProps = Readonly<{
 
 export function ErpProductionView({ snapshot, productionOrders }: ErpProductionViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Üretim"
-        description="ERP kaynaklı salt okunur üretim projeksiyonu."
+        description="ERP kaynaklı salt okunur üretim özeti."
         notice={
           <>
             <ErpReadonlyNotice>
-              ERP-4L yalnızca ERP Simulator üretim projeksiyonlarını içe aktarır.
+              Bu bağlantı ERP üretim kayıtlarını salt okunur olarak içe aktarır.
             </ErpReadonlyNotice>
             <ErpSimulatorNotice />
           </>
@@ -55,34 +55,34 @@ export function ErpProductionView({ snapshot, productionOrders }: ErpProductionV
         <ErpKpiCard
           label="Üretim Emirleri"
           value={snapshot.productionOrderCount}
-          description="Tanımlı ERP üretim emri"
+          description="Üretim emri"
           icon={<Factory aria-hidden="true" />}
         />
         <ErpKpiCard
           label="Devam Eden"
           value={snapshot.inProgressCount}
-          description="Serbest veya devam eden"
+          description="Devam eden kayıt"
           icon={<PackageCheck aria-hidden="true" />}
           tone="info"
         />
         <ErpKpiCard
           label="Tamamlanan"
           value={snapshot.completedCount}
-          description="Tamamlanan veya kapalı"
+          description="Tamamlanan, kapalı"
           icon={<CircleGauge aria-hidden="true" />}
           tone="success"
         />
         <ErpKpiCard
           label="Güncel Veri"
           value={snapshot.freshRecordCount}
-          description="Kaynak tazeliği: güncel"
-          icon={<CircleGauge aria-hidden="true" />}
+          description="Güncel kayıt"
+          icon={<RefreshCw aria-hidden="true" />}
           tone="success"
         />
         <ErpKpiCard
           label="Eski Veri"
           value={snapshot.staleRecordCount}
-          description="Kaynak tazeliği: eski"
+          description="Eski kayıt"
           icon={<AlertTriangle aria-hidden="true" />}
           tone="warning"
         />
@@ -96,10 +96,12 @@ export function ErpProductionView({ snapshot, productionOrders }: ErpProductionV
         {productionOrders.length === 0 ? (
           <ErpEmptyState
             title="Henüz üretim emri yok."
-            description="Önce üretim senkronizasyonu çalıştırın."
+            description="Önce üretim eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable className="erp-table--production">
+          <ErpDataTable label="ERP üretim emirleri" className="erp-table--production">
             <thead>
               <tr>
                 <th>Üretim No</th>
@@ -156,6 +158,6 @@ export function ErpProductionView({ snapshot, productionOrders }: ErpProductionV
           </ErpDataTable>
         )}
       </section>
-    </main>
+    </div>
   );
 }

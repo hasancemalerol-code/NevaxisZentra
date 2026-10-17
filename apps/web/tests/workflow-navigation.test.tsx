@@ -58,7 +58,7 @@ test("sidebar renders workflow-first primary navigation", () => {
   assert.match(markup, /navigation-label">İşler</);
   assert.match(markup, /navigation-label">Uygulamalar</);
   assert.match(markup, /aria-current="page"[^>]*href="\/fabrika"/);
-  assert.match(markup, /navigation-label">Makineler &amp; Kaynaklar</);
+  assert.match(markup, /navigation-label">Makineler ve Kaynaklar</);
   assert.match(markup, /navigation-label">Genel Bakış</);
   assert.match(markup, /navigation-label">Hatlar</);
   assert.doesNotMatch(markup, /navigation-label">Operasyon Merkezi</);
@@ -75,7 +75,7 @@ test("contextual navigation resolves by active workflow home", () => {
   assert.equal(fabrikaSection?.homeId, "fabrika");
   assert.ok(
     fabrikaSection?.items.some(
-      (item) => item.href === "/uretim/kaynaklar" && item.label === "Makineler & Kaynaklar",
+      (item) => item.href === "/uretim/kaynaklar" && item.label === "Makineler ve Kaynaklar",
     ),
   );
   assert.ok(fabrikaSection?.items.some((item) => item.label === "Genel Bakış" && item.href === "/fabrika"));
@@ -88,7 +88,7 @@ test("factory workspace primary nav exposes machines and resources entry", () =>
   );
 
   assert.match(markup, /data-testid="factory-workspace-primary-nav"/);
-  assert.match(markup, /Makineler &amp; Kaynaklar/);
+  assert.match(markup, /Makineler ve Kaynaklar/);
   assert.match(markup, /href="\/uretim\/kaynaklar"/);
 });
 
@@ -148,13 +148,22 @@ test("factory contextual breadcrumb preserves fabrika hierarchy", () => {
   assert.match(markup, /aria-current="page">Mixed Line 01</);
 });
 
-test("dashboard legacy route keeps compatibility banner path", async () => {
+test("dashboard legacy route (mock data) is available only in isolated environments", async () => {
   const { default: DashboardPage } = await import("../src/app/(app)/dashboard/page");
-  const legacyMarkup = renderToStaticMarkup(
-    await DashboardPage({ searchParams: Promise.resolve({ legacy: "1" }) }),
-  );
-  assert.match(legacyMarkup, /data-testid="dashboard-legacy-banner"/);
-  assert.match(legacyMarkup, /Bugün/);
+  const previous = process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES;
+  try {
+    delete process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES;
+    await assert.rejects(() => DashboardPage({ searchParams: Promise.resolve({ legacy: "1" }) }), /redirect/i);
+    process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES = "1";
+    const legacyMarkup = renderToStaticMarkup(
+      await DashboardPage({ searchParams: Promise.resolve({ legacy: "1" }) }),
+    );
+    assert.match(legacyMarkup, /data-testid="dashboard-legacy-banner"/);
+    assert.match(legacyMarkup, /Bugün/);
+  } finally {
+    if (previous === undefined) delete process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES;
+    else process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES = previous;
+  }
 });
 
 test("legacy ai-gorevleri list route preserves query compatibility", () => {

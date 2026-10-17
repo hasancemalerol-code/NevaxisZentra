@@ -31,6 +31,7 @@ import type {
   resolveBrokerCorrectionAction,
   sendBrokerPackageAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -293,7 +294,7 @@ export function ExportBrokerPanel({
           <h2>Gümrük müşaviri paketi</h2>
           <span>
             Paket hazırlama, teslim ve evrak düzeltme talebi takibi. Fabrika
-            tarafı handoff kaydıdır; broker operasyonu yönetilmez.
+            tarafı devir kaydıdır; gümrük müşavirliği operasyonu yönetilmez.
           </span>
         </div>
         {workspace ? (
@@ -316,7 +317,7 @@ export function ExportBrokerPanel({
           className="export-broker-panel__flash export-broker-panel__flash--error"
           role="alert"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
       {state.kind === "success" && (
@@ -324,7 +325,7 @@ export function ExportBrokerPanel({
           className="export-broker-panel__flash export-broker-panel__flash--success"
           role="status"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 
@@ -339,7 +340,7 @@ export function ExportBrokerPanel({
           </div>
           <div className="export-broker-panel__fields">
             <label>
-              Şirket adı
+              Şirket adı <span className="zx-required" aria-hidden="true">*</span>
               <input
                 className="input"
                 value={brokerCompanyName}
@@ -513,7 +514,7 @@ export function ExportBrokerPanel({
             </div>
             <div className="export-broker-panel__fields">
               <label>
-                Kategori
+                Kategori <span className="zx-required" aria-hidden="true">*</span>
                 <input
                   className="input"
                   value={correctionCategory}
@@ -523,7 +524,7 @@ export function ExportBrokerPanel({
                 />
               </label>
               <label>
-                Başlık
+                Başlık <span className="zx-required" aria-hidden="true">*</span>
                 <input
                   className="input"
                   value={correctionTitle}
@@ -546,7 +547,7 @@ export function ExportBrokerPanel({
                 </select>
               </label>
               <label className="export-broker-panel__wide">
-                Açıklama
+                Açıklama <span className="zx-required" aria-hidden="true">*</span>
                 <textarea
                   className="input"
                   value={correctionDescription}

@@ -125,14 +125,22 @@ public sealed class AdaptivePlanningService : IAdaptivePlanningService
                 .FirstAsync(s => s.Id == snapId, cancellationToken))
             : new ConstraintSnapshotPayload([], [], [], [], DateTimeOffset.UtcNow, DateTimeOffset.UtcNow);
 
-        var adherence = PlanAdherenceEngine.Compute(operations, DateTimeOffset.UtcNow);
+        // Without planned operations there is nothing to measure: no adherence, no utilization, no at-risk orders.
+        var adherence = operations.Count == 0 ? 0m : PlanAdherenceEngine.Compute(operations, DateTimeOffset.UtcNow);
         var versionsToday = plan is null ? [] : (await repository.GetVersionsForPlanAsync(plan.Id, cancellationToken))
             .Where(v => v.CreatedAtUtc.Date == DateTimeOffset.UtcNow.Date).ToList();
         var changesToday = changes.Where(c => c.CreatedAtUtc.Date == DateTimeOffset.UtcNow.Date).ToList();
-        var metrics = PlanStabilityMetricsEngine.Build(changesToday, versionsToday, adherence, 72m);
+        var deadlineRisks = LiveDeadlineRiskEngine.Evaluate(payload, operations, DateTimeOffset.UtcNow);
+        var metrics = PlanStabilityMetricsEngine.Build(
+            changesToday,
+            versionsToday,
+            adherence,
+            operations.Count == 0 ? 0m : 72m,
+            deadlineRisks.Count(r => r.RiskLevel == "at-risk"),
+            deadlineRisks.Count(r => r.RiskLevel == "late"));
         var risks = new AdaptivePlanningRiskSummary(
-            LiveDeadlineRiskEngine.Evaluate(payload, operations, DateTimeOffset.UtcNow),
-            ["Line-2 overload"],
+            deadlineRisks,
+            [],
             state.MachineStateJson.Contains("fault") ? ["IM-07 arıza"] : [],
             state.MaterialStateJson.Contains("shortage") ? ["PP-HF malzeme"] : [],
             state.MoldStateJson.Contains("mold") ? ["M-014 bakım"] : [],

@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import {
@@ -100,7 +101,7 @@ function mapAssessmentSummary(item: RawCommercialIntelligenceAssessmentSummary):
     leadingDriverCode: item.leadingDriverCode,
     leadingDriverLabel: getCommercialIntelligenceDriverReasonLabel(item.leadingDriverCode),
     evidenceStatus: "simulated",
-    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+    evidenceLabel: getCommercialWorkspaceEvidenceLabel(item.isPilotData, true),
     ruleSetVersion: item.ruleSetVersion,
     evaluatedAtUtc: item.evaluatedAtUtc,
     evaluatedLabel: formatDateTime(item.evaluatedAtUtc),
@@ -139,7 +140,7 @@ function mapComparisonSummary(item: RawCommercialIntelligenceComparisonSummary):
     leadingDriverCode: item.leadingDriverCode,
     leadingDriverLabel: getCommercialIntelligenceDriverReasonLabel(item.leadingDriverCode),
     evidenceStatus: "simulated",
-    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+    evidenceLabel: getCommercialWorkspaceEvidenceLabel(item.isPilotData, true),
     ruleSetVersion: item.ruleSetVersion,
     evaluatedAtUtc: item.evaluatedAtUtc,
     evaluatedLabel: formatDateTime(item.evaluatedAtUtc),
@@ -388,13 +389,16 @@ export async function readCommercialIntelligenceWorkspace(): Promise<CommercialI
     || profiles.some((item) => item.isPilotData);
 
   const workspace: CommercialIntelligenceWorkspacePayload = {
-    facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+    facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
     reportingPeriodLabel: reportingPeriodLabel(assessments, comparisons),
     freshnessLabel: freshnessLabel(assessments, comparisons),
-    evidenceLabel: hasPilot ? "Simülasyon kanıtı" : "Satın alma fiyat kanıtı",
-    provenanceDisclaimer: workspaceResult.value.provenanceDisclaimer
-      || profilesResult.value.provenanceDisclaimer
-      || comparisonsResult.value.provenanceDisclaimer,
+    evidenceLabel: hasPilot ? "Örnek veri kanıtı" : "Satın alma fiyat kanıtı",
+    provenanceDisclaimer: resolveCommercialProvenance(
+      workspaceResult.value.provenanceDisclaimer
+        || profilesResult.value.provenanceDisclaimer
+        || comparisonsResult.value.provenanceDisclaimer,
+      hasPilot,
+    ),
     ruleSetVersion: workspaceResult.value.ruleSetVersion
       || assessmentsResult.value.ruleSetVersion
       || comparisonsResult.value.ruleSetVersion,
@@ -432,7 +436,7 @@ export async function readCommercialIntelligenceWorkspace(): Promise<CommercialI
         ? null
         : latestSupplierComparison
           ? `${latestSupplierComparison.outcomeLabel}: karşılaştırılabilir tedarikçi sıralaması üretilemedi`
-          : "Karşılaştırılabilir tedarikçi konumu çalıştırması yok",
+          : "Karşılaştırılabilir tedarikçi konumu çalışması yok",
     },
     priorityDeviations,
     evidenceSummary,

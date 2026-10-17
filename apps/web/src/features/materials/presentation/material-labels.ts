@@ -1,3 +1,5 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
+import { displayDataName } from "@/lib/presentation/display-name";
 export function getMaterialLifecycleStatusLabel(status: string): string {
   switch (status) {
     case "draft":
@@ -103,7 +105,7 @@ export function getMaterialSourceLabel(source: string): string {
     case "erp":
       return "ERP";
     case "development-pilot":
-      return "Geliştirme Pilot";
+      return "Örnek veri";
     default:
       return "Bilinmiyor";
   }
@@ -116,7 +118,7 @@ export function getSpecificationSourceLabel(source: string): string {
     case "imported":
       return "İçe Aktarım";
     case "development-pilot":
-      return "Geliştirme Pilot";
+      return "Örnek veri";
     default:
       return "Bilinmiyor";
   }
@@ -137,6 +139,7 @@ export function formatMaterialDateTime(value?: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: FACILITY_TIME_ZONE,
   });
 }
 
@@ -243,13 +246,13 @@ export const MATERIAL_SOURCE_FORM_OPTIONS = [
   { value: "manual", label: "Manuel" },
   { value: "imported", label: "İçe Aktarım" },
   { value: "erp", label: "ERP" },
-  { value: "development-pilot", label: "Geliştirme Pilot" },
+  { value: "development-pilot", label: "Örnek veri" },
 ] as const;
 
 export const MATERIAL_SPECIFICATION_SOURCE_FORM_OPTIONS = [
   { value: "manual", label: "Manuel" },
   { value: "imported", label: "İçe Aktarım" },
-  { value: "development-pilot", label: "Geliştirme Pilot" },
+  { value: "development-pilot", label: "Örnek veri" },
 ] as const;
 
 export const MATERIAL_TRANSITION_TARGETS: Record<string, readonly { value: string; label: string }[]> = {
@@ -391,6 +394,7 @@ export function formatMaterialDateOnly(value?: string): string {
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: FACILITY_TIME_ZONE,
   });
 }
 
@@ -571,8 +575,16 @@ export function getMaterialAssessmentEvidenceFieldLabel(field: string): string {
       return "Teorik İhtiyaç (g)";
     case "observedConsumptionGrams":
       return "Gözlenen Tüketim (g)";
+    case "erpSourceFreshness":
+      return "ERP Kaynak Tazeliği";
+    case "erpAvailableQuantity":
+      return "ERP Kullanılabilir Miktar";
+    case "erpReservedQuantity":
+      return "ERP Rezerve Miktar";
+    case "requiredQuantityGrams":
+      return "Gereken Miktar (g)";
     default:
-      return field;
+      return displayDataName(field.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase()));
   }
 }
 

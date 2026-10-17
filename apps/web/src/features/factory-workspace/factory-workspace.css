@@ -30,7 +30,7 @@
 
 .factory-workspace__layout {
   display: grid;
-  grid-template-columns: minmax(220px, 260px) minmax(0, 1fr) minmax(280px, 340px);
+  grid-template-columns: minmax(300px, 340px) minmax(0, 1fr) minmax(280px, 340px);
   gap: 12px;
   align-items: start;
   min-width: 0;
@@ -60,6 +60,11 @@
   padding: 10px 12px;
 }
 
+.factory-workspace__tree-body {
+  display: grid;
+  gap: 8px;
+}
+
 .factory-hierarchy-search {
   width: 100%;
   min-height: 2rem;
@@ -84,10 +89,11 @@
 
 .factory-hierarchy-tree__button {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 3.6rem minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
   padding: 6px 8px;
   border: 0;
   background: transparent;
@@ -101,9 +107,26 @@
   border-left: 3px solid var(--fact-accent, #2563eb);
 }
 
+.factory-hierarchy-tree__name {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/* The status badge sits on its own line under the name so the name is never truncated. */
+.factory-hierarchy-tree__button > .fact-operational-badge {
+  grid-column: 2;
+  justify-self: start;
+}
+
+.factory-hierarchy-tree__button > span[aria-hidden="true"]:empty {
+  display: none;
+}
+
 .factory-hierarchy-tree__kind {
   color: var(--color-text-muted);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -124,13 +147,45 @@
   font-size: 0.78rem;
 }
 
-.factory-operational-row__primary strong {
+.factory-operational-row__primary {
+  min-width: 0;
+}
+
+.factory-operational-row__primary strong,
+.factory-operational-row__primary span {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factory-operational-row__order {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factory-operational-row--head {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-block: 2px;
+}
+
+button.factory-operational-row {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 
 .factory-operational-row__primary span {
   color: var(--color-text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .factory-signal-list {
@@ -162,22 +217,373 @@
   font-size: 0.75rem;
 }
 
-@media (max-width: 1200px) {
+/* Below 1500px the tree keeps its own column; the inspector sits under the live view (not below the fold). */
+@media (max-width: 1500px) {
+  .factory-workspace__layout {
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  }
+
+  .factory-workspace__layout > .factory-workspace__panel--tree {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  .factory-workspace__layout > .factory-workspace__panel:not(.factory-workspace__panel--tree):not(.factory-workspace__panel--inspector) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .factory-workspace__panel--inspector {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 1000px) {
   .factory-workspace__layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .factory-workspace__layout > .factory-workspace__panel--tree,
+  .factory-workspace__layout > .factory-workspace__panel:not(.factory-workspace__panel--tree):not(.factory-workspace__panel--inspector),
   .factory-workspace__panel--inspector {
-    order: 3;
+    grid-column: 1;
+    grid-row: auto;
   }
+
+  .factory-workspace__layout > .factory-workspace__panel:not(.factory-workspace__panel--tree):not(.factory-workspace__panel--inspector) {
+    order: -1;
+  }
+
 }
 
 @media (max-width: 768px) {
   .factory-operational-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 8px;
   }
 
+  .factory-operational-row__primary {
+    grid-column: span 2;
+  }
+
+  .factory-operational-row > .fact-numeric {
+    text-align: left;
+  }
+
+  .factory-operational-row--head {
+    display: none;
+  }
+
+  /* Stacked line rows keep their labels: each value says what it is. */
+  .factory-operational-row > [data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+/* Header rhythm matches the Bakım pages: eyebrow, title and subtitle each get room. */
+.factory-workspace .fact-workspace__header {
+  padding-bottom: 16px;
+}
+
+.factory-workspace .fact-workspace__header > div:first-child {
+  display: grid;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
   .factory-hierarchy-tree__button {
     min-height: 44px;
   }
 }
+
+.factory-workspace__panel--tree {
+  align-self: start;
+  min-width: 0;
+}
+
+/* ─── Round 4 ─── */
+
+/* Content blocks of the live view are separated by one gap (the line table no longer butts against the summary strip). */
+.factory-view-stack {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Tree spans two rows: the spare height goes to the inspector row, so the inspector sits right under the live view. */
+@media (min-width: 1001px) and (max-width: 1500px) {
+  .factory-workspace__layout {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}
+
+/* One column system for the line table header and every row. */
+.factory-operational-row {
+  grid-template-columns: minmax(0, 1.6fr) minmax(6.5rem, 0.8fr) minmax(0, 1fr) minmax(4.5rem, 0.5fr) minmax(3.5rem, 0.4fr);
+}
+
+.factory-operational-row .fact-numeric {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .factory-operational-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .factory-operational-row .fact-numeric {
+    text-align: left;
+  }
+}
+
+/* The tree scroller ends on a full row. */
+.factory-workspace__tree-body {
+  scroll-padding-bottom: 8px;
+}
+
+/* ─── Round 5 ─── */
+
+/* Tabs are a quiet pill row under the header (no bar of their own). */
+.factory-workspace .factory-workspace-primary-nav {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Page summary tiles carry an icon and a status colour. */
+.factory-status-strip__item {
+  position: relative;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 2px;
+}
+
+.factory-status-strip__icon {
+  display: grid;
+  grid-row: 1 / span 2;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: #eef2f7;
+  color: #566478;
+}
+
+.factory-status-strip__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.factory-status-strip__item > .fact-status-strip__label,
+.factory-status-strip__item > .fact-status-strip__value {
+  grid-column: 2;
+}
+
+.factory-status-strip__item--success .factory-status-strip__icon {
+  background: #e8f7ee;
+  color: #15803d;
+}
+
+.factory-status-strip__item--warning .factory-status-strip__icon {
+  background: #fff4e0;
+  color: #b45309;
+}
+
+.factory-status-strip__item--danger .factory-status-strip__icon {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.factory-status-strip__item--danger {
+  border-color: #f5c2c0;
+}
+
+/* Tree rows: the name owns the full row; kind and status share the line below, so names never wrap on a short column. */
+.factory-hierarchy-tree__button {
+  grid-template-columns: auto minmax(0, 1fr);
+  row-gap: 4px;
+}
+
+.factory-hierarchy-tree__button > .factory-hierarchy-tree__name {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.factory-hierarchy-tree__button > .factory-hierarchy-tree__kind {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.factory-hierarchy-tree__button > .fact-operational-badge {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: start;
+}
+
+/* One surface per block: the live panel holds its sections without a second card border. */
+.factory-workspace__panel .fact-section {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+.factory-workspace__panel .fact-section > .fact-section__header {
+  padding: 0 0 8px;
+  border-bottom: 0;
+}
+
+.factory-workspace__panel .fact-section > .fact-section__body {
+  padding: 0;
+}
+
+.factory-operational-count {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+/* Line table: one hairline between rows instead of a bordered box per row. */
+.factory-operational-rows {
+  gap: 0;
+  border: 1px solid var(--fact-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.factory-operational-row {
+  border: 0;
+  border-bottom: 1px solid var(--fact-border);
+  border-radius: 0;
+}
+
+.factory-operational-row:last-child {
+  border-bottom: 0;
+}
+
+.factory-operational-row--head {
+  background: #f3f7fb;
+  padding-block: 8px;
+}
+
+button.factory-operational-row:hover {
+  background: #f8fbff;
+}
+
+.factory-operational-row__primary strong,
+.factory-operational-row__primary span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Inspector context: label/value pairs share one two-column grid on wide inspectors, one column on the narrow one. */
+body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 28px;
+}
+
+body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) > div {
+  flex: none;
+  padding: 9px 0;
+  border: 0;
+  border-bottom: 1px solid var(--zx-line);
+  background: transparent;
+  align-items: start;
+}
+
+body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) > div:last-child {
+  border-bottom: 0;
+}
+
+@media (min-width: 560px) and (max-width: 1500px) {
+  body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) > div:nth-last-child(2):nth-child(odd) {
+    border-bottom: 0;
+  }
+
+  body .content-viewport .factory-workspace .fact-context-panel__body:has(> div) > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1000px) {
+  /* The long tree sits last in a shorter scroller with a faded edge. */
+  .factory-workspace__layout > .factory-workspace__panel--tree {
+    order: -2;
+  }
+
+
+  .factory-workspace__panel--inspector {
+    order: 2;
+  }
+}
+
+
+.factory-status-strip {
+  align-items: stretch;
+}
+
+/* Tree: nodes open and close, so the default view is short and nothing is cut at the bottom. */
+.factory-hierarchy-tree__row {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.factory-hierarchy-tree__row > .factory-hierarchy-tree__button {
+  flex: 1 1 auto;
+}
+
+.factory-hierarchy-tree__toggle {
+  display: grid;
+  flex: 0 0 24px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.factory-hierarchy-tree__toggle--leaf {
+  cursor: default;
+}
+
+.factory-hierarchy-tree__toggle:focus-visible {
+  outline: 2px solid var(--fact-accent, #2563eb);
+  outline-offset: -2px;
+}
+
+
+/* The three panels always share one row height (the tree card's bottom edge meets the right column); nothing scrolls inside the tree. */
+.factory-workspace__layout {
+  align-items: stretch;
+}
+
+.factory-workspace__panel--tree {
+  align-self: stretch;
+}
+
+/* Frozen checklist C4: the context panel renders directly in the inspector card (no second border); the scrolling tree shows a bottom fade as a scroll cue. */
+.factory-workspace__panel--inspector .fact-context-panel {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.factory-workspace__panel--inspector .fact-context-panel__header,
+.factory-workspace__panel--inspector .fact-context-panel > header {
+  padding-inline: 0;
+}
+

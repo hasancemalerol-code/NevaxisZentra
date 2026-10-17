@@ -4,7 +4,7 @@
   --surface: #ffffff;
   --surface-muted: #f8fafc;
   --border: #dfe7f1;
-  --muted-foreground: #64748b;
+  --muted-foreground: #566478;
   --primary: #2356a8;
 
   color-scheme: light;
@@ -147,7 +147,7 @@ table {
   margin: 0;
   overflow: hidden;
   color: rgb(113 128 150);
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 760;
   letter-spacing: 0.075em;
   line-height: 1.25;
@@ -225,7 +225,7 @@ table {
 .navigation-label {
   min-width: 0;
   overflow: hidden;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 680;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -425,7 +425,7 @@ table {
 .ai-task-card__category {
   margin: 0 0 0.2rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -444,7 +444,7 @@ table {
 }
 
 .ai-task-card__title a:hover {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .ai-task-card__title a:focus-visible,
@@ -486,7 +486,7 @@ table {
 
 .ai-task-card__recommendation-heading > span {
   color: #4f46e5;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -525,7 +525,7 @@ table {
   gap: 0.35rem;
   margin-bottom: 0.28rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -563,7 +563,7 @@ table {
 
 .ai-task-card__detail-link {
   flex: 0 0 auto;
-  color: #2563eb;
+  color: #1d4ed8;
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
@@ -707,7 +707,7 @@ table {
 .ai-task-detail__recommendation-card dt {
   margin-bottom: 0.25rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -760,12 +760,12 @@ table {
 .ai-task-detail__source-card small,
 .ai-task-detail__audit-card small {
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .ai-task-detail__audit-card time {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -775,7 +775,7 @@ table {
   border-radius: 999px;
   background: rgba(226, 232, 240, 0.72);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -840,7 +840,7 @@ table {
 .ai-task-detail-header__eyebrow {
   margin: 0 0 0.25rem;
   color: var(--accent-primary, #2563eb);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -873,7 +873,7 @@ table {
   border-radius: 999px;
   background: color-mix(in srgb, white 70%, #f8fafc);
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -932,7 +932,7 @@ table {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent-primary, #2563eb) 12%, white);
   color: var(--accent-primary, #2563eb);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -998,7 +998,7 @@ table {
 .ai-task-detail-section__eyebrow {
   margin: 0 0 0.15rem;
   color: var(--text-muted, #64748b);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1033,7 +1033,7 @@ table {
 
 .ai-task-detail-field__helper {
   color: var(--text-muted, #64748b);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 .ai-task-detail-field__control {
@@ -1122,7 +1122,7 @@ table {
 .ai-task-detail-overview__metric span {
   display: block;
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -1193,7 +1193,7 @@ table {
   align-items: center;
   gap: 0.35rem;
   color: #4f46e5;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1221,7 +1221,7 @@ table {
 
 .ai-task-detail-overview__facts dt {
   color: var(--text-muted, #64748b);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -1261,7 +1261,7 @@ table {
 .ai-task-detail-context__eyebrow {
   margin: 0 0 0.15rem;
   color: var(--text-muted, #64748b);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1282,7 +1282,7 @@ table {
 
 .ai-task-detail-context__grid dt {
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -1385,7 +1385,7 @@ table {
 
 .ai-task-detail-timeline__top time {
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -1397,7 +1397,7 @@ table {
 
 .ai-task-detail-timeline__note {
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -1472,7 +1472,7 @@ table {
 .ai-task-closure-panel__heading p {
   margin: 0;
   color: var(--text-muted, #64748b);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1557,7 +1557,7 @@ table {
 
 .ai-task-closure-panel__evidence-item small {
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .ai-task-closure-panel__empty {
@@ -1666,7 +1666,7 @@ table {
 .ai-task-action-panel__heading p {
   margin: 0 0 0.2rem;
   color: #4f46e5;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1741,7 +1741,7 @@ table {
 
 .ai-task-action-panel__footnote {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -1804,7 +1804,7 @@ table {
   align-items: center;
   gap: 0.4rem;
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1835,7 +1835,7 @@ table {
 .ai-task-filter-bar__controls > label > span,
 .ai-task-filter-bar__search > span {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2041,7 +2041,7 @@ table {
 }
 
 .ai-task-filter-preset:hover svg {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .ai-task-filter-preset[data-active="true"] {
@@ -2059,7 +2059,7 @@ table {
 }
 
 .ai-task-filter-preset[data-active="true"] svg {
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .ai-task-filter-preset:focus-visible {
@@ -2447,7 +2447,7 @@ table {
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 10%, white);
   color: inherit;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: center;
 }
@@ -2462,7 +2462,7 @@ table {
   background: var(--surface-elevated, #fff);
 }
 
-.ai-task-center-unified__layout-button[aria-pressed="true"] {
+.ai-task-center-unified__layout-button[aria-current="true"] {
   border-color: color-mix(in srgb, var(--accent-primary, #2563eb) 24%, white);
   background: color-mix(in srgb, var(--accent-primary, #2563eb) 10%, white);
   color: var(--accent-primary, #2563eb);
@@ -2486,7 +2486,7 @@ table {
   background: var(--surface-muted, #f8fafc);
 }
 
-.ai-task-center-unified__origin-filter[aria-pressed="true"] {
+.ai-task-center-unified__origin-filter[aria-current="true"] {
   border-color: color-mix(in srgb, var(--accent-primary, #2563eb) 22%, white);
   background: color-mix(in srgb, var(--accent-primary, #2563eb) 8%, white);
   color: var(--accent-primary, #2563eb);
@@ -2635,7 +2635,7 @@ table {
   border-radius: 999px;
   background: color-mix(in srgb, var(--accent-primary, #2563eb) 12%, white);
   color: var(--accent-primary, #2563eb);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -2682,7 +2682,7 @@ table {
 .ai-task-center-card__related {
   min-width: 0;
   color: var(--text-muted, #64748b);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 
@@ -2827,7 +2827,7 @@ table {
 .ai-task-automation-module__eyebrow {
   margin: 0 0 0.2rem;
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2933,7 +2933,7 @@ table {
 
 .ai-task-automation-rule-card__meta-label {
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3001,7 +3001,7 @@ table {
   display: block;
   margin-top: 0.2rem;
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-family: var(--font-mono, monospace);
 }
 
@@ -3278,7 +3278,7 @@ table {
 }
 
 .ai-task-automation-builder__stage-badge {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -3305,7 +3305,7 @@ table {
 
 .ai-task-automation-builder__workflow-label {
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3441,7 +3441,7 @@ table {
 .ai-task-decision-panel__metric span {
   display: block;
   color: var(--text-secondary);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -3459,7 +3459,7 @@ table {
 
 .ai-task-decision-panel__section-label {
   margin: 0 0 0.35rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -3510,7 +3510,7 @@ table {
 
 .ai-task-decision-panel__compare-rows dt {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -3599,7 +3599,7 @@ table {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--accent-primary);
   text-decoration: none;
@@ -3633,7 +3633,7 @@ table {
 }
 
 .ai-task-decision-panel__closure-status > span {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -3812,7 +3812,7 @@ table {
   padding: 0.05rem 0.35rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--border-subtle) 70%, var(--accent-primary) 30%);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 
 .ai-task-playbook-library__actions {
@@ -3850,7 +3850,7 @@ table {
 .ai-task-playbook-module__eyebrow {
   margin: 0 0 0.2rem;
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3940,7 +3940,7 @@ table {
 
 .ai-task-playbook-library-row__meta-label {
   color: var(--text-secondary);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -4029,7 +4029,7 @@ table {
 .ai-task-playbook-run-card__metric span,
 .ai-task-playbook-run-detail__metric span {
   color: var(--text-secondary);
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -4341,7 +4341,7 @@ table {
   flex-wrap: wrap;
   gap: 0.5rem;
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 
 .ai-task-playbook-step__block-reason {
@@ -4537,7 +4537,7 @@ table {
 .ai-task-execution-panel__heading p {
   margin: 0 0 0.2rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -4570,7 +4570,7 @@ table {
   gap: 0.35rem;
   margin-bottom: 0.3rem;
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -4611,7 +4611,7 @@ table {
 
 .ai-task-execution-panel__change > div > span {
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -4770,7 +4770,7 @@ table {
 .order-draft-card__eyebrow {
   margin: 0 0 6px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4812,8 +4812,8 @@ table {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #6b7b91;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -4833,7 +4833,7 @@ table {
 
 .order-draft-card__metrics dd span {
   color: #d92d20;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -4847,7 +4847,7 @@ table {
 }
 
 .order-draft-card__footer > span {
-  color: #718096;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -4899,7 +4899,7 @@ table {
 
 .order-draft-workspace__empty p {
   margin: 0;
-  color: #6b7b91;
+  color: #566478;
   font-size: 13px;
   line-height: 1.55;
 }
@@ -5027,7 +5027,7 @@ table {
   border-radius: 9px;
   color: #455a76;
   background: #f7faff;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -5072,8 +5072,8 @@ table {
 .order-draft-detail__line-card dt,
 .order-draft-detail__approval-card dt {
   margin: 0 0 6px;
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5099,7 +5099,7 @@ table {
 .order-draft-detail__line-heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -5209,7 +5209,7 @@ table {
 .order-draft-action-panel__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -5242,7 +5242,7 @@ table {
 }
 
 .order-draft-action-panel__statuses > div > span {
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   font-weight: 750;
 }
@@ -5330,18 +5330,6 @@ table {
   transform: translateY(-2px);
 }
 
-.orders-workflow-card::after {
-  position: absolute;
-  right: -28px;
-  bottom: -34px;
-  width: 110px;
-  height: 110px;
-  border-radius: 999px;
-  background: rgba(21, 94, 239, 0.045);
-  content: "";
-  pointer-events: none;
-}
-
 .orders-workflow-card__number {
   display: grid;
   place-items: center;
@@ -5371,7 +5359,7 @@ table {
 
 .orders-workflow-card p {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12.5px;
   line-height: 1.65;
 }
@@ -5499,18 +5487,6 @@ table {
   transform: translateY(-2px);
 }
 
-.orders-intake-source-card::after {
-  position: absolute;
-  right: -34px;
-  bottom: -42px;
-  width: 130px;
-  height: 130px;
-  border-radius: 999px;
-  background: rgba(21, 94, 239, 0.04);
-  content: "";
-  pointer-events: none;
-}
-
 .orders-intake-source-card__icon {
   display: grid;
   place-items: center;
@@ -5546,7 +5522,7 @@ table {
 
 .orders-intake-source-card p {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12.5px;
   line-height: 1.6;
 }
@@ -5624,7 +5600,7 @@ table {
   z-index: 1;
   width: 17px;
   height: 17px;
-  color: #718096;
+  color: #566478;
   pointer-events: none;
 }
 
@@ -5661,8 +5637,8 @@ table {
 }
 
 .order-draft-filter-bar__field > span {
-  color: #66758b;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -5711,7 +5687,7 @@ table {
   color: #52647d;
   background: #ffffff;
   font: inherit;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: pointer;
   transition:
@@ -5750,7 +5726,7 @@ table {
   justify-content: space-between;
   gap: 12px;
   padding: 0 2px;
-  color: #718096;
+  color: #566478;
   font-size: 12px;
   font-weight: 650;
 }
@@ -5985,7 +5961,7 @@ table {
   color: #52647d;
   background: rgba(255, 255, 255, 0.96);
   font: inherit;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 750;
   line-height: 1;
   white-space: nowrap;
@@ -6017,7 +5993,7 @@ table {
 
 .order-draft-filter-presets__button[aria-pressed="true"] {
   color: #ffffff;
-  border-color: #155eef;
+  border-color: #2463a7;
   background:
     linear-gradient(
       135deg,
@@ -6035,7 +6011,7 @@ table {
 
 .order-draft-filter-presets__reset {
   margin-left: auto;
-  color: #6c7b90;
+  color: #566478;
   background: #f8fafc;
 }
 
@@ -6109,18 +6085,6 @@ table {
   transform: translateY(-2px);
 }
 
-.order-draft-kpi-link::after {
-  position: absolute;
-  right: -30px;
-  bottom: -42px;
-  width: 116px;
-  height: 116px;
-  border-radius: 999px;
-  background: rgba(21, 94, 239, 0.045);
-  content: "";
-  pointer-events: none;
-}
-
 .order-draft-kpi-link__icon {
   display: grid;
   place-items: center;
@@ -6143,8 +6107,8 @@ table {
 }
 
 .order-draft-kpi-link__content > span {
-  color: #66758b;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -6158,8 +6122,8 @@ table {
 }
 
 .order-draft-kpi-link__content small {
-  color: #718096;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -6249,7 +6213,7 @@ table {
 .order-draft-timeline__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6368,14 +6332,14 @@ table {
 .order-draft-timeline__event-heading time {
   flex: 0 0 auto;
   color: #7a8799;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
 .order-draft-timeline__list p {
   margin: 7px 0 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12.5px;
   line-height: 1.55;
 }
@@ -6422,7 +6386,7 @@ table {
 .order-draft-clarification-panel__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6462,8 +6426,8 @@ table {
 }
 
 .order-draft-clarification-panel__channel span {
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -6531,7 +6495,7 @@ table {
 
 .order-draft-clarification-panel__questions small {
   color: #8795a9;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -6547,7 +6511,7 @@ table {
 .order-draft-clarification-panel__actions p {
   margin: 0;
   max-width: 720px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -6634,7 +6598,7 @@ table {
 .order-draft-clarification-message__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6833,7 +6797,7 @@ table {
 .order-draft-source-evidence__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -6948,7 +6912,7 @@ table {
 .order-draft-source-evidence__source-heading time {
   flex: 0 0 auto;
   color: #7a8799;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -6969,7 +6933,7 @@ table {
   border-radius: 9px;
   color: #52647d;
   background: #f3f6fa;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -7040,7 +7004,7 @@ table {
 .order-transfer-target-card__heading p {
   margin: 0 0 5px;
   color: #087443;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -7083,8 +7047,8 @@ table {
   align-items: center;
   gap: 7px;
   margin: 0 0 7px;
-  color: #748398;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -7230,7 +7194,7 @@ table {
 .order-transfer-readiness__heading p {
   margin: 0 0 5px;
   color: #b45309;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -7416,7 +7380,7 @@ table {
 .order-transfer-command-panel__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -7505,8 +7469,8 @@ table {
   align-items: center;
   gap: 7px;
   margin: 0 0 7px;
-  color: #748398;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -7584,7 +7548,7 @@ table {
 .order-transfer-command-panel__actions p {
   margin: 0;
   max-width: 760px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -7656,7 +7620,7 @@ table {
 .order-transfer-execution-preview__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -7851,7 +7815,7 @@ table {
 .order-transfer-execution-preview__blocked p,
 .order-transfer-execution-preview__result p {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -7874,8 +7838,8 @@ table {
 
 .order-transfer-execution-preview__details dt {
   margin: 0 0 7px;
-  color: #748398;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -7958,7 +7922,7 @@ table {
   border-radius: 10px;
   color: #80463f;
   background: #fff8f7;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .order-transfer-execution-preview__failure-meta strong {
@@ -8051,7 +8015,7 @@ table {
 
 .order-transfer-execution-preview__audit > div > div > span {
   color: #6f7d91;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -8085,7 +8049,7 @@ table {
 .order-transfer-execution-preview__audit dt {
   margin: 0 0 6px;
   color: #7a8799;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -8095,7 +8059,7 @@ table {
   margin: 0;
   overflow: hidden;
   color: #34445b;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -8140,7 +8104,7 @@ table {
 .production-planning-header p {
   margin: 0;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -8156,7 +8120,7 @@ table {
 
 .production-planning-header span {
   max-width: 920px;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -8204,8 +8168,8 @@ table {
 }
 
 .production-planning-kpis span {
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -8220,8 +8184,8 @@ table {
 
 .production-planning-kpis small {
   overflow: hidden;
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -8269,7 +8233,7 @@ table {
 .production-planning-safety p {
   margin: 0 0 4px;
   color: #6254e8;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -8285,7 +8249,7 @@ table {
 .production-planning-safety span {
   display: block;
   max-width: 900px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -8305,7 +8269,7 @@ table {
 .production-plan-workspace__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -8319,7 +8283,7 @@ table {
 }
 
 .production-plan-workspace__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -8375,8 +8339,8 @@ table {
 
 .production-plan-card__heading p {
   margin: 0;
-  color: #758398;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .production-plan-card__confidence {
@@ -8403,7 +8367,7 @@ table {
 
 .production-plan-card__confidence span {
   color: #71689c;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -8446,7 +8410,7 @@ table {
   display: block;
   margin-bottom: 5px;
   color: #7b889a;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -8466,8 +8430,8 @@ table {
 .production-plan-card__summary small {
   display: block;
   overflow: hidden;
-  color: #8290a3;
-  font-size: 10.5px;
+  color: #5a697d;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -8502,14 +8466,14 @@ table {
 
 .production-plan-card__risk span {
   color: #7d8999;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .production-plan-card__risk strong {
   color: #34445b;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 850;
 }
 
@@ -8521,8 +8485,8 @@ table {
   padding: 0 14px;
   border-radius: 10px;
   color: #ffffff;
-  background: #155eef;
-  font-size: 11.5px;
+  background: #2463a7;
+  font-size: 0.75rem;
   font-weight: 800;
   text-decoration: none;
   transition:
@@ -8550,7 +8514,7 @@ table {
   height: 22px;
   padding: 11px;
   border-radius: 12px;
-  color: #718096;
+  color: #566478;
   background: #f1f4f8;
 }
 
@@ -8563,7 +8527,7 @@ table {
 
 .production-plan-workspace--empty p {
   margin: 0;
-  color: #718096;
+  color: #566478;
   font-size: 12px;
   line-height: 1.55;
 }
@@ -8667,7 +8631,7 @@ table {
 .production-plan-filter-bar__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -8695,8 +8659,8 @@ table {
 }
 
 .production-plan-filter-bar__grid > label > span {
-  color: #66758b;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.035em;
   text-transform: uppercase;
@@ -8730,7 +8694,7 @@ table {
 
 .production-plan-filter-bar__grid input:focus,
 .production-plan-filter-bar__grid select:focus {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #ffffff;
   box-shadow:
     0 0 0 4px rgba(21, 94, 239, 0.1);
@@ -8776,7 +8740,7 @@ table {
   cursor: pointer;
   color: #52647d;
   background: rgba(255, 255, 255, 0.82);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 750;
   transition:
     border-color 160ms ease,
@@ -8881,7 +8845,7 @@ table {
   border-radius: 10px;
   color: #53657d;
   background: rgba(255, 255, 255, 0.9);
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   text-decoration: none;
   transition:
@@ -8933,7 +8897,7 @@ table {
 .production-plan-detail-page__header p {
   margin: 0 0 6px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -8948,7 +8912,7 @@ table {
 }
 
 .production-plan-detail-page__header span {
-  color: #748398;
+  color: #566478;
   font-size: 12px;
   font-weight: 700;
 }
@@ -9005,8 +8969,8 @@ table {
 }
 
 .production-plan-detail-page__summary span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -9023,8 +8987,8 @@ table {
 
 .production-plan-detail-page__summary small {
   overflow: hidden;
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -9073,7 +9037,7 @@ table {
 .production-plan-detail-page__content p {
   margin: 0;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9092,7 +9056,7 @@ table {
 }
 
 .production-plan-detail-page__content span {
-  color: #6e7d91;
+  color: #566478;
   font-size: 12px;
   line-height: 1.65;
 }
@@ -9148,7 +9112,7 @@ table {
 .production-plan-resources__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9164,7 +9128,7 @@ table {
 .production-plan-resources__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -9219,8 +9183,8 @@ table {
 }
 
 .production-plan-resource-card__content > span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -9280,7 +9244,7 @@ table {
 .production-plan-risk-panel__heading p {
   margin: 0 0 5px;
   color: #b54708;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9296,7 +9260,7 @@ table {
 .production-plan-risk-panel__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -9400,7 +9364,7 @@ table {
 .production-plan-risk-item__heading p {
   margin: 0 0 4px;
   color: #7a8799;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -9424,8 +9388,8 @@ table {
 }
 
 .production-plan-risk-item__content > span {
-  color: #6f7e91;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 
@@ -9464,8 +9428,8 @@ table {
 
 .production-plan-risk-panel__empty p {
   margin: 0;
-  color: #628071;
-  font-size: 11.5px;
+  color: #46695a;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 
@@ -9514,7 +9478,7 @@ table {
 .production-plan-approval-transfer-panel__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9530,7 +9494,7 @@ table {
 .production-plan-approval-transfer-panel__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -9569,8 +9533,8 @@ table {
 }
 
 .production-plan-approval-transfer-panel__meta span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -9586,8 +9550,8 @@ table {
 }
 
 .production-plan-approval-transfer-panel__meta small {
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .production-plan-approval-transfer-panel__grid {
@@ -9659,7 +9623,7 @@ table {
 .production-plan-readiness-column__heading p {
   margin: 0 0 4px;
   color: #6254e8;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -9702,8 +9666,8 @@ table {
 }
 
 .production-plan-readiness-column__ready span {
-  color: #628071;
-  font-size: 11px;
+  color: #46695a;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -9737,13 +9701,13 @@ table {
 
 .production-plan-readiness-blocker strong {
   color: #774213;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 850;
 }
 
 .production-plan-readiness-blocker span {
   color: #8b6848;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 
@@ -9790,7 +9754,7 @@ table {
 .production-plan-demand-table__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -9806,7 +9770,7 @@ table {
 .production-plan-demand-table__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -9852,8 +9816,8 @@ table {
 .production-plan-demand-table th {
   padding: 13px 16px;
   border-bottom: 1px solid #dfe6ef;
-  color: #6f7e91;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.05em;
   text-align: left;
@@ -9865,7 +9829,7 @@ table {
   padding: 15px 16px;
   border-bottom: 1px solid #e7ecf2;
   color: #52647d;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   vertical-align: middle;
 }
 
@@ -9896,8 +9860,8 @@ table {
 .production-plan-demand-table td > span {
   display: block;
   margin-top: 4px;
-  color: #8793a5;
-  font-size: 10px;
+  color: #5a697d;
+  font-size: 0.75rem;
 }
 
 .production-plan-demand-table__date {
@@ -9915,7 +9879,7 @@ table {
 }
 
 .production-plan-demand-table__date span {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 750;
   white-space: nowrap;
 }
@@ -9942,7 +9906,7 @@ table {
   padding: 10px;
   flex: 0 0 auto;
   border-radius: 11px;
-  color: #718096;
+  color: #566478;
   background: #f1f4f8;
 }
 
@@ -9955,8 +9919,8 @@ table {
 
 .production-plan-demand-table__empty p {
   margin: 0;
-  color: #718096;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 
@@ -9993,7 +9957,7 @@ table {
 .production-plan-timeline__heading p {
   margin: 0 0 5px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -10009,7 +9973,7 @@ table {
 .production-plan-timeline__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -10077,8 +10041,8 @@ table {
 }
 
 .production-plan-timeline__point span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -10135,7 +10099,7 @@ table {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #155eef;
+  background: #2463a7;
   box-shadow:
     0 0 0 4px rgba(21, 94, 239, 0.1);
   transform: translate(-50%, -50%);
@@ -10174,8 +10138,8 @@ table {
 }
 
 .production-plan-timeline__meta span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -10191,8 +10155,8 @@ table {
 }
 
 .production-plan-timeline__meta small {
-  color: #8793a5;
-  font-size: 10px;
+  color: #5a697d;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 900px) {
@@ -10260,7 +10224,7 @@ table {
 .production-plan-history-panel__heading p {
   margin: 0 0 5px;
   color: #6254e8;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -10276,7 +10240,7 @@ table {
 .production-plan-history-panel__heading span {
   display: block;
   max-width: 780px;
-  color: #738196;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -10306,8 +10270,8 @@ table {
 }
 
 .production-plan-history-panel__meta span {
-  color: #748398;
-  font-size: 9.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -10421,7 +10385,7 @@ table {
 .production-plan-history-item__heading p {
   margin: 0 0 4px;
   color: #6254e8;
-  font-size: 9.5px;
+  font-size: 0.75rem;
   font-weight: 850;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -10441,7 +10405,7 @@ table {
   gap: 6px;
   flex: 0 0 auto;
   color: #7b889a;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 750;
   white-space: nowrap;
 }
@@ -10454,8 +10418,8 @@ table {
 
 .production-plan-history-item__content > p {
   margin: 0;
-  color: #6f7e91;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 
@@ -10481,7 +10445,7 @@ table {
   padding: 10px;
   flex: 0 0 auto;
   border-radius: 11px;
-  color: #718096;
+  color: #566478;
   background: #f1f4f8;
 }
 
@@ -10494,8 +10458,8 @@ table {
 
 .production-plan-history-panel__empty p {
   margin: 0;
-  color: #718096;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.6;
 }
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
 import {
   DIGITAL_WORKFORCE_KPIS,
   DIGITAL_WORKFORCE_LIVE_STRIP,
@@ -10,6 +11,11 @@ import { readDigitalWorkforceControlCenter } from "@/features/digital-workforce/
 import "@/features/digital-workforce/components/digital-workforce-workspace.css";
 
 export async function DigitalWorkforceDashboardPanel() {
+  // Deferred module: nothing is fetched or rendered outside a demo/development context.
+  if (!deferredSurfacesEnabled()) {
+    return null;
+  }
+
   const hub = await readDigitalWorkforceControlCenter();
   const snapshot = hub.status === "success" ? hub.snapshot : null;
   const useDemo = !snapshot;

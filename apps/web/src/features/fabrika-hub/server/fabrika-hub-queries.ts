@@ -71,7 +71,7 @@ export async function readFabrikaHubWorkspace(): Promise<FabrikaHubWorkspace> {
 
   if (hasGrantedPermission(access, "process-oee.read")) {
     entries.push({
-      label: "Proses & OEE",
+      label: "Proses ve OEE",
       description: "Döngü süresi, OEE ve proses derinliği",
       href: "/proses-oee",
       metric: "Operasyonel",

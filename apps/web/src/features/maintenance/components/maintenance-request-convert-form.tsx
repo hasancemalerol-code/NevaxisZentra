@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import type { convertMaintenanceRequestAction } from "../server/maintenance-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenanceRequestConvertFormProps = Readonly<{
   requestId: string;
@@ -43,13 +44,13 @@ export function MaintenanceRequestConvertForm({
     >
       {message ? (
         <div className="maintenance-error-panel" role="alert">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
 
       <div className="maintenance-form-actions">
         <Button disabled={pending} type="submit" variant="primary">
-          {pending ? "Dönüştürülüyor…" : "Bakım emrine dönüştür"}
+          {pending ? "Dönüştürülüyor…" : "Bakım Emrine Dönüştür"}
         </Button>
       </div>
     </form>

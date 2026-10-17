@@ -51,7 +51,11 @@ public static class AiTaskListOriginResolver
             return AiTaskListOriginKinds.AiAnalysis;
         }
 
-        if (!string.IsNullOrWhiteSpace(task.SourceModule))
+        // One task -> one source truth: a task that carries evidence sources (the "N kaynak" the detail page lists) or a
+        // source entity link has a source, so the list can never report it as "Kaynak belirtilmemiş".
+        if (!string.IsNullOrWhiteSpace(task.SourceModule)
+            || !string.IsNullOrWhiteSpace(task.SourceEntityId)
+            || sources.Count > 0)
         {
             return AiTaskListOriginKinds.OperationalTask;
         }

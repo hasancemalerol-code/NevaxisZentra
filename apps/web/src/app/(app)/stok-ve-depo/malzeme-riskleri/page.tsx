@@ -6,6 +6,10 @@ import { MaterialAvailabilityRiskWorkspaceView } from "@/features/material-avail
 import { readMaterialAvailabilityRiskWorkspace } from "@/features/material-availability-risk/server/material-availability-risk-reader";
 import "@/features/materials/components/material-registry.css";
 import "@/features/quality-control/components/quality-workspace.css";
+import "@/features/material-availability-risk/components/material-availability-risk.css";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
 
 type MaterialAvailabilityRiskPageProps = Readonly<{
   searchParams: Promise<
@@ -37,41 +41,31 @@ export default async function MaterialAvailabilityRiskPage({
 
   if (result.status === "failure") {
     return (
-      <main className="material-registry-page">
+      <div className="material-registry-page">
         <header className="material-registry-header">
           <div className="material-registry-header__intro">
             <p className="material-registry-header__eyebrow">STOK VE DEPO</p>
             <h1>Malzeme Riskleri</h1>
           </div>
         </header>
-        <div role="alert" className="material-registry-error" data-testid="material-availability-risk-server-error">
-          <Package aria-hidden="true" />
-          <div>
-            <h3>Malzeme risk verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <div data-testid="material-availability-risk-server-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Malzeme risk verisi yüklenemedi" inline /></div>
+      </div>
     );
   }
 
   return (
-    <main className="material-registry-page">
-      <header className="material-registry-header">
-        <div className="material-registry-header__intro">
-          <p className="material-registry-header__eyebrow">STOK VE DEPO</p>
-          <h1>Malzeme Riskleri</h1>
-          <p className="material-registry-header__subtitle">
-            ERP stok ve malzeme ihtiyaç profillerine dayalı kullanılabilirlik risk değerlendirmeleri.
-          </p>
-        </div>
-        <div className="material-registry-header__actions">
+    <div className="material-registry-page">
+      <PageHeader
+        eyebrow="Stok ve Depo"
+        title="Malzeme Riskleri"
+        description="ERP stok ve malzeme ihtiyaç profillerine dayalı kullanılabilirlik riski değerlendirmeleri."
+        actions={(
           <Link href="/malzemeler" className="material-registry-header__link">
             <Package aria-hidden="true" />
             Malzeme kayıtları
           </Link>
-        </div>
-      </header>
+        )}
+      />
 
       <MaterialAvailabilityRiskWorkspaceView
         workspace={result.workspace}
@@ -80,6 +74,6 @@ export default async function MaterialAvailabilityRiskPage({
         history={result.history}
         historyError={result.historyError}
       />
-    </main>
+    </div>
   );
 }

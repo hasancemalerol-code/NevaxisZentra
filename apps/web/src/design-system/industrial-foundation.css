@@ -55,9 +55,10 @@
 
 .fact-workspace__meta {
   margin: 0;
-  font-size: var(--fact-text-meta);
+  max-width: 920px;
+  font-size: 0.875rem;
+  line-height: 1.55;
   color: var(--color-text-secondary);
-  font-family: var(--fact-text-mono);
 }
 
 /* ─── Command bar ─── */
@@ -86,31 +87,31 @@
 
 .fact-status-strip {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1px;
-  border: 1px solid var(--fact-border);
-  border-radius: var(--fact-radius-md);
-  overflow: hidden;
-  background: var(--fact-border);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
 }
 
 .fact-status-strip__item {
   display: grid;
-  gap: 2px;
-  padding: 8px 10px;
+  gap: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--fact-border);
+  border-radius: 12px;
   background: var(--fact-surface-panel);
+  box-shadow: 0 1px 2px rgb(20 37 58 / 4%), 0 6px 18px rgb(20 37 58 / 4%);
 }
 
 .fact-status-strip__label {
-  font-size: var(--fact-text-meta);
+  font-size: 0.75rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  font-weight: 700;
 }
 
 .fact-status-strip__value {
-  font-size: var(--fact-text-metric);
-  font-weight: 700;
+  font-size: 1.375rem;
+  font-weight: 750;
   font-variant-numeric: tabular-nums;
   color: var(--color-text-primary);
 }
@@ -228,7 +229,7 @@
 .fact-station-row__code {
   display: block;
   padding: 6px 8px 2px;
-  font-size: var(--fact-text-meta);
+  font-size: 0.8125rem;
   font-family: var(--fact-text-mono);
   color: var(--color-text-muted);
 }

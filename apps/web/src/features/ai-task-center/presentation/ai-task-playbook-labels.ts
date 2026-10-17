@@ -76,7 +76,7 @@ export const AI_TASK_PLAYBOOK_TRIGGER_SOURCE_LABELS: Readonly<
 > = {
   manual: "Manuel",
   automation: "Otomasyon",
-  "ai-recommendation": "AI Önerisi",
+  "ai-recommendation": "Yapay Zekâ Önerisi",
   "shift-handover": "Vardiya Teslimi",
 };
 

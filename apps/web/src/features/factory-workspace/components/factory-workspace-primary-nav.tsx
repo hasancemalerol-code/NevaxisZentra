@@ -3,7 +3,7 @@ import Link from "next/link";
 const PRIMARY_LINKS = [
   { href: "/fabrika", label: "Genel Bakış", exact: true },
   { href: "/uretim/hatlar", label: "Hatlar" },
-  { href: "/uretim/kaynaklar", label: "Makineler & Kaynaklar" },
+  { href: "/uretim/kaynaklar", label: "Makineler ve Kaynaklar" },
 ] as const;
 
 type FactoryWorkspacePrimaryNavProps = Readonly<{
@@ -19,7 +19,7 @@ export function FactoryWorkspacePrimaryNav({ pathname }: FactoryWorkspacePrimary
     >
       {PRIMARY_LINKS.map((link) => {
         const active =
-          "exact" in link && link.exact ? pathname === link.href : pathname.startsWith(link.href);
+          "exact" in link && link.exact ? pathname === link.href : pathname === link.href || pathname.startsWith(`${link.href}/`);
         return (
           <Link
             key={link.href}

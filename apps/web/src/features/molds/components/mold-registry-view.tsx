@@ -31,6 +31,7 @@ import { createMoldAction } from "../server/mold-writer";
 import { loadMoldDetailAction } from "../server/mold-actions";
 import { MoldHistoryDetailPanel } from "./mold-history-detail-panel";
 import "./mold-registry.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MoldRegistryViewProps = Readonly<{
   summary: MoldWorkspaceSummary;
@@ -282,7 +283,7 @@ export function MoldRegistryView({
   }
 
   return (
-    <main className="mold-registry-page">
+    <div className="mold-registry-page">
       <section className="mold-executive" aria-label="Kalıp yönetim komuta yüzeyi">
         <div className="mold-executive__top">
           <div className="mold-executive__intro">
@@ -325,8 +326,7 @@ export function MoldRegistryView({
           </article>
           <article className="mold-executive__kpi mold-executive__kpi--critical">
             <strong>{summary.quarantinedCount}</strong>
-            <span>Kritik Dikkat</span>
-            <small>Karantinada</small>
+            <span>Karantinada</span>
           </article>
         </div>
 
@@ -357,12 +357,12 @@ export function MoldRegistryView({
 
       {error ? (
         <div className="mold-registry-error" role="alert">
-          {error}
+          {customerMessage(error)}
         </div>
       ) : null}
       {message ? (
         <div className="mold-registry-empty" role="status">
-          {message}
+          {customerMessage(message)}
         </div>
       ) : null}
       {isPending ? (
@@ -384,11 +384,11 @@ export function MoldRegistryView({
             action={(formData) => runAction(() => createMoldAction(formData))}
           >
             <label className="mold-required">
-              Kalıp Kodu
+              Kalıp Kodu <span className="zx-required" aria-hidden="true">*</span>
               <input name="code" required aria-required="true" />
             </label>
             <label className="mold-required">
-              Kalıp Adı
+              Kalıp Adı <span className="zx-required" aria-hidden="true">*</span>
               <input name="name" required aria-required="true" />
             </label>
             <label>
@@ -521,14 +521,19 @@ export function MoldRegistryView({
             ))}
           </div>
 
-          <div className="mold-registry-table-wrap">
+          <div className="mold-registry-table-wrap" tabIndex={0} role="region" aria-label="Kalıp sicili (kaydırılabilir)">
             {filteredMolds.length === 0 ? (
               <div className="mold-registry-empty">
                 <Boxes aria-hidden="true" />
                 <p>Kayıtlı kalıp bulunamadı.</p>
+                {canManage && !filtersActive && !showCreate ? (
+                  <button type="button" className="mold-registry-button" onClick={() => setShowCreate(true)}>
+                    İlk kalıbı ekle
+                  </button>
+                ) : null}
               </div>
             ) : (
-              <table className={`mold-registry-table${detailOpen ? " mold-registry-table--compact" : ""}`}>
+              <table aria-label="Kalıp sicili" className={`mold-registry-table${detailOpen ? " mold-registry-table--compact" : ""}`}>
                 <colgroup>
                   <col className="mold-col-identity" />
                   <col className="mold-col-status" />
@@ -657,6 +662,6 @@ export function MoldRegistryView({
           </aside>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

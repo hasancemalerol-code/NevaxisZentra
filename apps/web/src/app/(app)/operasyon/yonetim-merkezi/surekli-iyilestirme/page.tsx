@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+import { AuthorizationGateState } from "@/components/ui/failure-state";
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { ContinuousImprovementWorkspacePanel } from "@/features/factory-learning/components/continuous-improvement-workspace-panel";
@@ -9,7 +9,7 @@ export default async function ContinuousImprovementPage() {
   const authorization = await denyUnlessGranted("continuous-improvement.read");
   if (authorization.status === "failure") {
     return (
-      <main className="commint-page">
+      <div className="commint-page continuous-improvement-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">OPERASYON</p>
@@ -17,23 +17,13 @@ export default async function ContinuousImprovementPage() {
             <p className="commint-executive__subtitle">{CONTINUOUS_IMPROVEMENT_SUBTITLE}</p>
           </div>
         </header>
-        <div
-          role="alert"
-          className="commint-error-banner"
-          data-testid="continuous-improvement-forbidden"
-        >
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{authorization.code === "authorization-denied" ? "Bu merkeze erişim yetkiniz yok" : "Yetki doğrulanamadı"}</h3>
-            <p>{authorization.message}</p>
-          </div>
-        </div>
-      </main>
+        <AuthorizationGateState code={authorization.code} />
+      </div>
     );
   }
 
   return (
-    <main className="commint-page">
+    <div className="commint-page continuous-improvement-page">
       <header className="commint-executive">
         <div className="commint-executive__intro">
           <p className="commint-executive__eyebrow">OPERASYON</p>
@@ -42,6 +32,6 @@ export default async function ContinuousImprovementPage() {
         </div>
       </header>
       <ContinuousImprovementWorkspacePanel />
-    </main>
+    </div>
   );
 }

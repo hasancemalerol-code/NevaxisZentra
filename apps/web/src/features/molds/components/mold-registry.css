@@ -56,7 +56,7 @@
 
 .mold-executive__eyebrow {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   color: #155eef;
   font-weight: 700;
@@ -129,7 +129,7 @@
 }
 
 .mold-executive__kpi--neutral::before {
-  background: #155eef;
+  background: #2463a7;
 }
 
 .mold-executive__kpi--success::before {
@@ -158,10 +158,10 @@
 
 .mold-executive__kpi span {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -170,8 +170,8 @@
 
 .mold-executive__kpi small {
   display: block;
-  font-size: 0.66rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -182,7 +182,7 @@
   margin: 0;
   padding: 0.15rem 0 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #566478;
   line-height: 1.35;
 }
 
@@ -195,11 +195,11 @@
 
 .mold-executive__attention-title {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .mold-executive__attention-list {
@@ -262,7 +262,7 @@
 }
 
 .mold-executive__attention-meta {
-  color: #64748b;
+  color: #566478;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -307,7 +307,7 @@
 }
 
 .mold-registry-kpi--neutral::before {
-  background: #155eef;
+  background: #2463a7;
 }
 
 .mold-registry-kpi--success::before {
@@ -336,10 +336,10 @@
 
 .mold-registry-kpi span {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: #64748b;
+  color: #566478;
   text-transform: uppercase;
   white-space: nowrap;
   overflow: hidden;
@@ -378,7 +378,7 @@
 
 .mold-registry-surface__count {
   font-size: 0.76rem;
-  color: #64748b;
+  color: #566478;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -410,7 +410,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 650;
   color: #475569;
   min-width: 0;
@@ -433,7 +433,7 @@
   left: 0.65rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: #5d6b7f;
   pointer-events: none;
 }
 
@@ -461,7 +461,7 @@
   background: #fff;
   color: #4d6078;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -473,7 +473,7 @@
 }
 
 .mold-lifecycle-pill[aria-pressed="true"] {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #eff4ff;
   color: #155eef;
 }
@@ -514,7 +514,7 @@
 .mold-detail-tabs__button:focus-visible,
 .mold-detail-close:focus-visible {
   outline: none;
-  border-color: #155eef;
+  border-color: #2463a7;
   box-shadow: 0 0 0 3px rgb(21 94 239 / 0.18);
 }
 
@@ -565,10 +565,10 @@
 }
 
 .mold-registry-table th {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: #566478;
   background: #f8fafc;
   font-weight: 700;
   white-space: nowrap;
@@ -671,8 +671,8 @@
 
 .mold-identity__code {
   display: block;
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 650;
   letter-spacing: 0.01em;
   overflow: hidden;
@@ -813,7 +813,7 @@
 
 .mold-sticky-context__code {
   flex: 0 0 auto;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
   color: #475569;
   white-space: nowrap;
@@ -822,7 +822,7 @@
 
 .mold-sticky-context__tab {
   flex: 0 0 auto;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -859,8 +859,8 @@
 .mold-detail-breadcrumb {
   margin: 0;
   min-width: 0;
-  font-size: 0.7rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   letter-spacing: 0.02em;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -893,7 +893,7 @@
 
 .mold-detail-close:focus-visible {
   outline: none;
-  border-color: #155eef;
+  border-color: #2463a7;
   box-shadow: 0 0 0 3px rgb(21 94 239 / 0.2);
 }
 
@@ -951,9 +951,9 @@
 }
 
 .mold-detail-meta-item__label {
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   font-weight: 650;
-  color: #64748b;
+  color: #566478;
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -1024,8 +1024,8 @@
 
 .mold-form-hint {
   margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.35;
 }
 
@@ -1048,11 +1048,11 @@
 
 .mold-form-section__label {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .mold-required::after {
@@ -1092,7 +1092,7 @@
   background: #fff;
   color: #4d6078;
   font: inherit;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -1104,7 +1104,7 @@
 }
 
 .mold-detail-tabs__button[aria-selected="true"] {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #eff4ff;
   color: #155eef;
 }
@@ -1137,11 +1137,11 @@
   margin: 0;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid #eef2f7;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .mold-registry-meta-grid {
@@ -1161,8 +1161,8 @@
 
 .mold-registry-meta-grid dt {
   margin: 0;
-  color: #64748b;
-  font-size: 0.7rem;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1202,7 +1202,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #475569;
   min-width: 0;
@@ -1254,8 +1254,8 @@
 }
 
 .mold-registry-button.primary {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #fff;
 }
 
@@ -1280,7 +1280,7 @@
 .mold-registry-button.compact {
   min-height: 1.75rem;
   padding: 0.25rem 0.55rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 /* ─── Badges ─── */
@@ -1291,7 +1291,7 @@
   gap: 0.2rem;
   border-radius: 999px;
   padding: 0.12rem 0.5rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   background: #eff6ff;
   color: #1d4ed8;
@@ -1365,7 +1365,7 @@
 }
 
 .mold-registry-history-item small {
-  color: #64748b;
+  color: #566478;
 }
 
 .mold-timeline {
@@ -1396,7 +1396,7 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 999px;
-  background: #155eef;
+  background: #2463a7;
   border: 2px solid #dbeafe;
   flex: 0 0 auto;
   margin-top: 0.2rem;
@@ -1457,8 +1457,8 @@
 
 .mold-timeline__meta {
   margin: 0.3rem 0 0;
-  font-size: 0.7rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem 0.55rem;
@@ -1477,8 +1477,8 @@
 .mold-compat-disclaimer {
   margin: 0.15rem 0 0;
   display: block;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.3;
 }
 
@@ -1550,7 +1550,7 @@
   background: #f8fafc;
   padding: 0.55rem 0.7rem;
   font-size: 0.8rem;
-  color: #64748b;
+  color: #566478;
 }
 
 /* ─── Legacy header aliases (error page) ─── */
@@ -1572,7 +1572,7 @@
 
 .mold-registry-header__eyebrow {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   color: #155eef;
   font-weight: 700;
@@ -1707,4 +1707,166 @@
   .mold-registry-toolbar__filters {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* ─── Review fixes: KPI strip, header controls, readable filters ─── */
+
+.mold-registry-page {
+  width: 100%;
+  max-width: 1384px;
+  margin-inline: auto;
+}
+
+.mold-executive__intro {
+  gap: 0.4rem;
+}
+
+.mold-executive__actions .mold-registry-button {
+  min-height: 2.5rem;
+  border-radius: 10px;
+}
+
+.mold-executive__kpis {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  background: #eef2f7;
+}
+
+.mold-executive__kpis .mold-executive__kpi:nth-child(n) {
+  border: 0;
+  background: #fff;
+}
+
+.mold-registry-toolbar select {
+  font-weight: 500;
+}
+
+
+/* Round 3: KPI strip fills every row (global 5-item grids force 3 columns and leave a grey empty cell), header keeps the action top right. */
+body .content-viewport section.mold-executive .mold-executive__kpis {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: #eef2f7;
+}
+
+body .content-viewport section.mold-executive .mold-executive__kpis > .mold-executive__kpi {
+  flex: 1 1 150px;
+}
+
+@media (min-width: 561px) {
+  .mold-executive__top {
+    flex-wrap: nowrap;
+  }
+
+  .mold-executive__actions {
+    margin-left: auto;
+  }
+}
+
+.mold-registry-header__intro {
+  gap: 0.4rem;
+}
+
+/* Round 5: five KPI cards on solid cells: 5 across down to 901px, then 2+2+1 (the last card spans the row), never a grey or empty slot. */
+body .content-viewport section.mold-executive div.mold-executive__kpis {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  gap: 1px;
+  background: #eef2f7;
+}
+
+body .content-viewport section.mold-executive div.mold-executive__kpis > .mold-executive__kpi {
+  flex: none;
+  grid-column: auto !important;
+  min-width: 0;
+  border: 0;
+  background: #fff;
+}
+
+@media (max-width: 640px) {
+  body .content-viewport section.mold-executive div.mold-executive__kpis {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+
+  body .content-viewport section.mold-executive div.mold-executive__kpis > .mold-executive__kpi {
+    grid-column: span 2 !important;
+  }
+
+  body .content-viewport section.mold-executive div.mold-executive__kpis > .mold-executive__kpi:nth-child(n + 4) {
+    grid-column: span 3 !important;
+  }
+}
+
+@media (max-width: 560px) {
+  body .content-viewport section.mold-executive div.mold-executive__kpis {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  body .content-viewport section.mold-executive div.mold-executive__kpis > .mold-executive__kpi,
+  body .content-viewport section.mold-executive div.mold-executive__kpis > .mold-executive__kpi:nth-child(n + 4) {
+    grid-column: auto !important;
+  }
+}
+
+/* Reflowed table cards: pills keep their own width. */
+@media (max-width: 820px) {
+  body .content-viewport table[data-zx-stack] td > :is(.badge, [class*="mold-registry-badge"], [class*="mold-status"]) {
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+
+/* Round 5: header rhythm matches the Kalite pages; KPI labels wrap instead of clipping. */
+.mold-executive__intro {
+  gap: 8px;
+}
+
+.mold-registry-toolbar select {
+  font-weight: 400;
+}
+
+.mold-executive__kpi span {
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* Status chips scroll on one row instead of wrapping to an orphan chip. */
+@media (max-width: 900px) {
+  .mold-lifecycle-pills {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .mold-lifecycle-pill {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+.mold-registry-header__intro {
+  gap: 8px;
+}
+
+.mold-executive__kpis {
+  margin-top: 8px;
+}
+
+/* Registry empty state: a centred, taller block with the call to action beneath the message. */
+.mold-registry-table-wrap > .mold-registry-empty {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 260px;
+  margin: 1rem;
+  text-align: center;
+  font-size: 0.9375rem;
+}
+
+.mold-registry-table-wrap > .mold-registry-empty svg {
+  width: 32px;
+  height: 32px;
+  color: #8294aa;
 }

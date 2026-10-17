@@ -12,9 +12,10 @@ import type { LivePlanWorkspacePayload, LivePlanWorkspaceTab } from "../domain/l
 
 type LivePlanOperationalCenterProps = Readonly<{
   workspace: LivePlanWorkspacePayload;
+  tabsHost?: HTMLElement | null;
 }>;
 
-export function LivePlanOperationalCenter({ workspace }: LivePlanOperationalCenterProps) {
+export function LivePlanOperationalCenter({ workspace, tabsHost }: LivePlanOperationalCenterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { adaptiveWorkspace, replanEvaluation, selection, productionPlans, canReadAdaptivePlanning, lineContexts } = workspace;
@@ -28,13 +29,14 @@ export function LivePlanOperationalCenter({ workspace }: LivePlanOperationalCent
     <section className="live-plan-workspace__panel" data-testid="live-plan-operational-center">
       <div className="live-plan-workspace__panel-header">
         <h2>Canlı Plan</h2>
-        {selection.lineId ?? lineContexts[0]?.lineId ? (
+        {productionPlans.length > 0 && (selection.lineId ?? lineContexts[0]?.lineId) ? (
           <Link
             href={buildScenarioRecoveryHref({
               lineId: selection.lineId ?? lineContexts[0]?.lineId,
               entryPoint: "PLAN",
-              orderReference: adaptiveWorkspace?.metrics.ordersAtRisk ? "ORD-418" : undefined,
+              orderReference: adaptiveWorkspace?.risks.deadlineRisks[0]?.orderId,
             })}
+            className="fact-link-button"
             data-testid="live-plan-simulate-recovery-link"
           >
             Kurtarma simülasyonu
@@ -48,6 +50,8 @@ export function LivePlanOperationalCenter({ workspace }: LivePlanOperationalCent
             replanEvaluation={replanEvaluation}
             initialTab={selection.tab}
             onTabChange={handleTabChange}
+            hideCreatePlanAction
+            tabsHost={tabsHost}
           />
         ) : (
           <ProductionPlanFilteredWorkspace productionPlans={productionPlans} />

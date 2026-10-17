@@ -1,7 +1,7 @@
 // Edge Gateway bounded-context — presentation labels (Turkish UI)
 
 export const EDGE_GATEWAY_VENDOR_LABELS: Record<string, string> = {
-  simulator: "Makine Simülatörü",
+  simulator: "Örnek veri kaynağı",
   "mqtt-bridge": "MQTT Köprüsü",
   "opcua-bridge": "OPC UA Köprüsü",
 };
@@ -47,10 +47,10 @@ export const MACHINE_EVENT_KIND_LABELS: Record<string, string> = {
   "machine.downtime.ended": "Duruş Bitti",
   "machine.alarm.raised": "Alarm Oluştu",
   "machine.alarm.cleared": "Alarm Temizlendi",
-  "machine.setup.started": "Setup Başladı",
-  "machine.setup.completed": "Setup Tamamlandı",
+  "machine.setup.started": "Kurulum Başladı",
+  "machine.setup.completed": "Kurulum Tamamlandı",
   "machine.scrap.observed": "Fire Gözlemi",
-  "edge.delivery.replay": "Edge Teslimatı",
+  "edge.delivery.replay": "Saha verisi teslimi",
 };
 
 export const ALARM_SEVERITY_LABELS: Record<string, string> = {
@@ -67,7 +67,7 @@ export const DOWNTIME_REASON_CATEGORY_LABELS: Record<string, string> = {
   material: "Malzeme",
   operator: "Operatör",
   quality: "Kalite",
-  setup: "Setup",
+  setup: "Kurulum",
   external: "Dış",
   planned: "Planlı",
   other: "Diğer",
@@ -156,7 +156,7 @@ export function getMachineReadinessLabel(isReady: boolean): string {
 }
 
 export function getEdgeSimulatorDisclaimer(): string {
-  return "Simülatör modu — gerçek PLC/makine bağlantısı yok. Deterministik test verileri.";
+  return "Örnek veri modu — gerçek PLC/makine bağlantısı yok.";
 }
 
 export function getMachineConnectivityLabel(
@@ -244,12 +244,12 @@ export function formatDurationMs(ms: number | null | undefined): string {
 
 export const EDGE_CAPABILITIES = [
   "Makine kayıt defteri (CNC, pres, vb.)",
-  "Edge gateway kaydı",
+  "Saha ağ geçidi kaydı",
   "Makine ↔ gateway atama",
-  "Kiracı / tesis izolasyonu (RLS)",
-  "Sadece okunur adaptör sözleşmesi",
-  "Deterministik makine simülatörü (CNC-001, PRESS-001)",
-  "Kanonik makine olayı zarfı (kaynak zaman damgası, alınma zamanı, sıra no.)",
+  "Organizasyon / tesis izolasyonu (RLS)",
+  "Salt okunur bağlantı kaydı",
+  "Örnek makine veri kaynağı",
+  "Makine olayı kaydı (kaynak zamanı, alınma zamanı, sıra no.)",
   "Telemetri ingest (idempotency key tabanlı tekilleştirme)",
   "Sıra dışı tespit (SourceSequence karşılaştırması)",
   "Makine son-görülme / hazırlık projeksiyonu",
@@ -275,7 +275,7 @@ export const EDGE_CAPABILITIES = [
   "Operasyonel özet projeksiyonu (gözlenen duruş / alarm / setup / fire)",
   "Observed-only ownership — EDGE üretim/kalite mutasyonu yapmaz",
   // EDGE-4
-  "Yerel sınırlı Edge olay tamponu (store-and-forward)",
+  "Yerel sınırlı saha olay tamponu (store-and-forward)",
   "Dayanıklı yerel JSON dosya tamponu — merkezi PostgreSQL değil",
   "Açık teslimat onayı (API acknowledgement sonrası delivered)",
   "Sınırlı yeniden deneme + üstel geri çekilme",
@@ -296,8 +296,8 @@ export const EDGE_BUFFER_STATUS_LABELS: Record<string, string> = {
   pending: "Bekliyor",
   "in-flight": "Gönderiliyor",
   delivered: "Teslim edildi",
-  "retry-wait": "Yeniden deneme",
-  "dead-letter": "Dead letter",
+  "retry-wait": "Yeniden Deneme",
+  "dead-letter": "Teslim edilemeyen",
 };
 
 export const EDGE_REPLAY_STATUS_LABELS: Record<string, string> = {
@@ -326,7 +326,7 @@ export function getEdgeBufferErrorLabel(code: string | null | undefined): string
     "edge.delivery.timeout": "Zaman aşımı",
     "edge.delivery.retryable-http": "Geçici HTTP hatası",
     "edge.delivery.non-retryable": "Kalıcı HTTP hatası",
-    "edge.delivery.unsupported-payload-version": "Desteklenmeyen payload sürümü",
+    "edge.delivery.unsupported-payload-version": "Desteklenmeyen veri paketi sürümü",
     "edge.delivery.malformed-event": "Geçersiz olay",
     "edge.delivery.authorization-denied": "Yetkilendirme reddedildi",
     "edge.delivery.stale-in-flight-recovered": "Askıda kalan gönderim kurtarıldı",

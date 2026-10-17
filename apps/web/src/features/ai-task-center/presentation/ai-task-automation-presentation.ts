@@ -202,7 +202,7 @@ export function formatAutomationOutcomeSummary(summary: string): string {
   }
 
   if (summary === "Automation already applied (idempotent replay).") {
-    return "Otomasyon zaten uygulandı (idempotent tekrar).";
+    return "Otomasyon zaten uygulandı; tekrar işlem yapılmadı.";
   }
 
   const simulationMatch = summary.match(

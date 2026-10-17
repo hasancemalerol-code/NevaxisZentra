@@ -12,6 +12,7 @@ import type {
   rejectQualityInspectionAction,
   startQualityInspectionAction,
 } from "../server/quality-control-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type QualityInspectionActionsProps = Readonly<{
   inspection: QualityInspectionDetail;
@@ -61,7 +62,7 @@ export function QualityInspectionActions({
 
       {message ? (
         <div role="alert" className="quality-error-panel">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
 

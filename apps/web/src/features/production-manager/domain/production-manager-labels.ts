@@ -1,4 +1,4 @@
-export const PRODUCTION_MANAGER_TITLE = "AI Üretim Yöneticisi";
+export const PRODUCTION_MANAGER_TITLE = "Yapay zekâ üretim yöneticisi";
 
 export const PRODUCTION_MANAGER_SUBTITLE =
   "Tahmin, senaryo simülasyonu ve kontrollü karar akışı";
@@ -61,7 +61,7 @@ export function getProductionManagerDecisionTypeLabel(type: string): string {
     case "material-depletion":
       return "Malzeme Tükenmesi";
     case "quality-escalation":
-      return "Kalite Eskalasyonu";
+      return "Kalite Üst Seviyeye Aktarımı";
     case "mold-risk":
       return "Kalıp Riski";
     case "capacity-overload":

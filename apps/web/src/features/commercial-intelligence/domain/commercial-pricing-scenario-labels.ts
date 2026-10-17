@@ -1,11 +1,14 @@
 export const COMMERCIAL_PRICING_SCENARIO_SUBTITLE =
-  "Fiyat koruma ve onay; önerilen birim fiyatların kârlılık profiline karşı deterministik değerlendirilmesini ve insan onaylı iş akışını gösterir.";
+  "Fiyat koruma ve onay; önerilen birim fiyatların kârlılık profiline karşı kayıtlı verilere göre değerlendirilmesini ve insan onaylı iş akışını gösterir.";
 
 export const COMMERCIAL_PRICING_SCENARIO_SCOPE_NOTE =
   "Senaryolar otomatik fiyat uygulamaz; yalnızca değerlendirme, onay geçişleri ve görev taslağı desteklenir.";
 
 export const COMMERCIAL_PRICING_SCENARIO_EMPTY_NOTE =
-  "Seçili filtreler için fiyat senaryosu bulunamadı. Yeni senaryo oluşturmak için yönetim yetkisi gerekir.";
+  "Seçili filtreler için fiyat senaryosu bulunamadı.";
+
+export const COMMERCIAL_PRICING_SCENARIO_EMPTY_MANAGE_HINT =
+  " Yeni senaryo oluşturmak için yönetim yetkisi gerekir.";
 
 export const COMMERCIAL_PRICING_SCENARIO_NO_SELECTION_NOTE =
   "Detay görmek için tablodan bir fiyat senaryosu seçin.";

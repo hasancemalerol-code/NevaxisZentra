@@ -24,7 +24,9 @@ import {
   getAiTaskPriorityLabel,
   getAiTaskRiskLevelLabel,
 } from "../presentation/ai-task-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
+import "./ai-task-create-form-polish.css";
 function mapCreatePayload(input: CreateAiTaskInput) {
   return {
     title: input.title,
@@ -177,7 +179,7 @@ export function AiTaskCreateForm() {
           void createPromise.then((result) => {
             if (!result || result.status === "failure") {
               setIsPending(false);
-              setErrorMessage(result?.message ?? "AI görevi oluşturulamadı.");
+              setErrorMessage(result?.message ?? "Görev oluşturulamadı.");
               return;
             }
 
@@ -187,19 +189,23 @@ export function AiTaskCreateForm() {
         }}
       >
         <div className="ai-task-create-form__grid">
+          <h2 className="ai-task-create-form__group">Genel</h2>
+
           <label>
-            Başlık
+            Başlık <span className="zx-required" aria-hidden="true">*</span>
             <input disabled={isPending} name="title" required type="text" />
           </label>
 
           <label>
-            Özet
+            Özet <span className="zx-required" aria-hidden="true">*</span>
             <textarea disabled={isPending} name="summary" required rows={2} />
           </label>
 
+          <div className="ai-task-create-form__row">
           <label>
-            Kategori
-            <select defaultValue="commercial-intelligence" disabled={isPending} name="category" required>
+            Kategori <span className="zx-required" aria-hidden="true">*</span>
+            <select defaultValue="" disabled={isPending} name="category" required>
+              <option disabled value="">Kategori seçin</option>
               {AI_TASK_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
                   {getAiTaskCategoryLabel(category)}
@@ -209,7 +215,7 @@ export function AiTaskCreateForm() {
           </label>
 
           <label>
-            Öncelik
+            Öncelik <span className="zx-required" aria-hidden="true">*</span>
             <select defaultValue="medium" disabled={isPending} name="priority" required>
               {AI_TASK_PRIORITIES.map((priority) => (
                 <option key={priority} value={priority}>
@@ -220,7 +226,7 @@ export function AiTaskCreateForm() {
           </label>
 
           <label>
-            Risk seviyesi
+            Risk seviyesi <span className="zx-required" aria-hidden="true">*</span>
             <select defaultValue="medium" disabled={isPending} name="riskLevel" required>
               {AI_TASK_RISK_LEVELS.map((riskLevel) => (
                 <option key={riskLevel} value={riskLevel}>
@@ -230,40 +236,51 @@ export function AiTaskCreateForm() {
             </select>
           </label>
 
+          </div>
+
+          <h2 className="ai-task-create-form__group">Analiz</h2>
+
           <label>
-            Tespit edilen sorun
+            Tespit edilen sorun <span className="zx-required" aria-hidden="true">*</span>
             <textarea disabled={isPending} name="detectedIssue" required rows={3} />
           </label>
 
           <label>
-            Analiz gerekçesi
+            Analiz gerekçesi <span className="zx-required" aria-hidden="true">*</span>
             <textarea disabled={isPending} name="reasoning" required rows={3} />
           </label>
 
+          <h2 className="ai-task-create-form__group">Öneri</h2>
+
           <label>
-            Öneri başlığı
+            Öneri başlığı <span className="zx-required" aria-hidden="true">*</span>
             <input disabled={isPending} name="recommendationTitle" required type="text" />
           </label>
 
           <label>
-            Öneri açıklaması
+            Öneri açıklaması <span className="zx-required" aria-hidden="true">*</span>
             <textarea disabled={isPending} name="recommendationDescription" required rows={3} />
           </label>
 
-          <label>
-            Kaynak modül (isteğe bağlı)
-            <input defaultValue="commercial-intelligence" disabled={isPending} name="sourceModule" type="text" />
-          </label>
+          <details className="ai-task-create-form__advanced">
+            <summary>Gelişmiş: kaynak bağlantısı (isteğe bağlı)</summary>
+            <div className="ai-task-create-form__advanced-grid">
+            <label>
+              Kaynak modül (isteğe bağlı)
+              <input disabled={isPending} name="sourceModule" type="text" />
+            </label>
 
-          <label>
-            Kaynak varlık kimliği (isteğe bağlı)
-            <input disabled={isPending} name="sourceEntityId" type="text" />
-          </label>
+            <label>
+              Kaynak varlık kimliği (isteğe bağlı)
+              <input disabled={isPending} name="sourceEntityId" type="text" />
+            </label>
 
-          <label>
-            Idempotency anahtarı (isteğe bağlı)
-            <input disabled={isPending} name="idempotencyKey" type="text" />
-          </label>
+            <label>
+              Tekrar önleme anahtarı (isteğe bağlı)
+              <input disabled={isPending} name="idempotencyKey" type="text" />
+            </label>
+            </div>
+          </details>
         </div>
 
         {errorMessage ? (
@@ -272,7 +289,7 @@ export function AiTaskCreateForm() {
             data-testid="ai-task-create-form-error"
             role="alert"
           >
-            {errorMessage}
+            {customerMessage(errorMessage)}
           </p>
         ) : null}
 

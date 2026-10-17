@@ -40,6 +40,8 @@ import {
   transferMaterialLotAction,
 } from "../server/material-writer";
 import { MaterialLotTraceabilityPanel } from "./material-lot-traceability-panel";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type MaterialLotPanelProps = Readonly<{
   materialId: string;
@@ -249,7 +251,7 @@ export function MaterialLotPanel({
         ) : null}
         {error ? (
           <div className="material-registry-error" role="alert">
-            {error}
+            {customerMessage(error)}
           </div>
         ) : null}
         <div className="material-lot-traceability-picker">
@@ -286,12 +288,12 @@ export function MaterialLotPanel({
     <div className="material-lot-panel" role="tabpanel">
       {error ? (
         <div className="material-registry-error" role="alert">
-          {error}
+          {customerMessage(error)}
         </div>
       ) : null}
       {message ? (
         <div className="material-registry-empty" role="status">
-          {message}
+          {customerMessage(message)}
         </div>
       ) : null}
       {isPending ? (
@@ -401,7 +403,7 @@ export function MaterialLotPanel({
             <input type="hidden" name="unitOfMeasure" value={unitOfMeasure} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="material-required">
-              Lot Numarası
+              Lot Numarası <span className="zx-required" aria-hidden="true">*</span>
               <input name="lotNumber" required />
             </label>
             <label>
@@ -471,7 +473,7 @@ export function MaterialLotPanel({
             <input type="hidden" name="receivedAtUtc" value={new Date().toISOString()} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="material-required">
-              Gözlenen Miktar
+              Gözlenen Miktar <span className="zx-required" aria-hidden="true">*</span>
               <input name="observedQuantity" type="number" step="0.001" min="0" required />
             </label>
             <label>
@@ -501,7 +503,7 @@ export function MaterialLotPanel({
             <input type="hidden" name="expectedVersion" value={activeLotDetail.version} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="material-required">
-              Hedef Konum
+              Hedef Konum <span className="zx-required" aria-hidden="true">*</span>
               <select name="targetStorageLocationId" required defaultValue="">
                 <option value="">Seçiniz</option>
                 {storageLocations.map((location) => (
@@ -540,7 +542,7 @@ export function MaterialLotPanel({
             <input type="hidden" name="expectedVersion" value={activeLotDetail.version} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="material-required">
-              Hedef Durum
+              Hedef Durum <span className="zx-required" aria-hidden="true">*</span>
               <select name="targetStatus" required defaultValue="">
                 <option value="">Seçiniz</option>
                 {transitionOptions.map((option) => (
@@ -551,7 +553,7 @@ export function MaterialLotPanel({
               </select>
             </label>
             <label className="material-required full-width">
-              Gerekçe
+              Gerekçe <span className="zx-required" aria-hidden="true">*</span>
               <textarea name="reason" rows={2} required />
             </label>
             <div className="material-registry-actions full-width">
@@ -579,7 +581,7 @@ export function MaterialLotPanel({
             <input type="hidden" name="expectedVersion" value={activeLotDetail.version} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="material-required">
-              Kalite Durumu
+              Kalite Durumu <span className="zx-required" aria-hidden="true">*</span>
               <select name="qualityStatus" required defaultValue={activeLotDetail.qualityStatus}>
                 {MATERIAL_LOT_QUALITY_FORM_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -627,7 +629,7 @@ export function MaterialLotPanel({
               </select>
             </label>
             <label className="material-required">
-              Belge Referansı
+              Belge Referansı <span className="zx-required" aria-hidden="true">*</span>
               <input name="documentReference" required />
             </label>
             <label>
@@ -720,14 +722,14 @@ export function MaterialLotPanel({
           </div>
         </div>
 
-        <div className="material-registry-table-wrap">
+        <div className="material-registry-table-wrap" tabIndex={0} role="region" aria-label="Malzeme lotları (kaydırılabilir)">
           {filteredLots.length === 0 ? (
             <div className="material-registry-empty">
               <Package aria-hidden="true" />
               <p>Kayıtlı lot bulunamadı.</p>
             </div>
           ) : (
-            <table className="material-registry-table">
+            <table aria-label="Malzeme lotları" className="material-registry-table">
               <thead>
                 <tr>
                   <th>Lot</th>
@@ -1024,9 +1026,7 @@ export function MaterialLotPanel({
               ) : null}
             </>
           ) : !isPending ? (
-            <div className="material-registry-error" role="alert">
-              Lot detayı yüklenemedi.
-            </div>
+            <InlineUnavailable subject="Lot detayı" />
           ) : null}
         </section>
       ) : null}

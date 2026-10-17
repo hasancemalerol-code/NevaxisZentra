@@ -38,7 +38,7 @@ export function OrderDraftKpiLinks({
       label: "Toplam taslak",
       value: summary.totalCount,
       description:
-        "Tüm kanallardan oluşturulan sipariş taslakları",
+        "Tüm kanallardan taslaklar",
       href: "/siparisler",
       icon: Layers3,
       tone: "neutral",
@@ -48,7 +48,7 @@ export function OrderDraftKpiLinks({
       label: "İnceleme gerekiyor",
       value: summary.needsReviewCount,
       description:
-        "Kullanıcı kontrolü veya veri doğrulaması bekleyenler",
+        "Kontrol bekleyenler",
       href: createOrderDraftFilterUrl({
         status: "needs-review",
       }),
@@ -60,7 +60,7 @@ export function OrderDraftKpiLinks({
       label: "Onay bekliyor",
       value: summary.awaitingApprovalCount,
       description:
-        "Yetkili kullanıcı kararına sunulan taslaklar",
+        "Karar bekleyen taslaklar",
       href: createOrderDraftFilterUrl({
         awaitingApproval: true,
       }),
@@ -72,7 +72,7 @@ export function OrderDraftKpiLinks({
       label: "Engelleyici sorun",
       value: summary.blockingIssueCount,
       description:
-        "Siparişin kesinleşmesini engelleyen açık sorunlar",
+        "Kesinleşmeyi engelleyenler",
       href: createOrderDraftFilterUrl({
         hasBlockingIssues: true,
       }),
@@ -84,7 +84,7 @@ export function OrderDraftKpiLinks({
       label: "ERP aktarım hatası",
       value: summary.transferFailedCount,
       description:
-        "Bağlı ERP sistemine aktarılamayan siparişler",
+        "ERP'ye aktarılamayanlar",
       href: createOrderDraftFilterUrl({
         transferStatus: "failed",
       }),
@@ -115,7 +115,7 @@ export function OrderDraftKpiLinks({
             <span className="order-draft-kpi-link__content">
               <span>{item.label}</span>
               <strong>{item.value}</strong>
-              <small>{item.description}</small>
+              <small title={item.description}>{item.description}</small>
             </span>
           </Link>
         );

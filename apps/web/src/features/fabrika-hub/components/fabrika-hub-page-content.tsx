@@ -12,7 +12,7 @@ export async function FabrikaHubPageContent() {
   const workspace = await readFabrikaHubWorkspace();
 
   return (
-    <main className="fact-workspace" data-testid="fabrika-hub-page">
+    <div className="fact-workspace" data-testid="fabrika-hub-page">
       <WorkspaceHeader
         breadcrumb={<FactoryContextBreadcrumb segments={[{ label: "Canlı durum" }]} />}
         context="FABRİKA"
@@ -45,6 +45,6 @@ export async function FabrikaHubPageContent() {
           ))}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

@@ -1,0 +1,306 @@
+.occ-status-pills {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.occ-status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.occ-status-pill--critical { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
+.occ-status-pill--warning { border-color: #fed7aa; background: #fff7ed; color: #9a3412; }
+
+.occ-table td,
+.occ-table th { white-space: nowrap; }
+.occ-table td:nth-child(2) { white-space: normal; min-width: 12rem; }
+
+.occ-table-wrap { overflow-x: auto; }
+
+.occ-empty-cell { padding: 16px 0; }
+
+.occ-filter-rail { align-items: end; }
+.occ-filter-rail .commint-filter-field { display: grid; gap: 4px; align-content: end; }
+.occ-filter-rail .commint-filter-field > span { line-height: 1.2; }
+.occ-filter-rail__clear { align-self: end; min-height: 2rem; white-space: nowrap; }
+
+.occ-disclosure { border: 1px solid #e8edf3; border-radius: 10px; background: #fff; }
+.occ-disclosure > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; font-size: 0.875rem; }
+.occ-disclosure[open] > summary { border-bottom: 1px solid #eef2f7; }
+.occ-disclosure .commint-table-wrap { border: 0; border-radius: 0; }
+
+.occ-commercial-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.occ-related-link-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.occ-related-link-card__title { margin: 0; font-size: 1rem; font-weight: 700; }
+.occ-related-link-card__text { margin: 2px 0 0; color: #566478; font-size: 0.8125rem; }
+
+@media (max-width: 900px) {
+  .occ-hide-narrow { display: none; }
+}
+
+/* Round 3: one vertical rhythm, compact clear button, left-aligned link cards */
+body .content-viewport .occ-page,
+body .content-viewport .commint-page--related {
+  gap: 16px;
+}
+
+body .content-viewport .occ-filter-rail > .occ-filter-rail__clear {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  padding-inline: 14px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--zx-accent-strong, #1d4ed8);
+  font-size: 0.8125rem;
+}
+
+body .content-viewport .occ-filter-rail > .occ-filter-rail__clear:hover {
+  background: var(--zx-surface-soft, #f1f5f9);
+}
+
+.occ-empty-cell {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.occ-kpi-value--text {
+  font-size: 1.0625rem !important;
+  line-height: 1.3;
+}
+
+.occ-commercial-link,
+.occ-related-link-card {
+  text-align: left;
+}
+
+.occ-commercial-link .commint-table__link,
+.occ-related-link-card .commint-button {
+  white-space: nowrap;
+}
+
+.occ-commercial-link .commint-panel__title {
+  margin: 0;
+}
+
+.commint-executive__meta li {
+  font-size: 0.8125rem;
+}
+
+/* Round 4: link cards are a left-aligned title block with the action on the right, never centred filler. */
+body .content-viewport .commint-panel.occ-commercial-link,
+body .content-viewport .commint-panel.occ-related-link-card {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding: 16px 20px;
+  text-align: left;
+}
+
+body .content-viewport .occ-commercial-link > *,
+body .content-viewport .occ-related-link-card > * {
+  margin: 0;
+  text-align: left;
+}
+
+body .content-viewport .occ-commercial-link .commint-table__link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* KPI labels keep one line height so values align across cards (two-line labels reserve both lines). */
+body .content-viewport [data-testid="operations-command-center-kpi-grid"] .commint-kpi-card__label {
+  min-height: 2.6em;
+  display: flex;
+  align-items: flex-end;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+
+/* Scope strip chips stay readable (>= 13px). */
+body .content-viewport .occ-page .commint-executive__meta li {
+  font-size: 0.8125rem;
+}
+
+/* Round 5: filter fields share the row with the clear action (no orphaned clear button), 8 KPI cards sit 4 + 4. */
+body .content-viewport .occ-filter-rail > .commint-filter-field {
+  flex: 1 1 160px;
+}
+
+.occ-queue-reference {
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  body .content-viewport .commint-kpi-grid.commint-kpi-grid[data-testid="operations-command-center-kpi-grid"]:has(> :nth-child(8):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+body .content-viewport [data-testid="operations-command-center-kpi-grid"] .commint-kpi-card__label {
+  text-wrap: balance;
+}
+
+/* Round 5b: deterministic filter rail. Four fields on equal tracks plus an auto-width clear action in the same row from 900px;
+   two equal columns below that with the clear action on its own left-aligned row. */
+body .content-viewport .occ-filter-rail.occ-filter-rail {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 12px 14px;
+  align-items: end;
+}
+
+body .content-viewport .occ-filter-rail.occ-filter-rail > .commint-filter-field {
+  flex: none;
+  min-width: 0;
+}
+
+body .content-viewport .occ-filter-rail.occ-filter-rail > .occ-filter-rail__clear {
+  margin-left: 0;
+  justify-self: end;
+}
+
+@media (max-width: 899px) {
+  body .content-viewport .occ-filter-rail.occ-filter-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body .content-viewport .occ-filter-rail.occ-filter-rail > .occ-filter-rail__clear {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+/* Round 6: status chips share one line (equal row heights) at laptop-tablet widths; the record column gives up width instead. */
+@media (min-width: 821px) and (max-width: 1100px) {
+  .occ-status-pills {
+    flex-wrap: nowrap;
+  }
+
+  .occ-table td:nth-child(2) {
+    min-width: 9rem;
+  }
+
+  .occ-table th,
+  .occ-table td {
+    padding-inline: 8px;
+  }
+}
+
+/* Round 7: header rhythm (6-8px between eyebrow, title, subtitle and meta) with the action aligned to the title row. */
+body .content-viewport .occ-page .commint-executive__intro {
+  display: grid;
+  gap: 6px;
+}
+
+body .content-viewport .occ-page .commint-executive__intro > * {
+  margin: 0;
+}
+
+body .content-viewport .occ-page .commint-executive__top {
+  align-items: flex-start;
+  gap: 12px 20px;
+}
+
+body .content-viewport .occ-page .commint-executive__actions {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+body .content-viewport .occ-page .commint-executive__subtitle,
+body .content-viewport .occ-page .commint-executive__meta li {
+  font-size: 0.875rem;
+}
+
+body .content-viewport .occ-page .commint-executive__meta {
+  margin-top: 0;
+}
+
+/* Round 9: same header baseline as the sibling pages; the read-only notice is a contained note; empty case list is a dashed muted box. */
+body .content-viewport .commint-page.occ-page {
+  padding-top: 30px !important;
+}
+
+body .content-viewport .occ-page .commint-readonly-note[data-testid="operations-command-center-readonly-note"] {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--zx-line, #e2e8f0);
+  border-radius: 10px;
+  background: var(--zx-surface-soft, #f6f8fb);
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.8125rem;
+}
+
+body .content-viewport .occ-page .commint-readonly-note.occ-empty-cell {
+  margin: 0;
+  padding: 18px 16px;
+  border: 1px dashed var(--zx-line-strong, #cbd5e1);
+  border-radius: 10px;
+  background: var(--zx-surface-soft, #f6f8fb);
+  color: var(--zx-text-muted, #566478);
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* KPI section: the tiles are the cards, so the wrapper carries no second border (no card-in-card). */
+body .content-viewport .occ-page .commint-panel[aria-labelledby="operations-command-center-kpi-heading"] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 768 and below: filters on two columns with the clear action last; 8 KPI tiles on two columns (4 rows), never 3+3+2. */
+@media (max-width: 899px) {
+  body .content-viewport .occ-filter-rail.occ-filter-rail > .occ-filter-rail__clear {
+    order: 99;
+  }
+
+  body .content-viewport .commint-kpi-grid.commint-kpi-grid[data-testid="operations-command-center-kpi-grid"]:has(> :nth-child(8):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Small print on the KPI tiles is 13px. */
+body .content-viewport .occ-page .commint-kpi-card__detail,
+body .content-viewport .occ-page .commint-kpi-card__footer {
+  font-size: 0.8125rem;
+}
+
+/* Table heads and the module/reference cell are at least 13px. */
+body .content-viewport .occ-page .occ-table th,
+body .content-viewport .occ-page .occ-table .commint-table__secondary {
+  font-size: 0.8125rem;
+}
+
+/* One section-card padding token (20px) for every card on the page; table sections have no second border
+   (the card is the container), so the 768 stacked rows carry only separators. */
+body .content-viewport .occ-page > .commint-panel:not([aria-labelledby="operations-command-center-kpi-heading"]),
+body .content-viewport .commint-page--related > .commint-panel.occ-related-link-card {
+  padding: 20px !important;
+}
+
+body .content-viewport .occ-page .occ-table-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body .content-viewport .occ-disclosure > summary {
+  padding: 14px 20px;
+}

@@ -23,6 +23,7 @@ import type {
   endDowntimeAction,
   recoverDowntimeAction,
 } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type DowntimePanelProps = Readonly<{
   orderId: string;
@@ -177,7 +178,7 @@ export function ProductionDowntimePanel({
 
       {panelState.kind === "error" && (
         <div role="alert" className="ops-panel__error">
-          {panelState.message}
+          {customerMessage(panelState.message)}
           <button
             type="button"
             className="ops-panel__error-dismiss"

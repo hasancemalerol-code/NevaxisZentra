@@ -46,7 +46,7 @@ export function ProductionPlanningLogisticsSection({
           <h2>İhracat / Sevkiyat deadline tüketimi</h2>
 
           <span>
-            Planning yalnızca Export/Shipment kaynak projeksiyonunu okur;
+            Planning yalnızca Export/Shipment kaynak özetini okur;
             sevkiyat alanları bu ekrandan düzenlenmez.
           </span>
         </div>

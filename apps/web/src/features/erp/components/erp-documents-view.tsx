@@ -29,14 +29,14 @@ type ErpDocumentsViewProps = Readonly<{
 
 export function ErpDocumentsView({ snapshot, documents }: ErpDocumentsViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Belgeler"
-        description="Harici ERP belge projeksiyonları — salt okunur görünüm. Belge indirme veya ERP yazma işlemi yoktur."
+        description="Harici ERP belge özetleri — salt okunur görünüm. Belge indirme veya ERP yazma işlemi yoktur."
         notice={
           <>
             <ErpReadonlyNotice>
-              ERP-4L yalnızca ERP Simulator belge projeksiyonlarını içe aktarır.
+              Bu bağlantı ERP belge kayıtlarını salt okunur olarak içe aktarır.
             </ErpReadonlyNotice>
             <ErpSimulatorNotice />
           </>
@@ -55,7 +55,7 @@ export function ErpDocumentsView({ snapshot, documents }: ErpDocumentsViewProps)
         <ErpKpiCard
           label="İçerik Mevcut"
           value={snapshot.contentAvailableCount}
-          description="İçerik bayrağı: mevcut"
+          description="İçeriği bulunan belge"
           icon={<FileText aria-hidden="true" />}
           tone="success"
         />
@@ -82,10 +82,12 @@ export function ErpDocumentsView({ snapshot, documents }: ErpDocumentsViewProps)
         {documents.length === 0 ? (
           <ErpEmptyState
             title="Henüz ERP belgesi yok."
-            description="Önce belge senkronizasyonu çalıştırın."
+            description="Önce belge eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable className="erp-table--documents">
+          <ErpDataTable label="ERP belgeleri" className="erp-table--documents">
             <thead>
               <tr>
                 <th>Belge Türü</th>
@@ -135,6 +137,6 @@ export function ErpDocumentsView({ snapshot, documents }: ErpDocumentsViewProps)
           </ErpDataTable>
         )}
       </section>
-    </main>
+    </div>
   );
 }

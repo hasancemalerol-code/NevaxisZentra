@@ -35,12 +35,16 @@ export type SerializableNavigationItem = Readonly<{
   href: string;
   iconKey: NavigationIconKey;
   exact?: boolean;
+  /** Also active for every route below this prefix (a section whose entry page is one of several siblings). */
+  matchPrefix?: string;
   permissionKey?: string;
   subscriptionModulePath?: string;
 }>;
 
 export type SerializableNavigationGroup = Readonly<{
   label: string;
+  /** Set on contextual groups: the sidebar shows only the group whose workflow home matches the current route. */
+  homeId?: string;
   items: readonly SerializableNavigationItem[];
 }>;
 

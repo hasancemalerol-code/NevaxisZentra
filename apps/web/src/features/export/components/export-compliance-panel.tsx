@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle, CheckCircle2, Scale, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { exportRequirementLabel } from "../presentation-requirement-labels";
 
 import type {
   ComplianceEvaluationResult,
@@ -20,6 +21,7 @@ import type {
   revalidateComplianceAction,
   satisfyComplianceRequirementAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -158,13 +160,13 @@ export function ExportCompliancePanel({
 
       {state.kind === "error" ? (
         <div className="export-compliance-panel__feedback export-compliance-panel__feedback--error" role="alert">
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
       {state.kind === "success" ? (
         <div className="export-compliance-panel__feedback export-compliance-panel__feedback--success" role="status">
           <CheckCircle2 aria-hidden="true" />
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
 
@@ -217,7 +219,7 @@ export function ExportCompliancePanel({
               <li key={requirement.id}>
                 <div>
                   <strong>{requirement.title}</strong>
-                  <small>{requirement.requirementCode}</small>
+                  <small>{exportRequirementLabel(requirement.requirementCode)}</small>
                 </div>
                 <Badge tone={requirement.blocking ? "danger" : "neutral"}>
                   {getComplianceRequirementStatusLabel(requirement.status)}
@@ -232,7 +234,7 @@ export function ExportCompliancePanel({
         <form className="export-compliance-panel__satisfy" onSubmit={handleSatisfy}>
           <h3>Gereksinimi karşıla</h3>
           <label>
-            Gereksinim
+            Gereksinim <span className="zx-required" aria-hidden="true">*</span>
             <select
               value={selectedRequirementId}
               onChange={(e) => setSelectedRequirementId(e.target.value)}
@@ -249,7 +251,7 @@ export function ExportCompliancePanel({
             </select>
           </label>
           <label>
-            Çözüm tipi
+            Çözüm tipi <span className="zx-required" aria-hidden="true">*</span>
             <input
               value={resolutionType}
               onChange={(e) => setResolutionType(e.target.value)}
@@ -257,7 +259,7 @@ export function ExportCompliancePanel({
             />
           </label>
           <label>
-            Not
+            Not <span className="zx-required" aria-hidden="true">*</span>
             <textarea
               value={resolutionNote}
               onChange={(e) => setResolutionNote(e.target.value)}

@@ -62,9 +62,9 @@
   margin-left: 0.35rem;
   padding: 0 0.3rem;
   border-radius: 999px;
-  background: #155eef;
+  background: #2463a7;
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -82,7 +82,7 @@
 
 .dwf-hero__eyebrow {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   font-weight: 700;
   color: var(--dwf-blue);
@@ -210,7 +210,7 @@
 .dwf-meta {
   display: block;
   color: var(--dwf-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -305,8 +305,8 @@
 }
 
 .dwf-btn--primary {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #fff;
 }
 
@@ -343,7 +343,7 @@
   border: 1px solid var(--dwf-border);
   background: var(--dwf-soft);
   color: var(--dwf-slate);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -430,7 +430,7 @@
   border: 1px solid var(--dwf-border);
   background: var(--dwf-soft);
   color: var(--dwf-muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -465,8 +465,8 @@
 }
 
 .dwf-tabs button[data-active="true"] {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #fff;
 }
 
@@ -623,7 +623,7 @@
 .dwf-dashboard__stat span,
 .dwf-dashboard__live span {
   color: #5f6f86;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -658,7 +658,7 @@
   border-radius: 999px;
   background: #fff;
   color: #334155;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -676,7 +676,7 @@
   background: #fff;
   padding: 0.28rem 0.65rem;
   font: inherit;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 650;
   color: var(--dwf-slate);
 }
@@ -712,8 +712,8 @@
 
 .dwf-table th {
   background: #f8fafc;
-  color: #64748b;
-  font-size: 0.68rem;
+  color: #566478;
+  font-size: 0.75rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }

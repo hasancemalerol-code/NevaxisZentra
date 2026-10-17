@@ -1,6 +1,8 @@
+import { formatDateTime } from "@/lib/presentation/format";
+
 export const ADAPTIVE_PLANNING_TITLE = "Planlama Merkezi";
 export const ADAPTIVE_PLANNING_SUBTITLE =
-  "Uyarlanabilir üretim planı, senaryo simülasyonu ve insan onaylı replan akışı";
+  "Uyarlanabilir üretim planı, senaryo simülasyonu ve insan onaylı yeniden planlama akışı";
 
 export function getPlanningHorizonLabel(horizon: string): string {
   switch (horizon) {
@@ -216,7 +218,7 @@ export function getActivityEventLabel(eventType: string): string {
     case "plan-published":
       return "Plan Yayınlandı";
     case "replan-evaluated":
-      return "Replan Değerlendirildi";
+      return "Yeniden planlama değerlendirildi";
     case "approval-requested":
       return "Onay İstendi";
     case "approval-granted":
@@ -251,20 +253,29 @@ export function formatAdaptivePercent(value: number): string {
   return `%${Math.round(value)}`;
 }
 
+/** The planning metrics are only meaningful when a plan or at least one planned operation exists. */
+export function hasAdaptivePlanData(workspace: Readonly<{ activePlan: unknown; operations: readonly unknown[] }>): boolean {
+  return Boolean(workspace.activePlan) || workspace.operations.length > 0;
+}
+
+/** A percentage metric of a plan that does not exist is "—", never a default such as %100. */
+export function formatAdaptivePercentForPlan(value: number, hasPlan: boolean): string {
+  return hasPlan ? formatAdaptivePercent(value) : "—";
+}
+
+/** A count metric (for example orders at risk) of a plan that does not exist is "—", not an invented number. */
+export function formatAdaptiveCountForPlan(value: number, hasPlan: boolean): string {
+  return hasPlan ? String(value) : "—";
+}
+
+export const ADAPTIVE_NO_PLAN_CAPTION = "Plan yok";
+
 export function formatAdaptiveDateTime(value?: string | null): string {
   if (!value) {
     return "—";
   }
 
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("tr-TR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
+  return formatDateTime(value);
 }
 
 export function formatAdaptiveDurationMinutes(minutes: number): string {

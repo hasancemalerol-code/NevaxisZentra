@@ -1,0 +1,97 @@
+/* Zentra Teams iş kutusu: whole tabs on wrapped rows (never clipped), one primary action, quiet secondary links. Scoped to the inbox host. */
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__toolbar {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* One compact view select replaces the 14-tab rail (no wrapped or clipped tab rows). */
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__view-rail {
+  display: none;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__view-select {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 4px;
+  max-width: 360px;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__view-select > span {
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__toolbar {
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__layout-toggle {
+  flex: 0 0 auto;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__table td:last-child a {
+  color: var(--zx-accent, #155eef);
+  font-weight: 600;
+}
+
+/* The only solid control in the header. */
+[data-list-path="/teams/is-kutum"] .ai-task-create-button {
+  border-color: var(--zx-accent, #155eef);
+  background: var(--zx-accent, #155eef);
+  color: #fff;
+  font-weight: 700;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-create-button:hover {
+  filter: brightness(0.94);
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-create-button strong {
+  color: inherit;
+}
+
+/* Automation and playbook links read as quiet text links beside the primary action. */
+[data-list-path="/teams/is-kutum"] .ai-task-automation-nav-link {
+  padding-inline: 0.5rem;
+  border-color: transparent;
+  background: transparent;
+  color: var(--zx-accent-strong, #1b528e);
+  font-weight: 600;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-automation-nav-link:hover {
+  background: var(--zx-accent-soft, #eef4ff);
+}
+
+/* Origin chips and the record count share one row. */
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified:has(> .ai-task-center-unified__origin-filters) {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified:has(> .ai-task-center-unified__origin-filters) > * {
+  grid-column: 1 / -1;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified:has(> .ai-task-center-unified__origin-filters) > .ai-task-center-unified__origin-filters {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified:has(> .ai-task-center-unified__origin-filters) > .ai-task-center-unified__summary {
+  grid-column: 2;
+  grid-row: 2;
+  white-space: nowrap;
+}
+
+/* Origin filters are plain neutral chips, not buttons. */
+[data-list-path="/teams/is-kutum"] .ai-task-center-unified__origin-filter {
+  min-height: 0;
+  border-color: var(--zx-line, #dce5f0);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+}

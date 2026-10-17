@@ -52,7 +52,7 @@ async function factoryIntelligenceFetch<T>(
     return {
       status: "failure",
       code: body.code ?? `http-${response.status}`,
-      message: body.message ?? body.title ?? "İstek başarısız.",
+      message: body.message ?? body.title ?? "Servis isteği tamamlanamadı.",
     };
   }
 

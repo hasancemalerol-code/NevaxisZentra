@@ -7,6 +7,8 @@ export type LineTopologyStation = Readonly<{
   code: string;
   name: string;
   state: string;
+  /** Optional customer label that replaces the state text (the state still drives the colour). */
+  statusLabel?: string;
 }>;
 
 type LineTopologyProps = Readonly<{
@@ -24,20 +26,20 @@ export function LineTopology({ stations, selectedStationId, onSelectStation }: L
 
         if (interactive) {
           return (
-            <button
-              key={station.id}
-              type="button"
-              className="fact-station-row"
-              data-selected={selected}
-              onClick={() => onSelectStation?.(station.id)}
-              role="listitem"
-            >
-              <span className="fact-station-row__code">{station.code}</span>
-              <span className="fact-station-row__name">{station.name}</span>
-              <span className="fact-station-row__status">
-                <OperationalBadge status={mapOperationalStatus(station.state)} label={station.state} />
-              </span>
-            </button>
+            <div key={station.id} className="fact-station-cell" role="listitem">
+              <button
+                type="button"
+                className="fact-station-row"
+                data-selected={selected}
+                onClick={() => onSelectStation?.(station.id)}
+              >
+                <span className="fact-station-row__code">{station.code}</span>
+                <span className="fact-station-row__name">{station.name}</span>
+                <span className="fact-station-row__status">
+                  <OperationalBadge status={mapOperationalStatus(station.state)} label={station.statusLabel ?? station.state} />
+                </span>
+              </button>
+            </div>
           );
         }
 
@@ -46,7 +48,7 @@ export function LineTopology({ stations, selectedStationId, onSelectStation }: L
             <span className="fact-station-row__code">{station.code}</span>
             <span className="fact-station-row__name">{station.name}</span>
             <span className="fact-station-row__status">
-              <OperationalBadge status={mapOperationalStatus(station.state)} label={station.state} />
+              <OperationalBadge status={mapOperationalStatus(station.state)} label={station.statusLabel ?? station.state} />
             </span>
           </div>
         );

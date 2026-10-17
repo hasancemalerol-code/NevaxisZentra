@@ -1,5 +1,7 @@
 import { CheckoutReturnView } from "@/features/saas-billing/components/checkout-return-view";
 
+import "@/features/saas-admin/components/saas-admin.css";
+
 type PageProps = Readonly<{
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }>;

@@ -48,6 +48,7 @@ import {
   startAiTaskPlaybookRunAction,
 } from "../server/ai-task-playbook-actions";
 import type { AiTaskPlaybookCapabilities } from "../server/ai-task-playbook-queries";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskPlaybookLibraryClientProps = Readonly<{
   playbooks: readonly AiTaskPlaybookSummary[];
@@ -183,7 +184,7 @@ export function AiTaskPlaybookLibraryClient({
   return (
     <div className="ai-task-playbook-library" data-testid="ai-task-playbook-library">
       {actionError ? (
-        <p className="ai-task-playbook-library__error" role="alert">{actionError}</p>
+        <p className="ai-task-playbook-library__error" role="alert">{customerMessage(actionError)}</p>
       ) : null}
 
       {activeView === "playbooks" ? (
@@ -196,12 +197,12 @@ export function AiTaskPlaybookLibraryClient({
                     className="button button-primary button-medium"
                     href="/ai-gorevleri/playbooklar/yeni"
                   >
-                    Yeni Playbook Oluştur
+                    Yeni playbook oluştur
                   </Link>
                 ) : undefined
               }
-              description="Henüz playbook tanımlanmadı."
-              title="Playbook bulunamadı"
+              description="İlk operasyon akışınızı oluşturarak başlayın."
+              title="Henüz playbook yok"
             />
           ) : (
             <div className="ai-task-playbook-library-row-list">

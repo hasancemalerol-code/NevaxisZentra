@@ -36,6 +36,7 @@ import type {
   NetworkAllocationEvaluationApi,
   NetworkFacilityStateApi,
 } from "../server/factory-network-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 const WORKSPACE_TABS = [
   { id: "overview", label: "Ağ Özeti" },
@@ -219,8 +220,8 @@ export function FactoryNetworkWorkspaceClient({
         ))}
       </div>
 
-      {message ? <p className="factory-network-workspace__message" role="status">{message}</p> : null}
-      {error ? <p className="factory-network-workspace__error" role="alert">{error}</p> : null}
+      {message ? <p className="factory-network-workspace__message" role="status">{customerMessage(message)}</p> : null}
+      {error ? <p className="factory-network-workspace__error" role="alert">{customerMessage(error)}</p> : null}
 
       {activeTab === "overview" ? (
         <section className="factory-network-workspace__section" data-testid="factory-network-overview">
@@ -618,7 +619,7 @@ export function FactoryNetworkWorkspaceClient({
           {allocationEvaluation && allocationEvaluation.facilityComparisons.length > 0 ? (
             <Card>
               <h3>Fabrika karşılaştırması</h3>
-              <table className="factory-network-comparison-table">
+              <table aria-label="Fabrika karşılaştırması" className="factory-network-comparison-table">
                 <thead>
                   <tr>
                     <th>Fabrika</th>

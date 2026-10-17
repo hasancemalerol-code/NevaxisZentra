@@ -81,13 +81,13 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
   }
 
   if (code === "permission-denied") {
-    return { status: "failure", message: "AI görevlerini görüntüleme yetkiniz bulunmuyor.", code };
+    return { status: "failure", message: "Yapay zekâ görevlerini görüntüleme yetkiniz bulunmuyor.", code };
   }
 
   if (code === "subscription-required") {
     return {
       status: "failure",
-      message: "AI görevleri bu kurulumun lisansı kapsamında etkin değil. Lisans durumunu sistem yöneticinizle kontrol edin.",
+      message: "Yapay zekâ görevleri bu kurulumun lisansı kapsamında etkin değil. Lisans durumunu sistem yöneticinizle kontrol edin.",
       code,
     };
   }
@@ -225,7 +225,7 @@ export async function readAiTaskDetail(taskId: string): Promise<AiTaskDetailResu
   const result = await getAiTask(contextResult.context, taskId);
   if (result.status === "failure") {
     if (result.code === "not-found") {
-      return { status: "failure", message: "AI görevi bulunamadı.", code: result.code };
+      return { status: "failure", message: "Yapay zekâ görevi bulunamadı.", code: result.code };
     }
 
     return mapFailureMessage(result.code, result.message);

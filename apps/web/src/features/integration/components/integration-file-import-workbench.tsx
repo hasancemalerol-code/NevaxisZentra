@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type PreviewState = Readonly<{
   fileKind: string;
@@ -280,7 +281,7 @@ export function IntegrationFileImportWorkbench({
         <button type="button" disabled={!dryRun || busy} onClick={confirmImport}>İçe Aktar</button>
       </div>
 
-      {error ? <div role="alert" className="state-panel error-state">{error}</div> : null}
+      {error ? <div role="alert" className="state-panel error-state">{customerMessage(error)}</div> : null}
       {preview ? (
         <div>
           <h3>Önizleme ({preview.fileKind})</h3>

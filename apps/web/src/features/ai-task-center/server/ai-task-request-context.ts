@@ -46,7 +46,7 @@ export function resolveAiTaskRequestContext(): AiTaskRequestContextResult {
     return {
       status: "failure",
       message: executionConfig.status === "success"
-        ? "AI görev istek bağlamı yapılandırılmış çalışma modlarından çözümlenemedi."
+        ? "Yapay zekâ görev istek bağlamı yapılandırılmış çalışma modlarından çözümlenemedi."
         : planningConfig.message,
       code: planningConfig.code,
     };
@@ -74,6 +74,6 @@ export function resolveAiTaskRequestContext(): AiTaskRequestContextResult {
 
 export async function resolveAiTaskRequestContextFromIncomingRequest(): Promise<AiTaskRequestContextResult> {
   return resolveSharedProductionApiRequestContext(
-    "AI görev istek bağlamı yapılandırılmış çalışma modlarından çözümlenemedi.",
+    "Yapay zekâ görev istek bağlamı yapılandırılmış çalışma modlarından çözümlenemedi.",
   );
 }

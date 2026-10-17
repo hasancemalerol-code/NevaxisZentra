@@ -62,6 +62,8 @@ import {
   updateCommercialQuotationRiskProfileAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { isNoDataValue, kpiValueClass, detailValueClass } from "./commercial-no-data";
 
 type CommercialQuotationRiskWorkspaceViewProps = Readonly<{
   workspace: CommercialQuotationRiskWorkspacePayload;
@@ -363,7 +365,7 @@ export function CommercialQuotationRiskWorkspaceView({
   };
 
   return (
-    <main className="commint-page" data-testid="commercial-quotation-risk-workspace">
+    <div className="commint-page" data-testid="commercial-quotation-risk-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -371,7 +373,7 @@ export function CommercialQuotationRiskWorkspaceView({
             <h1>Teklif Riskleri</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_QUOTATION_RISK_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Kanıt penceresi: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Kanıt: {workspace.evidenceLabel}</li>
@@ -391,25 +393,28 @@ export function CommercialQuotationRiskWorkspaceView({
             </button>
           </div>
         </div>
-        {!workspace.realQuotationMappingComplete ? (
-          <p
-            className="commint-provenance-strip"
-            data-testid="commercial-quotation-risk-development-banner"
-          >
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_QUOTATION_RISK_DEVELOPMENT_BANNER}
-          </p>
-        ) : null}
-        {!workspace.realQuotationMappingComplete ? (
-          <p className="commint-readonly-note" data-testid="commercial-quotation-risk-mapping-note">
-            {REAL_QUOTATION_MAPPING_NOTE}
-          </p>
-        ) : null}
-        {!canManage ? (
-          <p className="commint-readonly-note" data-testid="commercial-quotation-risk-readonly-note">
-            {COMMERCIAL_QUOTATION_RISK_READONLY_NOTE}
-          </p>
-        ) : null}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          {workspace.hasDevelopmentPilotData ? (
+            <p
+              className="commint-provenance-strip"
+              data-testid="commercial-quotation-risk-development-banner"
+            >
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_QUOTATION_RISK_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!workspace.realQuotationMappingComplete ? (
+            <p className="commint-readonly-note" data-testid="commercial-quotation-risk-mapping-note">
+              {REAL_QUOTATION_MAPPING_NOTE}
+            </p>
+          ) : null}
+          {!canManage ? (
+            <p className="commint-readonly-note" data-testid="commercial-quotation-risk-readonly-note">
+              {COMMERCIAL_QUOTATION_RISK_READONLY_NOTE}
+            </p>
+          ) : null}
+        </details>
         {feedback ? <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p> : null}
       </header>
 
@@ -431,7 +436,7 @@ export function CommercialQuotationRiskWorkspaceView({
                 <p className="commint-kpi-card__label">{kpi.label}</p>
                 <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
               </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
+              <p className={kpiValueClass(kpi.value)}>{isNoDataValue(kpi.value) ? "—" : kpi.value}</p>
               <p className="commint-kpi-card__detail">{kpi.detail}</p>
               {"accessibleSummary" in kpi && kpi.accessibleSummary ? (
                 <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
@@ -463,7 +468,7 @@ export function CommercialQuotationRiskWorkspaceView({
       </div>
 
       {activeTab === "overview" ? (
-        <div className="commint-panel-grid commint-panel-grid--overview" data-testid="commercial-quotation-risk-overview">
+        <div className="commint-panel-grid commint-panel-grid--overview commint-panel-grid--auto" data-testid="commercial-quotation-risk-overview">
           <section className="commint-panel commint-panel--distribution" data-testid="commercial-quotation-risk-risk-distribution">
             <h2 className="commint-panel__title">Risk dağılımı</h2>
             {workspace.riskDistribution.some((slice) => slice.count > 0) ? (
@@ -574,8 +579,8 @@ export function CommercialQuotationRiskWorkspaceView({
             {workspace.customerComparison.unavailableReason ? (
               <p className="commint-empty">{workspace.customerComparison.unavailableReason}</p>
             ) : customerPreviewRows.length > 0 ? (
-              <div className="commint-table-wrap">
-                <table className="commint-table">
+              <div className="commint-table-wrap" tabIndex={0}>
+                <table aria-label="Müşteri risk konumu önizlemesi" className="commint-table">
                   <thead>
                     <tr>
                       <th>Sıra</th>
@@ -605,7 +610,9 @@ export function CommercialQuotationRiskWorkspaceView({
             ) : (
               <p className="commint-empty">Müşteri risk konumu verisi yok</p>
             )}
-            <p className="commint-supplier-row__meta">{workspace.provenanceDisclaimer}</p>
+            {customerPreviewRows.length > 0 ? (
+              <p className="commint-supplier-row__meta">{workspace.provenanceDisclaimer}</p>
+            ) : null}
           </section>
         </div>
       ) : null}
@@ -620,8 +627,8 @@ export function CommercialQuotationRiskWorkspaceView({
             onClearFilters={clearAssessmentFilters}
             isRefreshing={isPending}
           />
-          <div className="commint-table-wrap">
-            <table className="commint-table" data-testid="commercial-quotation-risk-assessments-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Teklif risk değerlendirmeleri" className="commint-table" data-testid="commercial-quotation-risk-assessments-table">
               <thead>
                 <tr>
                   <th>Değerlendirme</th>
@@ -696,8 +703,8 @@ export function CommercialQuotationRiskWorkspaceView({
               ))}
             </select>
           </div>
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Risk eğilimi karşılaştırmaları" className="commint-table">
               <thead>
                 <tr>
                   <th>Karşılaştırma</th>
@@ -760,7 +767,7 @@ export function CommercialQuotationRiskWorkspaceView({
                 <QuotationRiskComparisonDetailPanel comparisonDetail={trendsDetail} />
               ) : null}
               {trendsDetailStatus === "error" ? (
-                <p className="commint-empty" role="alert">Karşılaştırma detayı yüklenemedi.</p>
+                <InlineUnavailable subject="Karşılaştırma detayı" />
               ) : null}
             </section>
           ) : (
@@ -792,8 +799,8 @@ export function CommercialQuotationRiskWorkspaceView({
           {workspace.customerComparison.unavailableReason ? (
             <p className="commint-empty">{workspace.customerComparison.unavailableReason}</p>
           ) : (
-            <div className="commint-table-wrap">
-              <table className="commint-table" data-testid="commercial-quotation-risk-customers-table">
+            <div className="commint-table-wrap" tabIndex={0}>
+              <table aria-label="Müşteri risk konumu" className="commint-table" data-testid="commercial-quotation-risk-customers-table">
                 <thead>
                   <tr>
                     <th>Sıra</th>
@@ -867,7 +874,7 @@ export function CommercialQuotationRiskWorkspaceView({
               <div data-testid="commercial-quotation-risk-profile-hero">
                 <h3 className="commint-panel__title">{selectedProfile.displayName}</h3>
                 <p className="commint-panel__hint">
-                  {selectedProfile.profileCode} · Sürüm {selectedProfile.version} · {selectedProfile.ruleSetVersion}
+                  {selectedProfile.profileCode} · Sürüm {selectedProfile.version}
                 </p>
                 {!isEditingProfile ? (
                   <>
@@ -1109,13 +1116,13 @@ export function CommercialQuotationRiskWorkspaceView({
                 <QuotationRiskAssessmentDetailDrawerBody assessmentDetail={assessmentDetail} />
               ) : null}
               {detailStatus === "error" ? (
-                <p className="commint-empty" role="alert">Detay yüklenemedi.</p>
+                <InlineUnavailable subject="Ayrıntı" />
               ) : null}
             </div>
           </aside>
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -1123,7 +1130,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import {
   Lock,
   Plus,
   Timer,
-  TrendingUp,
   TriangleAlert,
 } from "lucide-react";
 
@@ -35,6 +34,7 @@ import {
   getQualityReleaseStatusLabel,
   isCorrectiveActionOverdue,
 } from "../presentation/quality-dashboard-labels";
+import { displayActor } from "@/lib/presentation/display-label";
 import { QualityWorkspaceNav } from "./quality-workspace-nav";
 import { QualityDashboardKpi } from "./quality-dashboard-kpi";
 import "./quality-workspace.css";
@@ -103,7 +103,7 @@ export function QualityDashboardView({
   });
 
   return (
-    <main className="production-execution-page quality-dashboard-page">
+    <div className="production-execution-page quality-dashboard-page">
       <header className="quality-dashboard-header production-execution-header">
         <div className="quality-dashboard-header__intro">
           <p>KALİTE KONTROL</p>
@@ -129,7 +129,7 @@ export function QualityDashboardView({
           </Link>
           <Link
             href="/kalite/raporlama"
-            className="quality-dashboard-action quality-dashboard-action--tertiary"
+            className="quality-dashboard-action quality-dashboard-action--secondary"
           >
             <BarChart3 aria-hidden="true" />
             Kalite Raporları
@@ -200,14 +200,17 @@ export function QualityDashboardView({
             <div>
               <span>İlk Geçiş Verimi</span>
               <strong>{formatQualityPercent(overview.firstPassYieldPercent)}</strong>
+              {overview.firstPassYieldPercent == null ? <small>Veri yok</small> : null}
             </div>
             <div>
               <span>Geçme Oranı</span>
               <strong>{formatQualityPercent(overview.passRatePercent)}</strong>
+              {overview.passRatePercent == null ? <small>Veri yok</small> : null}
             </div>
             <div>
               <span>Serbest Bırakma Oranı</span>
               <strong>{formatQualityPercent(overview.releaseRatePercent)}</strong>
+              {overview.releaseRatePercent == null ? <small>Veri yok</small> : null}
             </div>
             <div>
               <span>Serbest Bırakılanlar</span>
@@ -308,40 +311,40 @@ export function QualityDashboardView({
           {openNcrs.length === 0 ? (
             <p className="quality-dashboard-empty">Açık NCR bulunmuyor.</p>
           ) : (
-            <div className="quality-dashboard-table-wrap">
-              <table className="quality-dashboard-table">
+            <div className="quality-dashboard-table-wrap" tabIndex={0} role="region" aria-label="Açık NCR tablosu">
+              <table aria-label="Açık NCR" className="quality-dashboard-table">
                 <thead>
                   <tr>
-                    <th>NCR No</th>
-                    <th>Üretim Emri</th>
-                    <th>Ürün</th>
-                    <th>Şiddet</th>
+                    <th className="quality-col-nowrap">NCR No</th>
+                    <th className="quality-col-nowrap">Üretim Emri</th>
+                    <th className="quality-col-optional">Ürün</th>
+                    <th>Kritiklik</th>
                     <th>Durum</th>
-                    <th>Blokesi</th>
-                    <th>Sorumlu</th>
+                    <th className="quality-col-optional">Blokesi</th>
+                    <th className="quality-col-optional">Sorumlu</th>
                     <th>Yaş</th>
                   </tr>
                 </thead>
                 <tbody>
                   {openNcrs.map((ncr) => (
                     <tr key={ncr.id}>
-                      <td>
+                      <td className="quality-col-nowrap">
                         <Link href={`/kalite/ncr/${ncr.id}`}>
                           <strong>{ncr.ncrNumber}</strong>
                         </Link>
                         <small>{ncr.title}</small>
                       </td>
-                      <td>{ncr.productionOrderReference ?? ncr.productionOrderId ?? "—"}</td>
-                      <td>{ncr.productReference ?? "—"}</td>
+                      <td className="quality-col-nowrap">{ncr.productionOrderReference ?? ncr.productionOrderId ?? "—"}</td>
+                      <td className="quality-col-optional">{ncr.productReference ?? "—"}</td>
                       <td>
                         <Badge tone={getQualityNcrSeverityTone(ncr.severity)}>
                           {getQualityStatusLabel(ncr.severity)}
                         </Badge>
                       </td>
-                      <td>{getQualityStatusLabel(ncr.status)}</td>
-                      <td>{getQualityStatusLabel(ncr.holdStatus)}</td>
-                      <td>{ncr.ownerSubjectId ?? "—"}</td>
-                      <td>{formatQualityAge(ncr.detectedAtUtc)}</td>
+                      <td className="quality-col-nowrap">{getQualityStatusLabel(ncr.status)}</td>
+                      <td className="quality-col-optional">{getQualityStatusLabel(ncr.holdStatus)}</td>
+                      <td className="quality-col-optional">{displayActor(ncr.ownerSubjectId)}</td>
+                      <td className="quality-col-nowrap">{formatQualityAge(ncr.detectedAtUtc)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -351,7 +354,7 @@ export function QualityDashboardView({
         </Card>
       </section>
 
-      <section className="quality-dashboard-priority">
+      <section className="quality-dashboard-priority quality-dashboard-priority--balanced">
         <Card className="production-execution-panel">
           <header className="quality-dashboard-section__header">
             <h2>Aktif Kalite Blokeleri</h2>
@@ -360,31 +363,31 @@ export function QualityDashboardView({
           {activeHoldNcrs.length === 0 ? (
             <p className="quality-dashboard-empty">Aktif kalite blokesi bulunmuyor.</p>
           ) : (
-            <div className="quality-dashboard-table-wrap">
-              <table className="quality-dashboard-table">
+            <div className="quality-dashboard-table-wrap" tabIndex={0} role="region" aria-label="Aktif Kalite Blokeleri tablosu">
+              <table aria-label="Aktif Kalite Blokeleri" className="quality-dashboard-table">
                 <thead>
                   <tr>
-                    <th>NCR</th>
-                    <th>Üretim Emri</th>
+                    <th className="quality-col-nowrap">NCR</th>
+                    <th className="quality-col-nowrap">Üretim Emri</th>
                     <th>Sebep</th>
-                    <th>Durum</th>
-                    <th>Yaş</th>
+                    <th className="quality-col-nowrap">Durum</th>
+                    <th className="quality-col-nowrap">Yaş</th>
                   </tr>
                 </thead>
                 <tbody>
                   {activeHoldNcrs.map((ncr) => (
                     <tr key={ncr.id}>
-                      <td>
+                      <td className="quality-col-nowrap">
                         <Link href={`/kalite/ncr/${ncr.id}`}>
                           <strong>{ncr.ncrNumber}</strong>
                         </Link>
                       </td>
-                      <td>{ncr.productionOrderReference ?? "—"}</td>
+                      <td className="quality-col-nowrap">{ncr.productionOrderReference ?? "—"}</td>
                       <td>{ncr.title}</td>
-                      <td>
+                      <td className="quality-col-nowrap">
                         <Badge tone="information">Kalite Blokesi: Aktif</Badge>
                       </td>
-                      <td>{formatQualityAge(ncr.detectedAtUtc)}</td>
+                      <td className="quality-col-nowrap">{formatQualityAge(ncr.detectedAtUtc)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -400,15 +403,15 @@ export function QualityDashboardView({
           {correctiveActions.length === 0 ? (
             <p className="quality-dashboard-empty">Açık düzeltici aksiyon bulunmuyor.</p>
           ) : (
-            <div className="quality-dashboard-table-wrap">
-              <table className="quality-dashboard-table">
+            <div className="quality-dashboard-table-wrap" tabIndex={0} role="region" aria-label="Düzeltici Aksiyonlar tablosu">
+              <table aria-label="Düzeltici Aksiyonlar" className="quality-dashboard-table">
                 <thead>
                   <tr>
                     <th>Başlık</th>
-                    <th>NCR</th>
-                    <th>Sorumlu</th>
-                    <th>Termin</th>
-                    <th>Durum</th>
+                    <th className="quality-col-nowrap">NCR</th>
+                    <th className="quality-col-optional">Sorumlu</th>
+                    <th className="quality-col-nowrap">Termin</th>
+                    <th className="quality-col-nowrap">Durum</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -419,14 +422,14 @@ export function QualityDashboardView({
                           <strong>{action.title}</strong>
                         </Link>
                       </td>
-                      <td>{action.ncrNumber}</td>
-                      <td>{action.ownerSubjectId ?? "—"}</td>
-                      <td>
+                      <td className="quality-col-nowrap">{action.ncrNumber}</td>
+                      <td className="quality-col-optional">{displayActor(action.ownerSubjectId)}</td>
+                      <td className="quality-col-nowrap">
                         {action.dueAtUtc
                           ? new Date(action.dueAtUtc).toLocaleDateString("tr-TR")
                           : "—"}
                       </td>
-                      <td>
+                      <td className="quality-col-nowrap">
                         <Badge
                           tone={
                             isCorrectiveActionOverdue(action) ? "information" : "neutral"
@@ -448,7 +451,6 @@ export function QualityDashboardView({
         <Card className="production-execution-panel">
           <header className="quality-dashboard-section__header">
             <h2>Kontrol Planları</h2>
-            <Link href="/kalite/planlar/yeni">Yeni Kontrol Planı</Link>
           </header>
           {activePlans.length === 0 ? (
             <p className="quality-dashboard-empty">Aktif kontrol planı bulunmuyor.</p>
@@ -481,30 +483,30 @@ export function QualityDashboardView({
           {recentInspections.length === 0 ? (
             <p className="quality-dashboard-empty">Son kontrol kaydı bulunmuyor.</p>
           ) : (
-            <div className="quality-dashboard-table-wrap">
-              <table className="quality-dashboard-table">
+            <div className="quality-dashboard-table-wrap" tabIndex={0} role="region" aria-label="Son Kalite Kontrolleri tablosu">
+              <table aria-label="Son Kalite Kontrolleri" className="quality-dashboard-table">
                 <thead>
                   <tr>
-                    <th>Kontrol</th>
-                    <th>Üretim Emri</th>
-                    <th>Ürün</th>
-                    <th>Plan</th>
+                    <th className="quality-col-nowrap">Kontrol</th>
+                    <th className="quality-col-nowrap">Üretim Emri</th>
+                    <th className="quality-col-optional">Ürün</th>
+                    <th className="quality-col-optional">Plan</th>
                     <th>Sonuç</th>
-                    <th>Serbest Bırakma</th>
-                    <th>Güncelleme</th>
+                    <th className="quality-col-nowrap">Serbest Bırakma</th>
+                    <th className="quality-col-nowrap">Güncelleme</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentInspections.map((inspection) => (
                     <tr key={inspection.id}>
-                      <td>
+                      <td className="quality-col-nowrap">
                         <Link href={`/kalite/kontroller/${inspection.id}`}>
                           <strong>{inspection.inspectionNumber}</strong>
                         </Link>
                       </td>
-                      <td>{inspection.productionOrderReference ?? "—"}</td>
-                      <td>{inspection.productReference ?? "—"}</td>
-                      <td>{inspection.planCode ?? "—"}</td>
+                      <td className="quality-col-nowrap">{inspection.productionOrderReference ?? "—"}</td>
+                      <td className="quality-col-optional">{inspection.productReference ?? "—"}</td>
+                      <td className="quality-col-optional">{inspection.planCode ?? "—"}</td>
                       <td>
                         <Badge tone={getOverallResultTone(inspection.overallResult)}>
                           {getQualityOverallResultLabel(inspection.overallResult)}
@@ -515,7 +517,7 @@ export function QualityDashboardView({
                           {getQualityReleaseStatusLabel(inspection.releaseStatus)}
                         </Badge>
                       </td>
-                      <td>{formatQualityAge(inspection.updatedAtUtc)}</td>
+                      <td className="quality-col-nowrap">{formatQualityAge(inspection.updatedAtUtc)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -525,34 +527,10 @@ export function QualityDashboardView({
         </Card>
       </section>
 
-      <Card className="production-execution-panel">
-        <header className="quality-dashboard-section__header">
-          <h2>Hızlı İşlemler</h2>
-        </header>
-        <div className="quality-dashboard-quick-actions">
-          <Link href="/kalite/kontroller/yeni">
-            <ClipboardCheck aria-hidden="true" />
-            Yeni Kalite Kontrolü
-          </Link>
-          <Link href="/kalite/planlar/yeni">
-            <Plus aria-hidden="true" />
-            Yeni Kontrol Planı
-          </Link>
-          <Link href="/kalite/ncr">
-            <FileWarning aria-hidden="true" />
-            NCR&apos;ları Gör
-          </Link>
-          <Link href="/kalite/raporlama">
-            <TrendingUp aria-hidden="true" />
-            Kalite Raporları
-          </Link>
-        </div>
-      </Card>
-
-      <footer className="production-execution-footer-note">
+      <footer className="quality-footer-note">
         <CheckCircle2 aria-hidden="true" />
         Kalite blokesi üretim emri durumundan ayrı izlenir; üretim durumu salt okunurdur.
       </footer>
-    </main>
+    </div>
   );
 }

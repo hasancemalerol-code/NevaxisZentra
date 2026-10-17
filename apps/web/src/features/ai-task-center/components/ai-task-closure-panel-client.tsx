@@ -52,6 +52,7 @@ import {
   AiTaskDetailTextarea,
   AiTaskDetailValueRow,
 } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskClosurePanelClientProps = Readonly<{
   task: AiTask;
@@ -127,7 +128,7 @@ export function AiTaskClosurePanelClient({
 
     const parts = [
       closurePolicy.name,
-      `Min. kanıt: ${closurePolicy.minimumEvidenceCount}`,
+      `En az kanıt: ${closurePolicy.minimumEvidenceCount}`,
     ];
 
     if (closurePolicy.approvalRequired) {
@@ -194,12 +195,12 @@ export function AiTaskClosurePanelClient({
       {errorMessage ? (
         <div className="ai-task-closure-panel__alert" role="alert">
           <AlertTriangle aria-hidden="true" />
-          <span>{errorMessage}</span>
+          <span>{customerMessage(errorMessage)}</span>
         </div>
       ) : null}
 
       <div className="ai-task-closure-panel__sections">
-        <AiTaskDetailSectionCard eyebrow="Resolution" title="Çözüm">
+        <AiTaskDetailSectionCard eyebrow="Çözüm" title="Çözüm">
           <AiTaskDetailValueRow
             label="Çözüm kodu"
             value={
@@ -280,7 +281,7 @@ export function AiTaskClosurePanelClient({
               {evidenceItems.length} kayıt
             </Badge>
           }
-          eyebrow="Evidence"
+          eyebrow="Kanıt"
           title="Kanıtlar"
         >
           {evidenceItems.length > 0 ? (
@@ -357,7 +358,7 @@ export function AiTaskClosurePanelClient({
           ) : null}
         </AiTaskDetailSectionCard>
 
-        <AiTaskDetailSectionCard eyebrow="Closure" title="Kapanış">
+        <AiTaskDetailSectionCard eyebrow="Kapanış" title="Kapanış">
           {closureValidation && !closureValidation.isValid ? (
             <ul className="ai-task-closure-panel__issues">
               {closureValidation.issues.map((issue) => (
@@ -410,7 +411,7 @@ export function AiTaskClosurePanelClient({
         </AiTaskDetailSectionCard>
 
         {(canApproveClosure || canRejectClosure || closure?.approvedAt || closure?.rejectedAt) ? (
-          <AiTaskDetailSectionCard eyebrow="Approval" title="Onay">
+          <AiTaskDetailSectionCard eyebrow="Onay" title="Onay">
             {closure?.approvedAt ? (
               <AiTaskDetailValueRow
                 label="Onay zamanı"
@@ -512,7 +513,7 @@ export function AiTaskClosurePanelClient({
         ) : null}
 
         {(canReopen || closure?.reopenedAt || closureState === "closed") ? (
-          <AiTaskDetailSectionCard eyebrow="Reopen" title="Reopen">
+          <AiTaskDetailSectionCard eyebrow="Yeniden açma" title="Yeniden aç">
             {closure?.reopenedAt ? (
               <AiTaskDetailValueRow
                 label="Yeniden açılma"

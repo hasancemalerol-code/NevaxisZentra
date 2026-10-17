@@ -50,18 +50,20 @@ export function OrderDraftFilteredWorkspace({
         onFilterChange={setFilter}
       />
 
-      <div className="order-draft-filtered-workspace__result">
-        <span>
-          {filteredOrderDrafts.length} sonuç
-        </span>
-
-        {filteredOrderDrafts.length !==
-        orderDrafts.length ? (
+      {orderDrafts.length > 0 ? (
+        <div className="order-draft-filtered-workspace__result">
           <span>
-            Toplam {orderDrafts.length} taslak
+            {filteredOrderDrafts.length} sonuç
           </span>
-        ) : null}
-      </div>
+
+          {filteredOrderDrafts.length !==
+          orderDrafts.length ? (
+            <span>
+              Toplam {orderDrafts.length} taslak
+            </span>
+          ) : null}
+        </div>
+      ) : null}
 
       <OrderDraftWorkspace
         orderDrafts={filteredOrderDrafts}

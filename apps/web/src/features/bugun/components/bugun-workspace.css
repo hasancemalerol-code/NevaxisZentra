@@ -11,8 +11,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px;
-  border: 1px solid var(--fact-border);
+  padding: 14px 16px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 8px;
   background: var(--fact-surface-elevated);
 }
 
@@ -59,4 +61,185 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+/* Today = one merged screen: one header, one KPI row, then attention items and the task workspace. */
+.bugun-sections.fact-workspace {
+  padding: 0;
+  gap: 16px;
+  background: transparent;
+}
+
+.bugun-page .ai-task-kpi-links > * {
+  min-width: 0;
+}
+
+/* The embedded task header is the only header on this screen: the shared "second section" band (margin + hairline) must not apply. */
+.bugun-page[data-testid="bugun-page"] .page-content > .zx-page-header {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Attention + decision sections and the task workspace below them never touch. */
+.bugun-sections.fact-workspace {
+  margin-bottom: 20px;
+}
+
+.bugun-attention-list a {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ─── Bugün task workspace: one consolidated rule set (header actions, view tabs, table, KPI cards) ─── */
+
+/* KPI top bars carry no legend; the column count belongs to the shared count-aware grid. */
+.bugun-page .kpi-card::before {
+  display: none;
+}
+
+/* Header: description first, then every action on one full-width row that fills evenly (no detached "Veriyi yenile"). */
+.bugun-page .zx-page-header {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.bugun-page .zx-page-header__actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.bugun-page .zx-page-header__actions > * {
+  min-width: 0;
+  min-height: 40px;
+  justify-content: center;
+  align-self: stretch;
+}
+
+.bugun-page .zx-page-header__actions > form {
+  display: flex;
+}
+
+.bugun-page .zx-page-header__actions > form > * {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.bugun-page .zx-page-header__actions :is(a, button),
+.bugun-page .zx-page-header__actions :is(a, button) span {
+  white-space: nowrap;
+}
+
+.bugun-page .zx-page-header__actions :is(a, button) svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 1000px) {
+  .bugun-page .zx-page-header__actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* View tabs: from 700px an even wrapping grid inside a padded group (labels ellipsize); narrower screens scroll with an edge fade. */
+.bugun-page .ai-task-center-unified .ai-task-center-unified__view-rail {
+  --fade-left: 0px;
+  --fade-right: 0px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  max-width: 100%;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent 100%);
+}
+
+.bugun-page .ai-task-center-unified__view-rail[data-fade-start="true"] { --fade-left: 32px; }
+.bugun-page .ai-task-center-unified__view-rail[data-fade-end="true"] { --fade-right: 48px; }
+
+.bugun-page .ai-task-center-unified__view-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+@media (min-width: 700px) {
+  .bugun-page .ai-task-center-unified .ai-task-center-unified__view-rail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+    overflow: visible;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  .bugun-page .ai-task-center-unified__view-tab {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: left;
+  }
+}
+
+/* Task table: no forced width; at tablet widths only "İlişkili bağlam" is dropped so the "Aç" action column stays reachable. */
+.bugun-page .ai-task-center-unified__table {
+  min-width: 0;
+}
+
+@media (min-width: 821px) and (max-width: 1100px) {
+  .bugun-page .ai-task-center-unified__table th:nth-last-child(2),
+  .bugun-page .ai-task-center-unified__table td:nth-last-child(2) {
+    display: none;
+  }
+
+  .bugun-page .ai-task-center-unified__table th {
+    white-space: normal;
+  }
+}
+
+
+/* KPI cards: heading slot has a fixed two-line height and the value sits on the same baseline across the row. */
+.bugun-page .kpi-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.bugun-page .kpi-card-heading {
+  min-height: 2.6em;
+  align-items: flex-start;
+}
+
+.bugun-page .kpi-card .kpi-value {
+  margin-top: auto;
+}
+
+.bugun-page .kpi-footer {
+  font-size: 0.8125rem;
+}
+
+/* The shared round-3 rule forces flex 1 1 0 on every action; in a grid the item sizing must be neutral (higher specificity than that rule). */
+body .content-viewport .bugun-page .zx-page-header__actions > * {
+  flex: none;
+  width: auto;
+}
+
+.bugun-attention-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Frozen checklist C3: section cards on Bugün use the same 20px inner padding as the table card beside them. */
+body .content-viewport .bugun-sections .fact-section > .fact-section__header {
+  padding: 12px 20px;
+}
+
+body .content-viewport .bugun-sections .fact-section > .fact-section__body {
+  padding: 16px 20px;
 }

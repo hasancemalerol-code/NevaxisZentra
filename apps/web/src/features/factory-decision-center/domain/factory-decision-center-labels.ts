@@ -23,6 +23,6 @@ export function getFactoryDecisionSeverityLabel(severity: string): string {
   return SEVERITY_LABELS[severity] ?? severity.toUpperCase();
 }
 
-export const FACTORY_DECISION_CENTER_TITLE = "FABRİKA KARAR MERKEZİ";
+export const FACTORY_DECISION_CENTER_TITLE = "Fabrika Karar Merkezi";
 export const FACTORY_DECISION_CENTER_SUBTITLE =
-  "Fabrikanın kritik kararlarını, risk altındaki sonuçları ve dijital iş gücünün yürüttüğü kurtarma operasyonlarını tek merkezden yönetin.";
+  "Fabrikanın kritik kararlarını, risk altındaki sonuçları ve kurtarma operasyonlarını tek merkezden yönetin.";

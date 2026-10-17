@@ -1,3 +1,4 @@
+import { stripFixtureRecords } from "@/lib/runtime/fixture-data";
 import "./ai-task-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -47,6 +48,7 @@ export type RawAiTaskSummary = Readonly<{
   escalationLevel: number;
   escalationState: string;
   slaState: string;
+  slaBreachType?: string | null;
   dueAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -350,9 +352,9 @@ function failureMessage(status: number, payload: unknown): string {
     const reason = "failureReason" in payload ? String((payload as { failureReason?: string }).failureReason ?? "") : "";
     const detail = "detail" in payload ? String((payload as { detail?: string }).detail ?? "") : "";
     const title = "title" in payload ? String((payload as { title?: string }).title ?? "") : "";
-    return reason || detail || title || `AI görev isteği başarısız (${status}).`;
+    return reason || detail || title || `Yapay zekâ görev isteği başarısız (${status}).`;
   }
-  return `AI görev isteği başarısız (${status}).`;
+  return `Yapay zekâ görev isteği başarısız (${status}).`;
 }
 
 async function getJson<T>(
@@ -383,12 +385,22 @@ async function getJson<T>(
       };
     }
 
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+
+    if (guarded === null) {
+
+      // A fixture record is not a customer record outside isolated environments.
+
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+
+    }
+
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
       code: "source-unavailable",
-      message: "AI Görev Merkezi API'sine ulaşılamadı.",
+      message: "Görev Merkezi API'sine ulaşılamadı.",
       retryable: true,
     };
   }
@@ -429,12 +441,22 @@ async function writeJson<T>(
       };
     }
 
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+
+    if (guarded === null) {
+
+      // A fixture record is not a customer record outside isolated environments.
+
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+
+    }
+
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
       code: "source-unavailable",
-      message: "AI Görev Merkezi API'sine ulaşılamadı.",
+      message: "Görev Merkezi API'sine ulaşılamadı.",
       retryable: true,
     };
   }

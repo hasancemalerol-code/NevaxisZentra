@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileWarning, ShieldCheck } from "lucide-react";
+import { FileWarning } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { QualityNcrFilters } from "@/features/quality-control/components/quality-ncr-filters";
@@ -13,7 +13,10 @@ import {
   formatQualityDateTime,
   getQualityHoldLabel,
 } from "@/features/quality-control/presentation/quality-ui-labels";
+import { displayActor } from "@/lib/presentation/display-label";
 import { readQualityNcrList } from "@/features/quality-control/server/quality-control-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   searchParams: Promise<{
@@ -45,13 +48,7 @@ export default async function QualityNcrListPage({ searchParams }: PageProps) {
         title="Uygunsuzluk Raporları"
         nav="ncr"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>NCR listesi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="NCR listesi yüklenemedi" inline />
       </QualityPageShell>
     );
   }
@@ -88,17 +85,17 @@ export default async function QualityNcrListPage({ searchParams }: PageProps) {
         {ncrs.length === 0 ? (
           <p className="quality-empty-state">Açık NCR bulunmuyor.</p>
         ) : (
-          <div className="quality-table-wrap">
-            <table className="quality-table">
+          <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="NCR listesi tablosu">
+            <table aria-label="NCR Listesi" className="quality-table quality-table--ncr">
               <thead>
                 <tr>
                   <th>NCR No</th>
                   <th>Üretim Emri</th>
                   <th>Ürün</th>
-                  <th>Şiddet</th>
+                  <th>Kritiklik</th>
                   <th>Durum</th>
                   <th>Kalite Blokesi</th>
-                  <th>Disposition</th>
+                  <th className="quality-col-wide-only">Uygunsuzluk kararı</th>
                   <th>Sorumlu</th>
                   <th>Oluşturulma</th>
                 </tr>
@@ -127,12 +124,12 @@ export default async function QualityNcrListPage({ searchParams }: PageProps) {
                     <td className="quality-table__cell">
                       {getQualityHoldLabel(ncr.holdStatus, ncr.holdStatus === "active")}
                     </td>
-                    <td className="quality-table__cell--wrap">
+                    <td className="quality-table__cell--wrap quality-col-wide-only">
                       {ncr.dispositionType
                         ? getQualityStatusLabel(ncr.dispositionType)
                         : getQualityStatusLabel(ncr.dispositionStatus)}
                     </td>
-                    <td className="quality-table__cell">{ncr.ownerSubjectId ?? "—"}</td>
+                    <td className="quality-table__cell">{displayActor(ncr.ownerSubjectId)}</td>
                     <td className="quality-table__cell">{formatQualityDateTime(ncr.createdAtUtc)}</td>
                   </tr>
                 ))}

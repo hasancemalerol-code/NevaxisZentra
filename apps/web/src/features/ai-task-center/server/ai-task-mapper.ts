@@ -168,6 +168,13 @@ function mapEvidenceItems(
   }));
 }
 
+/** Single place that decides a task's SLA state from a raw API payload (list summary or detail). */
+export function resolveRawSlaState(
+  raw: Readonly<{ slaState?: string | null; sla?: { state: string } | null }>,
+): string {
+  return raw.slaState ?? raw.sla?.state ?? "not-applicable";
+}
+
 function mapSla(raw: RawAiTaskSla | undefined, fallbackState: string): AiTaskSla {
   const state = asSlaState(raw?.state ?? fallbackState);
   return {
@@ -284,8 +291,10 @@ export function mapRawAiTaskDetail(raw: RawAiTaskDetail): AiTask {
       summary: raw.impact.summary,
     },
     sources: mapSources(raw.sources),
-    ...mapOwnershipFields(raw),
-    sla: mapSla(raw.sla, raw.slaState ?? raw.sla?.state ?? "not-applicable"),
+    // The detail payload carries the derived SLA only as `sla` (no top-level `slaState`); reading the missing
+    // top-level field made the detail page show "Uygulanamaz" while the list showed the real derived state.
+    ...mapOwnershipFields({ ...raw, slaState: resolveRawSlaState(raw) }),
+    sla: mapSla(raw.sla, resolveRawSlaState(raw)),
     assignmentReason: raw.assignmentReason ?? undefined,
     assignmentSource: raw.assignmentSource ?? undefined,
     approval: {
@@ -357,6 +366,17 @@ export function mapRawAiTaskSummary(raw: RawAiTaskSummary): AiTaskListRecord {
     },
     sources: [],
     ...ownership,
+    sla: mapSla(
+      {
+        state: ownership.slaState,
+        acknowledgmentDueAtUtc: null,
+        responseDueAtUtc: null,
+        resolutionDueAtUtc: null,
+        isOverdue: ownership.slaState === "overdue" || ownership.slaState === "breached",
+        breachType: raw.slaBreachType ?? null,
+      },
+      ownership.slaState,
+    ),
     approval: {
       state: asApprovalState(raw.approval.state),
     },

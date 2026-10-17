@@ -3,17 +3,17 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import {
   fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
-import Link from "next/link";
 
 import { TeamsWorkspaceClient } from "@/features/teams/components/teams-workspace-client";
 import "@/features/teams/components/teams-workspace.css";
 import { readTeamsWorkspace } from "@/features/teams/server/teams-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -32,15 +32,10 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
       <PageContent>
         <PageHeader
           description="Operasyon ekipleri arasında kalıcı kanal iletişimi."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Operasyon İletişimi"
         />
-        <Section title="Yükleme hatası">
-          <EmptyState
-            description={result.message}
-            title="Teams çalışma alanı yüklenemedi"
-          />
-        </Section>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Operasyon iletişimi çalışma alanı yüklenemedi" backHref="/dashboard" backLabel="Ana sayfaya dön" inline />
       </PageContent>
     );
   }
@@ -51,35 +46,12 @@ export default async function TeamsPage({ searchParams }: TeamsPageProps) {
   const canCreateTask = hasGrantedPermission(effectiveAccess, "ai-task.create");
   const canCreateApproval = hasGrantedPermission(effectiveAccess, "teams.approvals.create");
   const canCreateHandover = hasGrantedPermission(effectiveAccess, "teams.handover.create");
-  const canReadHandover = hasGrantedPermission(effectiveAccess, "teams.handover.read");
-
   return (
     <PageContent>
         <PageHeader
           description="Tesis kapsamlı operasyon kanalları, mesajlar ve görev bağlamı."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Operasyon İletişimi"
-          actions={
-            <>
-              <Link href="/teams/is-kutum" className="teams-context-chip" data-testid="teams-work-inbox-index-link">
-                İş kutum
-              </Link>
-              <Link href="/teams/bildirimler" className="teams-context-chip" data-testid="teams-notifications-index-link">
-                Bildirimler
-              </Link>
-              <Link href="/teams/ozel-mesajlar" className="teams-context-chip" data-testid="teams-direct-messages-index-link">
-                Özel mesajlar
-              </Link>
-              <Link href="/teams/onaylar" className="teams-context-chip" data-testid="teams-approvals-index-link">
-                Onay istekleri
-              </Link>
-              {canReadHandover ? (
-                <Link href="/teams/devretme" className="teams-context-chip" data-testid="teams-handovers-index-link">
-                  Vardiya devri
-                </Link>
-              ) : null}
-            </>
-          }
         />
 
       <Section title="Çalışma alanı">

@@ -1,3 +1,4 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 export const FACTORY_NETWORK_TITLE = "Fabrika Ağı";
 export const FACTORY_NETWORK_SUBTITLE =
   "Çok tesisli kapasite dengesi, tahsis kararları ve ağ dayanıklılığı yönetimi";
@@ -15,6 +16,7 @@ export function formatNetworkDateTime(value?: string): string {
     return new Intl.DateTimeFormat("tr-TR", {
       dateStyle: "short",
       timeStyle: "short",
+      timeZone: FACILITY_TIME_ZONE,
     }).format(new Date(value));
   } catch {
     return value;

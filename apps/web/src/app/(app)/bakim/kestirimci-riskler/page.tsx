@@ -2,6 +2,8 @@ import { forbidUnlessGranted } from "@/features/admin-access/server/require-curr
 import { MaintenancePredictiveRiskWorkspaceView } from "@/features/maintenance/components/maintenance-predictive-risk-workspace-view";
 import { readMaintenancePredictiveRiskWorkspace } from "@/features/maintenance/server/maintenance-predictive-risk-reader";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+
 type MaintenancePredictiveRiskPageProps = Readonly<{
   searchParams: Promise<Readonly<{ asset?: string; assessment?: string }>>;
 }>;
@@ -14,15 +16,13 @@ export default async function MaintenancePredictiveRiskPage({ searchParams }: Ma
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
+      <div className="production-execution-page">
         <header className="production-execution-header">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>Kestirimci Bakım Riskleri</h1>
+          <p>BAKIM VE ARIZA</p>
+          <h1>Kestirimci Riskler</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <p>{result.message}</p>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline />
+      </div>
     );
   }
 

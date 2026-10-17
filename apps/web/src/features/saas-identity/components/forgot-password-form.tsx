@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <div className="auth-form__field">
-        <label htmlFor="forgot-organization">Kuruluş kodu</label>
+        <label htmlFor="forgot-organization">Kuruluş kodu <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="forgot-organization"
           name="organizationContext"
@@ -63,7 +63,7 @@ export function ForgotPasswordForm() {
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="forgot-email">E-posta</label>
+        <label htmlFor="forgot-email">E-posta <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="forgot-email"
           name="email"

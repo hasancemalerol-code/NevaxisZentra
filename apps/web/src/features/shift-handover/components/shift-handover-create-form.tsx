@@ -12,7 +12,7 @@ export function ShiftHandoverCreateForm() {
   return (
     <form action={submitCreateShiftHandover} className="shift-handover-form-grid">
       <label>
-        Vardiya Tarihi
+        Vardiya tarihi <span className="zx-required" aria-hidden="true">*</span>
         <input name="shiftDate" required type="date" />
       </label>
       <label>
@@ -24,14 +24,16 @@ export function ShiftHandoverCreateForm() {
         </select>
       </label>
       <label>
-        Departman / Alan
-        <input name="department" required />
+        Departman veya alan <span className="zx-required" aria-hidden="true">*</span>
+        <input name="department" placeholder="Örn. Üretim" required />
       </label>
-      <label>
+      <label className="shift-handover-field--wide">
         Özet
-        <textarea name="summary" rows={3} />
+        <textarea name="summary" rows={2} />
       </label>
-      <Button type="submit">Taslak Oluştur</Button>
+      <div className="shift-handover-form-actions">
+        <Button type="submit">Taslak Oluştur</Button>
+      </div>
     </form>
   );
 }

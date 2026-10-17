@@ -61,7 +61,7 @@ export function AiTaskFilterBar({
 
   return (
     <section
-      aria-label="AI görev filtreleri"
+      aria-label="Yapay zekâ görev filtreleri"
       className="ai-task-filter-bar"
     >
       <div className="ai-task-filter-bar__heading">

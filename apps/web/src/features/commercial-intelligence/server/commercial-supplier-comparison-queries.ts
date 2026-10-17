@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import {
@@ -83,7 +84,7 @@ function mapComparisonSummary(item: RawCommercialIntelligenceComparisonSummary):
     leadingDriverCode: item.leadingDriverCode,
     leadingDriverLabel: getCommercialIntelligenceDriverReasonLabel(item.leadingDriverCode),
     evidenceStatus: "simulated",
-    evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+    evidenceLabel: getCommercialWorkspaceEvidenceLabel(item.isPilotData, true),
     ruleSetVersion: item.ruleSetVersion,
     evaluatedAtUtc: item.evaluatedAtUtc,
     evaluatedLabel: formatDateTime(item.evaluatedAtUtc),
@@ -225,13 +226,16 @@ export async function readCommercialSupplierComparisonWorkspace(
   const hasPilot = comparisons.some((item) => item.isPilotData) || profiles.some((item) => item.isPilotData);
 
   const workspace: CommercialSupplierComparisonWorkspacePayload = {
-    facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+    facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
     reportingPeriodLabel: reportingPeriodLabel(supplierComparisons),
     freshnessLabel: freshnessLabel(supplierComparisons),
-    evidenceLabel: hasPilot ? "Simülasyon kanıtı" : "Satın alma fiyat kanıtı",
-    provenanceDisclaimer: workspaceResult.value.provenanceDisclaimer
-      || profilesResult.value.provenanceDisclaimer
-      || comparisonsResult.value.provenanceDisclaimer,
+    evidenceLabel: hasPilot ? "Örnek veri kanıtı" : "Satın alma fiyat kanıtı",
+    provenanceDisclaimer: resolveCommercialProvenance(
+      workspaceResult.value.provenanceDisclaimer
+        || profilesResult.value.provenanceDisclaimer
+        || comparisonsResult.value.provenanceDisclaimer,
+      hasPilot,
+    ),
     ruleSetVersion: workspaceResult.value.ruleSetVersion || comparisonsResult.value.ruleSetVersion,
     defaultMinimumComparableObservations: workspaceResult.value.defaultMinimumComparableObservations,
     hasDevelopmentPilotData: hasPilot,

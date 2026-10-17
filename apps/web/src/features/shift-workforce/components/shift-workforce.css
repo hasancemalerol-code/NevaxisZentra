@@ -50,7 +50,7 @@
 
 .shift-workforce-executive__eyebrow {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
   color: #155eef;
   font-weight: 700;
@@ -134,8 +134,8 @@
 }
 
 .shift-workforce-workspace-tab--active {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #fff;
 }
 
@@ -219,8 +219,8 @@
 }
 
 .shift-workforce-sticky-context__code {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   white-space: nowrap;
 }
 
@@ -283,8 +283,8 @@
 }
 
 .shift-workforce-kpi__label {
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -386,8 +386,8 @@
 }
 
 .shift-workforce-registry__count {
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .shift-workforce-registry__toolbar {
@@ -413,7 +413,7 @@
   left: 0.55rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: #5d6b7f;
 }
 
 .shift-workforce-search input {
@@ -440,8 +440,8 @@
 .shift-workforce-filter label {
   display: block;
   margin-bottom: 0.15rem;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
 }
 
@@ -474,10 +474,10 @@
 }
 
 .shift-workforce-table th {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: #566478;
   font-weight: 700;
 }
 
@@ -498,8 +498,8 @@
 
 .shift-workforce-cell-secondary {
   display: block;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .shift-workforce-badge {
@@ -507,7 +507,7 @@
   align-items: center;
   padding: 0.12rem 0.45rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -540,7 +540,7 @@
 
 .shift-workforce-badge--unknown {
   background: #f8fafc;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-btn {
@@ -563,8 +563,8 @@
 }
 
 .shift-workforce-btn--primary {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #fff;
 }
 
@@ -574,7 +574,7 @@
 
 .shift-workforce-btn--sm {
   padding: 0.28rem 0.55rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .shift-workforce-pagination {
@@ -586,8 +586,8 @@
 }
 
 .shift-workforce-pagination__info {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .shift-workforce-pagination__actions {
@@ -602,7 +602,7 @@
   gap: 0.35rem;
   padding: 2rem 1rem;
   text-align: center;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-empty h3 {
@@ -622,7 +622,7 @@
   align-items: center;
   gap: 0.45rem;
   padding: 1rem;
-  color: #64748b;
+  color: #566478;
   font-size: 0.82rem;
 }
 
@@ -657,8 +657,8 @@
 
 .shift-workforce-detail-breadcrumb {
   margin: 0;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -666,7 +666,7 @@
 .shift-workforce-detail-header__meta {
   margin: 0.15rem 0 0;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-detail-header__chips {
@@ -687,7 +687,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-detail-section {
@@ -710,8 +710,8 @@
 }
 
 .shift-workforce-detail-grid dt {
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -769,8 +769,8 @@
 
 .shift-workforce-competency-item__meta {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.4;
 }
 
@@ -811,7 +811,7 @@
 .shift-workforce-form-grid label {
   display: grid;
   gap: 0.2rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   color: #475569;
   font-weight: 600;
 }
@@ -842,14 +842,14 @@
 .shift-workforce-empty-inline {
   margin: 0;
   font-size: 0.82rem;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-limitations {
   margin: 0;
   padding-left: 1.1rem;
   font-size: 0.78rem;
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-workforce-limitations li {
@@ -896,7 +896,7 @@
 .shift-assignment-context__grid label {
   display: grid;
   gap: 0.2rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   color: #475569;
   font-weight: 600;
 }
@@ -940,7 +940,7 @@
 }
 
 .shift-assignment-kpi__value--insufficient {
-  color: #64748b;
+  color: #566478;
 }
 
 .shift-assignment-reason-list {
@@ -974,8 +974,8 @@
 
 .shift-assignment-reason-item__meta {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.4;
 }
 

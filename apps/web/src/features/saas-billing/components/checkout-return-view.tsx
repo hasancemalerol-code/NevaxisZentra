@@ -12,6 +12,8 @@ import {
   loadPaymentAttemptDetailAction,
   verifyCheckoutReturnAction,
 } from "@/features/saas-billing/server/saas-billing-actions";
+import { PageFrame, PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 
 type CheckoutReturnViewProps = Readonly<{
   paymentAttemptId: string | null;
@@ -21,7 +23,7 @@ type CheckoutReturnViewProps = Readonly<{
 export function CheckoutReturnView({ paymentAttemptId, checkoutSessionToken }: CheckoutReturnViewProps) {
   const hasReturnParams = Boolean(paymentAttemptId && checkoutSessionToken);
   const [message, setMessage] = useState(
-    hasReturnParams ? CHECKOUT_VERIFICATION_MESSAGE : "Ödeme dönüş bilgisi eksik.",
+    hasReturnParams ? CHECKOUT_VERIFICATION_MESSAGE : "",
   );
   const [status, setStatus] = useState<string | null>(null);
   const [failureCode, setFailureCode] = useState<string | null>(null);
@@ -59,16 +61,41 @@ export function CheckoutReturnView({ paymentAttemptId, checkoutSessionToken }: C
     });
   }, [checkoutSessionToken, hasReturnParams, idempotencyKey, paymentAttemptId]);
 
+  if (!hasReturnParams) {
+    return (
+      <PageFrame>
+        <PageHeader
+          eyebrow="Ayarlar"
+          title="Ödeme dönüşü"
+          description="Ödeme sağlayıcısından dönen sonuç bu sayfada gösterilir."
+        />
+        <StatePage
+          kind="empty"
+          inline
+          title="Gösterilecek ödeme sonucu yok"
+          description="Bu sayfa yalnızca ödeme sağlayıcısından yönlendirildiğinizde sonuç gösterir."
+          actions={<StatePageLink href="/ayarlar" primary>Faturalandırmaya dön</StatePageLink>}
+        />
+      </PageFrame>
+    );
+  }
+
   return (
-    <section className="saas-admin-panel" aria-live="polite">
-      <h2>Ödeme dönüşü</h2>
-      <p role="status">
-        {isPending ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null} {message}
-      </p>
-      {status ? (
-        <p className={paymentStatusBadgeClass(status)}>{formatPaymentStatus(status)}</p>
-      ) : null}
-      {failureCode ? <p className="saas-admin-billing-muted">İşlem tamamlanamadı.</p> : null}
-    </section>
+    <PageFrame>
+      <PageHeader
+        eyebrow="Ayarlar"
+        title="Ödeme dönüşü"
+        description="Ödeme sağlayıcısından dönen sonuç doğrulanıyor."
+      />
+      <section className="zx-panel" aria-live="polite">
+        <p role="status" className="zx-text-body">
+          {isPending ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null} {message}
+        </p>
+        {status ? (
+          <p className={paymentStatusBadgeClass(status)}>{formatPaymentStatus(status)}</p>
+        ) : null}
+        {failureCode ? <p className="saas-admin-billing-muted">İşlem tamamlanamadı.</p> : null}
+      </section>
+    </PageFrame>
   );
 }

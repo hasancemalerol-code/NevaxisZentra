@@ -125,16 +125,18 @@ export function OrderDraftFilterPresets({
         );
       })}
 
-      <button
-        className="order-draft-filter-presets__reset"
-        onClick={() => {
-          onFilterChange({});
-        }}
-        type="button"
-      >
-        <RotateCcw aria-hidden="true" />
-        Sıfırla
-      </button>
+      {filtersAreEqual(filter, {}) ? null : (
+        <button
+          className="order-draft-filter-presets__reset"
+          onClick={() => {
+            onFilterChange({});
+          }}
+          type="button"
+        >
+          <RotateCcw aria-hidden="true" />
+          Sıfırla
+        </button>
+      )}
     </div>
   );
 }

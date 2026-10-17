@@ -134,7 +134,7 @@ export function PresentationModeView({ dashboard }: PresentationModeViewProps) {
   );
 
   return (
-    <main className="commint-page" data-testid="presentation-mode-page">
+    <div className="commint-page" data-testid="presentation-mode-page">
       <header className="commint-executive">
         <div className="commint-executive__intro">
           <p className="commint-executive__eyebrow">FACTOS</p>
@@ -186,6 +186,6 @@ export function PresentationModeView({ dashboard }: PresentationModeViewProps) {
           <ArrowUpRight aria-hidden="true" size={16} />
         </Link>
       </section>
-    </main>
+    </div>
   );
 }

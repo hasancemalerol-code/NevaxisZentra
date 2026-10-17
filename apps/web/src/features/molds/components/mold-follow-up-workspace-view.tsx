@@ -31,6 +31,8 @@ import {
   getMoldFollowUpTaskButtonLabel,
   MOLD_FOLLOW_UP_TASK_DISCLAIMER,
 } from "../presentation/mold-follow-up-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type MoldFollowUpWorkspaceViewProps = Readonly<{
   workspace: MoldFollowUpWorkspacePayload;
@@ -132,7 +134,7 @@ export function MoldFollowUpWorkspaceView({
     return (
       <div className="quality-empty-panel" data-testid="mold-follow-up-empty">
         <FileWarning aria-hidden="true" />
-        <h3>Takip edilecek kalıp kaydı yok</h3>
+        <strong>Takip edilecek kalıp kaydı yok</strong>
         <p>Yetkili tesis kapsamında bakım veya sayaç eşiği takibi gereken kalıp bulunamadı.</p>
       </div>
     );
@@ -162,7 +164,7 @@ export function MoldFollowUpWorkspaceView({
         <QualityDashboardKpi
           label="Görev bağlantısı"
           value={workspace.kpis.taskLinkedCount}
-          description="AI görev taslağı"
+          description="Yapay zekâ görev taslağı"
           tone="ready"
           icon={<ExternalLink />}
         />
@@ -197,7 +199,7 @@ export function MoldFollowUpWorkspaceView({
       {actionError ? (
         <div role="alert" className="quality-error-panel">
           <AlertTriangle aria-hidden="true" />
-          <p>{actionError}</p>
+          <p>{customerMessage(actionError)}</p>
         </div>
       ) : null}
 
@@ -207,8 +209,8 @@ export function MoldFollowUpWorkspaceView({
             <h2>Kalıp envanteri</h2>
             <p>Takip gerektiren kalıp kayıtları</p>
           </header>
-          <div className="quality-table-wrap" data-testid="mold-follow-up-table">
-            <table>
+          <div className="quality-table-wrap" tabIndex={0} data-testid="mold-follow-up-table">
+            <table aria-label="Kalıp envanteri">
               <thead>
                 <tr>
                   <th>Kalıp</th>
@@ -251,9 +253,9 @@ export function MoldFollowUpWorkspaceView({
           </header>
 
           {moldError ? (
-            <p role="alert" data-testid="mold-follow-up-detail-error">{moldError}</p>
+            <p role="alert" data-testid="mold-follow-up-detail-error">{customerMessage(moldError)}</p>
           ) : !mold ? (
-            <p data-testid="mold-follow-up-detail-empty">Seçili kalıp kaydı yüklenemedi.</p>
+            <InlineUnavailable subject="Seçili kalıp kaydı" testId="mold-follow-up-detail-empty" />
           ) : (
             <div data-testid="mold-follow-up-detail-ready">
               <dl className="quality-detail-grid">

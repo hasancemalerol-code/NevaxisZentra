@@ -42,7 +42,7 @@ export function ProductionQuantityPanel({ summary }: ProductionQuantityPanelProp
             <span>Planlanan</span>
             <strong>
               {formatQty(summary.plannedQuantity)}
-              <small style={{ fontSize: "0.55em", fontWeight: 600, color: "#8495aa", marginLeft: 4 }}>
+              <small style={{ fontSize: "0.75rem", fontWeight: 600, color: "#5a697d", marginLeft: 4 }}>
                 {summary.plannedQuantityUnit ?? "adet"}
               </small>
             </strong>
@@ -53,7 +53,7 @@ export function ProductionQuantityPanel({ summary }: ProductionQuantityPanelProp
           <span>İyi Üretim</span>
           <strong>
             {formatQty(summary.goodQuantity)}
-            <small style={{ fontSize: "0.48em", fontWeight: 600, color: "#8495aa", marginLeft: 4 }}>
+            <small style={{ fontSize: "0.75rem", fontWeight: 600, color: "#5a697d", marginLeft: 4 }}>
               adet
             </small>
           </strong>
@@ -63,7 +63,7 @@ export function ProductionQuantityPanel({ summary }: ProductionQuantityPanelProp
           <span>Fire</span>
           <strong>
             {formatQty(summary.scrapQuantity)}
-            <small style={{ fontSize: "0.55em", fontWeight: 600, color: "#c4690c", marginLeft: 4 }}>
+            <small style={{ fontSize: "0.75rem", fontWeight: 600, color: "#a8560a", marginLeft: 4 }}>
               adet
             </small>
           </strong>
@@ -73,7 +73,7 @@ export function ProductionQuantityPanel({ summary }: ProductionQuantityPanelProp
           <span>Toplam Üretim</span>
           <strong>
             {formatQty(summary.grossProducedQuantity)}
-            <small style={{ fontSize: "0.55em", fontWeight: 600, color: "#8495aa", marginLeft: 4 }}>
+            <small style={{ fontSize: "0.75rem", fontWeight: 600, color: "#5a697d", marginLeft: 4 }}>
               adet
             </small>
           </strong>
@@ -84,7 +84,7 @@ export function ProductionQuantityPanel({ summary }: ProductionQuantityPanelProp
             <span>Kalan</span>
             <strong>
               {formatQty(summary.remainingQuantity)}
-              <small style={{ fontSize: "0.55em", fontWeight: 600, color: "#18794e", marginLeft: 4 }}>
+              <small style={{ fontSize: "0.75rem", fontWeight: 600, color: "#12673f", marginLeft: 4 }}>
                 adet
               </small>
             </strong>

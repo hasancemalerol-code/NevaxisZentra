@@ -1,12 +1,14 @@
 .subscription-access-denied {
   box-sizing: border-box;
-  display: flex;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   padding: 1.5rem 1rem 2rem;
   overflow-x: clip;
+  align-items: center;
+  min-height: calc(100vh - 56px - 3.5rem);
 }
 
 .subscription-access-denied__card {
@@ -24,9 +26,9 @@
 
 .subscription-access-denied__eyebrow {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.12em;
-  color: #b45309;
+  color: #1d4ed8;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -61,6 +63,12 @@
   max-width: 100%;
 }
 
+/* An active subscription does not explain the denial, so it is shown as information, not as a green success. */
+.subscription-access-denied__status--ok {
+  background: #eef2f7;
+  color: #475569;
+}
+
 .subscription-access-denied__actions {
   display: flex;
   flex-wrap: wrap;
@@ -87,8 +95,24 @@
   background: #f1f5f9;
 }
 
+/* Declared after the base link so the primary action really is the filled one. */
+.subscription-access-denied__link.subscription-access-denied__link--primary {
+  border-color: #1b528e;
+  background: #1b528e;
+  color: #fff;
+}
+
+.subscription-access-denied__link.subscription-access-denied__link--primary:hover {
+  background: #1e40af;
+}
+
+.subscription-access-denied__link:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
 .subscription-access-denied__hint {
   margin: 0;
   font-size: 0.82rem;
-  color: #64748b;
+  color: #566478;
 }

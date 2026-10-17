@@ -1,3 +1,5 @@
+import { enumLabel } from "@/lib/presentation/enum-labels";
+
 export type QualityControlPlanSummary = Readonly<{
   id: string;
   code: string;
@@ -269,7 +271,7 @@ export function getQualityStatusLabel(status: string): string {
     case "sort-or-screen":
       return "Ayıkla / ele";
     default:
-      return status;
+      return enumLabel(status);
   }
 }
 

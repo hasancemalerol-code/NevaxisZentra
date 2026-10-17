@@ -1,10 +1,10 @@
 import type { CommercialQuotationRiskTabId } from "../types/commercial-quotation-risk-types";
 
 export const COMMERCIAL_QUOTATION_RISK_SUBTITLE =
-  "Teklif fiyatı, geçerlilik, ödeme vadesi, risk eğilimi ve müşteri referansı konumlarını deterministik kanıt ve payda ile izleyin.";
+  "Teklif fiyatı, geçerlilik, ödeme vadesi, risk eğilimi ve müşteri referansı konumlarını kayıtlı kanıt ve karşılaştırılan toplamla izleyin.";
 
 export const COMMERCIAL_QUOTATION_RISK_DEVELOPMENT_BANNER =
-  "Gerçek teklif veri bağlantısı henüz tamamlanmadı. Görüntülenen geliştirme verileri simülasyondur ve gerçek müşteri, teklif, sipariş, fatura veya piyasa verisi değildir.";
+  "Gerçek teklif veri bağlantısı henüz tamamlanmadı. Bağlantı kurulana kadar müşteri, teklif, sipariş, fatura veya piyasa verisi gösterilmez.";
 
 export const COMMERCIAL_QUOTATION_RISK_READONLY_NOTE =
   "Salt okunur erişim: risk profili düzenleme devre dışıdır.";
@@ -13,7 +13,7 @@ export const COMMERCIAL_QUOTATION_RISK_EVIDENCE_SCOPE =
   "Seçili teklif risk kanıt penceresi";
 
 export const REAL_QUOTATION_MAPPING_NOTE =
-  "Gerçek teklif veri eşlemesi henüz tamamlanmadı. Bu çalışma alanındaki geliştirme verileri simülasyon kanıtıdır.";
+  "Gerçek teklif veri eşlemesi henüz tamamlanmadı. Eşleme kurulana kadar bu çalışma alanında değer gösterilmez.";
 
 export const COMMERCIAL_QUOTATION_RISK_TAB_OPTIONS: ReadonlyArray<
   Readonly<{ id: CommercialQuotationRiskTabId; label: string }>
@@ -35,7 +35,7 @@ export const COMMERCIAL_QUOTATION_RISK_KPI_ORDER = [
 
 const QUOTATION_RISK_PROVENANCE_LABELS: Record<string, string> = {
   "Deterministic local Development quotation-risk evidence — simulated, non-production, not real customer, quotation, invoice, order, or market evidence.":
-    "Deterministik yerel geliştirme teklif riski kanıtı — simülasyon, üretim dışı; gerçek müşteri, teklif, sipariş, fatura veya piyasa verisi değildir.",
+    "Örnek teklif riski verisi — gerçek müşteri, teklif, sipariş, fatura veya piyasa verisi değildir.",
 };
 
 const QUOTATION_RISK_OUTCOME_LABELS: Record<string, string> = {

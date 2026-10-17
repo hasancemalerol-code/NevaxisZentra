@@ -1,3 +1,4 @@
+import { classifyFailedResponse } from "@/lib/api/api-failure-classifier";
 import "./ai-task-server-boundary";
 
 import type { ProductionOrderRequestContext } from "../../production-execution/server/production-order-request-context";
@@ -48,6 +49,16 @@ export type RawAiTaskDeliveryChannel = Readonly<{
   reasonCode: string | null;
 }>;
 
+/** A refused or failed delivery API call, carrying the classified failure code (never raw backend text). */
+export class AiTaskDeliveryApiError extends Error {
+  constructor(
+    readonly failureCode: string,
+    readonly httpStatus: number,
+  ) {
+    super(`Delivery API failed: ${httpStatus}`);
+  }
+}
+
 async function fetchAiTaskDeliveryApi<T>(
   context: ProductionOrderRequestContext,
   path: string,
@@ -64,7 +75,8 @@ async function fetchAiTaskDeliveryApi<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`Delivery API failed: ${response.status}`);
+    const failure = await classifyFailedResponse(response);
+    throw new AiTaskDeliveryApiError(failure.failureCode ?? failure.kind, response.status);
   }
 
   return (await response.json()) as T;

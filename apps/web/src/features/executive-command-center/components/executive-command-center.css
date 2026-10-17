@@ -8,8 +8,8 @@
 }
 
 .executive-filter-rail__active-note {
-  font-size: 0.72rem;
-  color: #2563eb;
+  font-size: 0.75rem;
+  color: #1d4ed8;
   margin: 0 0 0.35rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -39,7 +39,7 @@
   font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
   margin: 0 0 0.75rem;
 }
 
@@ -79,7 +79,7 @@
 }
 
 .executive-timeline__time {
-  color: #64748b;
+  color: #566478;
   font-variant-numeric: tabular-nums;
 }
 
@@ -92,6 +92,557 @@
 @media (max-width: 900px) {
   .executive-command-grid,
   .executive-command-grid--two {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- Composition: header, sections, equal-height cards, balanced grids ---- */
+[data-testid="executive-command-center-view"] {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+}
+
+[data-testid="executive-command-center-view"] > * {
+  margin: 0;
+}
+
+[data-testid="executive-command-center-view"] .commint-executive {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 20px;
+}
+
+[data-testid="executive-command-center-view"] .commint-executive > .commint-executive__intro {
+  flex: 1 1 360px;
+  gap: 4px;
+}
+
+[data-testid="executive-command-center-view"] .commint-executive__eyebrow,
+.executive-panel .commint-executive__eyebrow {
+  color: var(--zx-text-muted, #566478);
+}
+
+[data-testid="executive-command-center-view"] .commint-executive__intro h1 {
+  font-size: clamp(1.5rem, 1.8vw, 1.75rem);
+}
+
+[data-testid="executive-command-center-view"] .commint-executive__subtitle {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+[data-testid="executive-command-center-view"] .commint-filter-rail {
+  margin: 0;
+}
+
+.executive-section {
+  margin: 0;
+}
+
+.executive-narrative {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 1px solid var(--zx-line, #dce5f0);
+  border-radius: 12px;
+  background: var(--zx-surface, #fff);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.executive-narrative > svg {
+  flex: none;
+  color: var(--zx-accent, #155eef);
+}
+
+.executive-narrative > p {
+  margin: 0;
+  min-width: 0;
+}
+
+/* Outcome cards: three across, equal height, link pinned to the bottom. */
+[data-testid="executive-command-center-view"] .commint-kpi-grid.executive-outcome-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.executive-outcome-grid .commint-kpi-card {
+  grid-template-rows: auto auto 1fr auto;
+  min-height: 9rem;
+  padding: 16px 18px;
+}
+
+.executive-drill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+.executive-outcome-grid .executive-drill-link {
+  align-self: end;
+}
+
+.executive-panel-link {
+  margin-top: 4px;
+}
+
+@media (max-width: 900px) {
+  [data-testid="executive-command-center-view"] .commint-kpi-grid.executive-outcome-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .executive-outcome-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  [data-testid="executive-command-center-view"] .commint-kpi-grid.executive-outcome-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Section grids: panels stretch to the same height; a lone trailing card spans the row. */
+[data-testid="executive-command-center-view"] .executive-command-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 16px;
+}
+
+[data-testid="executive-command-center-view"] .executive-command-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.executive-command-grid--two > :only-child {
+  grid-column: 1 / -1;
+}
+
+.executive-panel,
+.executive-command-grid--two > .commint-panel {
+  height: 100%;
+  padding: 16px 18px;
+  gap: 12px;
+}
+
+.executive-panel .commint-panel__header,
+.executive-command-grid--two .commint-panel__header {
+  margin-bottom: 0;
+}
+
+.executive-panel .commint-panel__header h3,
+.executive-command-grid--two .commint-panel__header h3 {
+  margin: 2px 0 0;
+  font-size: 1rem;
+}
+
+@media (max-width: 1280px) {
+  [data-testid="executive-command-center-view"] .executive-command-grid:not(.executive-command-grid--two) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .executive-command-grid:not(.executive-command-grid--two) > :nth-child(3):last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  [data-testid="executive-command-center-view"] .executive-command-grid,
+  [data-testid="executive-command-center-view"] .executive-command-grid--two,
+  [data-testid="executive-command-center-view"] .executive-command-grid:not(.executive-command-grid--two) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.executive-stack-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.executive-stack-item__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.executive-stack-item__header {
+  margin-bottom: 0;
+}
+
+.executive-stack-item__prediction {
+  margin: 0;
+}
+
+/* Card lists inside panels: two columns where there is room (exposure, verified value, throughput). */
+.executive-stack--cards {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  align-items: stretch;
+}
+
+.executive-exposure-value {
+  font-size: 1.2rem;
+}
+
+.executive-empty {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px dashed var(--zx-line, #dce5f0);
+  border-radius: 10px;
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.executive-timeline__row {
+  padding: 10px 12px;
+  border: 1px solid var(--zx-line, #e5ebf3);
+  border-radius: 10px;
+}
+
+.executive-throughput-strip {
+  margin-bottom: 4px;
+}
+
+/* ---- Round 3: header action right, filter clear as a button, balanced section rows ---- */
+[data-testid="executive-command-center-view"] .commint-executive {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+[data-testid="executive-command-center-view"] .commint-executive > .commint-executive__actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+[data-testid="executive-command-center-view"] .commint-executive__subtitle {
+  margin-top: 4px;
+}
+
+.executive-filter-rail .commint-filter-rail__clear {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  min-height: 40px;
+  width: auto;
+  padding: 0 16px;
+  border: 1px solid var(--zx-line, #dce5f0);
+  background: var(--zx-surface, #fff);
+  color: var(--zx-text, #0f172a);
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.executive-filter-rail .commint-filter-rail__clear:disabled {
+  color: var(--zx-text-muted, #566478);
+  cursor: not-allowed;
+}
+
+/* First section: priority + risks share a row, approvals span the full row below. */
+[data-testid="executive-command-center-view"] .executive-command-grid:not(.executive-command-grid--two) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+[data-testid="executive-command-center-view"] .executive-command-grid:not(.executive-command-grid--two) > :nth-child(3):last-child {
+  grid-column: 1 / -1;
+}
+
+/* Paired panels keep their own height: an empty card never stretches into a void. */
+[data-testid="executive-command-center-view"] .executive-command-grid--two {
+  align-items: start;
+}
+
+.executive-command-grid--two > .commint-panel {
+  height: auto;
+}
+
+/* Panel headers: title left, icon pinned right (never a stray icon on its own line). */
+.executive-section .commint-panel__header,
+.executive-panel .commint-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.executive-section .commint-panel__header > svg {
+  flex: none;
+  color: var(--zx-text-muted, #566478);
+}
+
+.executive-throughput-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 12px;
+}
+
+.executive-timeline__row > div {
+  min-width: 0;
+}
+
+.executive-footer-links {
+  padding: 12px 16px;
+  border: 1px solid var(--zx-line, #dce5f0);
+  border-radius: 12px;
+  background: var(--zx-surface, #fff);
+  font-size: 0.875rem;
+}
+
+.executive-footer-links p {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  color: var(--zx-text-muted, #566478);
+}
+
+.executive-footer-links a {
+  color: var(--zx-accent, #155eef);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  [data-testid="executive-command-center-view"] .executive-command-grid:not(.executive-command-grid--two) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- Round 4: count-aware tile grids, stacked impact/timeline rows, readable helper text ---- */
+[data-testid="executive-command-center-view"] .executive-command-grid--stack {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Four impact tiles: 4 across when there is room, otherwise 2x2; never a single-column tower. */
+.executive-exposure-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+@media (max-width: 1180px) {
+  .executive-exposure-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .executive-exposure-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Six workforce counters: 3x2 (or 2x3), never 4+2 or 5+1. */
+.executive-throughput-strip--six {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  .executive-throughput-strip--six {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Helper lines stay at 13px and eyebrows breathe above their titles. */
+[data-testid="executive-command-center-view"] .commint-kpi-card__detail,
+[data-testid="executive-command-center-view"] .commint-kpi-card__label,
+[data-testid="executive-command-center-view"] .executive-stack-item__meta {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+[data-testid="executive-command-center-view"] .commint-panel__header > div > .commint-executive__eyebrow,
+[data-testid="executive-command-center-view"] .executive-stack-item .commint-executive__eyebrow {
+  margin-bottom: 4px;
+}
+
+.executive-empty {
+  display: grid;
+  place-items: center;
+  min-height: 4.5rem;
+  text-align: center;
+}
+
+/* ---- Round 5: nine outcome tiles as a deliberate 3x3, filled board, one quiet summary ---- */
+/* The shared KPI grid auto-fits (and spans an odd last tile); the executive grid is counted instead. */
+body .content-viewport .commint-kpi-grid.executive-outcome-grid.executive-outcome-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body .content-viewport .executive-outcome-grid.executive-outcome-grid > .commint-kpi-card:last-child:nth-child(odd) {
+  grid-column: auto;
+}
+
+@media (max-width: 900px) {
+  body .content-viewport .commint-kpi-grid.executive-outcome-grid.executive-outcome-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .content-viewport .commint-kpi-grid.executive-outcome-grid.executive-outcome-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body .content-viewport .executive-outcome-grid.executive-outcome-grid > .commint-kpi-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 460px) {
+  body .content-viewport .commint-kpi-grid.executive-outcome-grid.executive-outcome-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Populated panels share the board; a lone trailing panel spans the row, never an empty slot. */
+.executive-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.executive-board:empty {
+  display: none;
+}
+
+.executive-board > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .executive-board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* One compact card replaces the stack of dashed one-line empties. */
+.executive-quiet__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.executive-quiet__list > li {
+  display: grid;
+  flex: 1 1 220px;
+  gap: 2px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--zx-line, #dce5f0);
+  border-radius: 10px;
+  background: var(--zx-surface-muted, #f8fafc);
+}
+
+.executive-quiet__list > li > strong {
+  font-size: 0.875rem;
+}
+
+.executive-quiet__list > li > span {
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.executive-quiet .commint-panel__header {
+  margin-bottom: 12px;
+}
+
+/* Footer links: label muted, destinations clearly links. */
+.executive-footer-links a {
+  text-decoration-thickness: 1px;
+}
+
+/* The commercial workspace sheet forces auto-fit with a long :not(:has()) selector; the doubled class above outranks it. */
+body .content-viewport .executive-filter-rail .commint-filter-rail__clear {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+.executive-footer-links a {
+  text-decoration: none;
+}
+
+.executive-footer-links p {
+  gap: 6px 20px;
+}
+
+.executive-footer-links__item {
+  white-space: nowrap;
+}
+
+.executive-footer-links__item a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Tablet: titles reserve two lines so the values line up across cards. */
+@media (max-width: 820px) {
+  .executive-outcome-grid .commint-kpi-card__label {
+    min-height: 2.9em;
+  }
+}
+
+/* Panel sections breathe: eyebrow and title never sit flush against the border. */
+.executive-section.commint-panel {
+  padding: 16px 18px;
+}
+
+/* Impact tiles: description takes the spare height, the link row is pinned to the bottom so rows line up. */
+.executive-exposure-grid > .executive-stack-item {
+  grid-template-rows: auto auto 1fr auto;
+  align-content: stretch;
+}
+
+.executive-exposure-grid > .executive-stack-item > .executive-drill-link {
+  align-self: end;
+}
+
+.executive-exposure-grid > .executive-stack-item > .commint-kpi-card__detail {
+  min-height: 2.9em;
+}
+
+/* Outcome cards are flex columns (commercial sheet): the link is pinned with an auto margin so link rows align per row. */
+.executive-outcome-grid .commint-kpi-card .executive-drill-link {
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+.executive-outcome-grid .commint-kpi-card__detail {
+  min-height: 2.9em;
+}
+
+/* Sakin bölümler: equal tracks. Five tiles fill one row on wide screens, otherwise three per row (left-aligned, no spans). */
+.executive-quiet__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.executive-quiet__list > li {
+  flex: none;
+}
+
+@media (min-width: 1100px) {
+  .executive-quiet__list:has(> li:nth-child(5):last-child) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .executive-quiet__list {
     grid-template-columns: minmax(0, 1fr);
   }
 }

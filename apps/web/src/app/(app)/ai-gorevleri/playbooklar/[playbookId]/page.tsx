@@ -1,4 +1,4 @@
-import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -11,6 +11,7 @@ import {
 import { EmptyState } from "@/components/ui/states";
 import { AiTaskPlaybookBuilderClient } from "@/features/ai-task-center/components/ai-task-playbook-builder-client";
 import { readAiTaskPlaybookBuilderContext } from "@/features/ai-task-center/server/ai-task-playbook-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type AiTaskPlaybookBuilderPageProps = Readonly<{
   params: Promise<Readonly<{ playbookId: string }>>;
@@ -30,15 +31,12 @@ export default async function AiTaskPlaybookBuilderPage({
     return (
       <PageContent>
         <PageHeader
-          description="Playbook tanımını düzenleyin"
-          eyebrow="AI Görev Merkezi"
+          eyebrow="Görev Merkezi"
           title={isCreate ? "Yeni Playbook" : "Playbook Düzenle"}
         />
-        <EmptyState
-          data-testid="ai-task-playbook-builder-error"
-          description={isNotFoundFailureCode(result.code) ? "İstenen playbook kaydı bulunamadı." : result.message}
-          title={isNotFoundFailureCode(result.code) ? "Playbook bulunamadı" : "Playbook yüklenemedi"}
-        />
+        <div data-testid="ai-task-playbook-builder-error">
+          <FailureStatePage code={result.code} message={result.message} failedTitle="Playbook yüklenemedi" entityLabel="playbook" backHref="/ai-gorevleri/playbooklar" backLabel="Playbook listesine dön" inline />
+        </div>
       </PageContent>
     );
   }
@@ -47,8 +45,7 @@ export default async function AiTaskPlaybookBuilderPage({
     return (
       <PageContent>
         <PageHeader
-          description="Playbook tanımını düzenleyin"
-          eyebrow="AI Görev Merkezi"
+          eyebrow="Görev Merkezi"
           title="Playbook Düzenle"
         />
         <EmptyState
@@ -74,7 +71,7 @@ export default async function AiTaskPlaybookBuilderPage({
             ? "Yeni operasyonel playbook tanımı oluşturun."
             : `${result.playbook?.name ?? "Playbook"} tanımını düzenleyin.`
         }
-        eyebrow="AI Görev Merkezi"
+        eyebrow="Görev Merkezi"
         title={isCreate ? "Yeni Playbook" : "Playbook Düzenle"}
       />
 

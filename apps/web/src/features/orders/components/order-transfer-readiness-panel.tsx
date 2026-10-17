@@ -82,7 +82,7 @@ export function OrderTransferReadinessPanel({
     <Card className="order-transfer-readiness">
       <div className="order-transfer-readiness__heading">
         <div>
-          <p>Human-in-the-Loop kontrolü</p>
+          <p>İnsan Onayı Kontrolü</p>
 
           <h2>Aktarım hazırlığı</h2>
         </div>
@@ -126,7 +126,7 @@ export function OrderTransferReadinessPanel({
           <p>
             {readiness.isReady
               ? "Zorunlu kontroller başarıyla tamamlandı. Aktarım yine de yalnızca yetkili kullanıcının açık işlemiyle başlatılmalıdır."
-              : "Başarısız kontroller çözülmeden AI veya sistem otomatik aktarım gerçekleştiremez."}
+              : "Başarısız kontroller çözülmeden yapay zekâ veya sistem otomatik aktarım gerçekleştiremez."}
           </p>
         </div>
       </div>

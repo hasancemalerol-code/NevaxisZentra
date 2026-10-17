@@ -151,8 +151,8 @@ export function CommercialMaterialProfitabilityComparisonTable({
   onSelect,
 }: MaterialProfitabilityComparisonTableProps) {
   return (
-    <div className="commint-table-wrap" data-testid="commercial-material-cost-profitability-material-table">
-      <table className="commint-table">
+    <div className="commint-table-wrap" tabIndex={0} data-testid="commercial-material-cost-profitability-material-table">
+      <table aria-label="Malzeme maliyet kârlılığı karşılaştırmaları" className="commint-table">
         <thead>
           <tr>
             <th>Malzeme</th>
@@ -218,8 +218,8 @@ export function CommercialCostDriverProfitabilityComparisonTable({
   onSelect,
 }: CostDriverProfitabilityComparisonTableProps) {
   return (
-    <div className="commint-table-wrap" data-testid="commercial-material-cost-profitability-cost-table">
-      <table className="commint-table">
+    <div className="commint-table-wrap" tabIndex={0} data-testid="commercial-material-cost-profitability-cost-table">
+      <table aria-label="Maliyet bileşeni karşılaştırma kayıtları" className="commint-table">
         <thead>
           <tr>
             <th>Karşılaştırma</th>

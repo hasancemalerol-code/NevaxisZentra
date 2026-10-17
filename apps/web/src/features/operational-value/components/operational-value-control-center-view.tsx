@@ -1,4 +1,7 @@
+import { localizeDataText } from "@/lib/presentation/display-name";
 import Link from "next/link";
+
+import { PageHeader } from "@/components/ui/page";
 
 import type {
   OperationalValueBreakdownItemApi,
@@ -7,7 +10,13 @@ import type {
   OperationalValueEconomicInputSnapshotApi,
 } from "../server/operational-value-api-client";
 
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { formatDate } from "@/lib/presentation/format";
+
 import "../operational-value.css";
+
+import "@/features/shift-operations/components/shift-operations-workspace.css";
 
 type OperationalValueControlCenterViewProps = Readonly<{
   controlCenter: OperationalValueControlCenterApi;
@@ -23,6 +32,12 @@ function formatNumber(value: number, fractionDigits = 0): string {
 function formatCurrency(value: number, currency = "USD"): string {
   const symbol = currency === "TRY" ? "₺" : "$";
   return `${symbol}${formatNumber(value, 2)}`;
+}
+
+function methodologyText(text: string): string {
+  return /^Verified operational outcomes only/i.test(text.trim())
+    ? "Yalnızca doğrulanmış operasyonel sonuçlar gösterilir. Ekonomik değer için tanımlı birim girdileri gerekir; tahminler doğrulanmış sonuç sayılmaz."
+    : customerMessage(text);
 }
 
 function formatMinutes(minutes: number): string {
@@ -74,8 +89,8 @@ function BreakdownList({
     <div key={`${item.dimensionType}:${item.dimensionId}:${item.valueCategory}`} className="operational-value-item">
       <div className="operational-value-item__row">
         <div className="operational-value-item__title">{item.label}</div>
-        {item.valueCategory ? <span className="operational-value-badge">{item.valueCategory}</span> : null}
-        {item.attributionClass ? <span className="operational-value-badge">{item.attributionClass}</span> : null}
+        {item.valueCategory ? <span className="operational-value-badge">{enumLabel(item.valueCategory)}</span> : null}
+        {item.attributionClass ? <span className="operational-value-badge">{enumLabel(item.attributionClass)}</span> : null}
       </div>
       <div className="operational-value-item__meta">
         {formatNumber(item.operationalValue, 1)} {item.unit} · {item.caseCount} vaka
@@ -93,19 +108,16 @@ function CaseDetailPanel({ caseDetail }: Readonly<{ caseDetail: OperationalValue
       <div className="operational-value-item__row">
         <div className="operational-value-item__title">{caseDetail.title}</div>
         <span className={`operational-value-badge ${statusBadgeClass(caseDetail.status)}`}>
-          {caseDetail.status}
+          {enumLabel(caseDetail.status)}
         </span>
-        <span className="operational-value-badge">{caseDetail.valueCategory}</span>
+        <span className="operational-value-badge">{enumLabel(caseDetail.valueCategory)}</span>
       </div>
       <div className="operational-value-item__meta">{caseDetail.problemSummary}</div>
       <div className="operational-value-detail-grid">
         <div className="operational-value-detail-cell">
-          <div className="operational-value-detail-cell__label">Baseline</div>
+          <div className="operational-value-detail-cell__label">Başlangıç değeri</div>
           <div className="operational-value-detail-cell__value">
             {formatNumber(caseDetail.baselineValue, 1)} {caseDetail.unit}
-          </div>
-          <div className="operational-value-item__meta">
-            {caseDetail.baselineMethod} · {caseDetail.baselineSource}
           </div>
         </div>
         <div className="operational-value-detail-cell">
@@ -115,20 +127,14 @@ function CaseDetailPanel({ caseDetail }: Readonly<{ caseDetail: OperationalValue
           </div>
         </div>
         <div className="operational-value-detail-cell">
-          <div className="operational-value-detail-cell__label">Delta</div>
+          <div className="operational-value-detail-cell__label">Fark</div>
           <div className="operational-value-detail-cell__value">
             +{formatNumber(caseDetail.deltaValue, 1)} {caseDetail.unit}
           </div>
         </div>
         <div className="operational-value-detail-cell">
           <div className="operational-value-detail-cell__label">Doğrulama</div>
-          <div className="operational-value-detail-cell__value">{caseDetail.verificationOutcome}</div>
-        </div>
-        <div className="operational-value-detail-cell">
-          <div className="operational-value-detail-cell__label">Zeka maliyeti</div>
-          <div className="operational-value-detail-cell__value">
-            {formatCurrency(caseDetail.intelligenceCost)}
-          </div>
+          <div className="operational-value-detail-cell__value">{enumLabel(caseDetail.verificationOutcome)}</div>
         </div>
         <div className="operational-value-detail-cell">
           <div className="operational-value-detail-cell__label">Ekonomik değer</div>
@@ -148,9 +154,9 @@ function CaseDetailPanel({ caseDetail }: Readonly<{ caseDetail: OperationalValue
         ) : null}
         {caseDetail.roiPercent != null ? (
           <div className="operational-value-detail-cell">
-            <div className="operational-value-detail-cell__label">ROI</div>
+            <div className="operational-value-detail-cell__label">Yatırım getirisi</div>
             <div className="operational-value-detail-cell__value">
-              {formatNumber(caseDetail.roiPercent, 1)}%
+              %{formatNumber(caseDetail.roiPercent, 1)}
             </div>
           </div>
         ) : null}
@@ -184,7 +190,7 @@ function EconomicInputsPanel({
         </p>
       ) : null}
       <div className="operational-value-item__meta">
-        Sürüm {inputs.versionCode} · {inputs.currency} · {inputs.effectiveFromUtc.slice(0, 10)}
+        Sürüm {inputs.versionCode} · geçerlilik {formatDate(inputs.effectiveFromUtc)}
         {inputs.isActive ? " · aktif" : ""}
       </div>
       <div className="operational-value-economic-grid">
@@ -193,7 +199,7 @@ function EconomicInputsPanel({
         <EconomicField label="Duruş / saat" value={inputs.downtimeCostPerHour} currency={inputs.currency} />
         <EconomicField label="İşgücü / saat" value={inputs.laborCostPerHour} currency={inputs.currency} />
         <EconomicField label="Mesai / saat" value={inputs.overtimeCostPerHour} currency={inputs.currency} />
-        <EconomicField label="Changeover / dk" value={inputs.changeoverCostPerMinute} currency={inputs.currency} />
+        <EconomicField label="Ürün değişimi / dk" value={inputs.changeoverCostPerMinute} currency={inputs.currency} />
         <EconomicField label="Enerji birim" value={inputs.energyUnitCost} currency={inputs.currency} />
         <EconomicField label="Gecikme cezası" value={inputs.lateDeliveryPenalty} currency={inputs.currency} />
       </div>
@@ -219,42 +225,39 @@ function EconomicField({
 export function OperationalValueControlCenterView({
   controlCenter,
 }: OperationalValueControlCenterViewProps) {
-  const { summary, intelligenceCost, reportPreview } = controlCenter;
+  const { summary, reportPreview } = controlCenter;
   const currency = summary.currency ?? reportPreview.currency ?? "USD";
   const featuredCase = controlCenter.featuredCase ?? controlCenter.recentCases[0];
+  const detailsEmpty =
+    controlCenter.trend.length === 0
+    && controlCenter.breakdownByCategory.length === 0
+    && controlCenter.breakdownByLine.length === 0
+    && controlCenter.breakdownByWorkflow.length === 0
+    && !featuredCase
+    && !controlCenter.activeEconomicInputs;
   const hasEconomicValue =
     summary.economicConversionStatus.toUpperCase() === "CONVERTED"
     && summary.verifiedEconomicValue != null;
 
   return (
     <div className="operational-value-shell" data-testid="operational-value-control-center">
-      <header className="fact-section__header">
-        <div>
-          <p className="fact-section__eyebrow">ULTRA I</p>
-          <h1>Operasyonel Değer</h1>
-          <p className="fact-section__subtitle">
-            Doğrulanmış operasyonel kazanım, maliyet ve savunulabilir ROI yüzeyi
-          </p>
-        </div>
-        <div className="operational-value-item__row">
-          <Link className="shift-ops-cta" href="/intelligence-runtime">
-            Zeka maliyeti
-          </Link>
-          <Link className="shift-ops-cta" href="/fabrika">
-            Fabrika
-          </Link>
-        </div>
-      </header>
+      <PageHeader
+        eyebrow="DOĞRULANMIŞ DEĞER"
+        title="Operasyonel Değer"
+        description="Doğrulanmış operasyonel kazanım, maliyet ve savunulabilir yatırım getirisi görünümü."
+        actions={<Link className="zx-button" href="/fabrika">Fabrikaya git</Link>}
+      />
 
       <section className="operational-value-summary" data-testid="operational-value-summary">
         <div className="operational-value-summary__item">
           <div className="operational-value-summary__label">Doğrulanmış sonuç</div>
           <div className="operational-value-summary__value">{summary.verifiedOutcomes}</div>
+          <div className="operational-value-summary__meta">sonuç</div>
         </div>
         <div className="operational-value-summary__item">
           <div className="operational-value-summary__label">İyi çıktı kazanımı</div>
           <div className="operational-value-summary__value">
-            +{formatNumber(summary.goodOutputGainedUnits, 0)}
+            {summary.goodOutputGainedUnits > 0 ? "+" : ""}{formatNumber(summary.goodOutputGainedUnits, 0)}
           </div>
           <div className="operational-value-summary__meta">adet</div>
         </div>
@@ -263,20 +266,17 @@ export function OperationalValueControlCenterView({
           <div className="operational-value-summary__value">
             {formatMinutes(summary.downtimeAvoidedMinutes)}
           </div>
+          <div className="operational-value-summary__meta">duruş süresi</div>
         </div>
         <div className="operational-value-summary__item">
           <div className="operational-value-summary__label">Korunan geciken sipariş</div>
           <div className="operational-value-summary__value">{summary.lateOrdersProtected}</div>
+          <div className="operational-value-summary__meta">sipariş</div>
         </div>
         <div className="operational-value-summary__item">
           <div className="operational-value-summary__label">Azalan insan dokunuşu</div>
           <div className="operational-value-summary__value">{summary.humanTouchesReduced}</div>
-        </div>
-        <div className="operational-value-summary__item">
-          <div className="operational-value-summary__label">Zeka maliyeti</div>
-          <div className="operational-value-summary__value">
-            {formatCurrency(summary.intelligenceCost, currency)}
-          </div>
+          <div className="operational-value-summary__meta">müdahale</div>
         </div>
         {hasEconomicValue ? (
           <div className="operational-value-summary__item operational-value-summary__item--economic">
@@ -288,17 +288,35 @@ export function OperationalValueControlCenterView({
               {economicStatusLabel(summary.economicConversionStatus)}
             </div>
           </div>
-        ) : (
-          <div className="operational-value-summary__item">
-            <div className="operational-value-summary__label">Ekonomik değer</div>
-            <div className="operational-value-summary__value">—</div>
-            <div className="operational-value-summary__meta">
-              {economicStatusLabel(summary.economicConversionStatus)}
-            </div>
-          </div>
-        )}
+        ) : null}
       </section>
 
+      {detailsEmpty ? (
+        <section className="operational-value-section" data-testid="operational-value-details-empty">
+          <div className="operational-value-section__header">
+            <h2>Ayrıntılar</h2>
+          </div>
+          <div className="operational-value-section__body">
+            <div className="operational-value-empty-row" data-testid="operational-value-trend">
+              <span>Değer trendi</span>
+              <span>Trend verisi henüz oluşmadı.</span>
+            </div>
+            <div className="operational-value-empty-row" data-testid="operational-value-breakdown">
+              <span>Kırılım</span>
+              <span>Kategori kırılımı bulunamadı.</span>
+            </div>
+            <div className="operational-value-empty-row" data-testid="operational-value-case-detail">
+              <span>Vaka detayı</span>
+              <span>Doğrulanmış değer vakası bulunamadı.</span>
+            </div>
+            <div className="operational-value-empty-row" data-testid="operational-value-economic-inputs">
+              <span>Ekonomik girdi yapılandırması</span>
+              <span>Ekonomik girdi yapılandırması bulunamadı. Operasyonel değer gösterilir; finansal dönüşüm yapılamaz.</span>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <>
       <section className="operational-value-section">
         <div className="operational-value-section__header">
           <h2>Değer trendi</h2>
@@ -332,11 +350,6 @@ export function OperationalValueControlCenterView({
       <section className="operational-value-section">
         <div className="operational-value-section__header">
           <h2>Kırılım</h2>
-          <div className="operational-value-breakdown-tabs">
-            <span className="operational-value-breakdown-tab operational-value-breakdown-tab--active">Kategori</span>
-            <span className="operational-value-breakdown-tab">Hat</span>
-            <span className="operational-value-breakdown-tab">İş akışı</span>
-          </div>
         </div>
         <div className="operational-value-section__body" data-testid="operational-value-breakdown">
           <BreakdownList
@@ -382,66 +395,20 @@ export function OperationalValueControlCenterView({
           />
         </div>
       </section>
-
-      <section className="operational-value-section">
-        <div className="operational-value-section__header">
-          <h2>Zeka maliyeti bağlantısı</h2>
-          <Link className="shift-ops-cta" href="/intelligence-runtime">
-            Intelligence Runtime
-          </Link>
-        </div>
-        <div className="operational-value-section__body">
-          <div className="operational-value-cost-link">
-            <div className="operational-value-detail-grid">
-              <div className="operational-value-detail-cell">
-                <div className="operational-value-detail-cell__label">Toplam zeka maliyeti</div>
-                <div className="operational-value-detail-cell__value">
-                  {formatCurrency(intelligenceCost.totalIntelligenceCost, currency)}
-                </div>
-              </div>
-              <div className="operational-value-detail-cell">
-                <div className="operational-value-detail-cell__label">Doğrulanmış sonuç maliyeti</div>
-                <div className="operational-value-detail-cell__value">
-                  {intelligenceCost.costPerVerifiedOutcome != null
-                    ? formatCurrency(intelligenceCost.costPerVerifiedOutcome, currency)
-                    : "—"}
-                </div>
-              </div>
-              <div className="operational-value-detail-cell">
-                <div className="operational-value-detail-cell__label">Deterministik oran</div>
-                <div className="operational-value-detail-cell__value">
-                  {intelligenceCost.deterministicRouteRate != null
-                    ? `${(intelligenceCost.deterministicRouteRate * 100).toFixed(1)}%`
-                    : "—"}
-                </div>
-              </div>
-              <div className="operational-value-detail-cell">
-                <div className="operational-value-detail-cell__label">Frontier model oranı</div>
-                <div className="operational-value-detail-cell__value">
-                  {intelligenceCost.frontierModelCallRate != null
-                    ? `${(intelligenceCost.frontierModelCallRate * 100).toFixed(1)}%`
-                    : "—"}
-                </div>
-              </div>
-            </div>
-            {intelligenceCost.message ? (
-              <p className="operational-value-item__meta">{intelligenceCost.message}</p>
-            ) : null}
-          </div>
-        </div>
-      </section>
+        </>
+      )}
 
       <section className="operational-value-section">
         <div className="operational-value-section__header">
           <h2>Müşteri raporu önizleme</h2>
-          {controlCenter.canExport ? (
-            <span className="operational-value-badge operational-value-badge--verified">EXPORT</span>
+          {controlCenter.canExport && reportPreview.verifiedOutcomes > 0 ? (
+            <span className="operational-value-badge operational-value-badge--verified">Dışa aktarılabilir</span>
           ) : null}
         </div>
         <div className="operational-value-section__body" data-testid="operational-value-report-preview">
           <div className="operational-value-report">
             <div className="operational-value-report__title">
-              {reportPreview.periodLabel} · {reportPreview.verifiedOutcomes} doğrulanmış sonuç
+              {localizeDataText(reportPreview.periodLabel)} · {reportPreview.verifiedOutcomes} doğrulanmış sonuç
             </div>
             <ul className="operational-value-report__list">
               {reportPreview.operationalImprovements.map((item) => (
@@ -449,19 +416,18 @@ export function OperationalValueControlCenterView({
               ))}
             </ul>
             <div className="operational-value-item__meta">
-              Zeka maliyeti: {formatCurrency(reportPreview.intelligenceCost, currency)}
               {reportPreview.verifiedEconomicValue != null
-                ? ` · Ekonomik değer: ${formatCurrency(reportPreview.verifiedEconomicValue, currency)}`
-                : ` · ${economicStatusLabel(reportPreview.economicConversionStatus)}`}
+                ? `Ekonomik değer: ${formatCurrency(reportPreview.verifiedEconomicValue, currency)}`
+                : `Ekonomik değer: ${economicStatusLabel(reportPreview.economicConversionStatus)}`}
               {reportPreview.netValue != null
                 ? ` · Net: ${formatCurrency(reportPreview.netValue, currency)}`
                 : ""}
               {reportPreview.roiPercent != null
-                ? ` · ROI: ${formatNumber(reportPreview.roiPercent, 1)}%`
+                ? ` · Yatırım getirisi: %${formatNumber(reportPreview.roiPercent, 1)}`
                 : ""}
-              {reportPreview.paybackStatus ? ` · Geri ödeme: ${reportPreview.paybackStatus}` : ""}
+              {reportPreview.paybackStatus ? ` · Geri ödeme: ${enumLabel(reportPreview.paybackStatus)}` : ""}
             </div>
-            <p className="operational-value-report__method">{reportPreview.methodologySummary}</p>
+            <p className="operational-value-report__method">{methodologyText(reportPreview.methodologySummary)}</p>
           </div>
         </div>
       </section>

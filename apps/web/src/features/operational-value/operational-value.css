@@ -31,7 +31,7 @@
 }
 
 .operational-value-summary__meta {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-muted, #5c6773);
   margin-top: 0.15rem;
 }
@@ -72,7 +72,7 @@
 }
 
 .operational-value-trend-point__label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-muted, #5c6773);
 }
 
@@ -90,7 +90,7 @@
 .operational-value-breakdown-tab {
   padding: 0.25rem 0.55rem;
   border-radius: 0.35rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -133,7 +133,7 @@
   display: inline-block;
   padding: 0.15rem 0.45rem;
   border-radius: 0.35rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -177,7 +177,7 @@
 
 .operational-value-detail-cell__label {
   color: var(--text-muted, #5c6773);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .operational-value-detail-cell__value {
@@ -200,7 +200,7 @@
 
 .operational-value-economic-field__label {
   color: var(--text-muted, #5c6773);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .operational-value-economic-field__value {
@@ -244,4 +244,129 @@
   font-size: 0.8rem;
   color: var(--text-muted, #5c6773);
   font-style: italic;
+}
+
+/* Round 4: count-aware summary tiles (6 -> 6 / 3 x 2 / 2 x 3; with the economic tile: 5 + full row) and calmer empty sections. */
+.operational-value-summary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.operational-value-summary__item {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.operational-value-summary__item--economic {
+  grid-column: 1 / -1;
+}
+
+.operational-value-summary__label,
+.operational-value-summary__meta,
+.operational-value-trend-point__label,
+.operational-value-detail-cell__label,
+.operational-value-economic-field__label {
+  font-size: 0.8125rem;
+}
+
+@media (min-width: 821px) {
+  .operational-value-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .operational-value-summary:has(.operational-value-summary__item--economic) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1700px) {
+  .operational-value-summary {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .operational-value-summary:has(.operational-value-summary__item--economic) > :nth-child(5) {
+    grid-column: 1 / -1;
+  }
+}
+
+.operational-value-section__body:has(> .operational-value-item__meta:only-child) {
+  padding-block: 0.65rem;
+}
+
+/* Round 5: readable tile text, one quiet look for a figure that is not available, and empty sections as single compact rows. */
+.operational-value-summary__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--zx-text, #3b4a5e);
+}
+
+.operational-value-summary__meta {
+  font-size: 0.8125rem;
+}
+
+.operational-value-summary__value--empty {
+  color: var(--text-muted, #5c6773);
+}
+
+.operational-value-section:has(> .operational-value-section__body > .operational-value-item__meta:only-child) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.operational-value-section:has(> .operational-value-section__body > .operational-value-item__meta:only-child) > .operational-value-section__header {
+  flex: 0 0 min(100%, 17rem);
+  border-bottom: 0;
+}
+
+.operational-value-section:has(> .operational-value-section__body > .operational-value-item__meta:only-child) > .operational-value-section__body {
+  flex: 1 1 18rem;
+  padding-block: 0.65rem;
+}
+
+/* Five tiles (no economic conversion yet) sit in one row on wide screens. */
+@media (min-width: 1100px) {
+  .operational-value-summary:has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Round 9: one merged empty card for the detail sections; readable report method text. */
+.operational-value-empty-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 17rem) minmax(0, 1fr);
+  gap: 4px 16px;
+  padding-block: 6px;
+  font-size: 0.875rem;
+  color: var(--text-muted, #5c6773);
+}
+
+.operational-value-empty-row > span:first-child {
+  color: var(--zx-text-strong, #12263a);
+  font-weight: 600;
+}
+
+.operational-value-empty-row + .operational-value-empty-row {
+  border-top: 1px solid var(--surface-border, #e3e9f1);
+}
+
+@media (max-width: 640px) {
+  .operational-value-empty-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.operational-value-report__method {
+  font-size: 0.875rem;
+}
+
+/* Frozen checklist round 4: the report preview sits directly in its card (no second dashed box); the divider above the method text stays. */
+body .content-viewport .operational-value-report {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }

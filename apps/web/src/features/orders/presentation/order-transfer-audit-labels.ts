@@ -52,7 +52,7 @@ export function getOrderTransferAuditFollowUpLabel(
 
     case "failed":
       return record.retryable
-        ? "Yeniden deneme uygun"
+        ? "Yeniden Deneme uygun"
         : "Manuel inceleme gerekiyor";
   }
 }

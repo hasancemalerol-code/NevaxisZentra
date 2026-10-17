@@ -265,7 +265,7 @@ export function getExportAiSourceTypeLabel(sourceType: ExportAiSourceType): stri
     case "historical-observation":
       return "Geçmiş gözlem";
     case "broker-input":
-      return "Broker girdisi";
+      return "Gümrük müşaviri bilgisi";
     case "operational-data":
       return "Operasyon verisi";
     case "ai-interpretation":
@@ -322,7 +322,8 @@ export function getExportAiProviderLabel(provider: string): string {
     return "Etkin değil";
   }
 
-  return provider;
+  // A real provider identifier is an implementation detail; customers only need to know a model is involved.
+  return "Model destekli";
 }
 
 export function getCrossModuleRiskSeverityLabel(

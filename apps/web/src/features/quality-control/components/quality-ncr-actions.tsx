@@ -7,14 +7,14 @@ import { Button } from "@/components/ui/button";
 import type { QualityNcrDetail } from "../domain/quality-control";
 import type {
   closeQualityNcrAction,
-  completeQualityCorrectiveActionAction,
   createQualityCorrectiveActionAction,
   decideQualityDispositionAction,
   placeQualityHoldAction,
   releaseQualityHoldAction,
   resolveQualityNcrAction,
-  startQualityCorrectiveActionAction,
 } from "../server/quality-control-writer";
+import { getQualityStatusLabel } from "../domain/quality-control";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type QualityNcrActionsProps = Readonly<{
   ncr: QualityNcrDetail;
@@ -22,8 +22,6 @@ export type QualityNcrActionsProps = Readonly<{
   onReleaseHold: typeof releaseQualityHoldAction;
   onDecideDisposition: typeof decideQualityDispositionAction;
   onCreateCorrectiveAction: typeof createQualityCorrectiveActionAction;
-  onStartCorrectiveAction: typeof startQualityCorrectiveActionAction;
-  onCompleteCorrectiveAction: typeof completeQualityCorrectiveActionAction;
   onResolve: typeof resolveQualityNcrAction;
   onClose: typeof closeQualityNcrAction;
 }>;
@@ -34,8 +32,6 @@ export function QualityNcrActions({
   onReleaseHold,
   onDecideDisposition,
   onCreateCorrectiveAction,
-  onStartCorrectiveAction,
-  onCompleteCorrectiveAction,
   onResolve,
   onClose,
 }: QualityNcrActionsProps) {
@@ -62,25 +58,55 @@ export function QualityNcrActions({
   const holdActive = ncr.holdStatus === "active" || ncr.activeHold?.status === "active";
   const canResolve = ncr.status !== "resolved" && ncr.status !== "closed" && ncr.status !== "cancelled";
   const canClose = ncr.status === "resolved";
+  const closingHint = canResolve
+    ? "Uygunsuzluk kaydını çözülmüş olarak işaretler; kapatma yalnızca çözümden sonra yapılabilir."
+    : canClose
+      ? "Kayıt çözüldü. Kapatma işlemi kaydı sonlandırır."
+      : `Kayıt ${getQualityStatusLabel(ncr.status).toLocaleLowerCase("tr-TR")} durumunda; çözme ve kapatma kullanılamıyor.`;
 
   return (
     <section className="quality-section quality-section--wide quality-action-bar" aria-label="NCR işlemleri">
       <header className="quality-section__header">
-        <div>
-          <h2>İşlemler</h2>
-          <p>Sürüm: {version}</p>
-        </div>
+        <h2>İşlemler</h2>
       </header>
 
       {message ? (
         <div role="alert" className="quality-error-panel">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
 
+      {/* The state-changing decision comes first and carries the page's primary emphasis. */}
+      <div className="quality-action-bar__group quality-action-bar__group--closing">
+        <div className="quality-action-bar__closing-copy">
+          <strong>NCR durumu</strong>
+          <p className="quality-action-bar__hint">{closingHint}</p>
+        </div>
+        <div className="quality-action-bar__buttons">
+          <Button
+            type="button"
+            variant="primary"
+            disabled={pending || !canResolve}
+            onClick={() => void run(() => onResolve(ncr.id, version, "NCR çözüldü"))}
+          >
+            NCR&apos;yi Çöz
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            disabled={pending || !canClose}
+            onClick={() => void run(() => onClose(ncr.id, version, "NCR kapatıldı"))}
+          >
+            NCR&apos;yi Kapat
+          </Button>
+        </div>
+      </div>
+
       {!holdActive && ncr.status !== "closed" && ncr.status !== "cancelled" ? (
+        <details className="quality-action-bar__group quality-action-disclosure">
+          <summary>Blokeyi uygula</summary>
         <form
-          className="quality-action-bar__group"
+          className="quality-action-bar__form"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -94,7 +120,6 @@ export function QualityNcrActions({
             );
           }}
         >
-          <strong>Kalite Blokesi Koy</strong>
           <div className="quality-action-bar__row">
             <div className="quality-form-field">
               <label htmlFor="hold-scope">Kapsam</label>
@@ -104,7 +129,7 @@ export function QualityNcrActions({
               </select>
             </div>
             <div className="quality-form-field">
-              <label htmlFor="hold-reason">Neden</label>
+              <label htmlFor="hold-reason">Neden <span className="zx-required" aria-hidden="true">*</span></label>
               <input
                 id="hold-reason"
                 name="reason"
@@ -115,15 +140,18 @@ export function QualityNcrActions({
               />
             </div>
             <Button type="submit" variant="secondary" disabled={pending}>
-              Kalite Blokesi Koy
+              Blokeyi uygula
             </Button>
           </div>
         </form>
+        </details>
       ) : null}
 
       {holdActive ? (
+        <details className="quality-action-bar__group quality-action-disclosure" open>
+          <summary>Blokeyi kaldır</summary>
         <form
-          className="quality-action-bar__group"
+          className="quality-action-bar__form"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -132,10 +160,9 @@ export function QualityNcrActions({
             );
           }}
         >
-          <strong>Blokeyi Kaldır</strong>
           <div className="quality-action-bar__row">
             <div className="quality-form-field">
-              <label htmlFor="release-reason">Serbest bırakma nedeni</label>
+              <label htmlFor="release-reason">Serbest bırakma nedeni <span className="zx-required" aria-hidden="true">*</span></label>
               <input
                 id="release-reason"
                 name="releaseReason"
@@ -146,15 +173,18 @@ export function QualityNcrActions({
               />
             </div>
             <Button type="submit" variant="secondary" disabled={pending}>
-              Blokeyi Kaldır
+              Blokeyi kaldır
             </Button>
           </div>
         </form>
+        </details>
       ) : null}
 
       {ncr.dispositionStatus !== "decided" && ncr.status !== "closed" ? (
+        <details className="quality-action-bar__group quality-action-disclosure">
+          <summary>Uygunsuzluk kararı belirle</summary>
         <form
-          className="quality-action-bar__group"
+          className="quality-action-bar__form"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -168,7 +198,6 @@ export function QualityNcrActions({
             );
           }}
         >
-          <strong>Disposition Belirle</strong>
           <div className="quality-action-bar__row">
             <div className="quality-form-field">
               <label htmlFor="disposition-type">Karar</label>
@@ -182,18 +211,21 @@ export function QualityNcrActions({
             </div>
             <div className="quality-form-field">
               <label htmlFor="disposition-note">Not</label>
-              <input id="disposition-note" name="note" type="text" className="quality-form-input" placeholder="Disposition notu" />
+              <input id="disposition-note" name="note" type="text" className="quality-form-input" placeholder="Uygunsuzluk kararı notu" />
             </div>
             <Button type="submit" variant="secondary" disabled={pending}>
-              Disposition Belirle
+              Uygunsuzluk kararı belirle
             </Button>
           </div>
         </form>
+        </details>
       ) : null}
 
       {ncr.status !== "closed" && ncr.status !== "cancelled" ? (
+        <details className="quality-action-bar__group quality-action-disclosure">
+          <summary>Düzeltici aksiyon ekle</summary>
         <form
-          className="quality-action-bar__group"
+          className="quality-action-bar__form"
           onSubmit={(event) => {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
@@ -208,14 +240,13 @@ export function QualityNcrActions({
             );
           }}
         >
-          <strong>Düzeltici Aksiyon Ekle</strong>
           <div className="quality-form-grid">
             <div className="quality-form-field">
-              <label htmlFor="ca-title">Başlık</label>
+              <label htmlFor="ca-title">Başlık <span className="zx-required" aria-hidden="true">*</span></label>
               <input id="ca-title" name="title" type="text" className="quality-form-input" placeholder="Başlık" required />
             </div>
             <div className="quality-form-field">
-              <label htmlFor="ca-description">Açıklama</label>
+              <label htmlFor="ca-description">Açıklama <span className="zx-required" aria-hidden="true">*</span></label>
               <input id="ca-description" name="description" type="text" className="quality-form-input" placeholder="Açıklama" required />
             </div>
             <div className="quality-form-field">
@@ -229,71 +260,13 @@ export function QualityNcrActions({
           </div>
           <div className="quality-form-actions">
             <Button type="submit" variant="secondary" disabled={pending}>
-              Düzeltici Aksiyon Ekle
+              Düzeltici aksiyon ekle
             </Button>
           </div>
         </form>
+        </details>
       ) : null}
 
-      {ncr.correctiveActions.map((action) => (
-        <div key={action.id} className="quality-action-bar__group">
-          <div className="quality-ca-item__body">
-            <strong>{action.title}</strong>
-            <span>{action.description}</span>
-          </div>
-          <div className="quality-action-bar__buttons">
-            {action.status === "open" ? (
-              <Button
-                type="button"
-                variant="secondary"
-                size="small"
-                disabled={pending}
-                onClick={() => void run(() => onStartCorrectiveAction(action.id, action.version))}
-              >
-                Başlat
-              </Button>
-            ) : null}
-            {action.status === "in-progress" ? (
-              <Button
-                type="button"
-                variant="primary"
-                size="small"
-                disabled={pending}
-                onClick={() =>
-                  void run(() =>
-                    onCompleteCorrectiveAction(action.id, action.version, "Tamamlandı"),
-                  )
-                }
-              >
-                Tamamla
-              </Button>
-            ) : null}
-          </div>
-        </div>
-      ))}
-
-      <div className="quality-action-bar__buttons">
-        {canResolve ? (
-          <Button
-            type="button"
-            variant="primary"
-            disabled={pending}
-            onClick={() => void run(() => onResolve(ncr.id, version, "NCR çözüldü"))}
-          >
-            Çöz
-          </Button>
-        ) : null}
-        {canClose ? (
-          <Button
-            type="button"
-            variant="danger"
-            disabled={pending}
-            onClick={() => void run(() => onClose(ncr.id, version, "NCR kapatıldı"))}
-          >
-            Kapat
-          </Button>
-        ) : null}
-      </div>
     </section>
   );
 }

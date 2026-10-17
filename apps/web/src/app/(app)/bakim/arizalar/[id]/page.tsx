@@ -1,6 +1,7 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Wrench } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,7 +10,6 @@ import {
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MaintenanceRequestConvertForm } from "@/features/maintenance/components/maintenance-request-convert-form";
-import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import {
   looksLikeRawUuid,
@@ -23,8 +23,10 @@ import {
   getMaintenanceStatusLabel,
   getMaintenanceTypeLabel,
 } from "@/features/maintenance/presentation/maintenance-labels";
-import { readMaintenanceRequestDetail } from "@/features/maintenance/server/maintenance-reader";
+import { readMaintenanceAssetHistory, readMaintenanceRequestDetail } from "@/features/maintenance/server/maintenance-reader";
 import { convertMaintenanceRequestAction } from "@/features/maintenance/server/maintenance-writer";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type PageProps = Readonly<{
   params: Promise<{ id: string }>;
@@ -42,6 +44,7 @@ function formatDateTime(iso?: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: FACILITY_TIME_ZONE,
   });
 }
 
@@ -51,6 +54,10 @@ function displayActor(value?: string): string {
   }
 
   return value;
+}
+
+function withAgo(age: string): string {
+  return age === "Az önce" || age === "—" ? age : `${age} önce`;
 }
 
 export default async function MaintenanceRequestDetailPage({
@@ -73,79 +80,94 @@ export default async function MaintenanceRequestDetailPage({
     }
 
     return (
-      <main className="production-execution-page maintenance-page">
+      <div className="production-execution-page maintenance-page">
         <header className="maintenance-page-header production-execution-header">
           <Link className="maintenance-back-link" href="/bakim">
             <ArrowLeft aria-hidden="true" />
             Bakım ana sayfası
           </Link>
           <div className="maintenance-page-header__intro">
-            <p>BAKIM &amp; ARIZA</p>
+            <p>BAKIM VE ARIZA</p>
             <h1>Arıza Kaydı</h1>
           </div>
         </header>
-        <MaintenanceWorkspaceNav active="overview" />
-        <div className="maintenance-error-panel" role="alert">
-          <Wrench aria-hidden="true" />
-          <div>
-            <h3>Arıza kaydı yüklenemedi</h3>
-            <p>Kayıt şu anda görüntülenemiyor. Lütfen daha sonra tekrar deneyin.</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Arıza kaydı yüklenemedi" inline />
+      </div>
     );
   }
 
   const request = result.request;
   const access = await fetchEffectiveAccessCapabilities();
   const canManage = hasGrantedPermission(access, "maintenance.manage");
+  const historyResult = request.status === "converted-to-work-order" ? await readMaintenanceAssetHistory(request.assetReference) : null;
+  const linkedWorkOrder = historyResult && historyResult.status === "success"
+    ? historyResult.history.workOrders.find((item) => item.maintenanceRequestId === request.id)
+    : undefined;
   const canConvert =
     canManage && (request.status === "open" || request.status === "triaged");
 
   return (
-    <main className="production-execution-page maintenance-page">
+    <div className="production-execution-page maintenance-page">
       <header className="maintenance-page-header production-execution-header">
         <Link className="maintenance-back-link" href="/bakim">
           <ArrowLeft aria-hidden="true" />
           Bakım ana sayfası
         </Link>
-        <div className="maintenance-page-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>{request.requestNumber}</h1>
-          <span>{request.title}</span>
+        <div className="maintenance-page-header__row">
+          <div className="maintenance-page-header__intro">
+            <p>BAKIM VE ARIZA</p>
+            <h1>{request.requestNumber}</h1>
+            <span>{request.title}</span>
+          </div>
+          {linkedWorkOrder ? (
+            <div className="maintenance-page-header__actions">
+              <Link className="button button-secondary button-medium" href={`/bakim/emirler/${linkedWorkOrder.id}`}>
+                <span>Bakım Emrini Gör</span>
+              </Link>
+            </div>
+          ) : null}
+          {canConvert ? (
+            <div className="maintenance-page-header__actions">
+              <MaintenanceRequestConvertForm
+                expectedVersion={request.version}
+                onConvert={convertMaintenanceRequestAction}
+                requestId={request.id}
+              />
+              <small className="maintenance-page-header__hint">Bu arıza kaydından yeni bir bakım emri açılır.</small>
+            </div>
+          ) : null}
         </div>
       </header>
-
-      <MaintenanceWorkspaceNav active="overview" />
 
       <div className="maintenance-page-content">
         <section aria-label="Arıza kaydı özeti" className="maintenance-section">
           <header className="maintenance-section__header">
             <h2>Arıza Kaydı Özeti</h2>
           </header>
-          <div className="maintenance-badge-row">
-            <Badge tone="neutral">{getMaintenanceStatusLabel(request.status)}</Badge>
-            <Badge tone={getMaintenancePriorityTone(request.priority)}>
-              {getMaintenancePriorityLabel(request.priority)}
-            </Badge>
-            <Badge tone="neutral">{getMaintenanceTypeLabel(request.type)}</Badge>
-          </div>
-          <dl className="maintenance-detail-dl">
+          <dl className="maintenance-detail-dl maintenance-detail-dl--summary">
             <div>
-              <dt>Kayıt No</dt>
-              <dd>{request.requestNumber}</dd>
+              <dt>Durum</dt>
+              <dd>
+                <Badge tone="neutral">{getMaintenanceStatusLabel(request.status)}</Badge>
+              </dd>
             </div>
             <div>
-              <dt>Başlık</dt>
-              <dd>{request.title}</dd>
+              <dt>Öncelik</dt>
+              <dd>
+                <Badge tone={getMaintenancePriorityTone(request.priority)}>
+                  {getMaintenancePriorityLabel(request.priority)}
+                </Badge>
+              </dd>
             </div>
             <div>
-              <dt>Açıklama</dt>
-              <dd>{request.description || "—"}</dd>
+              <dt>Tür</dt>
+              <dd>
+                <Badge tone="neutral">{getMaintenanceTypeLabel(request.type)}</Badge>
+              </dd>
             </div>
             <div>
               <dt>Kaynak</dt>
-              <dd>{request.source === "manual" ? "Manuel" : request.source}</dd>
+              <dd>{request.source === "manual" ? "Manuel" : enumLabel(request.source)}</dd>
             </div>
             <div>
               <dt>Bildiren</dt>
@@ -155,11 +177,12 @@ export default async function MaintenanceRequestDetailPage({
               <dt>Bildirilme</dt>
               <dd>{formatDateTime(request.reportedAtUtc)}</dd>
             </div>
-            <div>
-              <dt>Son güncelleme</dt>
-              <dd>{formatMaintenanceAge(request.updatedAtUtc)}</dd>
+            <div className="maintenance-detail-dl__wide">
+              <dt>Açıklama</dt>
+              <dd>{request.description || "Açıklama girilmedi"}</dd>
             </div>
           </dl>
+          <p className="maintenance-detail-note">Son güncelleme: {withAgo(formatMaintenanceAge(request.updatedAtUtc))}</p>
         </section>
 
         <section aria-label="Varlık" className="maintenance-section">
@@ -175,29 +198,17 @@ export default async function MaintenanceRequestDetailPage({
               <dd>{getMaintenanceAssetTypeLabel(request.assetType)}</dd>
             </div>
             <div>
-              <dt>Referans</dt>
+              <dt>Varlık referansı</dt>
               <dd>{request.assetReference}</dd>
             </div>
             <div>
-              <dt>Ad</dt>
-              <dd>{request.assetName ?? "—"}</dd>
+              <dt>Varlık adı</dt>
+              <dd>{request.assetName ?? "Adı girilmedi"}</dd>
             </div>
           </dl>
         </section>
 
-        {canConvert ? (
-          <section aria-label="Bakım emrine dönüştür" className="maintenance-section">
-            <header className="maintenance-section__header">
-              <h2>Bakım Emrine Dönüştür</h2>
-            </header>
-            <MaintenanceRequestConvertForm
-              expectedVersion={request.version}
-              onConvert={convertMaintenanceRequestAction}
-              requestId={request.id}
-            />
-          </section>
-        ) : null}
       </div>
-    </main>
+    </div>
   );
 }

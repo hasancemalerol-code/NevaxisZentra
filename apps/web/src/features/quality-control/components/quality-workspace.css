@@ -66,8 +66,8 @@
 }
 
 .quality-dashboard-action--primary {
-  border-color: #155eef;
-  background: #155eef;
+  border-color: #2463a7;
+  background: #2463a7;
   color: #fff;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .quality-dashboard-action--secondary:hover {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #eff4ff;
   color: #155eef;
 }
@@ -133,7 +133,7 @@
 }
 
 .quality-workspace-nav__link--active {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #eff4ff;
   color: #155eef;
 }
@@ -189,7 +189,7 @@
 }
 
 .quality-dashboard-kpi--paused .quality-dashboard-kpi__icon {
-  color: #ad5d0b;
+  color: #8f4a08;
   background: #fff3df;
 }
 
@@ -200,14 +200,14 @@
 }
 
 .quality-dashboard-kpis.production-execution-kpis .quality-dashboard-kpi__label {
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.35;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .quality-dashboard-kpis.production-execution-kpis .quality-dashboard-kpi__value {
@@ -221,11 +221,11 @@
 .quality-dashboard-kpis.production-execution-kpis .quality-dashboard-kpi__desc {
   display: block;
   overflow: visible;
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.4;
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   text-overflow: unset;
 }
 
@@ -270,7 +270,7 @@
   border: 1px dashed #d7e2ef;
   border-radius: 14px;
   background: #f8fbff;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   text-align: center;
 }
@@ -312,8 +312,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .quality-inspection-row__meta span {
@@ -332,8 +332,8 @@
 }
 
 .quality-inspection-row__field span {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -408,7 +408,7 @@
 }
 
 .quality-alert-item__body span {
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -439,8 +439,8 @@
 }
 
 .quality-dashboard-table th {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -455,7 +455,7 @@
 .quality-dashboard-table td small {
   display: block;
   margin-top: 2px;
-  color: #66758b;
+  color: #566478;
 }
 
 .quality-dashboard-table a {
@@ -512,8 +512,8 @@
 }
 
 .quality-dashboard-reporting-preview span {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.35;
   letter-spacing: 0.05em;
@@ -553,7 +553,7 @@
 }
 
 .quality-plan-row__meta span {
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -569,7 +569,7 @@
   border-radius: 999px;
   background: #f3f7fb;
   color: #4d6078;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 1280px) {
@@ -714,7 +714,7 @@
 
 .quality-section__header p {
   margin: 4px 0 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -752,8 +752,8 @@
 }
 
 .quality-detail-dl dt {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -764,7 +764,7 @@
   color: #243652;
   font-size: 13px;
   font-weight: 700;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .quality-badge-row {
@@ -779,7 +779,7 @@
   border: 1px dashed #d7e2ef;
   border-radius: 14px;
   background: #f8fbff;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   text-align: center;
 }
@@ -819,7 +819,7 @@
   border: 1px solid #e7edf5;
   border-radius: 12px;
   background: #f8fbff;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -848,8 +848,8 @@
 }
 
 .quality-filter-panel__field label {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -915,7 +915,7 @@
 .quality-form-input:focus,
 .quality-form-select:focus,
 .quality-form-textarea:focus {
-  border-color: #155eef;
+  border-color: #2463a7;
   outline: none;
   box-shadow: 0 0 0 3px rgb(21 94 239 / 12%);
 }
@@ -924,7 +924,7 @@
 .quality-form-select:disabled,
 .quality-form-textarea:disabled {
   background: #f3f7fb;
-  color: #8491a4;
+  color: #566478;
   cursor: not-allowed;
 }
 
@@ -935,8 +935,8 @@
 }
 
 .quality-form-field label {
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -956,7 +956,7 @@
 .quality-form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
   align-items: center;
 }
 
@@ -1006,8 +1006,8 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  color: #8395aa;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1042,8 +1042,8 @@
 
 .quality-table__identifier small {
   display: block;
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.35;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1059,7 +1059,7 @@
 
 .quality-table__cell--wrap {
   white-space: normal;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .quality-table tr:last-child td {
@@ -1138,8 +1138,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .quality-ca-item__meta span {
@@ -1216,15 +1216,15 @@
 }
 
 .quality-measurement-row__info span {
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .quality-measurement-row__tolerance {
   display: grid;
   gap: 2px;
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 /* ─── Reporting KPI grid ─── */
@@ -1289,4 +1289,875 @@
   .quality-reporting-kpis.production-execution-kpis {
     grid-template-columns: 1fr;
   }
+}
+
+/* ─── Review fixes: responsive tables, summary cards, labeled chips ─── */
+
+.quality-section {
+  align-content: start;
+}
+
+.quality-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.quality-col-nowrap,
+.quality-col-nowrap strong,
+.quality-col-nowrap a {
+  white-space: nowrap;
+}
+
+.quality-dashboard-priority > .production-execution-panel {
+  align-content: start;
+}
+
+.quality-dashboard-priority--balanced {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Scroll wrappers carry no edge shadow/fade: a permanent gradient read as a clipped column. */
+.quality-dashboard-table-wrap,
+.quality-table-wrap {
+  background: none;
+  margin: 0;
+  padding: 0;
+}
+
+.quality-table-wrap:focus-visible,
+.quality-dashboard-table-wrap:focus-visible {
+  outline: 2px solid #155eef;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.quality-dashboard-reporting-preview small {
+  color: #566478;
+  font-size: 0.75rem;
+}
+
+.quality-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Stat panels (NCR, Kalite Blokeleri, Düzeltici Aksiyonlar) share one shape: a vertical label | value row list with row dividers only (no inner box).
+   The doubled class beats the shared `dl:has(> div)` flex rule; fixed 49px rows, and the cards stretch so panel bottoms align. */
+body .content-viewport dl.quality-stat-list.quality-stat-list {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-auto-rows: 49px;
+  align-self: start;
+  align-content: start;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+body .content-viewport dl.quality-stat-list.quality-stat-list > div {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid #e7edf5;
+  background: #fff;
+}
+
+body .content-viewport dl.quality-stat-list.quality-stat-list > div:last-child {
+  border-bottom: 0;
+}
+
+.quality-summary-grid > .quality-section {
+  grid-template-rows: auto 1fr;
+}
+
+.quality-stat-list dt {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.quality-stat-list dd {
+  margin: 0;
+  color: #10213c;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.quality-table--compact {
+  min-width: 0;
+}
+
+.quality-table--compact td,
+.quality-table--compact th {
+  white-space: nowrap;
+}
+
+.quality-table__identifier--nowrap strong,
+.quality-table__identifier--nowrap small {
+  white-space: nowrap;
+}
+
+.quality-table__identifier a {
+  white-space: nowrap;
+}
+
+.quality-table__identifier small {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.quality-period-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.quality-period-switch label {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quality-period-switch .quality-form-select {
+  width: auto;
+  min-width: 140px;
+}
+
+.quality-period-switch__submit {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #c9d8e8;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #10213c;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.quality-labeled-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quality-labeled-chip__label {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quality-badge-row {
+  gap: 8px 20px;
+}
+
+.quality-detail-grid > .quality-section > .quality-empty-state {
+  padding: 10px 12px;
+}
+
+.quality-ca-item__side {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+}
+
+.quality-ca-item__controls {
+  display: grid;
+  justify-items: end;
+  gap: 6px;
+}
+
+.quality-ca-item__error {
+  margin: 0;
+  color: #991b1b;
+  font-size: 0.75rem;
+}
+
+.quality-action-bar__group--closing {
+  background: #f8fbff;
+}
+
+.quality-action-bar__hint {
+  margin: 0;
+  color: #566478;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.quality-form-input[type="datetime-local"] {
+  font-variant-numeric: tabular-nums;
+  color-scheme: light;
+}
+
+.quality-evidence-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quality-evidence-list li {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f3f7fb;
+  color: #243652;
+  font-size: 0.8125rem;
+}
+
+
+.quality-form-hint {
+  color: #566478;
+  font-size: 0.75rem;
+}
+
+.quality-context-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.quality-context-strip > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 14px;
+  border-right: 1px solid #e7edf5;
+}
+
+.quality-context-strip > div:last-child {
+  border-right: none;
+}
+
+.quality-context-strip dt {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.quality-context-strip dd {
+  margin: 0;
+  color: #243652;
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.quality-table--form td {
+  vertical-align: middle;
+}
+
+.quality-table--form td:nth-child(1),
+.quality-table--form td:nth-child(2) {
+  min-width: 170px;
+}
+
+@media (max-width: 1599px) {
+  .quality-dashboard-priority--balanced {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 1279px) {
+  .quality-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .quality-col-optional {
+    display: none;
+  }
+
+  .quality-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quality-context-strip {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quality-context-strip > div {
+    border-right: none;
+    border-bottom: 1px solid #e7edf5;
+  }
+
+  .quality-period-switch {
+    margin-left: 0;
+  }
+}
+
+/* ─── Round 3: NCR list/detail, action bar, corrective-action rows ─── */
+
+.quality-detail-note {
+  margin: 0;
+  color: #243652;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.quality-table--ncr td:first-child {
+  min-width: 190px;
+}
+
+@media (max-width: 1479px) {
+  .quality-col-wide-only {
+    display: none;
+  }
+}
+
+body .content-viewport .quality-action-bar {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: stretch;
+}
+
+body .content-viewport .quality-action-bar > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+body .content-viewport .quality-action-bar > form.quality-action-bar__group {
+  flex: 1 1 420px;
+}
+
+@media (max-width: 900px) {
+  .quality-ca-item__side {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-items: start;
+    gap: 8px 12px;
+  }
+
+  .quality-ca-item__controls {
+    justify-items: start;
+  }
+}
+
+/* Page header: title block left, header actions top right (no orphan action row under the subtitle). */
+.quality-page-header.production-execution-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 20px;
+}
+
+.quality-page-header.production-execution-header > .quality-back-link {
+  grid-column: 1 / -1;
+}
+
+.quality-page-header.production-execution-header > .quality-page-header__actions {
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .quality-page-header.production-execution-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quality-page-header.production-execution-header > .quality-page-header__actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Follow-up workspace: spaced blocks, buttons in one row. */
+.quality-followup-fields {
+  margin-bottom: 4px;
+}
+
+.quality-followup-block {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e7edf5;
+}
+
+.quality-followup-block > h3,
+.quality-followup-block > p {
+  margin: 0;
+}
+
+.quality-panel .quality-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.quality-panel .quality-action-row > :is(button, a) {
+  min-height: 40px;
+}
+
+/* Plan form: fixed-type cells read as chips, numeric columns keep room for their placeholders. */
+.quality-static-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid #d7e2ef;
+  border-radius: 999px;
+  background: #f3f7fb;
+  color: #243652;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quality-static-chip--on {
+  border-color: #bfe3cf;
+  background: #e8f6ef;
+  color: #18794e;
+}
+
+.quality-table--form {
+  min-width: 1060px;
+}
+
+.quality-table--form td:nth-child(5),
+.quality-table--form td:nth-child(6),
+.quality-table--form td:nth-child(7) {
+  min-width: 112px;
+}
+
+.quality-table--form td:nth-child(4) {
+  min-width: 84px;
+}
+
+
+.quality-context-strip {
+  border: 1px solid #e7edf5;
+}
+
+@media (min-width: 901px) {
+  .quality-context-strip > div {
+    border-bottom: 0;
+  }
+}
+
+.quality-context-strip dd:empty::before {
+  content: "—";
+}
+
+.quality-dashboard-reporting-preview {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .quality-dashboard-reporting-preview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── NCR detail: one column system per definition grid, a real gutter between the card pair ─── */
+.quality-ncr-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.quality-ncr-pair > .quality-section {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1100px) {
+  .quality-ncr-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+body .content-viewport dl.quality-ncr-dl.quality-ncr-dl {
+  display: grid !important;
+  grid-template-columns: repeat(var(--ncr-cols, 3), minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+  background: #e7edf5;
+  overflow: hidden;
+}
+
+body .content-viewport dl.quality-ncr-dl.quality-ncr-dl > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.quality-ncr-dl dt {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quality-ncr-dl dd {
+  margin: 0;
+  color: #10213c;
+  font-size: 0.875rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 820px) {
+  body .content-viewport dl.quality-ncr-dl.quality-ncr-dl {
+    grid-template-columns: repeat(var(--ncr-cols-narrow, 2), minmax(0, 1fr));
+  }
+}
+
+/* Resolve is a state change, not the page's primary call to action: same weight as the other form actions. */
+.quality-action-bar__group--closing .quality-action-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ─── Round 4: pills, stat labels, plan table, follow-up rhythm ─── */
+.quality-context-strip dd.quality-context-strip__pending {
+  color: #566478;
+  font-weight: 500;
+}
+
+/* Reflowed table cards: a status pill keeps its own width instead of stretching across the row. */
+@media (max-width: 820px) {
+  body .content-viewport table[data-zx-stack] td > .badge {
+    justify-self: start;
+    width: fit-content;
+    max-width: 100%;
+  }
+}
+
+/* Stat labels wrap on word boundaries only (no "KAPATILD / I"). */
+.quality-stat-list dt {
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  letter-spacing: 0.02em;
+}
+
+/* Plan form: the 10-column table fits the content card at 1366 without clipping KRİTİK. */
+.quality-table--form {
+  min-width: 900px;
+}
+
+.quality-table--form td:nth-child(5),
+.quality-table--form td:nth-child(6),
+.quality-table--form td:nth-child(7) {
+  min-width: 100px;
+}
+
+.quality-table--form th:nth-child(9),
+.quality-table--form td:nth-child(9) {
+  min-width: 64px;
+  text-align: center;
+}
+
+/* Follow-up: evidence rows share one look and the disclaimer keeps a gap from them. */
+.quality-evidence-list li {
+  border: 1px solid #e7edf5;
+}
+
+.quality-panel .quality-automation-disclaimer {
+  margin-top: 14px;
+}
+
+.quality-panel .quality-action-row > :is(button, a) {
+  flex: 1 1 220px;
+  justify-content: center;
+}
+
+/* Plan form: numeric cells keep their full width without placeholders; the critical checkbox carries a visible label. */
+.quality-inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #243652;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.quality-table--form th:nth-child(9),
+.quality-table--form td:nth-child(9) {
+  min-width: 88px;
+}
+
+/* ─── Round 5 ─── */
+/* New inspection form: the card shares the header's left edge; the empty-selection hint is muted. */
+
+.quality-context-strip dd.quality-context-strip__pending {
+  font-weight: 400;
+}
+
+/* KPI labels reserve two lines so values align across cards. */
+.quality-dashboard-kpis.production-execution-kpis .quality-dashboard-kpi__label,
+.quality-reporting-kpis .quality-dashboard-kpi__label {
+  min-height: 2.7em;
+}
+
+.quality-dashboard-kpi-grid .quality-dashboard-kpi__content {
+  align-self: start;
+}
+
+/* Side-by-side panels with an empty state: the panel fills the row and the empty box is centred. */
+.quality-dashboard-priority--balanced > .production-execution-panel {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  align-content: stretch;
+}
+
+.quality-dashboard-priority--balanced .quality-dashboard-empty {
+  display: grid;
+  align-content: center;
+}
+
+/* ─── NCR detail (round 5): the resolve/close decision leads the actions card and carries the accent ─── */
+.quality-action-bar__group--closing {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 20px;
+  border-color: #b9cdf5;
+  border-left: 4px solid #155eef;
+  background: #f4f8ff;
+}
+
+.quality-action-bar__closing-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quality-action-bar__closing-copy > strong {
+  color: #10213c;
+  font-size: 0.9375rem;
+  font-weight: 820;
+}
+
+.quality-action-bar__hint {
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 720px) {
+  .quality-action-bar__group--closing {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Card pair: both cards fill the row height and their tile grids stretch to the same bottom edge. */
+.quality-ncr-pair > .quality-section {
+  display: grid;
+  align-content: start;
+  grid-auto-rows: auto;
+}
+
+.quality-ncr-pair > .quality-section > dl.quality-ncr-dl {
+  align-self: stretch;
+}
+
+/* Reserve two label lines in every KPI card so values and captions line up across a row. */
+.quality-dashboard-kpi__label {
+  min-height: 2.7em;
+  letter-spacing: 0.02em;
+}
+
+/* KPI row at tablet width: two columns (the shared 700-1099px rule forces three narrow ones). */
+@media (max-width: 800px) {
+  body .content-viewport .quality-dashboard-kpis.production-execution-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Form submit buttons keep their natural width (the shared rail rule stretched them to a full-width outline bar). */
+body .content-viewport .quality-action-bar__row > button.button,
+body .content-viewport .quality-form-actions > button.button {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+/* Round 10: follow-up KPI labels stay on one line (icon hidden in these cards so the text column is wide enough), every value on the same baseline;
+   the shared coloured left bar is dropped on this page. */
+body .content-viewport .quality-dashboard-kpi-grid[data-testid="quality-ncr-follow-up-kpi-grid"] .quality-dashboard-kpi__label {
+  display: block;
+  height: auto;
+  min-height: 0;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.quality-dashboard-kpi-grid[data-testid="quality-ncr-follow-up-kpi-grid"] .quality-dashboard-kpi__icon {
+  display: none;
+}
+
+.quality-dashboard-kpi-grid[data-testid="quality-ncr-follow-up-kpi-grid"] > *::before {
+  display: none;
+}
+
+/* Follow-up detail fields: plain two-column list with a gutter, no boxed mini-cells touching the card edge. */
+body .content-viewport dl.quality-followup-fields {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+
+body .content-viewport dl.quality-followup-fields > div {
+  flex: none;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+
+.quality-ncr-dl dd {
+  font-weight: 500;
+}
+
+/* Plan form: the add-row action and the submit actions keep a clear gap; empty-selection hints read as hints. */
+.quality-form-section .quality-form-actions {
+  margin-bottom: 16px;
+}
+
+.quality-context-strip dd.quality-context-strip__pending {
+  font-style: italic;
+}
+
+/* Reporting preview cells share one height whether or not they carry a caption. */
+.quality-dashboard-reporting-preview > div {
+  min-height: 84px;
+  align-content: start;
+}
+
+/* NCR actions: forms live behind disclosures (one summary row each), so no stack of equal outline forms. */
+.quality-action-disclosure {
+  padding: 0;
+}
+
+.quality-action-disclosure > summary {
+  padding: 12px 16px;
+  color: #10213c;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quality-action-disclosure > summary:focus-visible {
+  outline: 2px solid #155eef;
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.quality-action-disclosure[open] > summary {
+  border-bottom: 1px solid #e7edf5;
+}
+
+.quality-action-disclosure > .quality-action-bar__form {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+/* Trend tables: one neutral text colour (the navy token fringes blue at 12px) and grayscale smoothing so no column reads as a link. */
+body .content-viewport .quality-table-wrap {
+  will-change: transform;
+}
+
+body .content-viewport .quality-table--compact td {
+  color: #222;
+}
+
+.quality-labeled-chip__label,
+.quality-ca-item__meta {
+  font-size: 0.8125rem;
+}
+
+.quality-action-disclosure > summary {
+  padding: 10px 16px;
+}
+
+/* NCR follow-up: the inventory card matches the detail card height (no empty canvas under the left column). */
+.quality-panel-grid:has([data-testid="quality-ncr-follow-up-table"]) {
+  align-items: stretch;
+}
+
+/* ─── Checklist C4: no box inside a card on the NCR page ─── */
+/* Field grids: borderless tinted cells (the card is the only frame). */
+body .content-viewport dl.quality-ncr-dl.quality-ncr-dl {
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+body .content-viewport dl.quality-ncr-dl.quality-ncr-dl > div {
+  border-radius: 10px;
+  background: #f6f9fd;
+}
+
+/* Corrective action item and action disclosures: tinted rows, no second border. */
+.quality-ca-list .quality-ca-item {
+  border: 0;
+  background: #f6f9fd;
+}
+
+.quality-action-bar__group.quality-action-disclosure {
+  border: 0;
+  background: #f6f9fd;
+}
+
+.quality-action-disclosure[open] > summary {
+  border-bottom: 1px solid #dfe6ef;
+}
+
+/* Inline summary labels use the same label style as the grid labels. */
+.quality-labeled-chip__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }

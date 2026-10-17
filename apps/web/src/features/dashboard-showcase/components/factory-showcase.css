@@ -1,11 +1,11 @@
 .factory-showcase-shell,
 .factory-showcase-shell__main {
   box-sizing: border-box;
-  width: 100vw;
-  height: 100dvh;
+  width: 100%;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   background: #eef2f6;
 }
 
@@ -21,17 +21,17 @@
   --fs-quality: #0f9d8d;
   --fs-quality-soft: rgb(15 157 141 / 12%);
   --fs-navy: #10213d;
-  --fs-muted: #738198;
+  --fs-muted: #566478;
   --fs-border: #d7e1ed;
   --fs-card-shadow: 0 1px 2px rgb(20 37 58 / 4%), 0 6px 18px rgb(20 37 58 / 5%);
 
   box-sizing: border-box;
   display: grid;
-  grid-template-rows: minmax(0, 82px) minmax(0, 1.62fr) 225px minmax(0, 1fr);
+  grid-template-rows: 82px auto 210px minmax(250px, auto);
   gap: var(--fs-gap);
-  width: 100vw;
-  height: 100dvh;
-  overflow: hidden;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: visible;
   padding: var(--fs-padding);
   background: #eef2f6;
   color: var(--fs-navy);
@@ -69,7 +69,8 @@
   white-space: nowrap;
 }
 
-.factory-showcase__brand > span:last-child {
+.factory-showcase__brand > span:last-child,
+.factory-showcase__brand > .factory-showcase__title {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -92,7 +93,7 @@
   border-radius: 8px;
   background: linear-gradient(135deg, #1f6fd1 0%, #0f4f9f 100%);
   color: #fff;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -144,7 +145,7 @@
 
 .factory-showcase__clock span {
   display: block;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .factory-showcase__refresh {
@@ -199,7 +200,7 @@
   border-radius: 999px;
   background: rgb(255 255 255 / 92%);
   color: var(--fs-muted);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 650;
   transform: translateX(-50%);
 }
@@ -207,7 +208,7 @@
 .factory-showcase__kpi-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(132px, auto));
   gap: var(--fs-gap);
   min-height: 0;
 }
@@ -255,7 +256,7 @@
 .factory-showcase-kpi__label {
   margin: 0 0 2px;
   color: var(--fs-muted);
-  font-size: 11px;
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
@@ -277,7 +278,7 @@
 .factory-showcase-kpi__supporting,
 .factory-showcase-kpi__comparison {
   color: var(--fs-muted);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -348,7 +349,7 @@
   justify-content: flex-end;
   gap: 10px;
   color: #4f6078;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -442,7 +443,7 @@
 
 .factory-showcase-chart__axis-label {
   fill: #8290a4;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -477,7 +478,7 @@
   justify-content: center;
   gap: 18px;
   color: #4f6078;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -520,7 +521,7 @@
 
 .factory-showcase-bar__value {
   fill: var(--fs-navy);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -573,7 +574,7 @@
 
 .factory-showcase-distribution__center span {
   color: var(--fs-muted);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -633,7 +634,7 @@
 .factory-showcase-distribution__label,
 .factory-showcase-distribution__quantity,
 .factory-showcase-distribution__percent {
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -685,4 +686,282 @@
   .factory-showcase-kpi__value {
     font-size: 34px;
   }
+}
+
+.factory-showcase__title { margin: 0; font-size: inherit; font-weight: inherit; line-height: inherit; color: inherit; }
+
+/* Inside the application shell the product brand already sits in the shell header: no second brand lockup. */
+.app-shell .factory-showcase__brand-lockup,
+.app-shell .factory-showcase__brand-divider {
+  display: none;
+}
+
+/* Header: items wrap instead of clipping; the refresh label and live status never shrink below their text. */
+.factory-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  max-height: none;
+  padding: 10px 14px;
+  gap: 10px 20px;
+}
+
+.factory-showcase__brand {
+  flex: 1 1 260px;
+}
+
+.factory-showcase__facility {
+  flex: 0 1 auto;
+  justify-self: auto;
+}
+
+.factory-showcase__status {
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.factory-showcase__clock,
+.factory-showcase__refresh,
+.factory-showcase__live {
+  flex: 0 0 auto;
+}
+
+.factory-showcase__refresh {
+  padding-right: 18px;
+}
+
+.factory-showcase__live svg {
+  flex: 0 0 auto;
+}
+
+.factory-showcase__back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--fs-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fs-navy);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.factory-showcase__back:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Round 4: every KPI card shares one structure; empty charts collapse into a short band, not a blank box. */
+.factory-showcase-kpi__pending {
+  justify-content: flex-start;
+  min-height: 34px;
+  font-size: 0.8125rem;
+}
+
+.factory-showcase__kpi-grid {
+  grid-template-rows: none;
+  grid-auto-rows: minmax(132px, auto);
+}
+
+@media (max-width: 1100px) {
+  .factory-showcase__kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .factory-showcase__kpi-grid,
+  .factory-showcase__bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.factory-showcase__panel:has(> .factory-showcase-chart__pending) {
+  grid-template-rows: auto auto;
+  align-content: start;
+}
+
+.factory-showcase-chart__pending {
+  justify-content: flex-start;
+  min-height: 56px;
+  font-size: 0.8125rem;
+}
+
+.factory-showcase__bottom-grid {
+  align-items: start;
+}
+
+.factory-showcase-kpi__unit,
+.factory-showcase-kpi__supporting,
+.factory-showcase-kpi__comparison,
+.factory-showcase-kpi__sparkline-legend,
+.factory-showcase-distribution__label,
+.factory-showcase-distribution__quantity,
+.factory-showcase-distribution__percent {
+  font-size: 0.8125rem;
+}
+
+/* Round 5: every KPI card keeps one structure (label, figure, one reserved context line, chart band). */
+.factory-showcase-kpi__meta {
+  display: grid;
+  gap: 2px;
+  min-height: 1.25rem;
+  margin-top: 2px;
+}
+
+.factory-showcase-kpi__meta > .factory-showcase-kpi__comparison {
+  margin-top: 0;
+}
+
+.factory-showcase-kpi__label {
+  font-size: 0.875rem;
+}
+
+/* Rows follow their content: an empty chart is a short quiet band, not a 210px blank card. */
+.factory-showcase {
+  grid-template-rows: none;
+  grid-auto-rows: auto;
+}
+
+.factory-showcase__hourly {
+  min-height: 0;
+}
+
+.factory-showcase__bottom-grid {
+  min-height: 0;
+}
+
+/* "Henüz veri yok" is a quiet note, not content. */
+.factory-showcase-kpi__pending,
+.factory-showcase-chart__pending {
+  font-weight: 500;
+}
+
+.factory-showcase-chart__pending {
+  justify-content: center;
+  min-height: 96px;
+}
+
+body .factory-showcase .factory-showcase-kpi__pending,
+body .factory-showcase .factory-showcase-chart__pending {
+  font-weight: 400;
+  color: var(--fs-muted);
+}
+
+.factory-showcase-kpi__chart-area:empty {
+  display: none;
+}
+
+.factory-showcase-chart__pending {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Round 9: no-data cards are short; the grid follows content. */
+.factory-showcase__kpi-grid {
+  grid-auto-rows: auto;
+}
+
+.factory-showcase-kpi {
+  min-height: 0;
+}
+
+.factory-showcase-chart__pending {
+  min-height: 64px;
+}
+
+.factory-showcase-chart__pending {
+  min-height: 40px;
+}
+
+.factory-showcase-kpi {
+  grid-template-rows: auto;
+  align-content: start;
+}
+
+/* Round 11: the page grid has min-height: 100dvh, so its auto rows were stretching every row (header, KPI cards, chart panels) to fill the viewport. Rows keep their content height. */
+.factory-showcase,
+.factory-showcase__kpi-grid,
+.factory-showcase__bottom-grid {
+  align-content: start;
+}
+
+/* Round 12: idle header status and the compact all-empty KPI card. */
+.factory-showcase__status-dot--idle {
+  background: #9aa7b8;
+}
+
+.factory-showcase-kpi-compact {
+  grid-template-rows: auto;
+}
+
+.factory-showcase-kpi-compact__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.factory-showcase-kpi-compact__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  border-top: 1px solid var(--fs-border);
+  font-size: 0.875rem;
+  color: var(--fs-muted);
+}
+
+.factory-showcase-kpi-compact__row > span:first-child {
+  color: var(--fs-navy);
+  font-weight: 650;
+}
+
+@media (max-width: 1100px) {
+  .factory-showcase-kpi-compact__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .factory-showcase-kpi-compact__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Round 13: the chart panels fill the remaining viewport height with a centred quiet note. */
+.factory-showcase {
+  display: flex;
+  flex-direction: column;
+  align-content: normal;
+}
+
+.factory-showcase__hourly,
+.factory-showcase__bottom-grid {
+  flex: 1 1 0;
+  min-height: 200px;
+}
+
+.factory-showcase__bottom-grid {
+  align-items: stretch;
+  align-content: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.factory-showcase__panel:has(> .factory-showcase-chart__pending) {
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+}
+
+.factory-showcase-chart__pending {
+  align-self: center;
+  justify-content: center;
 }

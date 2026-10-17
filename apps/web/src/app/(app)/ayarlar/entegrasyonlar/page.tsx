@@ -2,48 +2,61 @@ import Link from "next/link";
 
 import { readIntegrationHub } from "@/features/integration/server/integration-reader";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+
 export const dynamic = "force-dynamic";
+
+const HUB_DESCRIPTION = "Fabrika sistemlerinizin bağlantı durumunu, olay akışını ve karantina kayıtlarını izleyin.";
 
 export default async function EntegrasyonlarPage() {
   const result = await readIntegrationHub();
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <header className="production-execution-header">
-          <p>AYARLAR</p>
-          <h1>Entegrasyonlar</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">{result.message}</div>
-      </main>
+      <div className="production-execution-page">
+        <PageHeader eyebrow="Ayarlar" title="Entegrasyonlar" description={HUB_DESCRIPTION} />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline />
+      </div>
     );
   }
 
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <p>AYARLAR</p>
-        <h1>Entegrasyonlar</h1>
-        <p>
-          <Link href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</Link>
-          {" — canlı olay akışı, sağlık ve karantina görünümü"}
-          {" · "}
-          <Link href="/ayarlar/entegrasyonlar/gercek-fabrika">Gerçek Fabrika Pilot</Link>
-        </p>
-      </header>
+    <div className="production-execution-page">
+      <PageHeader
+        eyebrow="Ayarlar"
+        title="Entegrasyonlar"
+        description={HUB_DESCRIPTION}
+        actions={
+          result.connectors.length === 0 ? undefined : (
+            <>
+              <StatePageLink href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</StatePageLink>
+              <StatePageLink href="/ayarlar/entegrasyonlar/gercek-fabrika">Fabrika Bağlantıları</StatePageLink>
+            </>
+          )
+        }
+      />
 
-      <section className="state-panel">
-        <h2>Bağlantılar</h2>
-        {result.connectors.length === 0 ? (
-          <p>Henüz entegrasyon bağlantısı yok.</p>
-        ) : (
+      {result.connectors.length === 0 ? (
+        <StatePage
+          kind="empty"
+          inline
+          title="Henüz entegrasyon bağlantısı yok"
+          description="Fabrika verilerini Veri Aktarım Merkezi üzerinden içeri alabilirsiniz; bağlantılar eklendiğinde burada izlenir."
+          actions={<StatePageLink href="/ayarlar/veri-aktarim-merkezi" primary>Veri Aktarım Merkezi</StatePageLink>}
+        />
+      ) : (
+        <section className="state-panel">
+          <h2>Bağlantılar</h2>
           <ul>
             {result.connectors.map((connector) => (
               <li key={connector.id}>
-                <strong>{connector.name}</strong> — {connector.connectorKind}
+                <strong>{connector.name}</strong> — {enumLabel(connector.connectorKind)}
                 {" "}
                 <span>
-                  ({connector.healthStatus} / {connector.freshnessState})
+                  ({enumLabel(connector.healthStatus)} / {enumLabel(connector.freshnessState)})
                 </span>
                 <div>
                   {(connector.connectorKind === "file-import" || connector.connectorKind === "folder-watch") && (
@@ -52,14 +65,14 @@ export default async function EntegrasyonlarPage() {
                     </Link>
                   )}
                   {connector.connectorKind !== "file-import" && connector.connectorKind !== "folder-watch" && (
-                    <span>REST / Webhook / DB / ERP bağlantıları API üzerinden yönetilir.</span>
+                    <span>ERP, veritabanı ve servis bağlantıları buradan yönetilir.</span>
                   )}
                 </div>
               </li>
             ))}
           </ul>
-        )}
-      </section>
-    </main>
+        </section>
+      )}
+    </div>
   );
 }

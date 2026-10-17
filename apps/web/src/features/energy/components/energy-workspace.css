@@ -54,7 +54,7 @@
 
 .energy-executive__eyebrow {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   color: var(--energy-blue);
   font-weight: 700;
@@ -84,7 +84,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.2rem 0.45rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
 }
 
@@ -116,7 +116,7 @@
   background: #fffdf5;
   border: 1px solid #fde68a;
   color: #92400e;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.28;
 }
 
@@ -128,7 +128,7 @@
   padding: 0.1rem 0.38rem;
   background: #fef3c7;
   border: 1px solid #fcd34d;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -209,9 +209,9 @@
   gap: 0.28rem;
   border-radius: 999px;
   padding: 0.12rem 0.42rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--energy-kpi-accent);
+  color: color-mix(in srgb, var(--energy-kpi-accent) 62%, black);
   background: color-mix(in srgb, var(--energy-kpi-accent) 10%, white);
   border: 1px solid color-mix(in srgb, var(--energy-kpi-accent) 18%, white);
   max-width: 100%;
@@ -225,7 +225,7 @@
 
 .energy-kpi-card__label {
   margin: 0;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   font-weight: 600;
 }
@@ -255,18 +255,18 @@
 
 .energy-kpi-card__meta {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.32;
 }
 
 .energy-kpi-card__scope {
-  color: #64748b;
+  color: #566478;
 }
 
 .energy-kpi-card__evidence {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.32;
 }
@@ -300,7 +300,7 @@
 
 .energy-kpi-card__evidence-rail-label {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.2;
 }
@@ -425,7 +425,7 @@
 
 .energy-panel--chart,
 .energy-panel--distribution {
-  min-height: 15.15rem;
+  min-height: 9rem;
   display: flex;
   flex-direction: column;
 }
@@ -451,7 +451,7 @@
 
 .energy-panel__meta {
   margin: 0 0 0.32rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.32;
 }
@@ -474,7 +474,7 @@
 
 .energy-chart-caption {
   margin: 0.28rem 0 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
 }
 
@@ -487,8 +487,8 @@
 .energy-reference-meta {
   display: block;
   margin-top: 0.15rem;
-  font-size: 0.68rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   letter-spacing: 0.01em;
 }
 
@@ -511,8 +511,8 @@
 }
 
 .energy-chart-y-label {
-  font-size: 11px;
-  fill: #94a3b8;
+  font-size: 1.1rem;
+  fill: #566478;
 }
 
 .energy-chart-area {
@@ -531,7 +531,7 @@
   flex-wrap: wrap;
   gap: 0.35rem 0.65rem;
   margin-top: 0.32rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: #475569;
 }
 
@@ -548,7 +548,7 @@
 }
 
 .energy-chart-legend__swatch--actual {
-  background: #2563eb;
+  background: #2463a7;
 }
 
 .energy-chart-legend__swatch--target {
@@ -569,7 +569,7 @@
 
 .energy-allocation-donut {
   position: relative;
-  width: min(100%, 12.5rem);
+  width: min(100%, 15rem);
   aspect-ratio: 1;
   align-self: center;
 }
@@ -586,10 +586,10 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: calc(100% * 56 / 120);
+  width: calc(100% * 70 / 120);
   aspect-ratio: 1;
   height: auto;
-  max-height: calc(100% * 56 / 120);
+  max-height: calc(100% * 70 / 120);
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -605,9 +605,9 @@
 }
 
 .energy-allocation-donut__label {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   line-height: 1.15;
-  color: #64748b;
+  color: #566478;
 }
 
 .energy-allocation-donut__total {
@@ -618,16 +618,16 @@
 }
 
 .energy-allocation-donut__unit {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   line-height: 1.1;
-  color: #64748b;
+  color: #566478;
 }
 
 .energy-allocation-donut__coverage {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.1;
   font-weight: 700;
-  color: #2563eb;
+  color: #1d4ed8;
 }
 
 .energy-allocation-summary {
@@ -635,7 +635,7 @@
   flex-wrap: wrap;
   gap: 0.35rem 0.65rem;
   margin-bottom: 0.55rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
 }
 
@@ -662,14 +662,14 @@
 
 .energy-allocation-row__label {
   min-width: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.28;
   color: #334155;
   white-space: normal;
 }
 
 .energy-allocation-row__value {
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #0f172a;
   white-space: nowrap;
@@ -715,7 +715,7 @@
 .energy-intelligence-row .energy-button {
   align-self: center;
   padding: 0.34rem 0.62rem;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   white-space: nowrap;
   min-height: 2rem;
 }
@@ -729,7 +729,7 @@
 
 .energy-intelligence-row__meta {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.32;
 }
@@ -739,28 +739,27 @@
   flex-direction: column;
   gap: 0.55rem;
   flex: 1;
-  padding: 0.62rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
-  min-height: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .energy-target-comparison__summary {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--energy-slate-500);
   line-height: 1.35;
 }
 
 .energy-target-comparison dl {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr);
   gap: 0.48rem 0.85rem;
   margin: 0;
   flex: 1;
   align-content: start;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .energy-target-comparison .energy-panel__meta {
@@ -881,7 +880,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border: 1px solid transparent;
 }
@@ -1064,4 +1063,337 @@
   .energy-tab {
     flex: 0 0 auto;
   }
+}
+
+/* Tab strip sizes to its labels instead of stretching four tabs across the page. */
+.energy-tab-rail {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.energy-tab {
+  flex: 0 0 auto;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.energy-kpi-card__tone {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Round 3: shared page header, one KPI value style, one tab look, calm empty states ─── */
+.energy-page {
+  gap: 1rem;
+}
+
+.energy-page .energy-executive {
+  gap: 12px;
+}
+
+.energy-page .energy-executive__meta {
+  margin: 0;
+  gap: 8px;
+}
+
+.energy-page .energy-executive__meta li {
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+}
+
+/* KPI cards: label, value and one status line sit in fixed slots, so values line up across the row. */
+.energy-page .energy-kpi-card {
+  gap: 10px;
+  min-height: 0;
+  padding: 14px 16px;
+}
+
+.energy-page .energy-kpi-card__body {
+  align-content: start;
+  gap: 6px;
+}
+
+.energy-page .energy-kpi-card__label {
+  min-height: 1.25em;
+  font-size: 0.8125rem;
+}
+
+.energy-page .energy-kpi-card__value-row {
+  min-height: 2rem;
+  align-items: baseline;
+}
+
+.energy-page .energy-kpi-card__value,
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__value {
+  color: var(--energy-slate-500);
+}
+
+.energy-page .energy-kpi-card__unit {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.energy-page .energy-kpi-card__meta,
+.energy-page .energy-kpi-card__evidence {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Tabs: same pill look as every other sub-navigation (hover border, filled active tab). */
+.energy-page .energy-tab-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.energy-page .energy-tab {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--zx-line, #d8dee9);
+  border-radius: 999px;
+  background: var(--zx-surface, #fff);
+  color: var(--zx-text, #334155);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  box-shadow: none;
+}
+
+.energy-page .energy-tab:hover {
+  border-color: var(--zx-accent, #2563eb);
+  color: var(--zx-accent-strong, #1d4ed8);
+}
+
+.energy-page .energy-tab[aria-selected="true"] {
+  border-color: var(--zx-accent, #2563eb);
+  background: var(--zx-accent-strong, #1d4ed8);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* Empty areas inside panels: a compact dashed block sized to its message (no 150-250px blank cards). */
+.energy-page .energy-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 20px 16px;
+  border: 1px dashed var(--zx-line-strong, #cbd5e1);
+  border-radius: var(--zx-radius-sm, 10px);
+  background: var(--zx-surface-soft, #f8fafc);
+  color: var(--zx-text-muted, #64748b);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.energy-page .energy-panel--chart:has(.energy-empty),
+.energy-page .energy-panel--distribution:has(.energy-empty) {
+  min-height: 0;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel {
+  height: auto;
+  align-self: start;
+}
+
+.energy-page .energy-panel-grid--lower {
+  align-items: start;
+}
+
+/* ─── Round 4: one header divider, readable chips, even lower row, calm no-data KPI bars ─── */
+.energy-page .energy-executive .zx-page-header {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.energy-page .energy-executive .zx-page-header__description {
+  max-width: 900px;
+}
+
+.energy-page .energy-executive__meta li {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+}
+
+.energy-page .energy-kpi-card--unavailable::before {
+  background: #cbd5e1;
+}
+
+.energy-page .energy-panel__meta,
+.energy-page .energy-target-comparison__summary,
+.energy-page .energy-target-comparison dl {
+  font-size: 0.8125rem;
+}
+
+.energy-page .energy-panel-grid--lower {
+  align-items: stretch;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel {
+  height: 100%;
+  align-self: stretch;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel > .energy-empty {
+  flex: 1 1 auto;
+  align-content: center;
+}
+
+.energy-page .energy-kpi-card__value-row {
+  flex-wrap: nowrap;
+}
+
+.energy-page .energy-kpi-card__unit {
+  white-space: nowrap;
+}
+
+/* ─── Round 5: compact empty panels, readable captions ─── */
+.energy-page .energy-panel-grid--lower {
+  align-items: start;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel {
+  height: auto;
+  align-self: start;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel > .energy-empty {
+  flex: 0 0 auto;
+  padding: 16px;
+}
+
+.energy-page .energy-chart-caption,
+.energy-page .energy-chart-legend,
+.energy-page .energy-allocation-row__label,
+.energy-page .energy-allocation-row__value,
+.energy-page .energy-intelligence-row__meta,
+.energy-page .energy-executive__meta {
+  font-size: 0.8125rem;
+}
+
+.energy-page .energy-kpi-card__top:empty {
+  display: none;
+}
+
+/* ─── Round 5b: bottom row shares the top row's 3:2 split and equal height; no-data KPI cards are fully neutral ─── */
+.energy-page .energy-panel-grid--lower {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 0.52rem;
+  align-items: stretch;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel {
+  height: auto;
+  align-self: stretch;
+}
+
+@media (max-width: 1280px) {
+  .energy-page .energy-panel-grid--lower {
+    grid-template-columns: 1fr;
+  }
+}
+
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__icon {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.energy-page .energy-kpi-card--unavailable::before {
+  height: 2px;
+}
+
+.energy-page .energy-panel--no-data {
+  grid-column: 1 / -1;
+}
+
+/* ─── Round 6: lower cards size to content; one primary colour ─── */
+.energy-page .energy-panel-grid--lower {
+  align-items: start;
+}
+
+.energy-page .energy-panel-grid--lower > .energy-panel {
+  align-self: start;
+}
+
+.energy-page .energy-button--primary {
+  background: var(--zx-accent-strong, #1d4ed8);
+  border-color: var(--zx-accent-strong, #1d4ed8);
+}
+
+.energy-page .energy-panel-grid--lower:has(> .energy-panel:only-child) {
+  grid-template-columns: 1fr;
+}
+
+/* Round 9: an empty KPI card shows one no-data cue (the dash value); the extra hairline is dropped. */
+.energy-page .energy-kpi-card--unavailable::before {
+  display: none;
+}
+
+/* Round 10: a no-data KPI card shows the label, a dash and one caption (no icon chip); captions share a two-line slot. */
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__top {
+  display: none;
+}
+
+.energy-page .energy-kpi-card__meta {
+  min-height: 2.8em;
+}
+
+/* Round 11: a no-data KPI card is only as tall as label + dash + caption (no reserved rows, no min-height). */
+.energy-page .energy-kpi-card--unavailable {
+  grid-template-rows: auto;
+  align-content: start;
+  gap: 0;
+}
+
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__meta {
+  min-height: 0;
+}
+
+.energy-page .energy-kpi-card--unavailable .energy-kpi-card__value-row {
+  min-height: 0;
+}
+
+/* Frozen checklist C4: the target comparison list sits borderless inside its card. */
+body .content-viewport .energy-target-comparison dl {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Round 16: stacked panels share one 16px section gap; panel headers have equal padding and a 16px title-to-content gap; empty states sit borderless inside a panel (no box-in-box). */
+.energy-page .energy-panel-grid--overview,
+.energy-page .energy-panel-grid--lower {
+  gap: 1rem;
+}
+
+.energy-page .energy-panel {
+  padding: 16px 18px;
+}
+
+.energy-page .energy-panel > .energy-panel__title,
+.energy-page .energy-panel__header {
+  margin-bottom: 16px;
+}
+
+.energy-page .energy-panel > :is(.energy-empty, .zx-empty) {
+  margin-top: 0;
+  border: 0;
+  background: transparent;
 }

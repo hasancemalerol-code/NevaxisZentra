@@ -40,8 +40,8 @@ const TABS = [
   { id: "telemetry", label: "Telemetri" },
   { id: "cycles", label: "Çevrimler" },
   { id: "ops", label: "Duruş & Alarm" },
-  { id: "setupScrap", label: "Setup & Fire" },
-  { id: "delivery", label: "Edge Sağlığı" },
+  { id: "setupScrap", label: "Kurulum ve fire" },
+  { id: "delivery", label: "Saha veri sağlığı" },
   { id: "timeline", label: "Olaylar" },
 ] as const;
 
@@ -104,7 +104,7 @@ export function EdgeMachineDetailPanel({
           <h2 className="edge-detail-panel__title">
             {machine.name}
             <span className="edge-detail-panel__code">{machine.machineCode}</span>
-            {isSimulatorFixture && <span className="edge-sim-badge">Simülatör</span>}
+            {isSimulatorFixture && <span className="edge-sim-badge">Örnek veri</span>}
           </h2>
           <p className="edge-detail-panel__subtitle">
             Makine operasyonel gözlemleri — resmi üretim/kalite kaydı değildir.
@@ -117,7 +117,7 @@ export function EdgeMachineDetailPanel({
 
       {isSimulatorFixture && (
         <p className="edge-simulator-notice">
-          Simülatör verisi — gerçek makine bağlantısı değildir.
+          Örnek veri — gerçek makine bağlantısı değildir.
         </p>
       )}
 
@@ -163,17 +163,17 @@ export function EdgeMachineDetailPanel({
                 <span>{formatRelativeTime(signal?.lastCycleAtUtc ?? detail.cycleProjection?.lastCycleAtUtc)}</span>
               </div>
               <div className="edge-detail-summary-item">
-                <span className="edge-detail-summary-item__label">Edge Teslimatı</span>
+                <span className="edge-detail-summary-item__label">Saha verisi teslimi</span>
                 <span>{getEdgeDeliveryPresentationLabel(deliveryHealth)}</span>
               </div>
             </div>
             <div className="edge-detail-summary-grid edge-detail-summary-grid--secondary">
               <div className="edge-detail-summary-item">
-                <span className="edge-detail-summary-item__label">Gateway</span>
+                <span className="edge-detail-summary-item__label">Ağ geçidi</span>
                 <span>{machine.activeGatewayCode ?? "—"}</span>
               </div>
               <div className="edge-detail-summary-item">
-                <span className="edge-detail-summary-item__label">Transport</span>
+                <span className="edge-detail-summary-item__label">Aktarım yöntemi</span>
                 <span>{gateway ? getEdgeGatewayVendorLabel(gateway.vendorKey) : "—"}</span>
               </div>
               <div className="edge-detail-summary-item">
@@ -182,7 +182,7 @@ export function EdgeMachineDetailPanel({
               </div>
               <div className="edge-detail-summary-item">
                 <span className="edge-detail-summary-item__label">Ortam</span>
-                <span>{isSimulatorFixture ? "Simülatör (geliştirme)" : "Edge Gateway"}</span>
+                <span>{isSimulatorFixture ? "Örnek veri" : "Saha ağ geçidi"}</span>
               </div>
             </div>
             {signal?.isInObservedDowntime && (
@@ -213,8 +213,8 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Telemetri yok</p>
               </div>
             ) : (
-              <div className="edge-telemetry-table-wrap">
-                <table className="edge-telemetry-table">
+              <div className="edge-telemetry-table-wrap" tabIndex={0} role="region" aria-label="Canlı telemetri (kaydırılabilir)">
+                <table aria-label="Canlı telemetri" className="edge-telemetry-table">
                   <thead>
                     <tr>
                       <th>Metrik</th>
@@ -282,7 +282,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Çevrim geçmişi yok</p>
               </div>
             ) : (
-              <table className="edge-cycle-table">
+              <table aria-label="Çevrim bilgileri" className="edge-cycle-table">
                 <thead>
                   <tr>
                     <th>Zaman</th>
@@ -338,7 +338,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Gözlenen duruş kaydı yok</p>
               </div>
             ) : (
-              <table className="edge-ops-table">
+              <table aria-label="Gözlenen duruşlar" className="edge-ops-table">
                 <thead>
                   <tr>
                     <th>Başlangıç</th>
@@ -371,7 +371,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Aktif alarm yok</p>
               </div>
             ) : (
-              <table className="edge-ops-table edge-ops-table--alarms">
+              <table aria-label="Aktif alarmlar" className="edge-ops-table edge-ops-table--alarms">
                 <thead>
                   <tr>
                     <th>Kod</th>
@@ -400,7 +400,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__text">Geçmiş kayıt yok</p>
               </div>
             ) : (
-              <table className="edge-ops-table">
+              <table aria-label="Alarm geçmişi" className="edge-ops-table">
                 <thead>
                   <tr>
                     <th>Kod</th>
@@ -428,13 +428,13 @@ export function EdgeMachineDetailPanel({
 
         {tab === "setupScrap" && (
           <>
-            <h3 className="edge-detail-subsection-title">Gözlenen Setup / Değişimler</h3>
+            <h3 className="edge-detail-subsection-title">Gözlenen kurulum / değişimler</h3>
             {detail.setupEpisodes.length === 0 ? (
               <div className="edge-empty-state edge-empty-state--compact">
                 <p className="edge-empty-state__title">Gözlenen setup / değişim kaydı yok</p>
               </div>
             ) : (
-              <table className="edge-ops-table">
+              <table aria-label="Gözlenen kurulum ve değişimler" className="edge-ops-table">
                 <thead>
                   <tr>
                     <th>Başlangıç</th>
@@ -468,7 +468,7 @@ export function EdgeMachineDetailPanel({
                 <p className="edge-empty-state__title">Gözlenen fire kaydı yok</p>
               </div>
             ) : (
-              <table className="edge-ops-table">
+              <table aria-label="Makineden gözlenen fire" className="edge-ops-table">
                 <thead>
                   <tr>
                     <th>Miktar</th>
@@ -506,7 +506,7 @@ export function EdgeMachineDetailPanel({
             )}
             <div className="edge-reliability-status-grid">
               <div className="edge-reliability-status-item">
-                <span className="edge-reliability-status-item__label">API Bağlantısı</span>
+                <span className="edge-reliability-status-item__label">Bağlantı durumu</span>
                 <span className={`edge-reliability-status-item__value ${deliveryHealth.apiConnected ? "edge-reliability-status-item__value--ok" : "edge-reliability-status-item__value--warn"}`}>
                   {deliveryHealth.apiConnected ? "Bağlı" : "Kesik"}
                 </span>
@@ -520,7 +520,7 @@ export function EdgeMachineDetailPanel({
                 <span>{deliveryHealth.pendingCount + deliveryHealth.retryCount}</span>
               </div>
               <div className="edge-reliability-status-item">
-                <span className="edge-reliability-status-item__label">Dead Letter</span>
+                <span className="edge-reliability-status-item__label">Teslim edilemeyen</span>
                 <span>{deliveryHealth.deadLetterCount}</span>
               </div>
               <div className="edge-reliability-status-item">
@@ -536,12 +536,12 @@ export function EdgeMachineDetailPanel({
                 <span>{formatBufferUtilization(deliveryHealth.bufferUtilization)}</span>
               </div>
               <div className="edge-reliability-status-item">
-                <span className="edge-reliability-status-item__label">Replay</span>
+                <span className="edge-reliability-status-item__label">Yeniden gönderim</span>
                 <span>{getEdgeReplayStatusLabel(deliveryHealth.replayStatus)}</span>
               </div>
             </div>
             {machineBuffered.length > 0 && (
-              <table className="edge-reliability-table" style={{ marginTop: 12 }}>
+              <table aria-label="Saha veri teslimi" className="edge-reliability-table" style={{ marginTop: 12 }}>
                 <thead>
                   <tr>
                     <th>Olay</th>
@@ -563,7 +563,7 @@ export function EdgeMachineDetailPanel({
               </table>
             )}
             {machineDeadLetters.length > 0 && (
-              <table className="edge-reliability-table edge-reliability-table--dead-letter" style={{ marginTop: 12 }}>
+              <table aria-label="Teslim edilemeyen olaylar" className="edge-reliability-table edge-reliability-table--dead-letter" style={{ marginTop: 12 }}>
                 <thead>
                   <tr>
                     <th>Olay</th>

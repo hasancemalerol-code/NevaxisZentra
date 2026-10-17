@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Activity, ArrowLeft, BadgeCheck, Inbox, Lightbulb, Percent } from "lucide-react";
 
 import type {
   ContinuousOptimizationControlCenterApi,
@@ -7,13 +8,33 @@ import type {
 
 import "../continuous-optimization.css";
 
+import "@/features/shift-operations/components/shift-operations-workspace.css";
+import { MetricCard, MetricGrid } from "@/components/ui/metric";
+import { PageHeader } from "@/components/ui/page";
+import { Panel } from "@/components/ui/panel";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { formatPercent } from "@/lib/presentation/format";
+
 type ContinuousOptimizationControlCenterViewProps = Readonly<{
   controlCenter: ContinuousOptimizationControlCenterApi;
 }>;
 
+function OptimizationEmpty({ eyebrow, title, description }: Readonly<{ eyebrow: string; title: string; description: string }>) {
+  return (
+    <div className="continuous-optimization-empty" role="status">
+      <span className="continuous-optimization-empty__icon" aria-hidden="true">
+        <Inbox size={22} />
+      </span>
+      <p className="continuous-optimization-empty__eyebrow">{eyebrow}</p>
+      <strong className="continuous-optimization-empty__title">{title}</strong>
+      <p className="continuous-optimization-empty__text">{description}</p>
+    </div>
+  );
+}
+
 function OpportunityList({ items, emptyLabel }: Readonly<{ items: readonly OptimizationOpportunityApi[]; emptyLabel: string }>) {
   if (items.length === 0) {
-    return <p className="continuous-optimization-item__meta">{emptyLabel}</p>;
+    return <OptimizationEmpty eyebrow="FIRSAT YOK" title={emptyLabel} description="Yeni bir fırsat nitelendiğinde burada listelenir." />;
   }
 
   return items.map((item) => (
@@ -21,7 +42,7 @@ function OpportunityList({ items, emptyLabel }: Readonly<{ items: readonly Optim
       <div className="continuous-optimization-item__title">{item.title}</div>
       <div className="continuous-optimization-item__meta">{item.summary}</div>
       <div className="continuous-optimization-item__meta">
-        +{item.estimatedBenefit.toFixed(1)} beklenen kazanç · {item.riskClass} risk · {item.triggerType}
+        +{item.estimatedBenefit.toFixed(1)} beklenen kazanç · {enumLabel(item.riskClass)} risk · {enumLabel(item.triggerType)}
       </div>
     </div>
   ));
@@ -34,82 +55,70 @@ export function ContinuousOptimizationControlCenterView({
 
   return (
     <div className="continuous-optimization-shell" data-testid="continuous-optimization-control-center">
-      <header className="fact-section__header">
-        <div>
-          <p className="fact-section__eyebrow">ULTRA G</p>
-          <h1>Sürekli Optimizasyon</h1>
-          <p className="fact-section__subtitle">
-            Olay güdümlü, deterministik-first optimizasyon kontrol yüzeyi
-          </p>
-        </div>
-        <Link className="shift-ops-cta" href="/fabrika">
-          Fabrika
-        </Link>
-      </header>
+      <PageHeader
+        eyebrow="Uygulamalar"
+        title="Sürekli Optimizasyon"
+        description="Fabrikadaki iyileştirme fırsatlarını izleyin, onay bekleyenleri yönetin ve doğrulanan kazançları görün."
+        actions={
+          <Link className="button button-secondary button-medium" href="/fabrika">
+            <ArrowLeft aria-hidden="true" size={16} />
+            Fabrika&apos;ya dön
+          </Link>
+        }
+      />
 
-      <section className="continuous-optimization-kpis" data-testid="continuous-optimization-kpis">
-        <div className="continuous-optimization-kpi">
-          <div className="continuous-optimization-kpi__label">Aktif koşu</div>
-          <div className="continuous-optimization-kpi__value">{kpis.runsActive}</div>
-        </div>
-        <div className="continuous-optimization-kpi">
-          <div className="continuous-optimization-kpi__label">Nitelenen fırsat</div>
-          <div className="continuous-optimization-kpi__value">{kpis.opportunitiesQualified}</div>
-        </div>
-        <div className="continuous-optimization-kpi">
-          <div className="continuous-optimization-kpi__label">Doğrulanmış kazanç</div>
-          <div className="continuous-optimization-kpi__value">{kpis.verifiedGains}</div>
-        </div>
-        <div className="continuous-optimization-kpi">
-          <div className="continuous-optimization-kpi__label">Verified gain rate</div>
-          <div className="continuous-optimization-kpi__value">{(kpis.verifiedGainRate * 100).toFixed(0)}%</div>
-        </div>
-      </section>
+      <div className="continuous-optimization-kpis" data-testid="continuous-optimization-kpis">
+        <MetricGrid label="Optimizasyon özeti">
+          <MetricCard label="Aktif koşu" value={kpis.runsActive} hint="Yürütülen optimizasyon" icon={<Activity size={18} />} tone="info" />
+          <MetricCard label="Nitelenen fırsat" value={kpis.opportunitiesQualified} hint="Değerlendirmeye uygun" icon={<Lightbulb size={18} />} />
+          <MetricCard label="Doğrulanmış kazanç" value={kpis.verifiedGains} hint="Ölçülerek onaylanan" icon={<BadgeCheck size={18} />} tone="low" />
+          <MetricCard
+            label="Kazanç oranı"
+            value={formatPercent(kpis.verifiedGainRate * 100, 0)}
+            hint="Kazanca dönüşen koşular"
+            icon={<Percent size={18} />}
+            tone="low"
+          />
+        </MetricGrid>
+      </div>
 
-      <section className="continuous-optimization-section">
-        <div className="continuous-optimization-section__header">
-          <h2>Aktif fırsatlar</h2>
-        </div>
+      <Panel title="Aktif fırsatlar" subtitle="Kural tabanlı tarama sonucu nitelenen iyileştirme fırsatları">
         <div className="continuous-optimization-section__body" data-testid="continuous-optimization-opportunities">
-          <OpportunityList items={controlCenter.activeOpportunities} emptyLabel="Aktif optimizasyon fırsatı yok." />
+          <OpportunityList items={controlCenter.activeOpportunities} emptyLabel="Aktif optimizasyon fırsatı yok" />
         </div>
-      </section>
+      </Panel>
 
-      <section className="continuous-optimization-section">
-        <div className="continuous-optimization-section__header">
-          <h2>Onay bekleyen</h2>
-        </div>
-        <div className="continuous-optimization-section__body" data-testid="continuous-optimization-approval">
-          {controlCenter.awaitingApproval.length === 0 ? (
-            <p className="continuous-optimization-item__meta">Onay bekleyen optimizasyon yok.</p>
-          ) : (
-            controlCenter.awaitingApproval.map((run) => (
-              <div key={run.runId} className="continuous-optimization-item">
-                <div className="continuous-optimization-item__title">{run.lineCode ?? run.optimizationType}</div>
-                <div className="continuous-optimization-item__meta">{run.triggerType} · {run.currentPhase}</div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+      <div className="continuous-optimization-pair">
+        <Panel className="continuous-optimization-pair__card" title="Onay bekleyen" subtitle="İnsan onayı gereken optimizasyon koşuları">
+          <div className="continuous-optimization-section__body" data-testid="continuous-optimization-approval">
+            {controlCenter.awaitingApproval.length === 0 ? (
+              <OptimizationEmpty eyebrow="ONAY YOK" title="Onay bekleyen optimizasyon yok" description="Onay gerektiren bir koşu oluştuğunda burada listelenir." />
+            ) : (
+              controlCenter.awaitingApproval.map((run) => (
+                <div key={run.runId} className="continuous-optimization-item">
+                  <div className="continuous-optimization-item__title">{run.lineCode ?? enumLabel(run.optimizationType)}</div>
+                  <div className="continuous-optimization-item__meta">{enumLabel(run.triggerType)} · {enumLabel(run.currentPhase)}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </Panel>
 
-      <section className="continuous-optimization-section">
-        <div className="continuous-optimization-section__header">
-          <h2>Doğrulanmış kazançlar</h2>
-        </div>
-        <div className="continuous-optimization-section__body" data-testid="continuous-optimization-verified-gains">
-          {controlCenter.verifiedGains.length === 0 ? (
-            <p className="continuous-optimization-item__meta">Henüz doğrulanmış kazanç yok.</p>
-          ) : (
-            controlCenter.verifiedGains.map((gain) => (
-              <div key={gain.runId} className="continuous-optimization-item">
-                <div className="continuous-optimization-item__title">{gain.lineCode}</div>
-                <div className="continuous-optimization-item__meta">{gain.summary}</div>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+        <Panel className="continuous-optimization-pair__card" title="Doğrulanmış kazançlar" subtitle="Uygulandıktan sonra ölçülerek doğrulanan sonuçlar">
+          <div className="continuous-optimization-section__body" data-testid="continuous-optimization-verified-gains">
+            {controlCenter.verifiedGains.length === 0 ? (
+              <OptimizationEmpty eyebrow="KAZANÇ YOK" title="Henüz doğrulanmış kazanç yok" description="Ölçüm tamamlandığında burada görünür." />
+            ) : (
+              controlCenter.verifiedGains.map((gain) => (
+                <div key={gain.runId} className="continuous-optimization-item">
+                  <div className="continuous-optimization-item__title">{gain.lineCode}</div>
+                  <div className="continuous-optimization-item__meta">{gain.summary}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 }

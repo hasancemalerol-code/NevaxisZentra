@@ -1,7 +1,8 @@
-import { Factory } from "lucide-react";
+
 
 import { ErpProductionOrderDetailView } from "@/features/erp/components/erp-production-order-detail-view";
 import { readErpProductionOrderDetail } from "@/features/erp/server/erp-production-reader";
+import { ErpFailurePage } from "@/features/erp/components/erp-failure-page";
 
 type ErpProductionOrderDetailPageProps = Readonly<{
   params: Promise<{ productionOrderId: string }>;
@@ -15,19 +16,16 @@ export default async function ErpProductionOrderDetailPage({
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
-        <header className="production-execution-header">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>Üretim Detayı</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">
-          <Factory aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "ERP üretim emri yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen ERP kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+      <ErpFailurePage
+        title="Üretim Detayı"
+        description="ERP üretim emri ve ilerleme özeti."
+        listHref="/erp-entegrasyonlari/uretim"
+        listLabel="Üretim Emirlerine Dön"
+        failedTitle="ERP üretim emri yüklenemedi"
+        entityLabel="üretim emri"
+        code={"code" in result ? result.code : undefined}
+        message={result.message}
+      />
     );
   }
 

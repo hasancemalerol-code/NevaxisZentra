@@ -6,49 +6,54 @@ import { Card } from "@/components/ui/card";
 import { getResearchCaseStatusLabel } from "@/features/export/domain/export-3l";
 import { readCountryResearchCases } from "@/features/export/server/export-case-reader";
 import { CreateResearchCaseForm } from "./create-research-case-form";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function CountryResearchListPage() {
   const result = await readCountryResearchCases();
 
   if (result.status === "failure") {
     return (
-      <main className="export-page">
+      <div className="export-page">
         <header className="export-header">
-          <p>ÜLKE ARAŞTIRMASI</p>
+          <p>İHRACAT</p>
           <h1>Ülke Araştırma</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <p>Araştırma dosyaları yüklenemedi.</p>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Araştırma dosyaları yüklenemedi" inline />
+      </div>
     );
   }
 
   const cases = result.cases;
 
   return (
-    <main className="export-page">
-      <div className="export-detail-page__back">
-        <Link href="/ihracat">
-          <ArrowLeft aria-hidden="true" />
-          İhracat ana sayfasına dön
-        </Link>
-      </div>
-
+    <div className="export-page">
       <header className="export-header">
-        <p>ÜLKE ARAŞTIRMASI</p>
-        <h1>Ülke Araştırma</h1>
+        <div className="export-header__top">
+          <div className="export-header__intro">
+            <p>İHRACAT</p>
+            <h1>Ülke Araştırma</h1>
+          </div>
+          <div className="export-header__actions">
+            <Link href="/ihracat" className="button button-secondary button-medium">
+              <ArrowLeft aria-hidden="true" />
+              İhracat ana sayfası
+            </Link>
+          </div>
+        </div>
         <span>
           Hedef ülke gereksinimlerini araştırın, bulguları kaydedin ve
           doğrulayın
         </span>
       </header>
 
+      <div className="export-split">
       <section className="export-workspace" aria-label="Yeni araştırma">
         <div className="export-workspace__heading">
           <div>
-            <p>YENİ ARAŞTIRMA</p>
-            <h2>Yeni Ülke Araştır</h2>
+            <div className="export-workspace__title-row">
+              <h2>Yeni araştırma</h2>
+            </div>
+            <span>Hedef ülke ve ürün bilgisini girin; araştırma dosyası otomatik açılır.</span>
           </div>
         </div>
         <CreateResearchCaseForm />
@@ -57,16 +62,26 @@ export default async function CountryResearchListPage() {
       <section className="export-workspace" aria-label="Araştırma listesi">
         <div className="export-workspace__heading">
           <div>
-            <p>ARAŞTIRMA DOSYALARI</p>
-            <h2>Aktif ülke araştırmaları</h2>
+            <div className="export-workspace__title-row">
+              <h2>Aktif ülke araştırmaları</h2>
+              <Badge tone="information">{cases.length} dosya</Badge>
+            </div>
+            <span>Başlatılan araştırma dosyaları burada listelenir.</span>
           </div>
-          <Badge tone="information">{cases.length} dosya</Badge>
         </div>
 
         {cases.length === 0 ? (
-          <div className="export-empty" role="status">
-            <Search aria-hidden="true" />
-            <p>Henüz ülke araştırması bulunmuyor.</p>
+          <div className="export-empty" role="status" aria-label="Boş liste">
+            <div className="export-empty__icon">
+              <Search aria-hidden="true" />
+            </div>
+            <div>
+              <p>ARAŞTIRMA YOK</p>
+              <h2>Henüz ülke araştırması bulunmuyor</h2>
+            </div>
+            <p className="export-empty__desc">
+              Formu doldurarak bir hedef ülke için ilk araştırma dosyasını başlatın.
+            </p>
           </div>
         ) : (
           <div className="export-workspace__list">
@@ -102,6 +117,7 @@ export default async function CountryResearchListPage() {
           </div>
         )}
       </section>
-    </main>
+      </div>
+    </div>
   );
 }

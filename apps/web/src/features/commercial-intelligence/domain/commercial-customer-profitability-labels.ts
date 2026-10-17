@@ -1,5 +1,5 @@
 export const COMMERCIAL_CUSTOMER_PROFITABILITY_SUBTITLE =
-  "Müşteri kârlılığı karşılaştırma zekâsı; müşteri katkı konumu, referans ve güncel dönem marj hareketini deterministik olarak gösterir.";
+  "Müşteri kârlılığı karşılaştırma zekâsı; müşteri katkı konumu, referans ve güncel dönem marj hareketini kayıtlı verilere dayanarak gösterir.";
 
 export const COMMERCIAL_CUSTOMER_PROFITABILITY_SCOPE_NOTE =
   "Bu çalışma alanı yalnızca müşteri katkı konumu karşılaştırmalarını gösterir; ürün veya maliyet bileşeni karşılaştırmaları ürün kârlılığı ekranındadır.";

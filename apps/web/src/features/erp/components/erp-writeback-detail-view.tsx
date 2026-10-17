@@ -36,10 +36,10 @@ export function ErpWritebackDetailView({ writeback, permissions }: ErpWritebackD
   const isSimulator = writeback.provider === "simulator";
 
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={getErpWritebackCommandTypeLabel(writeback.commandType)}
-        description="Onaylı ERP writeback isteği detayı."
+        description="Onaylı ERP işlem isteği ayrıntıları."
         notice={isSimulator ? <ErpSimulatorNotice variant="writeback" /> : null}
       />
 
@@ -93,9 +93,9 @@ export function ErpWritebackDetailView({ writeback, permissions }: ErpWritebackD
       <ErpDetailSection title="Veri Özeti">
         <p>{writeback.payloadSummary.lineCount} satır</p>
         {writeback.payloadSummary.lines.length === 0 ? (
-          <ErpEmptyState title="Payload satırı yok." />
+          <ErpEmptyState title="Gönderilen veri satırı yok." />
         ) : (
-          <ErpDataTable>
+          <ErpDataTable label="Onaylı işlem veri özeti">
             <thead>
               <tr>
                 <th>Ürün</th>
@@ -139,7 +139,7 @@ export function ErpWritebackDetailView({ writeback, permissions }: ErpWritebackD
         {writeback.approvals.length === 0 ? (
           <ErpEmptyState title="Henüz onay kaydı yok." />
         ) : (
-          <ErpDataTable className="erp-table--writeback-approvals">
+          <ErpDataTable label="Onay geçmişi" className="erp-table--writeback-approvals">
             <thead>
               <tr>
                 <th>Karar</th>
@@ -185,6 +185,6 @@ export function ErpWritebackDetailView({ writeback, permissions }: ErpWritebackD
       <p>
         <Link href="/erp-entegrasyonlari/onayli-islemler">← Onaylı işlemler listesine dön</Link>
       </p>
-    </main>
+    </div>
   );
 }

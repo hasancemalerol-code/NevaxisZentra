@@ -22,6 +22,7 @@ import {
   buildQuotationRiskAssessmentPrimaryLabel,
   buildQuotationRiskAssessmentSecondaryLabel,
 } from "./commercial-quotation-risk-presentation";
+import { detailValueClass } from "./commercial-no-data";
 
 export type QuotationRiskAssessmentFilters = Readonly<{
   outcome: string;
@@ -273,7 +274,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }
@@ -345,7 +346,7 @@ export function QuotationRiskAssessmentDetailDrawerBody({
           <DetailField label="Karşılaştırılabilir" value={formatCount(comparableCount)} />
           <DetailField label="Hariç tutulan" value={formatCount(excludedCount)} />
           <DetailField
-            label="Payda doğrulaması"
+            label="Toplam doğrulaması"
             value={`${formatCount(candidateCount)} = ${formatCount(comparableCount)} + ${formatCount(excludedCount)}`}
           />
           <DetailField label="Sonuç" value={summary.outcomeLabel} />
@@ -353,7 +354,7 @@ export function QuotationRiskAssessmentDetailDrawerBody({
         </div>
       </DetailSection>
       <DetailSection title="Sürücüler" testId="drivers">
-        <DetailField label="Önde gelen sürücü" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
+        <DetailField label="Başlıca etken" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
         {supportingDrivers.length > 0 ? (
           <ul className="commint-driver-list" data-testid="commercial-quotation-risk-assessment-supporting-drivers">
             {supportingDrivers.map((driver) => (
@@ -365,14 +366,13 @@ export function QuotationRiskAssessmentDetailDrawerBody({
             ))}
           </ul>
         ) : (
-          <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+          <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
         )}
       </DetailSection>
       <DetailSection title="Köken" testId="provenance">
         <div className="commint-detail-grid">
           <DetailField label="Kanıt kaynağı" value={summary.evidenceLabel} />
           <DetailField label="Köken" value={assessmentDetail.sourceProvenance || "—"} />
-          <DetailField label="Kural seti" value={summary.ruleSetVersion} />
           <DetailField label="Değerlendirme" value={summary.evaluatedLabel} />
         </div>
       </DetailSection>
@@ -467,7 +467,7 @@ export function QuotationRiskComparisonDetailPanel({
         </div>
       </DetailSection>
       <DetailSection title="Sürücüler" testId="drivers">
-        <DetailField label="Önde gelen sürücü" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
+        <DetailField label="Başlıca etken" value={leadingDriver?.reasonLabel ?? summary.leadingDriverLabel ?? "—"} />
         {supportingDrivers.length > 0 ? (
           <ul className="commint-driver-list" data-testid="commercial-quotation-risk-comparison-supporting-drivers">
             {supportingDrivers.map((driver) => (
@@ -479,13 +479,12 @@ export function QuotationRiskComparisonDetailPanel({
             ))}
           </ul>
         ) : (
-          <p className="commint-supplier-row__meta">Destekleyici sürücü yok</p>
+          <p className="commint-supplier-row__meta">Destekleyen başka etken yok</p>
         )}
       </DetailSection>
       <DetailSection title="Köken" testId="provenance">
         <div className="commint-detail-grid">
           <DetailField label="Köken" value={comparisonDetail.sourceProvenance || "—"} />
-          <DetailField label="Kural seti" value={summary.ruleSetVersion} />
           <DetailField label="Değerlendirme" value={summary.evaluatedLabel} />
         </div>
       </DetailSection>

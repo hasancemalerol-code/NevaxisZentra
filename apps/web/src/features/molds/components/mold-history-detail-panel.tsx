@@ -48,6 +48,7 @@ import {
   updateMoldAction,
 } from "../server/mold-writer";
 import { MoldCompatibilityDetailPanel } from "./mold-compatibility-detail-panel";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type DetailTab = "overview" | "maintenance" | "revisions" | "trials" | "timeline" | "compatibility";
 type ActionPanel = "edit" | "counter" | "transition" | null;
@@ -356,7 +357,7 @@ export function MoldHistoryDetailPanel({
             <input type="hidden" name="moldId" value={detail.id} />
             <input type="hidden" name="expectedVersion" value={detail.version} />
             <label className="full-width mold-required">
-              Ad
+              Ad <span className="zx-required" aria-hidden="true">*</span>
               <input name="name" defaultValue={detail.name} required aria-required="true" />
             </label>
             <label>
@@ -394,7 +395,7 @@ export function MoldHistoryDetailPanel({
       {canManage && actionPanel === "counter" && detail ? (
         <section className="mold-detail-action-panel" aria-label="Sayaç kaydet">
           <h3 className="mold-detail-action-panel__title">Sayaç Kaydet</h3>
-          <p className="mold-form-hint">Manuel sayaç kaydı oluşturur; mevcut API sözleşmesi korunur.</p>
+          <p className="mold-form-hint">Manuel sayaç kaydı oluşturur; mevcut kayıt yapısı korunur.</p>
           <form
             className="mold-registry-form-grid"
             action={(formData) => onAction(() => recordMoldCounterAction(formData))}
@@ -403,7 +404,7 @@ export function MoldHistoryDetailPanel({
             <input type="hidden" name="expectedVersion" value={detail.version} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="mold-required">
-              Vuruş Sayısı
+              Vuruş Sayısı <span className="zx-required" aria-hidden="true">*</span>
               <input
                 name="shotCount"
                 type="number"
@@ -446,7 +447,7 @@ export function MoldHistoryDetailPanel({
             <input type="hidden" name="expectedVersion" value={detail.version} />
             <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
             <label className="mold-required">
-              Hedef Durum
+              Hedef Durum <span className="zx-required" aria-hidden="true">*</span>
               <select
                 name="targetState"
                 required
@@ -462,7 +463,7 @@ export function MoldHistoryDetailPanel({
               </select>
             </label>
             <label className="full-width mold-required">
-              Geçiş Gerekçesi
+              Geçiş Gerekçesi <span className="zx-required" aria-hidden="true">*</span>
               <input name="reason" required aria-required="true" placeholder="Operasyonel gerekçe" />
             </label>
             <div className="mold-registry-actions full-width">
@@ -522,7 +523,7 @@ export function MoldHistoryDetailPanel({
       ) : null}
 
       {!detail && !isPending ? (
-        <div className="mold-registry-empty">Detay yüklenemedi veya erişim yok.</div>
+        <InlineUnavailable subject="Ayrıntı" />
       ) : null}
 
       {detail && tab === "overview" ? (
@@ -692,7 +693,7 @@ export function MoldHistoryDetailPanel({
                   </select>
                 </label>
                 <label className="full-width mold-required">
-                  Özet
+                  Özet <span className="zx-required" aria-hidden="true">*</span>
                   <input name="summary" required aria-required="true" placeholder="Örn. Planlı yağlama ve temizlik" />
                 </label>
                 <label className="full-width">
@@ -739,8 +740,8 @@ export function MoldHistoryDetailPanel({
             </section>
           ) : null}
 
-          <div className="mold-compat-table-wrap">
-            <table className="mold-registry-table">
+          <div className="mold-compat-table-wrap" tabIndex={0} role="region" aria-label="Açık bakım tamamlama (kaydırılabilir)">
+            <table aria-label="Açık bakım tamamlama" className="mold-registry-table">
               <thead>
                 <tr>
                   <th>Durum</th>
@@ -802,7 +803,7 @@ export function MoldHistoryDetailPanel({
                 <input type="hidden" name="moldId" value={detail.id} />
                 <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
                 <label className="mold-required">
-                  Revizyon No
+                  Revizyon No <span className="zx-required" aria-hidden="true">*</span>
                   <input name="revisionNumber" required aria-required="true" placeholder="R-01" />
                 </label>
                 <label>
@@ -820,7 +821,7 @@ export function MoldHistoryDetailPanel({
                   <input name="revisionDate" type="date" defaultValue={new Date().toISOString().slice(0, 10)} />
                 </label>
                 <label className="full-width mold-required">
-                  Özet
+                  Özet <span className="zx-required" aria-hidden="true">*</span>
                   <input name="summary" required aria-required="true" placeholder="Örn. Gözenek sayısı güncellendi" />
                 </label>
                 <label>
@@ -840,8 +841,8 @@ export function MoldHistoryDetailPanel({
             </section>
           ) : null}
 
-          <div className="mold-compat-table-wrap">
-            <table className="mold-registry-table">
+          <div className="mold-compat-table-wrap" tabIndex={0} role="region" aria-label="Revizyon kaydı (kaydırılabilir)">
+            <table aria-label="Revizyon kaydı" className="mold-registry-table">
               <thead>
                 <tr>
                   <th>Revizyon No</th>
@@ -896,7 +897,7 @@ export function MoldHistoryDetailPanel({
                 <input type="hidden" name="moldId" value={detail.id} />
                 <input type="hidden" name="idempotencyKey" value={crypto.randomUUID()} />
                 <label className="mold-required">
-                  Deneme No
+                  Deneme No <span className="zx-required" aria-hidden="true">*</span>
                   <input name="trialNumber" required aria-required="true" placeholder="T-01" />
                 </label>
                 <label>
@@ -942,8 +943,8 @@ export function MoldHistoryDetailPanel({
             </section>
           ) : null}
 
-          <div className="mold-compat-table-wrap">
-            <table className="mold-registry-table">
+          <div className="mold-compat-table-wrap" tabIndex={0} role="region" aria-label="Deneme kaydı (kaydırılabilir)">
+            <table aria-label="Deneme kaydı" className="mold-registry-table">
               <thead>
                 <tr>
                   <th>Deneme No</th>

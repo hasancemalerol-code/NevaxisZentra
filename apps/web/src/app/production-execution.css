@@ -33,7 +33,7 @@
 .button-warning {
   border-color: transparent;
   color: #ffffff;
-  background: #c4690c;
+  background: #a8560a;
 }
 
 .button-warning:hover {
@@ -75,7 +75,7 @@
 
 .input:focus {
   outline: none;
-  border-color: #155eef;
+  border-color: #2463a7;
   box-shadow: 0 0 0 3px rgb(21 94 239 / 11%);
 }
 
@@ -111,7 +111,7 @@
 
 .workflow-action-dialog__description {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.55;
 }
@@ -131,7 +131,7 @@
   padding: 9px 13px;
   border: 1px solid #f0d5ae;
   border-radius: 9px;
-  color: #ad5d0b;
+  color: #8f4a08;
   background: #fff3df;
   font-size: 12.5px;
   line-height: 1.5;
@@ -179,7 +179,7 @@
 
 .workflow-action-dialog__textarea:focus {
   outline: none;
-  border-color: #155eef;
+  border-color: #2463a7;
   box-shadow: 0 0 0 3px rgb(21 94 239 / 11%);
 }
 
@@ -208,7 +208,7 @@
 .production-execution-header p {
   margin: 0;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -225,7 +225,7 @@
 
 .production-execution-header span {
   max-width: 920px;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -234,7 +234,7 @@
 
 .production-execution-kpis {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
 }
 
@@ -273,8 +273,8 @@
 }
 
 .production-execution-kpis span {
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -288,12 +288,11 @@
 }
 
 .production-execution-kpis small {
-  overflow: hidden;
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 /* KPI tone variations via SVG color */
@@ -309,7 +308,7 @@
 }
 
 .production-execution-kpis__item--paused > svg {
-  color: #ad5d0b;
+  color: #8f4a08;
   background: #fff3df;
 }
 
@@ -362,7 +361,7 @@
 .production-execution-safety p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -378,7 +377,7 @@
 .production-execution-safety span {
   display: block;
   max-width: 900px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -400,7 +399,7 @@
 .production-execution-workspace__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -414,7 +413,7 @@
 }
 
 .production-execution-workspace__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -467,7 +466,7 @@
 .production-execution-empty p {
   margin: 0;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -483,7 +482,7 @@
 .production-execution-empty__desc {
   max-width: 480px;
   margin: 0 auto;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -537,8 +536,8 @@
 
 .production-order-card__heading p {
   margin: 0;
-  color: #8395aa;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 620;
   letter-spacing: 0.01em;
 }
@@ -577,8 +576,8 @@
 }
 
 .production-order-card__summary span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -596,8 +595,8 @@
 
 .production-order-card__summary small {
   overflow: hidden;
-  color: #8491a4;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -637,13 +636,13 @@
 }
 
 .production-order-card__quantity-planned {
-  color: #8491a4;
+  color: #566478;
   font-size: 13.5px;
 }
 
 .production-order-card__quantity-label {
-  color: #8495aa;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -660,8 +659,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #ad5d0b;
-  font-size: 11.5px;
+  color: #8f4a08;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -670,7 +669,7 @@
   align-items: center;
   gap: 4px;
   color: #155eef;
-  font-size: 11.5px;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -770,7 +769,7 @@
 
 .production-order-detail-page__header-eyebrow {
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -786,7 +785,7 @@
 }
 
 .production-order-detail-page__header-ref {
-  color: #8395aa;
+  color: #566478;
   font-size: 12.5px;
   font-weight: 620;
   letter-spacing: 0.01em;
@@ -841,8 +840,8 @@
 }
 
 .production-order-detail-page__summary .card span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -860,7 +859,7 @@
 
 .production-order-detail-page__summary .card small {
   overflow: hidden;
-  color: #8491a4;
+  color: #566478;
   font-size: 12px;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -893,7 +892,7 @@
 .production-order-detail-page__context-card p {
   margin: 0 0 2px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -908,8 +907,8 @@
 }
 
 .production-order-detail-page__context-card span {
-  color: #8a98a9;
-  font-size: 11.5px;
+  color: #55657a;
+  font-size: 0.75rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -917,13 +916,13 @@
 
 .production-order-detail-page__context-card__guid {
   display: inline-block;
-  color: #aab5c0;
+  color: #566478;
   font-family:
     ui-monospace,
     "Cascadia Code",
     "Fira Code",
     monospace;
-  font-size: 10.5px;
+  font-size: 0.75rem;
 }
 
 /* ─── Production Quantity Panel ─── */
@@ -967,7 +966,7 @@
 
 .production-quantity-panel__header-eyebrow {
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -996,8 +995,8 @@
 }
 
 .production-quantity-panel__item span {
-  color: #8a95a5;
-  font-size: 10px;
+  color: #5a697d;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1017,7 +1016,7 @@
 }
 
 .production-quantity-panel__item--scrap strong {
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .production-quantity-panel__item--remaining strong {
@@ -1046,8 +1045,8 @@
 
 .production-quantity-panel__last-entry {
   margin: 0;
-  color: #aab5c0;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 /* ─── Production Entry History ─── */
@@ -1091,7 +1090,7 @@
 
 .production-entry-history__header-eyebrow {
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1112,7 +1111,7 @@
   margin: 0;
   border: 1px dashed #d8e6f0;
   border-radius: 10px;
-  color: #aab5c0;
+  color: #566478;
   background: #f7fafe;
   font-size: 13px;
 }
@@ -1144,7 +1143,7 @@
 }
 
 .production-entry-history__item--reversal .production-entry-history__item-details strong {
-  color: #738196;
+  color: #566478;
 }
 
 .production-entry-history__item-type {
@@ -1161,7 +1160,7 @@
   gap: 4px;
   padding: 3px 9px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 720;
   white-space: nowrap;
 }
@@ -1174,13 +1173,13 @@
 
 .entry-type-badge--scrap {
   border: 1px solid #f0d5ae;
-  color: #ad5d0b;
+  color: #8f4a08;
   background: #fff3df;
 }
 
 .entry-type-badge--reversal {
   border: 1px solid #dce3eb;
-  color: #738196;
+  color: #566478;
   background: #f8fafc;
 }
 
@@ -1203,12 +1202,12 @@
 }
 
 .production-entry-history__reason {
-  color: #8491a4;
+  color: #566478;
   font-size: 12px;
 }
 
 .production-entry-history__comment {
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   font-style: italic;
 }
@@ -1222,14 +1221,14 @@
 }
 
 .production-entry-history__item-meta time {
-  color: #8491a4;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
 .production-entry-history__item-meta span {
   color: #b0bbc7;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-family:
     ui-monospace,
     "Cascadia Code",
@@ -1260,7 +1259,7 @@
 
 .production-operator-actions__eyebrow {
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1327,7 +1326,7 @@
 .production-order-lifecycle-actions__heading p {
   margin: 0 0 2px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1411,11 +1410,11 @@
   width: 20px;
   height: 20px;
   margin-top: 3px;
-  color: #66758b;
+  color: #566478;
 }
 
 .ops-panel__header-icon--warning {
-  color: #c4690c;
+  color: #a8560a;
 }
 
 .ops-panel__header-icon--primary {
@@ -1434,7 +1433,7 @@
 .ops-panel__eyebrow {
   margin: 0 0 3px;
   color: #155eef;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1457,8 +1456,8 @@
 }
 
 .ops-panel__header-total-label {
-  color: #66758b;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1494,9 +1493,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 750;
-  color: #66758b;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
@@ -1510,11 +1509,11 @@
 }
 
 .ops-panel__active-dot--warning {
-  background: #c4690c;
+  background: #a8560a;
 }
 
 .ops-panel__active-dot--primary {
-  background: #155eef;
+  background: #2463a7;
 }
 
 @keyframes pulse {
@@ -1544,7 +1543,7 @@
   border-radius: 20px;
   background: #f0d5ae;
   color: #8b4f08;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -1552,7 +1551,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -1564,7 +1563,7 @@
 
 .ops-panel__active-comment {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   font-style: italic;
 }
@@ -1591,7 +1590,7 @@
   background: transparent;
   color: #bd2c36;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .ops-panel__pending {
@@ -1633,7 +1632,7 @@
 }
 
 .ops-panel__reason-btn--selected {
-  border-color: #155eef;
+  border-color: #2463a7;
   background: #edf4ff;
   color: #155eef;
   font-weight: 750;
@@ -1657,7 +1656,7 @@
 .ops-panel__history-label {
   margin: 0;
   color: #4d5e73;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1700,15 +1699,15 @@
 }
 
 .ops-panel__history-item-active {
-  color: #c4690c;
-  font-size: 11px;
+  color: #a8560a;
+  font-size: 0.75rem;
   font-weight: 700;
   font-style: italic;
 }
 
 .ops-panel__history-item-time {
-  color: #66758b;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 /* ─── Cycle panel specifics ─── */
@@ -1729,8 +1728,8 @@
 }
 
 .ops-panel__cycle-kpi span {
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1751,7 +1750,7 @@
   border: 1px solid #dde9f6;
   color: #3666a8;
   background: #eef5fc;
-  font-size: 11.5px;
+  font-size: 0.75rem;
 }
 
 .ops-panel__cycle-preview {
@@ -1800,7 +1799,7 @@
 
 .runtime-analytics__empty {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
 }
 
@@ -1840,11 +1839,11 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  color: #66758b;
+  color: #566478;
 }
 
 .runtime-tile--success .runtime-tile__icon { color: #10873a; }
-.runtime-tile--warning .runtime-tile__icon { color: #c4690c; }
+.runtime-tile--warning .runtime-tile__icon { color: #a8560a; }
 .runtime-tile--primary .runtime-tile__icon { color: #155eef; }
 
 .runtime-tile__icon > svg {
@@ -1859,8 +1858,8 @@
 }
 
 .runtime-tile__label {
-  color: #66758b;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -1877,8 +1876,8 @@
 }
 
 .runtime-tile__sub {
-  color: #66758b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -1907,7 +1906,7 @@
 .runtime-analytics__active-badge--warning {
   border: 1px solid #f0d5ae;
   background: #fff8ef;
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .runtime-analytics__active-badge--primary {
@@ -1948,11 +1947,11 @@
   height: 22px;
   flex-shrink: 0;
   margin-top: 2px;
-  color: #66758b;
+  color: #566478;
 }
 
 .health-panel--attention .health-panel__icon {
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .health-panel--critical .health-panel__icon {
@@ -1960,8 +1959,8 @@
 }
 
 .health-panel__eyebrow {
-  color: #66758b;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1986,7 +1985,7 @@
   border-radius: 20px;
   border: 1.5px solid #f0d5ae;
   background: #fff8ef;
-  color: #ad5d0b;
+  color: #8f4a08;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -2026,7 +2025,7 @@
 
 .health-panel__signal--warning {
   background: #fff8ef;
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .health-panel__signal--info {
@@ -2054,14 +2053,14 @@
 .health-panel__progress-fill {
   height: 100%;
   border-radius: 99px;
-  background: #155eef;
+  background: #2463a7;
   transition: width 300ms ease;
 }
 
 .health-panel__progress-label {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #66758b;
+  color: #566478;
   text-align: right;
 }
 
@@ -2081,8 +2080,8 @@
   border-radius: 12px;
   background: #fff8ef;
   border: 1px solid #f0d5ae;
-  color: #ad5d0b;
-  font-size: 11px;
+  color: #8f4a08;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2094,14 +2093,14 @@
 .stale-recover-btn {
   margin-top: 10px;
   border: 1.5px dashed #f0d5ae;
-  color: #ad5d0b;
+  color: #8f4a08;
   font-size: 12px;
   font-weight: 700;
 }
 
 .stale-recover-btn:hover {
   background: #fff8ef;
-  border-color: #c4690c;
+  border-color: #a8560a;
 }
 
 /* ─── 4L: Exception Panel ─── */
@@ -2168,7 +2167,7 @@
 }
 
 .exception-item__severity {
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 7px;
   border-radius: 10px;
@@ -2183,7 +2182,7 @@
 
 .exception-item__severity--warning {
   background: #fff0df;
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .exception-item__severity--info {
@@ -2193,7 +2192,7 @@
 
 .exception-item__status {
   margin-left: auto;
-  font-size: 10.5px;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 10px;
@@ -2208,7 +2207,7 @@
 
 .exception-item__status--acknowledged {
   background: #fff0df;
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .exception-item__status--resolved {
@@ -2225,7 +2224,7 @@
 
 .exception-item__resolution {
   font-size: 12px;
-  color: #66758b;
+  color: #566478;
   font-style: italic;
   margin: 0;
 }
@@ -2234,13 +2233,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
-  color: #66758b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .exception-item__actor {
   font-family: monospace;
-  font-size: 10px;
+  font-size: 0.75rem;
 }
 
 .exception-item__actions {
@@ -2255,7 +2254,7 @@
   align-items: center;
   gap: 8px;
   padding: 16px 14px;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   font-weight: 600;
 }
@@ -2278,7 +2277,7 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 700;
-  color: #66758b;
+  color: #566478;
   cursor: pointer;
   user-select: none;
   list-style: none;
@@ -2310,7 +2309,7 @@
   background: #f8fafc;
   font-size: 12px;
   font-weight: 700;
-  color: #66758b;
+  color: #566478;
   cursor: pointer;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
@@ -2324,7 +2323,7 @@
 .exception-severity-btn--warning.exception-severity-btn--selected {
   border-color: #fcd34d;
   background: #fffbeb;
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .exception-severity-btn--critical.exception-severity-btn--selected {
@@ -2334,7 +2333,7 @@
 }
 
 .workflow-action-dialog__char-count {
-  font-size: 10.5px;
+  font-size: 0.75rem;
   color: #99aabb;
   text-align: right;
   display: block;
@@ -2475,7 +2474,7 @@
 }
 
 .production-panel__header h3 {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: var(--color-text-secondary, #4d5e73);
@@ -2487,7 +2486,7 @@
 .production-panel__header-icon {
   width: 16px;
   height: 16px;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   flex-shrink: 0;
 }
 
@@ -2495,7 +2494,7 @@
   background: var(--color-interactive-primary, #0064d0);
   color: #ffffff;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   min-width: 20px;
   height: 20px;
@@ -2630,11 +2629,11 @@
 
 .shift-current-card__date {
   font-size: 12px;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
 }
 
 .shift-current-card__expired-badge {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-warning-text, #92400e);
   background: var(--color-warning-badge, #fef3c7);
@@ -2643,18 +2642,18 @@
 }
 
 .shift-empty-state {
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   font-size: 13px;
   font-style: italic;
   padding: 8px 0;
 }
 
 .shift-history h4 {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   margin: 0 0 6px;
 }
 
@@ -2690,12 +2689,12 @@
 .shift-history__date {
   flex: 1;
   font-family: monospace;
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .shift-history__released {
-  font-size: 11px;
-  color: var(--color-text-tertiary, #8596a7);
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary, #5a697d);
 }
 
 /* Operator Panel */
@@ -2727,7 +2726,7 @@
 }
 
 .operator-list__role-badge {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -2751,7 +2750,7 @@
 
 .operator-empty-state p {
   font-size: 13px;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   font-style: italic;
   margin: 0 0 4px;
 }
@@ -2791,8 +2790,8 @@
 }
 
 .handover-timeline__meta time {
-  font-size: 11px;
-  color: var(--color-text-tertiary, #8596a7);
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary, #5a697d);
 }
 
 .handover-timeline__body {
@@ -2817,7 +2816,7 @@
 
 .handover-timeline__issues strong {
   display: block;
-  font-size: 11px;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-warning-text, #92400e);
@@ -2831,20 +2830,20 @@
 
 .handover-empty-state p {
   font-size: 13px;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   font-style: italic;
   margin: 0;
 }
 
 .handover-empty-state__hint {
   font-size: 12px;
-  color: var(--color-text-tertiary, #8596a7);
+  color: var(--color-text-tertiary, #5a697d);
   margin-top: 4px;
 }
 
 /* Exception Ownership */
 .exception-item__ownership {
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 2px 6px;
   border-radius: 4px;
@@ -2953,4 +2952,158 @@
   width: 14px;
   height: 14px;
   flex-shrink: 0;
+}
+
+/* ─── Production reporting: every report section is a card with a designed empty state ─── */
+
+.production-report-section {
+  padding: 20px;
+  border: 1px solid #dfe6ef;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.production-report-empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  border: 1px dashed #c5d5e8;
+  border-radius: 12px;
+  background: #f8fbff;
+  text-align: center;
+}
+
+.production-report-empty svg {
+  width: 22px;
+  height: 22px;
+  color: #8aaccc;
+}
+
+.production-report-empty p {
+  margin: 0;
+  color: #15243b;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.production-report-empty span {
+  color: #566478;
+  font-size: 0.8125rem;
+}
+
+/* Page header with an action: the action sits on the title row, not on a band of its own. */
+.production-execution-page > .production-execution-header:has(> .production-execution-header__actions) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.production-execution-page > .production-execution-header > .production-execution-header__actions {
+  align-self: flex-start;
+}
+
+/* Header copy block: eyebrow, title and lead keep the shared rhythm (eyebrow 8px, lead 12px below the title). */
+.production-execution-header > div:first-child {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.production-execution-header > div:first-child > h1 {
+  margin-bottom: 4px;
+}
+
+/* Reporting KPIs: labels start on one line across the row whether or not a card carries a caption. */
+body .production-report-kpis > * {
+  align-items: flex-start;
+}
+
+body .production-report-kpis strong {
+  white-space: nowrap;
+}
+
+/* Order KPIs: column counts come from the shared count-aware KPI grid (no page-level spans). */
+
+/* Section leads and captions: at least 13px with readable contrast. */
+.production-execution-workspace__heading span,
+.production-report-empty span {
+  color: #4a5a70;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.production-execution-header > div:first-child,
+.production-execution-page > .production-execution-header {
+  margin-bottom: 8px;
+}
+
+/* Reporting empty sections: compact one-row notice instead of a tall dashed box. */
+.production-report-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px 12px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+/* Reporting without data: the four empty sections sit in a two-column grid on wide screens instead of a long dashed column. */
+.production-report-sections {
+  display: grid;
+  gap: inherit;
+}
+
+@media (min-width: 1280px) {
+  .production-report-sections--empty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+/* Reporting KPI captions: 13px, readable contrast. */
+.production-report-kpis small {
+  color: #4a5a70;
+  font-size: 0.8125rem;
+}
+
+/* Order KPIs, five cards: five columns from 1100px. Between 640px and 1099px: three equal columns (cards flow, the last row keeps the same card width). Below 640px: one column. */
+body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+  display: grid !important;
+  gap: 12px;
+}
+
+body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) > * {
+  flex: none;
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1099px) {
+  body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) > * {
+    grid-column: auto !important;
+  }
+}
+
+@media (max-width: 639px) {
+  body .production-execution-page .production-execution-kpis:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* A short page shows the viewport background to the bottom (no lighter strip). */
+.fact-workspace.production-execution-page {
+  background: transparent;
 }

@@ -3,12 +3,23 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
+import {
+  AlertTriangle,
+  Factory,
+  ArrowUpRight,
+  Boxes,
+  Cog,
+  Hourglass,
+  Pause,
+  Play,
+  ShieldAlert,
+} from "lucide-react";
 
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { LineTopology } from "@/components/workspace/line-topology";
 import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/operational-status";
-import { StatusStrip } from "@/components/workspace/status-strip";
+import { MetricCard, MetricGrid } from "@/components/ui/metric";
+import { PageHeader } from "@/components/ui/page";
 
 import {
   buildProductionResourcesFilterParams,
@@ -28,10 +39,19 @@ import {
   PRODUCTION_RESOURCE_STATE_FILTER_OPTIONS,
   PRODUCTION_RESOURCE_TYPE_FILTER_OPTIONS,
   getProductionResourceTypeLabel,
+  uniqueTopologyStations,
 } from "../domain/production-resources-labels";
 import type { ProductionResourceWorkspaceApi } from "../server/production-resources-api-client";
 
 import "./production-resources-workspace.css";
+
+import "@/features/apps-catalog/apps-catalog-workspace.css";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+
+/** Rows without a value are left out instead of printing a column of dashes. */
+function presentRows(rows: readonly { label: string; value: string | number | null | undefined }[]) {
+  return rows.filter((row) => row.value !== null && row.value !== undefined && row.value !== "");
+}
 
 type ProductionResourcesWorkspaceViewProps = Readonly<{
   workspace: ProductionResourceWorkspaceApi;
@@ -58,6 +78,10 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
     }
     return [...map.entries()].sort((left, right) => left[1].localeCompare(right[1], "tr"));
   }, [workspace.resources]);
+
+  const showOrderColumn = workspace.resources.some((row) => row.orderReference);
+  const showBufferColumn = workspace.resources.some((row) => row.bufferQuantity !== null && row.bufferQuantity !== undefined);
+  const columnCount = 7 + (showOrderColumn ? 1 : 0) + (showBufferColumn ? 1 : 0);
 
   const selectedResource =
     filteredResources.find((row) => row.resourceId === selectedResourceId) ??
@@ -90,27 +114,30 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
   }, [pathname, router, searchParams]);
 
   return (
-    <main className="fact-workspace production-resources-workspace" data-testid="production-resources-workspace">
-      <header className="fact-workspace__header">
-        <div>
-          <p className="fact-workspace__context">ÜRETİM · KAYNAKLAR</p>
-          <h1 className="fact-workspace__title">{PRODUCTION_RESOURCES_TITLE}</h1>
-          <p className="fact-workspace__meta">{PRODUCTION_RESOURCES_SUBTITLE}</p>
-        </div>
-      </header>
-
-      <StatusStrip
-        aria-label="Kaynak durum özeti"
-        items={[
-          { label: "Toplam", value: workspace.status.total },
-          { label: "Çalışıyor", value: workspace.status.running },
-          { label: "Boşta", value: workspace.status.idle },
-          { label: "Bekliyor", value: workspace.status.waiting },
-          { label: "Durdu", value: workspace.status.stopped },
-          { label: "Arıza", value: workspace.status.fault },
-          { label: "Risk", value: workspace.status.atRisk },
-        ]}
+    <div className="fact-workspace production-resources-workspace" data-testid="production-resources-workspace">
+      <PageHeader
+        eyebrow="ÜRETİM"
+        title={PRODUCTION_RESOURCES_TITLE}
+        description={PRODUCTION_RESOURCES_SUBTITLE}
+        actions={
+          <Link href="/uretim/hatlar" className="button button-secondary button-medium">
+            <Factory aria-hidden="true" size={16} />
+            Üretim Hatları
+          </Link>
+        }
       />
+
+      <div className="production-resources-kpis">
+        <MetricGrid label="Kaynak durum özeti">
+          <MetricCard label="Toplam" value={workspace.status.total} hint="Kayıtlı" icon={<Boxes size={18} />} />
+          <MetricCard label="Çalışıyor" value={workspace.status.running} hint="Üretimde" icon={<Play size={18} />} tone="low" />
+          <MetricCard label="Boşta" value={workspace.status.idle} hint="İş yok" icon={<Pause size={18} />} />
+          <MetricCard label="Bekliyor" value={workspace.status.waiting} hint="Beklemede" icon={<Hourglass size={18} />} tone="medium" />
+          <MetricCard label="Durdu" value={workspace.status.stopped} hint="Durmuş" icon={<Cog size={18} />} tone="high" />
+          <MetricCard label="Arıza" value={workspace.status.fault} hint="Müdahale" icon={<AlertTriangle size={18} />} tone="critical" />
+          <MetricCard label="Risk" value={workspace.status.atRisk} hint="İzlenmeli" icon={<ShieldAlert size={18} />} tone="high" />
+        </MetricGrid>
+      </div>
 
       <div
         className="production-resources-type-chips"
@@ -208,28 +235,28 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
       <div className="production-resources-layout">
         <section className="fact-section production-resources-grid-panel">
           <header className="fact-section__header">
-            <h2 className="fact-section__title">Kaynak grid</h2>
+            <h2 className="fact-section__title">Kaynak listesi</h2>
             <span className="production-resources-grid__secondary">{filteredResources.length} kayıt</span>
           </header>
           <div className="fact-section__body production-resources-grid-wrap">
-            <table className="fact-data-grid" data-testid="production-resources-grid">
+            <table aria-label="Kaynak listesi" className="fact-data-grid" data-testid="production-resources-grid">
               <thead>
                 <tr>
-                  <th>Kaynak</th>
-                  <th>Tip</th>
-                  <th>Hat</th>
-                  <th>İstasyon</th>
-                  <th>Durum</th>
-                  <th>Sipariş</th>
-                  <th>GOOD</th>
-                  <th>REJECT</th>
-                  <th>WIP</th>
+                  <th className="production-resources-grid__col--name">Kaynak</th>
+                  <th className="production-resources-grid__col--type">Tip</th>
+                  <th className="production-resources-grid__col--line">Hat</th>
+                  <th className="production-resources-grid__col--station">İstasyon</th>
+                  <th className="production-resources-grid__col--state">Durum</th>
+                  {showOrderColumn ? <th>Sipariş</th> : null}
+                  <th className="production-resources-grid__numeric production-resources-grid__col--num">İyi</th>
+                  <th className="production-resources-grid__numeric production-resources-grid__col--num">Hatalı</th>
+                  {showBufferColumn ? <th className="production-resources-grid__numeric production-resources-grid__col--num">Devam eden iş</th> : null}
                 </tr>
               </thead>
               <tbody>
                 {filteredResources.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="production-resources-grid__empty">
+                    <td colSpan={columnCount} className="production-resources-grid__empty">
                       {workspace.resources.length === 0 && !filtersActive ? (
                         <div
                           className="production-resources-zero-factory"
@@ -263,23 +290,25 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
                         data-testid={`production-resource-row-${row.resourceId}`}
                         onClick={() => setSelectedResourceId(row.resourceId)}
                       >
-                        <td>
+                        <td className="production-resources-grid__code">
                           <strong>{row.code}</strong>
                           <span className="production-resources-grid__secondary">{row.name}</span>
                         </td>
                         <td>{getProductionResourceTypeLabel(row.resourceType)}</td>
-                        <td>{row.lineCode}</td>
-                        <td>{row.stationCode}</td>
+                        <td className="production-resources-grid__code">{row.lineCode}</td>
+                        <td className="production-resources-grid__code">{row.stationCode}</td>
                         <td>
-                          <OperationalBadge status={mapOperationalStatus(row.state)} label={row.state} />
+                          <OperationalBadge status={mapOperationalStatus(row.state)} label={enumLabel(row.state)} />
                         </td>
-                        <td>{row.orderReference ?? "—"}</td>
+                        {showOrderColumn ? <td>{row.orderReference ?? "—"}</td> : null}
                         <td className="production-resources-grid__numeric">{row.goodCount}</td>
                         <td className="production-resources-grid__numeric">{row.rejectCount}</td>
-                        <td className="production-resources-grid__numeric">
-                          {row.bufferQuantity ?? "—"}
-                          {row.bufferCapacity ? ` / ${row.bufferCapacity}` : ""}
-                        </td>
+                        {showBufferColumn ? (
+                          <td className="production-resources-grid__numeric">
+                            {row.bufferQuantity ?? "—"}
+                            {row.bufferCapacity ? ` / ${row.bufferCapacity}` : ""}
+                          </td>
+                        ) : null}
                       </tr>
                     );
                   })
@@ -294,40 +323,41 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
             <>
               <ContextPanel
                 title="Kaynak kimliği"
-                rows={[
+                rows={presentRows([
                   { label: "Kaynak", value: `${selectedResource.code} · ${selectedResource.name}` },
                   { label: "Tip", value: getProductionResourceTypeLabel(selectedResource.resourceType) },
                   { label: "Hat", value: `${selectedResource.lineCode} · ${selectedResource.lineName}` },
                   { label: "Alan", value: selectedResource.areaCode },
                   { label: "İstasyon", value: `${selectedResource.stationCode} · ${selectedResource.stationName}` },
                   { label: "Makine kaydı", value: selectedResource.machineRegistryCode },
-                ]}
+                ])}
               />
               <ContextPanel
-                title="Operasyon durumu"
-                rows={[
-                  { label: "Durum", value: selectedResource.state },
+                title={`Operasyon durumu · ${selectedResource.code}`}
+                rows={presentRows([
+                  { label: "Durum", value: enumLabel(selectedResource.state) },
                   { label: "Operasyon", value: selectedResource.operationCode },
                   { label: "Operatör", value: selectedResource.operatorCode },
                   { label: "Sipariş", value: selectedResource.orderReference },
-                  { label: "GOOD", value: selectedResource.goodCount },
-                  { label: "REJECT", value: selectedResource.rejectCount },
-                  { label: "WIP", value: selectedResource.bufferQuantity },
-                  { label: "Kısıt", value: selectedResource.isBlocked ? "Bloklu" : selectedResource.isStarved ? "Aç" : "—" },
-                ]}
+                  { label: "İyi", value: selectedResource.goodCount },
+                  { label: "Hatalı", value: selectedResource.rejectCount },
+                  { label: "Devam eden iş", value: selectedResource.bufferQuantity },
+                  { label: "Kısıt", value: selectedResource.isBlocked ? "Bloklu" : selectedResource.isStarved ? "Aç" : null },
+                ])}
               />
               <section className="fact-section">
                 <header className="fact-section__header">
-                  <h3 className="fact-section__title">Hat topolojisi</h3>
+                  <h3 className="fact-section__title">{`Hat topolojisi · ${selectedResource.lineCode}`}</h3>
                 </header>
                 <div className="fact-section__body">
                 <LineTopology
-                  stations={selectedLineResources.map((row) => ({
-                    id: row.stationId,
-                    code: row.stationCode,
-                    name: row.stationName,
-                    state: row.state,
-                  }))}
+                  stations={uniqueTopologyStations(selectedLineResources)
+                    .map((row) => ({
+                      id: row.stationId,
+                      code: row.stationCode,
+                      name: row.stationName,
+                      state: row.state,
+                    }))}
                   selectedStationId={selectedResource.stationId}
                   onSelectStation={(stationId) => {
                     const match = selectedLineResources.find((row) => row.stationId === stationId);
@@ -336,24 +366,31 @@ export function ProductionResourcesWorkspaceView({ workspace }: ProductionResour
                 />
                 </div>
               </section>
-              <div className="production-resources-inspector__links">
-                <Link href={`/uretim/hatlar/${selectedResource.lineId}`} className="commint-table__link">
-                  Hat detayı
-                  <ArrowUpRight aria-hidden="true" size={14} />
-                </Link>
-                {selectedResource.machineRegistryCode ? (
-                  <Link href="/makineler" className="commint-table__link">
-                    Makine kaydı
-                    <ArrowUpRight aria-hidden="true" size={14} />
-                  </Link>
-                ) : null}
-              </div>
+              <section className="fact-section production-resources-inspector__context" aria-label="İlgili Bağlam">
+                <header className="fact-section__header">
+                  <h3 className="fact-section__title">İlgili Bağlam</h3>
+                </header>
+                <div className="fact-section__body">
+                  <div className="production-resources-inspector__links">
+                    <Link href={`/uretim/hatlar/${selectedResource.lineId}`} className="button button-secondary button-medium">
+                      Hat detayı
+                      <ArrowUpRight aria-hidden="true" size={14} />
+                    </Link>
+                    {selectedResource.machineRegistryCode ? (
+                      <Link href="/makineler" className="button button-secondary button-medium">
+                        Makine kaydı
+                        <ArrowUpRight aria-hidden="true" size={14} />
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+              </section>
             </>
           ) : (
             <p className="production-resources-grid__empty">{PRODUCTION_RESOURCES_EMPTY}</p>
           )}
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

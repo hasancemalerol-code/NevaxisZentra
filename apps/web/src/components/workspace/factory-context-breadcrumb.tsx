@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 
+import "@/features/bugun/components/bugun-workspace.css";
+
 export type FactoryContextBreadcrumbSegment = Readonly<{
   label: string;
   href?: string;

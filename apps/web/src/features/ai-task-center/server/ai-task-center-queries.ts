@@ -53,7 +53,7 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
   if (code === "permission-denied") {
     return {
       status: "failure",
-      message: "AI Görev Merkezi görüntüleme yetkiniz bulunmuyor.",
+      message: "Görev Merkezi görüntüleme yetkiniz bulunmuyor.",
       code,
     };
   }
@@ -61,7 +61,7 @@ function mapFailureMessage(code: string | undefined, message: string): ReadFailu
   if (code === "subscription-required") {
     return {
       status: "failure",
-      message: "AI Görev Merkezi bu kurulumun lisansı kapsamında etkin değil. Lisans durumunu sistem yöneticinizle kontrol edin.",
+      message: "Görev Merkezi bu kurulumun lisansı kapsamında etkin değil. Lisans durumunu sistem yöneticinizle kontrol edin.",
       code,
     };
   }

@@ -1,11 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { TEAMS_APPROVAL_DISCLAIMER } from "@/features/teams/domain/teams-constants";
 import { createTeamsApprovalAction } from "@/features/teams/server/teams-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { createActorLabeler } from "@/lib/presentation/display-label";
+import { Notice } from "@/components/ui/notice";
 
 type ReviewerCandidate = Readonly<{
   tenantMembershipId: string;
@@ -29,6 +32,7 @@ export function TeamsApprovalRequestForm({
   sourcePreview,
   reviewerCandidates,
 }: TeamsApprovalRequestFormProps) {
+  const actorLabel = useMemo(() => createActorLabeler(), []);
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [rationale, setRationale] = useState("");
@@ -86,7 +90,7 @@ export function TeamsApprovalRequestForm({
       </div>
 
       <label>
-        Onay başlığı
+        Onay başlığı <span className="zx-required" aria-hidden="true">*</span>
         <input
           data-testid="teams-approval-title-input"
           disabled={pending}
@@ -98,7 +102,7 @@ export function TeamsApprovalRequestForm({
       </label>
 
       <label>
-        Gerekçe
+        Gerekçe <span className="zx-required" aria-hidden="true">*</span>
         <textarea
           data-testid="teams-approval-rationale-input"
           disabled={pending}
@@ -123,7 +127,7 @@ export function TeamsApprovalRequestForm({
                 onChange={() => toggleReviewer(member.tenantMembershipId)}
                 type="checkbox"
               />
-              {member.displayLabel}
+              {actorLabel(member.displayLabel)}
             </label>
           ))
         )}
@@ -132,9 +136,7 @@ export function TeamsApprovalRequestForm({
       <p className="teams-task-draft-form__disclaimer">{TEAMS_APPROVAL_DISCLAIMER}</p>
 
       {error ? (
-        <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-approval-request-error">
-          {error}
-        </p>
+        <Notice tone="danger" alert data-testid="teams-approval-request-error">{customerMessage(error)}</Notice>
       ) : null}
 
       <div>
@@ -144,6 +146,9 @@ export function TeamsApprovalRequestForm({
           type="submit"
         >
           Onay isteği oluştur
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => router.push("/teams/onaylar")}>
+          Vazgeç
         </Button>
       </div>
     </form>

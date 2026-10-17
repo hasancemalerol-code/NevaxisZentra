@@ -53,6 +53,7 @@ import {
   updateCommercialIntelligenceProfileAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { kpiValueClass, detailValueClass } from "./commercial-no-data";
 
 type CommercialIntelligenceWorkspaceViewProps = Readonly<{
   workspace: CommercialIntelligenceWorkspacePayload;
@@ -369,7 +370,7 @@ export function CommercialIntelligenceWorkspaceView({
   ]);
 
   return (
-    <main className="commint-page" data-testid="commercial-intelligence-workspace">
+    <div className="commint-page" data-testid="commercial-intelligence-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -379,11 +380,11 @@ export function CommercialIntelligenceWorkspaceView({
               Satın alma fiyat kanıtını, dönemsel sapmaları ve tedarikçi konumlarını tek çalışma alanında izleyin.
             </p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Dönem: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Kanıt: {workspace.evidenceLabel}</li>
-              <li>{COMMERCIAL_INTELLIGENCE_CURRENT_EVIDENCE_SCOPE}</li>
+              <li>Kapsam: {COMMERCIAL_INTELLIGENCE_CURRENT_EVIDENCE_SCOPE}</li>
             </ul>
           </div>
           <div className="commint-executive__actions">
@@ -399,17 +400,20 @@ export function CommercialIntelligenceWorkspaceView({
             </button>
           </div>
         </div>
-        {workspace.hasDevelopmentPilotData ? (
-          <p className="commint-provenance-strip" data-testid="commercial-intelligence-provenance-strip">
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER}
-          </p>
-        ) : null}
-        {!canManage ? (
-          <p className="commint-readonly-note" data-testid="commercial-intelligence-readonly-note">
-            {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
-          </p>
-        ) : null}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          {workspace.hasDevelopmentPilotData ? (
+            <p className="commint-provenance-strip" data-testid="commercial-intelligence-provenance-strip">
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!canManage ? (
+            <p className="commint-readonly-note" data-testid="commercial-intelligence-readonly-note">
+              {COMMERCIAL_INTELLIGENCE_READONLY_NOTE}
+            </p>
+          ) : null}
+        </details>
         {feedback ? (
           <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p>
         ) : null}
@@ -433,7 +437,7 @@ export function CommercialIntelligenceWorkspaceView({
                   <Icon size={16} />
                 </span>
               </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
+              <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
               <p className="commint-kpi-card__detail">{kpi.detail}</p>
               <p className="commint-kpi-card__summary">{kpi.accessibleSummary}</p>
               <div className="commint-kpi-card__footer">
@@ -623,7 +627,7 @@ export function CommercialIntelligenceWorkspaceView({
                 <div>
                   <h3 className="commint-composer__title">Yeni fiyat analizi</h3>
                   <p className="commint-composer__hint">
-                    Onaylı profil, uyumlu kanıt bazı ve deterministik pencere ile satın alma fiyat analizi çalıştırın.
+                    Onaylı profil, uyumlu kanıt bazı ve sabit dönem penceresi ile satın alma fiyat analizi çalıştırın.
                   </p>
                 </div>
                 {selectedProfile ? (
@@ -675,8 +679,8 @@ export function CommercialIntelligenceWorkspaceView({
               </div>
             </section>
           ) : null}
-          <div className="commint-table-wrap">
-            <table className="commint-table">
+          <div className="commint-table-wrap" tabIndex={0}>
+            <table aria-label="Pencere bitişi" className="commint-table">
               <thead>
                 <tr>
                   <th>Malzeme</th>
@@ -719,7 +723,7 @@ export function CommercialIntelligenceWorkspaceView({
             <select
               value={selectedSupplierComparison?.id ?? ""}
               onChange={(event) => loadSupplierComparisonDetail(event.target.value)}
-              aria-label="Karşılaştırma çalıştırması seç"
+              aria-label="Karşılaştırma çalışması seç"
             >
               <option value="">Çalıştırma seçin</option>
               {supplierComparisons.map((item) => (
@@ -953,7 +957,7 @@ export function CommercialIntelligenceWorkspaceView({
           </aside>
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -970,7 +974,7 @@ function DetailField({ label, value }: Readonly<{ label: string; value: string }
   return (
     <div className="commint-detail-field">
       <span className="commint-detail-field__label">{label}</span>
-      <span className="commint-detail-field__value">{value}</span>
+      <span className={detailValueClass(value)}>{value}</span>
     </div>
   );
 }

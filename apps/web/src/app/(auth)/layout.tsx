@@ -26,7 +26,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
       <ZentraAuthHero />
       <div className="auth-layout__panel">
         <p className="visually-hidden">{config.applicationName}</p>
-        <div className="auth-layout__frame">{children}</div>
+        <main className="auth-layout__frame" id="main-content">{children}</main>
       </div>
     </div>
   );

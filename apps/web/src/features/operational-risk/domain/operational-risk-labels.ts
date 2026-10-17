@@ -1,10 +1,10 @@
 import type { OperationalRiskTabId } from "../types/operational-risk-types";
 
 export const OPERATIONAL_RISK_DEVELOPMENT_BANNER =
-  "Yerel geliştirme / simülasyon kanıtı — gerçek müşteri operasyonel kanıtı değildir.";
+  "Örnek veri — gerçek müşteri operasyonel kanıtı değildir.";
 
 export const OPERATIONAL_RISK_READONLY_NOTE =
-  "Salt okunur erişim: risk yaşam döngüsü, profil yönetimi ve tespit çalıştırma işlemleri devre dışıdır.";
+  "Salt okunur erişim: risk yaşam döngüsü, profil yönetimi ve kontrol çalışması işlemleri devre dışıdır.";
 
 export const OPERATIONAL_RISK_CURRENT_EVIDENCE_SCOPE =
   "Mevcut vaka ve tespit kanıtı penceresi";
@@ -15,7 +15,7 @@ export const OPERATIONAL_RISK_TAB_OPTIONS: ReadonlyArray<
   { id: "overview", label: "Genel Bakış" },
   { id: "cases", label: "Risk Vakaları" },
   { id: "profiles", label: "Tespit Profilleri" },
-  { id: "runs", label: "Tespit Çalıştırmaları" },
+  { id: "runs", label: "Kontrol Çalışmaları" },
 ];
 
 export const OPERATIONAL_RISK_KPI_ORDER = [
@@ -76,7 +76,7 @@ const EVIDENCE_LABELS: Record<string, string> = {
   measured: "Ölçülmüş",
   calculated: "Hesaplanmış",
   estimated: "Tahmini",
-  simulated: "Simülasyon",
+  simulated: "Örnek veri",
   "insufficient-data": "Veri yetersiz",
   "source-conflict": "Kaynak uyuşmazlığı",
 };
@@ -107,7 +107,7 @@ const RUN_STATUS_LABELS: Record<string, string> = {
 
 const SOURCE_MODULE_LABELS: Record<string, string> = {
   energy: "Enerji",
-  "iot-plc": "IoT & PLC",
+  "iot-plc": "IoT ve PLC",
   maintenance: "Bakım",
   material: "Malzeme",
   supplier: "Tedarik",
@@ -115,7 +115,7 @@ const SOURCE_MODULE_LABELS: Record<string, string> = {
   quality: "Kalite",
   production: "Üretim",
   cost: "Maliyet",
-  "development-simulator": "Geliştirme simülatörü",
+  "development-simulator": "Örnek veri kaynağı",
 };
 
 const DRIVER_LABELS: Record<string, string> = {
@@ -130,7 +130,7 @@ const DRIVER_LABELS: Record<string, string> = {
   "connectivity-risk": "Bağlantı riski",
   "source-stale": "Kaynak bayat",
   "missing-threshold": "Eşik eksik",
-  "missing-denominator": "Payda eksik",
+  "missing-denominator": "Karşılaştırılan toplam eksik",
   "insufficient-evidence": "Yetersiz kanıt",
   "source-conflict": "Kaynak uyuşmazlığı",
   "within-threshold": "Eşik içinde",

@@ -25,6 +25,7 @@ public sealed class ProductionManagerService : IProductionManagerService
     private readonly ITenantContextAccessor tenantContextAccessor;
     private readonly IFactoryOrchestrationService factoryOrchestration;
     private readonly IAiDecisionLedgerWriter? ledgerWriter;
+    private readonly ProductionManagerScenarioGate scenarioGate;
 
     public ProductionManagerService(
         IProductionManagerRepository repository,
@@ -32,8 +33,10 @@ public sealed class ProductionManagerService : IProductionManagerService
         TenantDatabaseSession tenantDatabaseSession,
         ITenantContextAccessor tenantContextAccessor,
         IFactoryOrchestrationService factoryOrchestration,
+        ProductionManagerScenarioGate scenarioGate,
         IAiDecisionLedgerWriter? ledgerWriter = null)
     {
+        this.scenarioGate = scenarioGate;
         this.repository = repository;
         this.dbContext = dbContext;
         this.tenantDatabaseSession = tenantDatabaseSession;
@@ -44,21 +47,51 @@ public sealed class ProductionManagerService : IProductionManagerService
 
     public Task<ProductionManagerWorkspaceSnapshot> GetWorkspaceAsync(
         Guid facilityId, CancellationToken cancellationToken) =>
-        tenantDatabaseSession.ExecuteReadAsync(
-            ct => GetWorkspaceCoreAsync(facilityId, ct),
-            cancellationToken);
+        scenarioGate.Enabled
+            ? tenantDatabaseSession.ExecuteReadAsync(
+                ct => GetWorkspaceCoreAsync(facilityId, ct),
+                cancellationToken)
+            : Task.FromResult(EmptyWorkspace(facilityId));
+
+    /// <summary>Honest empty workspace: nothing is predicted, decided or persisted without a real signal source.</summary>
+    private static ProductionManagerWorkspaceSnapshot EmptyWorkspace(Guid facilityId) =>
+        new(
+            new FactoryStateSnapshot { FacilityId = facilityId, CapturedAtUtc = DateTimeOffset.UtcNow },
+            [],
+            [],
+            [],
+            [],
+            [],
+            new ProductionManagerPolicy { FacilityId = facilityId, UpdatedAtUtc = DateTimeOffset.UtcNow },
+            new ProductionManagerExecutiveSummary("Veri Bekleniyor", 0, 0, 0, 0, 0));
+
+    private void EnsureScenarioEnabled()
+    {
+        if (!scenarioGate.Enabled)
+        {
+            throw new ProductionManagerException(
+                ProductionManagerFailureCodes.ScenarioUnavailable,
+                "Üretim yöneticisi kararları bu kurulumda gerçek sinyal kaynağı bağlanana kadar kapalıdır.");
+        }
+    }
 
     public Task<FactoryDecision> CreateDecisionAsync(
-        Guid facilityId, string decisionType, string? correlationKey, string subjectId, CancellationToken cancellationToken) =>
-        tenantDatabaseSession.ExecuteWriteAsync(
+        Guid facilityId, string decisionType, string? correlationKey, string subjectId, CancellationToken cancellationToken)
+    {
+        EnsureScenarioEnabled();
+        return tenantDatabaseSession.ExecuteWriteAsync(
             ct => CreateDecisionCoreAsync(facilityId, decisionType, correlationKey, subjectId, ct),
             cancellationToken);
+    }
 
     public Task<SimulationResult> SimulateAsync(
-        Guid facilityId, SimulationRequest request, string subjectId, CancellationToken cancellationToken) =>
-        tenantDatabaseSession.ExecuteWriteAsync(
+        Guid facilityId, SimulationRequest request, string subjectId, CancellationToken cancellationToken)
+    {
+        EnsureScenarioEnabled();
+        return tenantDatabaseSession.ExecuteWriteAsync(
             ct => SimulateCoreAsync(facilityId, request, subjectId, ct),
             cancellationToken);
+    }
 
     public Task<FactoryDecision> ApproveDecisionAsync(
         Guid decisionId, ApproveDecisionRequest request, string subjectId, CancellationToken cancellationToken) =>

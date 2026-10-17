@@ -25,6 +25,8 @@ import type {
   assignExceptionAction,
   unassignExceptionAction,
 } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { displayActor } from "@/lib/presentation/display-label";
 
 type ExceptionPanelProps = Readonly<{
   orderId: string;
@@ -174,7 +176,7 @@ export function ProductionExceptionPanel({
 
       {panelState.kind === "error" && (
         <div role="alert" className="ops-panel__error">
-          {panelState.message}
+          {customerMessage(panelState.message)}
           <button
             type="button"
             className="ops-panel__error-dismiss"
@@ -375,7 +377,7 @@ export function ProductionExceptionPanel({
 
                 <div className="exception-item__meta">
                   <span>{formatUtcShort(ex.raisedAtUtc)}</span>
-                  <span className="exception-item__actor">{ex.raisedBySubjectId}</span>
+                  <span className="exception-item__actor">{displayActor(ex.raisedBySubjectId)}</span>
                 </div>
 
                 {panelState.kind === "idle" && (
@@ -388,7 +390,7 @@ export function ProductionExceptionPanel({
                         disabled={isPending}
                       >
                         <Eye aria-hidden="true" />
-                        Gördüm
+                        Görüldü olarak işaretle
                       </button>
                     )}
                     {(ex.status === "open" || ex.status === "acknowledged") && (

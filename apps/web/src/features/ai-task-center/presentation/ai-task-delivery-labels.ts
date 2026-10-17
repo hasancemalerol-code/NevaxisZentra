@@ -50,7 +50,7 @@ export function getAiTaskEmailReadinessLabel(channel: {
 }): string {
   if (channel.available) return "Hazır";
   const code = channel.reasonCode ?? "not-configured";
-  return AI_TASK_EMAIL_READINESS_LABELS[code] ?? "Henüz yapılandırılmadı";
+  return AI_TASK_EMAIL_READINESS_LABELS[code] ?? "Yapılandırılmadı";
 }
 
 export function maskEmailForDisplay(email: string): string {
@@ -96,7 +96,7 @@ export function getAiTaskWhatsAppReadinessLabel(channel: {
 }): string {
   if (channel.available) return "Hazır";
   const code = channel.reasonCode ?? "not-configured";
-  return AI_TASK_WHATSAPP_READINESS_LABELS[code] ?? "Henüz yapılandırılmadı";
+  return AI_TASK_WHATSAPP_READINESS_LABELS[code] ?? "Yapılandırılmadı";
 }
 
 export function getAiTaskWhatsAppConsentLabel(status: string | null | undefined): string {

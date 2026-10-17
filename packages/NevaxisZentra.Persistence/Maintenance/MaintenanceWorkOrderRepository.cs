@@ -75,9 +75,8 @@ public sealed class MaintenanceWorkOrderRepository(
                 .Select(w => new { w.Status, w.Priority, w.CompletedAtUtc })
                 .ToListAsync(ct);
 
-            var plans = await dbContext.PreventiveMaintenancePlans.AsNoTracking()
-                .Where(p => p.TenantId == context.TenantId && p.FacilityId == context.FacilityId)
-                .Select(p => new { p.Status, p.NextDueAtUtc })
+            var dues = await dbContext.PreventiveMaintenanceDues.AsNoTracking()
+                .Where(d => d.TenantId == context.TenantId && d.FacilityId == context.FacilityId)
                 .ToListAsync(ct);
 
             var today = DateTime.UtcNow.Date;
@@ -91,9 +90,7 @@ public sealed class MaintenanceWorkOrderRepository(
                 workOrders.Count(w => w.Status == MaintenanceWorkOrderStatus.Completed
                     && w.CompletedAtUtc.HasValue
                     && w.CompletedAtUtc.Value.UtcDateTime.Date == today),
-                plans.Count(p => p.Status == PreventivePlanStatus.Active
-                    && p.NextDueAtUtc.HasValue
-                    && p.NextDueAtUtc.Value < DateTimeOffset.UtcNow));
+                dues.Count(d => MaintenanceOverdueRule.IsOverdueOpenDue(d, DateTimeOffset.UtcNow)));
         }, cancellationToken);
 
     public Task<IReadOnlyList<MaintenanceWorkOrderSummaryReadModel>> ListAsync(

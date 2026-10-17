@@ -10,6 +10,7 @@ import type {
   submitErpWritebackAction,
 } from "../server/erp-writeback-actions";
 import { ErpInfoBanner, ErpReadonlyNotice, ErpSimulatorNotice } from "./erp-ui-primitives";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ErpWritebackApprovalActionsProps = Readonly<{
   writebackId: string;
@@ -144,7 +145,7 @@ export function ErpWritebackApprovalActions({
       </div>
 
       {actionState.kind === "error" ? (
-        <ErpInfoBanner title="İşlem hatası">{actionState.message}</ErpInfoBanner>
+        <ErpInfoBanner title="İşlem hatası">{customerMessage(actionState.message)}</ErpInfoBanner>
       ) : null}
 
       <ErpSimulatorNotice variant="writeback" />

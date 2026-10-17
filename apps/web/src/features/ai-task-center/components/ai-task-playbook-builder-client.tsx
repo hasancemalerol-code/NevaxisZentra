@@ -45,6 +45,7 @@ import {
   AiTaskDetailSelect,
   AiTaskDetailTextarea,
 } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskPlaybookBuilderClientProps = Readonly<{
   mode: "create" | "edit";
@@ -285,7 +286,7 @@ export function AiTaskPlaybookBuilderClient({
   return (
     <div className="ai-task-playbook-builder" data-testid="ai-task-playbook-builder">
       {actionError ? (
-        <p className="ai-task-playbook-builder__error" role="alert">{actionError}</p>
+        <p className="ai-task-playbook-builder__error" role="alert">{customerMessage(actionError)}</p>
       ) : null}
 
       <AiTaskDetailSectionCard title="Playbook Bilgileri">

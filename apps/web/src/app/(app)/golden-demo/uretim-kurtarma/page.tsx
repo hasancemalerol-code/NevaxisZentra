@@ -1,6 +1,5 @@
-import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
-import Link from "next/link";
-import { TriangleAlert } from "lucide-react";
+
+
 
 import { GoldenDemoP1WorkspaceView } from "@/features/golden-demo-p1/components/golden-demo-p1-workspace-view";
 import {
@@ -12,6 +11,7 @@ import { readGoldenDemoP2PresentationStatus } from "@/features/golden-demo-p2/se
 import { readGoldenDemoP2BDigitalFactoryTeam } from "@/features/golden-demo-p2b/server/golden-demo-p2b-reader";
 import { readGoldenDemoP3Outcome } from "@/features/golden-demo-p3/server/golden-demo-p3-reader";
 import { forbidUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function GoldenDemoP1Page() {
   await forbidUnlessPresentationModeAccess();
@@ -24,7 +24,7 @@ export default async function GoldenDemoP1Page() {
 
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">ALTIN DEMO</p>
@@ -32,15 +32,8 @@ export default async function GoldenDemoP1Page() {
             <p className="commint-executive__subtitle">{GOLDEN_DEMO_P1_SUBTITLE}</p>
           </div>
         </header>
-        <div role="alert" className="commint-error-banner" data-testid="golden-demo-p1-forbidden">
-          <TriangleAlert aria-hidden="true" />
-          <div>
-            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Demo verisi bulunamadı" : "Veri yüklenemedi"}</h3>
-            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Bu tesis için henüz altın demo verisi oluşturulmadı; gösterilecek bir sonuç yok." : result.message}</p>
-            <Link href="/operasyon/yonetim-merkezi">Operasyon Yönetim Merkezi</Link>
-          </div>
-        </div>
-      </main>
+        <div data-testid="golden-demo-p1-forbidden"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Veri yüklenemedi" inline /></div>
+      </div>
     );
   }
 

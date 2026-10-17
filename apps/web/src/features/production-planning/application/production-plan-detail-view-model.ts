@@ -1,3 +1,4 @@
+import { displayReferenceCode } from "@/lib/presentation/display-name";
 import type {
   ProductionPlan,
   ProductionPlanPriority,
@@ -105,7 +106,7 @@ export function getProductionPlanResourceDisplayValue(
   value: string | null,
 ): string {
   return (
-    value ??
+    displayReferenceCode(value) ||
     getProductionPlanFallbackLabel(
       resourceType,
     )

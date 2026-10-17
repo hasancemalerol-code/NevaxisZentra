@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+
 
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { SaasAdminView } from "@/features/saas-admin/components/saas-admin-view";
@@ -7,16 +7,18 @@ import { readSaasAdminWorkspace } from "@/features/saas-admin/server/saas-admin-
 import { readBillingWorkspaceForAdmin } from "@/features/saas-billing/server/saas-billing-queries";
 import { fetchCurrentTenantSubscription } from "@/features/saas-subscription/server/saas-subscription-queries";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+
 export const dynamic = "force-dynamic";
 
 export default async function AyarlarPage() {
   const access = await denyUnlessGranted("admin-access.read");
   if (access.status === "failure") {
     return (
-      <main className="saas-admin-page">
+      <div className="saas-admin-page">
         <h1>{access.code === "authorization-denied" ? "Erişim reddedildi" : "Yetki doğrulanamadı"}</h1>
         <p>{access.code === "authorization-denied" ? "Bu sayfayı görüntüleme yetkiniz yok." : "Yetki doğrulaması şu anda yapılamıyor."}</p>
-      </main>
+      </div>
     );
   }
 
@@ -27,15 +29,13 @@ export default async function AyarlarPage() {
   ]);
   if (result.status === "failure") {
     return (
-      <main className="saas-admin-page">
+      <div className="saas-admin-page">
         <header className="saas-admin-executive">
-          <p className="saas-admin-executive__eyebrow">YÖNETİM VE GÜVENLİK</p>
+          <p className="saas-admin-executive__eyebrow">AYARLAR</p>
           <h1>Ayarlar</h1>
         </header>
-        <div className="saas-admin-alert" role="alert">
-          <ShieldAlert aria-hidden="true" /> {result.message}
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline />
+      </div>
     );
   }
 

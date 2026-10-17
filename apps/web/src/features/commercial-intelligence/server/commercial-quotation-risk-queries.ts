@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import {
@@ -416,11 +417,11 @@ export async function readCommercialQuotationRiskWorkspace(
     status: "success",
     canManage,
     workspace: {
-      facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+      facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
       reportingPeriodLabel: reportingPeriodLabel(assessments, comparisons),
       freshnessLabel: freshnessLabel(assessments, comparisons),
-      evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
-      provenanceDisclaimer: localizeCommercialQuotationRiskProvenance(workspaceResult.value.provenanceDisclaimer),
+      evidenceLabel: getCommercialWorkspaceEvidenceLabel(hasPilot),
+      provenanceDisclaimer: resolveCommercialProvenance(workspaceResult.value.provenanceDisclaimer, hasPilot, localizeCommercialQuotationRiskProvenance),
       ruleSetVersion: workspaceResult.value.ruleSetVersion,
       comparisonRuleSetVersion: workspaceResult.value.comparisonRuleSetVersion,
       defaultMinimumComparableObservations: workspaceResult.value.defaultMinimumComparableObservations,

@@ -5,16 +5,16 @@ import type {
 } from "../types/commercial-intelligence-types";
 
 export const COMMERCIAL_INTELLIGENCE_DEVELOPMENT_BANNER =
-  "Yerel geliştirme / simülasyon kanıtı — gerçek müşteri tedarik fiyatı veya piyasa kanıtı değildir.";
+  "Örnek veri — gerçek tedarik fiyatı veya piyasa kanıtı değildir.";
 
 export const COMMERCIAL_SALES_PRICE_DEVELOPMENT_BANNER =
-  "Yerel geliştirme / simülasyon kanıtı — gerçek müşteri işlemi, satış faturası, teklif veya piyasa kanıtı değildir.";
+  "Örnek veri — gerçek satış işlemi, fatura, teklif veya piyasa kanıtı değildir.";
 
 const SALES_PRICE_PROVENANCE_LABELS: Record<string, string> = {
   "Deterministic local Development sales-price evidence — simulated, non-production, not real customer, invoice, quotation, or market evidence.":
-    "Deterministik yerel geliştirme satış fiyatı kanıtı — simülasyon, üretim dışı; gerçek müşteri işlemi, satış faturası, teklif veya piyasa kanıtı değildir.",
+    "Örnek satış fiyatı verisi — gerçek müşteri işlemi, fatura, teklif veya piyasa kanıtı değildir.",
   "Deterministic local Development commercial-intelligence data — simulated, non-production, not real customer evidence, market prices, or guaranteed savings.":
-    "Deterministik yerel geliştirme ticari zekâ verisi — simülasyon, üretim dışı; gerçek müşteri kanıtı, piyasa fiyatları veya garantili tasarruf değildir.",
+    "Örnek ticari veri — gerçek müşteri kanıtı, piyasa fiyatı veya garantili tasarruf değildir.",
 };
 
 export const COMMERCIAL_INTELLIGENCE_READONLY_NOTE =
@@ -36,7 +36,7 @@ export const COMMERCIAL_SALES_PRICE_EVIDENCE_SCOPE =
   "Seçili satış fiyat kanıt penceresi";
 
 export const REAL_TRANSACTION_MAPPING_NOTE =
-  "Gerçek satış işlemi eşlemesi henüz tamamlanmadı. Bu çalışma alanındaki geliştirme verileri simülasyon kanıtıdır.";
+  "Gerçek satış işlemi eşlemesi henüz tamamlanmadı. Eşleme kurulana kadar bu çalışma alanında değer gösterilmez.";
 
 export const COMMERCIAL_SALES_PRICE_TAB_OPTIONS: ReadonlyArray<
   Readonly<{ id: CommercialSalesPriceTabId; label: string }>
@@ -119,10 +119,36 @@ const COMPARISON_DIMENSION_LABELS: Record<string, string> = {
 const EVIDENCE_STATUS_LABELS: Record<string, string> = {
   "measured-transaction": "Ölçülmüş işlem",
   calculated: "Hesaplanmış",
-  simulated: "Simülasyon",
+  simulated: "Örnek veri",
   "insufficient-data": "Veri yetersiz",
   "source-conflict": "Kaynak uyuşmazlığı",
 };
+
+/** Neutral wording for a tenant without any recorded commercial data: never "sample data". */
+export const COMMERCIAL_NO_SOURCE_LABEL = "Kayıtlı veri yok";
+export const COMMERCIAL_NO_EVIDENCE_LABEL = "Henüz kanıt yok";
+
+/** True for provenance text that describes development or sample data. */
+export function isCommercialSampleProvenance(value: string | null | undefined): boolean {
+  if (!value) return false;
+  return /Deterministic local Development|simulated|Örnek veri|Örnek /i.test(value);
+}
+
+/** Provenance line for a workspace: sample-data wording is shown only when the tenant really holds pilot data. */
+export function resolveCommercialProvenance(
+  value: string | null | undefined,
+  hasPilotData: boolean,
+  localize: (raw: string | null | undefined) => string = (raw) => raw ?? "",
+): string {
+  if (!hasPilotData && isCommercialSampleProvenance(value)) return COMMERCIAL_NO_SOURCE_LABEL;
+  return localize(value);
+}
+
+/** Workspace-level evidence label: "sample data" only for real pilot data, otherwise a neutral truthful label. */
+export function getCommercialWorkspaceEvidenceLabel(hasPilotData: boolean, hasRecords = false): string {
+  if (hasPilotData) return EVIDENCE_STATUS_LABELS.simulated;
+  return hasRecords ? EVIDENCE_STATUS_LABELS.calculated : COMMERCIAL_NO_EVIDENCE_LABEL;
+}
 
 const PROFILE_STATUS_LABELS: Record<string, string> = {
   draft: "Taslak",
@@ -201,7 +227,7 @@ const SOURCE_EVIDENCE_KIND_LABELS: Record<string, string> = {
   "sales-order-line": "Satış siparişi satırı",
   "invoice-line": "Fatura satırı",
   "quotation-line": "Teklif satırı",
-  "manual-development-simulator": "Manuel geliştirme simülatörü",
+  "manual-development-simulator": "Manuel örnek veri",
 };
 
 const GROSS_NET_BASIS_LABELS: Record<string, string> = {
@@ -301,7 +327,7 @@ export function localizeCommercialSalesPriceProvenance(value: string | null | un
         "Deterministic local Development sales-price evidence — simulated, non-production, not real customer, invoice, quotation, or market evidence."
       ];
     }
-    return "Deterministik yerel geliştirme verisi — simülasyon, üretim dışı.";
+    return "Örnek veri — gerçek müşteri verisi değildir.";
   }
   return trimmed;
 }

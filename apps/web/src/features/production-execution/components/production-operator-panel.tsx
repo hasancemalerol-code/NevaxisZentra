@@ -1,5 +1,6 @@
 "use client";
 
+import { displayActor } from "@/lib/presentation/display-label";
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserCheck, UserPlus, UserX } from "lucide-react";
@@ -7,6 +8,7 @@ import { UserCheck, UserPlus, UserX } from "lucide-react";
 import type { OperatorAssignmentSummary, OperatorAssignmentRole } from "../domain/production-execution-resources";
 import { OPERATOR_ASSIGNMENT_ROLES, getOperatorRoleLabel } from "../domain/production-execution-resources";
 import type { assignOperatorAction, releaseOperatorAction } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type OperatorPanelProps = Readonly<{
   orderId: string;
@@ -27,7 +29,7 @@ type PanelState =
   | { kind: "error"; message: string };
 
 function shortSubject(id: string): string {
-  if (id.length > 12) return `…${id.slice(-8)}`;
+  return displayActor(id);
   return id;
 }
 
@@ -235,7 +237,7 @@ export function ProductionOperatorPanel({
 
           {panelState.kind === "error" && (
             <div className="production-panel__error" role="alert">
-              <p>{panelState.message}</p>
+              <p>{customerMessage(panelState.message)}</p>
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPanelState({ kind: "idle" })}>
                 Kapat
               </button>

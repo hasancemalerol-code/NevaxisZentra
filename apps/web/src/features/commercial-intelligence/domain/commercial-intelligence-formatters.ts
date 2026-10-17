@@ -1,12 +1,12 @@
-const DATE_TIME_UTC_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
+const DATE_TIME_LOCAL_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
   dateStyle: "medium",
   timeStyle: "short",
-  timeZone: "UTC",
+  timeZone: "Europe/Istanbul",
 });
 
-const DATE_UTC_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
+const DATE_LOCAL_FORMATTER = new Intl.DateTimeFormat("tr-TR", {
   dateStyle: "medium",
-  timeZone: "UTC",
+  timeZone: "Europe/Istanbul",
 });
 
 const COUNT_FORMATTER = new Intl.NumberFormat("tr-TR");
@@ -34,14 +34,14 @@ export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) return "—";
-  return DATE_TIME_UTC_FORMATTER.format(parsed);
+  return DATE_TIME_LOCAL_FORMATTER.format(parsed);
 }
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return "—";
   const parsed = Date.parse(value);
   if (Number.isNaN(parsed)) return "—";
-  return DATE_UTC_FORMATTER.format(parsed);
+  return DATE_LOCAL_FORMATTER.format(parsed);
 }
 
 export function formatCompactPeriod(
@@ -61,17 +61,18 @@ export function formatRatioAsPercent(ratio: number | null | undefined): string {
     maximumFractionDigits: 1,
     signDisplay: "exceptZero",
   }).format(percent);
-  return `${formatted}%`;
+  const sign = formatted.startsWith("+") || formatted.startsWith("-") ? formatted[0] : "";
+  return `${sign}%${sign ? formatted.slice(1) : formatted}`;
 }
 
 /** Incidence fraction 0–1 → display percent without inventing zero for null. */
 export function formatIncidenceFraction(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "Hesaplanamadı";
   const percent = value * 100;
-  return `${new Intl.NumberFormat("tr-TR", {
+  return `%${new Intl.NumberFormat("tr-TR", {
     style: "decimal",
     maximumFractionDigits: 0,
-  }).format(percent)}%`;
+  }).format(percent)}`;
 }
 
 /** Signed incidence delta −1..1 as percentage points for display only. */

@@ -1,0 +1,80 @@
+.ai-task-create-form__row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.ai-task-create-form__row > label {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .ai-task-create-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.content-viewport .ai-task-create-form {
+  max-width: none;
+  margin-inline: 0;
+}
+
+.ai-task-create-form__group {
+  grid-column: 1 / -1;
+  margin: 6px 0 -4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--zx-line, #dbe2ea);
+  color: var(--zx-text-strong, #0f172a);
+  font-size: 0.8125rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ai-task-create-form__grid > .ai-task-create-form__group:first-child {
+  margin-top: 0;
+}
+
+.ai-task-create-form__grid > label:has(> input[name="title"]),
+.ai-task-create-form__grid > label:has(> input[name="recommendationTitle"]) {
+  grid-column: 1 / -1;
+}
+
+/* Select values read like the text inputs: regular weight. */
+.ai-task-create-form select {
+  font-weight: 400;
+}
+
+/* Select values read like text inputs (beats the shared inherit rule). */
+body .content-viewport .ai-task-create-form select:not([multiple]):not([size]) {
+  font-weight: 400;
+}
+
+/* Advanced-source disclosure: a themed chevron instead of the native triangle. */
+.ai-task-create-form__advanced > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.ai-task-create-form__advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.ai-task-create-form__advanced > summary::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.ai-task-create-form__advanced[open] > summary::before {
+  transform: rotate(45deg);
+}

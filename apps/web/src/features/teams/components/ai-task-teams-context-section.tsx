@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { MessagesSquare } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
 import {
   fetchEffectiveAccessCapabilities,
   hasGrantedPermission,
@@ -22,34 +21,30 @@ export async function AiTaskTeamsContextSection({ taskId }: AiTaskTeamsContextSe
   const canCreateApproval = hasGrantedPermission(access, "teams.approvals.create");
 
   return (
-    <Card className="p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-medium">Teams operasyon bağlamı</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {result.value.channelName}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-2">
-          <Link
-            href={result.value.teamsDeepLinkPath}
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary"
-            data-testid="ai-task-teams-context-link"
-          >
-            <MessagesSquare aria-hidden="true" size={16} />
-            Teams bağlamını aç
-          </Link>
-          {canCreateApproval ? (
-            <Link
-              href={`/teams/onaylar/yeni?channel=${encodeURIComponent(result.value.channelId)}&task=${encodeURIComponent(taskId)}`}
-              className="inline-flex items-center gap-2 text-sm font-medium text-primary"
-              data-testid="ai-task-request-approval"
-            >
-              Onay iste
-            </Link>
-          ) : null}
-        </div>
+    <section className="zx-panel zx-inline-panel" aria-labelledby="ai-task-teams-context-heading">
+      <div className="zx-inline-panel__copy">
+        <h2 id="ai-task-teams-context-heading" className="zx-panel__title">Teams operasyon bağlamı</h2>
+        <p className="zx-panel__subtitle">{result.value.channelName}</p>
       </div>
-    </Card>
+      <div className="zx-action-bar">
+        <Link
+          href={result.value.teamsDeepLinkPath}
+          className="zx-button"
+          data-testid="ai-task-teams-context-link"
+        >
+          <MessagesSquare aria-hidden="true" />
+          Teams bağlamını aç
+        </Link>
+        {canCreateApproval ? (
+          <Link
+            href={`/teams/onaylar/yeni?channel=${encodeURIComponent(result.value.channelId)}&task=${encodeURIComponent(taskId)}`}
+            className="zx-button"
+            data-testid="ai-task-request-approval"
+          >
+            Onay iste
+          </Link>
+        ) : null}
+      </div>
+    </section>
   );
 }

@@ -150,7 +150,15 @@ export type CommercialPricingScenarioTableRow = Readonly<{
   guardrailResult: string | null;
 }>;
 
+export type CommercialPricingScenarioProfileOption = Readonly<{
+  id: string;
+  version: number;
+  label: string;
+}>;
+
 export type CommercialPricingScenarioWorkspacePayload = Readonly<{
+  /** Approved sales-price profiles a scenario can be created against (named, never raw ids). */
+  profileOptions?: readonly CommercialPricingScenarioProfileOption[];
   facilityLabel: string;
   ruleSetVersion: string;
   provenanceDisclaimer: string;

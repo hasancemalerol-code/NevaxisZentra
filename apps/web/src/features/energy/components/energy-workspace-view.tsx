@@ -59,6 +59,11 @@ import {
   updateEnergyTargetAction,
 } from "../server/energy-actions";
 import "./energy-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { PageHeader } from "@/components/ui/page";
+import { EmptyPanel } from "@/components/ui/empty-panel";
+
 
 type EnergyWorkspaceViewProps = Readonly<{
   workspace: EnergyWorkspacePayload;
@@ -76,7 +81,7 @@ const MEASUREMENT_EVIDENCE_FILTER_OPTIONS = [
   { value: "measured", label: "Ölçülmüş" },
   { value: "calculated", label: "Hesaplanmış" },
   { value: "estimated", label: "Tahmini" },
-  { value: "simulated", label: "Simülasyon" },
+  { value: "simulated", label: "Örnek veri" },
   { value: "insufficient-data", label: "Veri yetersiz" },
   { value: "source-conflict", label: "Kaynak çelişkisi" },
 ] as const;
@@ -152,7 +157,7 @@ function buildTrendSummary(trend: readonly EnergyTrendPoint[]): string {
 }
 
 const DONUT_OUTER_RADIUS = 48;
-const DONUT_INNER_RADIUS = 29;
+const DONUT_INNER_RADIUS = 36;
 const DONUT_CENTER = { x: 60, y: 60 } as const;
 
 function describeDonutArc(
@@ -320,10 +325,10 @@ function EnergyTrendChart({
 
   const width = 800;
   const height = 244;
-  const pad = { top: 16, right: 34, bottom: 36, left: 56 };
+  const pad = { top: 30, right: 40, bottom: 36, left: 56 };
   const chartWidth = width - pad.left - pad.right;
   const chartHeight = height - pad.top - pad.bottom;
-  const maxTicks = trend.length <= 6 ? trend.length : trend.length <= 12 ? 6 : 7;
+  const maxTicks = trend.length <= 4 ? trend.length : 4;
   const tickIndices = selectChartTickIndices(trend.length, maxTicks);
   const yTickCount = 4;
   const timestamps = trend.map((point) => new Date(point.windowStartUtc).getTime());
@@ -467,7 +472,7 @@ function EnergyTrendChart({
           <text
             className="energy-chart-y-label"
             x={pad.left - 8}
-            y={pad.top - 4}
+            y={pad.top - 16}
             textAnchor="end"
           >
             kWh
@@ -481,7 +486,7 @@ function EnergyTrendChart({
                 x={xAt(index)}
                 y={height - 12}
                 textAnchor={labelAnchor(index)}
-                fontSize="10"
+                fontSize="17"
                 fill="#64748b"
               >
                 {point.label}
@@ -584,7 +589,7 @@ function EnergyTrendChart({
         </p>
       ) : null}
       <p className="energy-chart-caption" data-testid="energy-trend-caption">
-        {trend.length} zaman diliminde {scope.toLowerCase()}; noktalar gerçek UTC zamanına göre
+        {trend.length} zaman diliminde {scope.toLowerCase()}; noktalar gerçek zamana göre
         konumlandırılır.
       </p>
       <p className="energy-visually-hidden" data-testid="energy-trend-screen-reader">
@@ -768,7 +773,7 @@ export function EnergyWorkspaceView({
       actualLabel:
         totalKpi?.state === "available" && totalKpi.value !== "—"
           ? `${totalKpi.value}${totalKpi.unit ? ` ${totalKpi.unit}` : ""}`
-          : formatEnergyKwh(workspace.reportingTotalKwh),
+          : workspace.reportingTotalKwh > 0 ? `${formatEnergyKwh(workspace.reportingTotalKwh)} kWh` : "—",
       approvedTargetLabel: approvedTarget
         ? `${formatEnergyNumber(approvedTarget.targetValue)} ${approvedTarget.unit}`
         : "—",
@@ -776,7 +781,7 @@ export function EnergyWorkspaceView({
         varianceKpi?.state === "available" && varianceKpi.value !== "—"
           ? varianceKpi.value
           : aboveTargetLabel,
-      evidenceLabel: meta.evidenceLabel,
+      evidenceLabel: approvedTarget || workspace.reportingTotalKwh > 0 ? meta.evidenceLabel : "—",
       outcomeLabel: primaryAssessment?.outcomeLabel ?? varianceKpi?.meta ?? "—",
       hasApprovedTarget: Boolean(approvedTarget),
     };
@@ -1027,28 +1032,24 @@ export function EnergyWorkspaceView({
     );
   }
 
+  const formattedPeriod = formatEnergyPeriod(meta.reportingPeriodStartUtc, meta.reportingPeriodEndUtc);
+  const formattedLatest = formatEnergyDateTime(meta.latestFreshnessUtc);
+  const reportingPeriodText = formattedPeriod === "—" ? "Belirlenmedi" : formattedPeriod;
+  const latestDataText = formattedLatest === "—" ? "Henüz veri yok" : formattedLatest;
+  const noOverviewData =
+    (workspace.trend.length === 0 || workspace.trendInsufficientData) && (workspace.allocations.length === 0 || workspace.reportingTotalKwh <= 0);
+  const showPerformancePanel = !noOverviewData || overviewIntelligenceRows.length > 0;
+  const hasReportingInfo =
+    formattedPeriod !== "—" || formattedLatest !== "—";
+
   return (
-    <main className="energy-page" data-testid="energy-workspace">
+    <div className="energy-page" data-testid="energy-workspace">
       <section className="energy-executive" aria-label="Enerji yönetim komuta yüzeyi">
-        <div className="energy-executive__top">
-          <div className="energy-executive__intro">
-            <p className="energy-executive__eyebrow">ENERJİ YÖNETİMİ</p>
-            <h1>Enerji</h1>
-            <p className="energy-executive__subtitle">
-              Enjeksiyon makinesi ve yardımcı ekipman tüketimini tek yüzeyde izleyin; hedef,
-              baz ve değerlendirme kanıtlarını operasyonel karar düzeyinde görün.
-            </p>
-            <ul className="energy-executive__meta" aria-label="Raporlama meta verisi">
-              <li>{meta.facilityLabel}</li>
-              <li>
-                Raporlama:{" "}
-                {formatEnergyPeriod(meta.reportingPeriodStartUtc, meta.reportingPeriodEndUtc)}
-              </li>
-              <li>Tazelik: {formatEnergyDateTime(meta.latestFreshnessUtc)}</li>
-              <li>Kanıt: {meta.evidenceLabel}</li>
-            </ul>
-          </div>
-          <div className="energy-executive__actions">
+        <PageHeader
+          eyebrow="Enerji yönetimi"
+          title="Enerji"
+          description="Enjeksiyon makinesi ve yardımcı ekipman tüketimini hedef ve baz değerlendirmeleriyle izleyin."
+          actions={(
             <button
               type="button"
               className="energy-button"
@@ -1063,12 +1064,19 @@ export function EnergyWorkspaceView({
               )}
               Yenile
             </button>
-          </div>
-        </div>
+          )}
+        />
+        {hasReportingInfo ? (
+          <ul className="energy-executive__meta" aria-label="Raporlama bilgisi">
+
+            {formattedPeriod !== "—" ? <li>Raporlama dönemi: {reportingPeriodText}</li> : null}
+            {formattedLatest !== "—" ? <li>Son veri: {latestDataText}</li> : null}
+          </ul>
+        ) : null}
 
         {meta.hasDevelopmentPilotData ? (
           <p className="energy-provenance-strip" role="status" data-testid="energy-provenance-strip">
-            <span className="energy-provenance-strip__badge">Simülasyon</span>
+            <span className="energy-provenance-strip__badge">Örnek veri</span>
             <span>{ENERGY_DEVELOPMENT_BANNER}</span>
           </p>
         ) : null}
@@ -1087,7 +1095,7 @@ export function EnergyWorkspaceView({
 
       {error ? (
         <div className="energy-error-banner" role="alert">
-          {error}
+          {customerMessage(error)}
         </div>
       ) : null}
 
@@ -1102,6 +1110,12 @@ export function EnergyWorkspaceView({
           const presentation = resolveKpiPresentation(kpi, workspace.trend);
           const evidenceRail = resolveKpiEvidenceRail(kpi);
           const Icon = presentation.icon;
+          const isAvailable = kpi.state === "available";
+          // A sentence in the value slot ("Tarife tanımlı değil") is a status, not a value: the slot shows a dash and the single status line below carries the sentence.
+          const hasNumericValue = /^[\d\s.,%+\-−—]+$/.test(presentation.displayValue.trim());
+          const noReportingWindow = kpi.id === "total-consumption" && formattedPeriod === "—" && workspace.reportingTotalKwh <= 0;
+          const valueText = !noReportingWindow && (isAvailable || hasNumericValue) ? presentation.displayValue : "—";
+          const statusLine = kpi.meta || (hasNumericValue ? presentation.scopeLabel : presentation.displayValue);
           const sparklinePath =
             presentation.sparklineValues !== null
               ? createSparklinePath(presentation.sparklineValues)
@@ -1121,36 +1135,48 @@ export function EnergyWorkspaceView({
                 <span className="energy-kpi-card__icon" aria-hidden="true">
                   <Icon size={16} strokeWidth={2} />
                 </span>
-                <span
-                  className="energy-kpi-card__tone"
-                  data-testid={`energy-kpi-status-${kpi.id}`}
-                >
-                  {presentation.statusLabel}
-                </span>
+                {isAvailable ? (
+                  <span
+                    className="energy-kpi-card__tone"
+                    data-testid={`energy-kpi-status-${kpi.id}`}
+                    title={presentation.statusLabel}
+                  >
+                    {presentation.statusLabel}
+                  </span>
+                ) : null}
               </div>
               <div className="energy-kpi-card__body">
                 <p className="energy-kpi-card__label">{kpi.label}</p>
                 <div className="energy-kpi-card__value-row">
                   <p className="energy-kpi-card__value" title={kpi.unavailableReason}>
-                    {presentation.displayValue}
+                    {valueText}
                   </p>
-                  {presentation.displayUnit ? (
-                    <span className="energy-kpi-card__unit">{presentation.displayUnit}</span>
+                  {presentation.displayUnit && (isAvailable || hasNumericValue) ? (
+                    <span className="energy-kpi-card__unit" title={presentation.displayUnit}>
+                      {presentation.displayUnit.replace(/\s*iyi parça$/, "")}
+                    </span>
                   ) : null}
                 </div>
                 <p className="energy-kpi-card__meta">
-                  {presentation.scopeLabel && kpi.id !== "total-consumption" ? (
+                  {isAvailable ? (
                     <>
-                      <span className="energy-kpi-card__scope">{presentation.scopeLabel}</span>
-                      {" · "}
+                      {presentation.scopeLabel && kpi.id !== "total-consumption" ? (
+                        <>
+                          <span className="energy-kpi-card__scope">{presentation.scopeLabel}</span>
+                          {" · "}
+                        </>
+                      ) : null}
+                      {kpi.id === "total-consumption" ? presentation.scopeLabel : kpi.meta}
                     </>
-                  ) : null}
-                  {kpi.id === "total-consumption" ? presentation.scopeLabel : kpi.meta}
+                  ) : statusLine}
                 </p>
               </div>
+              {isAvailable ? (
               <div className="energy-kpi-card__footer">
                 <div className="energy-kpi-card__footer-top">
-                  <p className="energy-kpi-card__evidence">Kanıt: {kpi.evidenceLabel}</p>
+                  {kpi.state === "available" || kpi.evidenceLabel !== kpi.meta ? (
+                    <p className="energy-kpi-card__evidence">Kanıt: {kpi.evidenceLabel}</p>
+                  ) : null}
                   {sparklinePath ? (
                     <svg
                       className="energy-kpi-card__sparkline"
@@ -1183,6 +1209,7 @@ export function EnergyWorkspaceView({
                   </div>
                 ) : null}
               </div>
+              ) : null}
             </article>
           );
         })}
@@ -1220,6 +1247,23 @@ export function EnergyWorkspaceView({
           className="energy-panel-grid energy-panel-grid--overview"
           data-testid="energy-overview-grid"
         >
+          {noOverviewData ? (
+            <section className="energy-panel energy-panel--no-data" aria-label="Tüketim ve dağılım" data-testid="energy-no-data-panel">
+              <h2 className="energy-panel__title">Tüketim eğilimi ve dağılımı</h2>
+              <EmptyPanel
+                data-testid="energy-trend-insufficient"
+                icon={<Zap size={20} />}
+                title="Tüketim verisi henüz yok"
+                description="Seçili kapsamda karşılaştırılabilir tüketim verisi bulunmuyor."
+                action={(
+                  <button type="button" className="energy-button energy-button--primary" onClick={() => setActiveTab("measurement-points")}>
+                    Ölçüm noktalarını gör
+                  </button>
+                )}
+              />
+            </section>
+          ) : (
+          <>
           <section className="energy-panel energy-panel--chart" aria-label="Tüketim eğilimi">
             <div className="energy-panel__header">
               <h2 className="energy-panel__title">Tüketim eğilimi</h2>
@@ -1249,7 +1293,7 @@ export function EnergyWorkspaceView({
             <p className="energy-panel__meta" data-testid="energy-allocation-reconciliation">
               Toplam: {formatEnergyKwh(workspace.reportingTotalKwh)} kWh · Dağıtılan:{" "}
               {formatEnergyKwh(workspace.allocatedConsumptionKwh)} kWh · Kapsama:{" "}
-              {formatEnergyNumber(workspace.allocationCoveragePercent, 1)}%
+              %{formatEnergyNumber(workspace.allocationCoveragePercent, 1)}
               {workspace.residualConsumptionKwh > 0.0001
                 ? ` · Dağıtılmamış: ${formatEnergyKwh(workspace.residualConsumptionKwh)} kWh`
                 : ""}
@@ -1272,7 +1316,7 @@ export function EnergyWorkspaceView({
                     >
                       <span className="energy-allocation-row__label">{slice.label}</span>
                       <span className="energy-allocation-row__value">
-                        {formatEnergyKwh(slice.kwh)} kWh · {formatEnergyNumber(slice.percent, 1)}%
+                        {formatEnergyKwh(slice.kwh)} kWh · %{formatEnergyNumber(slice.percent, 1)}
                       </span>
                       <div className="energy-allocation-row__bar" aria-hidden="true">
                         <span style={{ width: `${Math.min(slice.percent, 100)}%` }} />
@@ -1283,11 +1327,14 @@ export function EnergyWorkspaceView({
               </div>
             )}
           </section>
+          </>
+          )}
 
           <div
             className="energy-panel-grid energy-panel-grid--lower"
             data-testid="energy-overview-lower-grid"
           >
+            {showPerformancePanel ? (
             <section
               className="energy-panel"
               aria-label="Enerji performansı"
@@ -1350,7 +1397,7 @@ export function EnergyWorkspaceView({
                   <button
                     type="button"
                     className="energy-button"
-                    style={{ padding: "0.2rem 0.45rem", fontSize: "0.68rem" }}
+                    style={{ padding: "0.2rem 0.45rem", fontSize: "0.75rem" }}
                     onClick={() => setActiveTab("assessments")}
                   >
                     Değerlendirmeler sekmesinde
@@ -1358,6 +1405,7 @@ export function EnergyWorkspaceView({
                 </p>
               ) : null}
             </section>
+            ) : null}
 
             <section
               className="energy-panel"
@@ -1497,7 +1545,7 @@ export function EnergyWorkspaceView({
                   </p>
                 </div>
               ) : (
-                <table className="energy-registry-table">
+                <table aria-label="Enerji kanıt kayıtları" className="energy-registry-table">
                   <thead>
                     <tr>
                       <th>Kod</th>
@@ -1596,7 +1644,7 @@ export function EnergyWorkspaceView({
                     </dd>
                   </dl>
                 ) : (
-                  <p className="energy-empty">Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 )}
               </aside>
             ) : null}
@@ -1718,7 +1766,7 @@ export function EnergyWorkspaceView({
                   </p>
                 </div>
               ) : (
-                <table className="energy-registry-table">
+                <table aria-label="Enerji kanıt kayıtları" className="energy-registry-table">
                   <thead>
                     <tr>
                       <th>Değerlendirme</th>
@@ -1848,8 +1896,6 @@ export function EnergyWorkspaceView({
                     <details style={{ marginTop: "0.75rem" }}>
                       <summary>Teknik ayrıntılar</summary>
                       <dl style={{ marginTop: "0.55rem" }}>
-                        <dt>Kural seti</dt>
-                        <dd>{assessmentDetail.ruleSetVersion}</dd>
                         <dt>Kaynak</dt>
                         <dd>{assessmentDetail.provenanceLabel ?? "—"}</dd>
                         {assessmentDetail.drivers.map((driver) => (
@@ -1868,7 +1914,7 @@ export function EnergyWorkspaceView({
                                   : null,
                                 driver.evidenceSource ? `Kaynak: ${driver.evidenceSource}` : null,
                                 driver.freshnessLabel
-                                  ? `Tazelik: ${driver.freshnessLabel}`
+                                  ? `Son veri: ${driver.freshnessLabel}`
                                   : null,
                               ]
                                 .filter(Boolean)
@@ -1880,7 +1926,7 @@ export function EnergyWorkspaceView({
                     </details>
                   </>
                 ) : (
-                  <p className="energy-empty">Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 )}
               </aside>
             ) : null}
@@ -1903,7 +1949,7 @@ export function EnergyWorkspaceView({
 
             {targetDialogError ? (
               <div className="energy-error-banner" role="alert" style={{ marginBottom: "0.55rem" }}>
-                {targetDialogError}
+                {customerMessage(targetDialogError)}
               </div>
             ) : null}
 
@@ -2045,6 +2091,6 @@ export function EnergyWorkspaceView({
           </div>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

@@ -13,11 +13,15 @@ import "./command-center.css";
 import "./production-execution.css";
 import "./export.css";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
+import "../design-system/zentra-premium.css";
+import "../design-system/zentra-surfaces.css";
+import "../design-system/zentra-surfaces-features.css";
+import "../design-system/zentra-surfaces-modules.css";
 
 export const metadata: Metadata = {
   title: buildZentraDocumentTitle(),
   description:
-    "Nevaxis Zentra — Production Intelligence & Autonomous Operations for production, quality, maintenance, and verified operational execution.",
+    "Nevaxis Zentra — Fabrikanızın Akıllı Operasyon Sistemi: üretim, kalite, bakım ve doğrulanmış operasyonel yürütme.",
 };
 
 interface RootLayoutProps {

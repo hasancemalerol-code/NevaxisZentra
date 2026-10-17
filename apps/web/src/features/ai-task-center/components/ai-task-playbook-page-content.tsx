@@ -4,10 +4,11 @@ import {
   PageContent,
   PageHeader,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { AiTaskPlaybookHeaderActions } from "@/features/ai-task-center/components/ai-task-playbook-header-actions";
 import { AiTaskPlaybookLibraryClient } from "@/features/ai-task-center/components/ai-task-playbook-library-client";
 import { readAiTaskPlaybookLibrary } from "@/features/ai-task-center/server/ai-task-playbook-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 function HeaderActionsFallback() {
   return <div className="ai-task-playbook-page-actions" aria-hidden="true" />;
@@ -21,15 +22,11 @@ export async function AiTaskPlaybookPageContent() {
       <PageContent>
         <PageHeader
           description="Operasyonel playbook kütüphanesi ve çalışma takibi"
-          eyebrow="AI Görev Merkezi"
+          eyebrow="Görev Merkezi"
           title="Operasyonel Playbooklar"
         />
 
-        <EmptyState
-          data-testid="ai-task-playbook-error"
-          description={result.message}
-          title="Playbook kütüphanesi yüklenemedi"
-        />
+        <div data-testid="ai-task-playbook-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Playbook kütüphanesi yüklenemedi" inline /></div>
       </PageContent>
     );
   }
@@ -52,7 +49,7 @@ export async function AiTaskPlaybookPageContent() {
           </Suspense>
         }
         description="Standart operasyon akışlarını tanımlayın, çalıştırın ve izleyin."
-        eyebrow="AI Görev Merkezi"
+        eyebrow="Görev Merkezi"
         title="Operasyonel Playbooklar"
       />
 

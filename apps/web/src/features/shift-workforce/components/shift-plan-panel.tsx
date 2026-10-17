@@ -35,8 +35,8 @@ export function ShiftPlanPanel({ contextOptions }: ShiftPlanPanelProps) {
             <p>Planlama bağlamı için kayıtlı vardiya bulunmuyor.</p>
           </div>
         ) : (
-          <div className="shift-workforce-registry__table-wrap">
-            <table className="shift-workforce-table">
+          <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Vardiya tanımları (kaydırılabilir)">
+            <table aria-label="Vardiya tanımları" className="shift-workforce-table">
               <thead>
                 <tr>
                   <th>Vardiya</th>

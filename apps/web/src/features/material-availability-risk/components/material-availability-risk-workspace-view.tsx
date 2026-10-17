@@ -41,6 +41,10 @@ import {
   MATERIAL_AVAILABILITY_RISK_DISCLAIMER,
   MATERIAL_AVAILABILITY_RISK_TASK_DISCLAIMER,
 } from "../presentation/material-availability-risk-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { formatEvidenceSentence, formatEvidenceValue } from "@/lib/presentation/format";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type MaterialAvailabilityRiskWorkspaceViewProps = Readonly<{
   workspace: MaterialAvailabilityRiskWorkspacePayload;
@@ -183,10 +187,10 @@ export function MaterialAvailabilityRiskWorkspaceView({
 
   if (workspace.assessments.length === 0) {
     return (
-      <div className="quality-empty-panel" data-testid="material-availability-risk-empty">
+      <div className="quality-empty-panel material-risk-empty" data-testid="material-availability-risk-empty">
         <FileWarning aria-hidden="true" />
-        <h3>Değerlendirilmiş malzeme riski yok</h3>
-        <p>Yetkili tesis kapsamında malzeme kullanılabilirliği değerlendirmesi bulunamadı.</p>
+        <strong>Değerlendirilmiş malzeme riski yok</strong>
+        <p>Malzeme kullanılabilirliği değerlendirmesi oluştuğunda burada listelenir.</p>
       </div>
     );
   }
@@ -264,7 +268,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
       {actionError ? (
         <div role="alert" className="quality-error-panel" data-testid="material-availability-risk-action-error">
           <AlertTriangle aria-hidden="true" />
-          <p>{actionError}</p>
+          <p>{customerMessage(actionError)}</p>
         </div>
       ) : null}
 
@@ -274,8 +278,8 @@ export function MaterialAvailabilityRiskWorkspaceView({
             <h2>Malzeme risk envanteri</h2>
             <p>Kullanılabilirlik değerlendirmeleri</p>
           </header>
-          <div className="quality-table-wrap" data-testid="material-availability-risk-table">
-            <table>
+          <div className="quality-table-wrap" tabIndex={0} data-testid="material-availability-risk-table">
+            <table aria-label="Malzeme risk envanteri">
               <thead>
                 <tr>
                   <th>Malzeme</th>
@@ -324,9 +328,9 @@ export function MaterialAvailabilityRiskWorkspaceView({
           </header>
 
           {assessmentError ? (
-            <p role="alert" data-testid="material-availability-risk-detail-error">{assessmentError}</p>
+            <p role="alert" data-testid="material-availability-risk-detail-error">{customerMessage(assessmentError)}</p>
           ) : !assessment ? (
-            <p data-testid="material-availability-risk-detail-empty">Seçili değerlendirme yüklenemedi.</p>
+            <InlineUnavailable subject="Seçili değerlendirme" testId="material-availability-risk-detail-empty" />
           ) : (
             <div data-testid="material-availability-risk-detail-ready">
               <dl className="quality-detail-grid">
@@ -380,15 +384,11 @@ export function MaterialAvailabilityRiskWorkspaceView({
                 </div>
                 <div>
                   <dt>Kaynak tazeliği</dt>
-                  <dd>{assessment.sourceFreshness ?? "—"}</dd>
+                  <dd>{assessment.sourceFreshness ? enumLabel(assessment.sourceFreshness) : "—"}</dd>
                 </div>
                 <div>
                   <dt>Değerlendirme</dt>
                   <dd>{formatDateTime(assessment.evaluatedAtUtc)}</dd>
-                </div>
-                <div>
-                  <dt>Kural seti</dt>
-                  <dd>{assessment.ruleSetVersion}</dd>
                 </div>
               </dl>
 
@@ -399,7 +399,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                     {assessment.drivers.map((driver) => (
                       <li key={`${driver.code}-${driver.label}`}>
                         <strong>{driver.label}</strong>
-                        {driver.value ? ` — ${driver.value}` : ""}
+                        {driver.value ? ` — ${formatEvidenceSentence(driver.value)}` : ""}
                         {" "}
                         ({getMaterialAssessmentDriverStateLabel(driver.state)})
                       </li>
@@ -416,8 +416,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                       <li key={`${item.field}-${item.source ?? "unknown"}`}>
                         <strong>{getMaterialAssessmentEvidenceFieldLabel(item.field)}</strong>
                         {": "}
-                        {item.isMissing ? "Eksik" : (item.value ?? "—")}
-                        {item.source ? ` (${item.source})` : ""}
+                        {item.isMissing ? "Eksik" : formatEvidenceValue(item.value)}
                       </li>
                     ))}
                   </ul>
@@ -431,7 +430,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                     Kanıt yetersiz veya çelişkili — yalnızca veri inceleme görev taslağı oluşturulabilir.
                   </p>
                 ) : (
-                  <p>{assessment.evidenceSummary || "—"}</p>
+                  <p>{formatEvidenceSentence(assessment.evidenceSummary) || "—"}</p>
                 )}
               </section>
 
@@ -441,7 +440,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                   <ul className="quality-audit-list" data-testid="material-availability-risk-audit-events">
                     {assessment.auditEvents.map((event) => (
                       <li key={`${event.eventType}-${event.occurredAtUtc}`}>
-                        <strong>{event.eventType}</strong>
+                        <strong>{enumLabel(event.eventType)}</strong>
                         {" — "}
                         {event.actor}
                         {" ("}
@@ -457,7 +456,7 @@ export function MaterialAvailabilityRiskWorkspaceView({
                 <section aria-labelledby="material-risk-history-heading">
                   <h3 id="material-risk-history-heading">Değerlendirme geçmişi</h3>
                   {historyError ? (
-                    <p role="alert" data-testid="material-availability-risk-history-error">{historyError}</p>
+                    <p role="alert" data-testid="material-availability-risk-history-error">{customerMessage(historyError)}</p>
                   ) : (
                     <ul className="quality-audit-list" data-testid="material-availability-risk-history">
                       {history.map((entry) => (
@@ -471,8 +470,6 @@ export function MaterialAvailabilityRiskWorkspaceView({
                           </button>
                           {" — "}
                           {formatDateTime(entry.evaluatedAtUtc)}
-                          {" "}
-                          ({entry.ruleSetVersion})
                         </li>
                       ))}
                     </ul>

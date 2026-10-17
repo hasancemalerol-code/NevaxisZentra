@@ -96,7 +96,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/uretim",
       },
       {
-        label: "Makineler & Kaynaklar",
+        label: "Makineler ve Kaynaklar",
         href: "/uretim/kaynaklar",
         iconKey: "cpu",
         permissionKey: requiredRoutePermission("kaynaklar"),
@@ -110,7 +110,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/vardiyalar",
       },
       {
-        label: "Proses & OEE",
+        label: "Proses ve OEE",
         href: "/proses-oee",
         iconKey: "circle-gauge",
         permissionKey: "process-oee.read",
@@ -136,7 +136,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/makineler",
       },
       {
-        label: "Kalıp & Takımlar",
+        label: "Kalıp ve Takımlar",
         href: "/kaliplar",
         iconKey: "molds",
         permissionKey: "mold.read",
@@ -175,7 +175,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         subscriptionModulePath: "/enerji",
       },
       {
-        label: "IoT & PLC",
+        label: "IoT ve PLC",
         href: "/iot-plc",
         iconKey: "cable",
         permissionKey: "iot-plc.read",
@@ -184,7 +184,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "Risk & Tedarik",
+    label: "Risk ve Tedarik",
     items: [
       {
         label: "Operasyonel Riskler",
@@ -278,7 +278,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "users-round",
       },
       {
-        label: "Malzeme ve Maliyet Kârlılığı",
+        label: "Malzeme ve Maliyet",
         href: "/ticari-zeka/malzeme-ve-maliyet-karliligi",
         iconKey: "boxes",
       },
@@ -311,7 +311,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
     ],
   },
   {
-    label: "ERP & Entegrasyon",
+    label: "ERP ve Entegrasyon",
     items: [
       {
         label: "ERP Bağlantısı",
@@ -320,11 +320,11 @@ export const primaryNavigation: readonly NavigationGroup[] = [
       },
       {
         label: "Veri Eşleştirme",
-        href: "/erp-entegrasyonlari/veri-eslestirme",
+        href: "/erp-entegrasyonlari/eslestirme",
         iconKey: "boxes",
       },
       {
-        label: "Senkronizasyonlar",
+        label: "Eşitleme",
         href: "/erp-entegrasyonlari/senkronizasyonlar",
         iconKey: "circle-gauge",
       },
@@ -334,7 +334,7 @@ export const primaryNavigation: readonly NavigationGroup[] = [
         iconKey: "triangle-alert",
       },
       {
-        label: "Entegrasyon Sağlığı",
+        label: "Bağlantı Sağlığı",
         href: "/erp-entegrasyonlari/saglik",
         iconKey: "gauge",
       },

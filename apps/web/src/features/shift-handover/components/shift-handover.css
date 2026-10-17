@@ -61,3 +61,242 @@
   padding: 0.5rem 0.625rem;
   background: var(--background);
 }
+
+/* Create / add-item forms stay behind a disclosure and never stretch across the page. */
+.shift-handover-disclosure {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+/* The collapsed disclosure is a secondary button, never an input-looking bar. */
+.shift-handover-disclosure > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--zx-line-strong, #c3ccd9);
+  border-radius: var(--zx-radius-sm, 8px);
+  background: var(--zx-surface, #fff);
+  color: var(--zx-accent-strong, #1a4a8a);
+  font-size: 0.875rem;
+  font-weight: 650;
+  list-style: none;
+  cursor: pointer;
+}
+
+.shift-handover-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.shift-handover-disclosure > summary::before {
+  content: "+";
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.shift-handover-disclosure[open] > summary::before {
+  content: "\2212";
+}
+
+.shift-handover-disclosure > summary:hover {
+  background: var(--zx-surface-muted, #f3f6fa);
+}
+
+.shift-handover-disclosure > summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-focus-ring, #1675d1) 38%, transparent);
+  outline-offset: 2px;
+}
+
+.shift-handover-disclosure > .shift-handover-form-grid {
+  width: 100%;
+  max-width: 720px;
+  padding: 16px;
+  border: 1px solid var(--zx-line, #d8dee9);
+  border-radius: var(--zx-radius-sm, 8px);
+  background: var(--zx-surface, #fff);
+}
+
+.shift-handover-action-hint {
+  max-width: 320px;
+  margin: 6px 0 0;
+  color: var(--zx-text-muted, #5b6b7f);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.shift-handover-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  align-items: start;
+}
+
+.shift-handover-form-grid input,
+.shift-handover-form-grid select,
+.shift-handover-form-grid textarea {
+  width: 100%;
+  min-height: 38px;
+  border-color: var(--zx-line-strong, #c3ccd9);
+  background: var(--zx-surface, #fff);
+  font: inherit;
+}
+
+.shift-handover-field--wide,
+.shift-handover-check,
+.shift-handover-form-actions {
+  grid-column: 1 / -1;
+}
+
+.shift-handover-form-grid label.shift-handover-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.shift-handover-form-grid label.shift-handover-check input {
+  width: auto;
+  min-height: 0;
+}
+
+.shift-handover-form-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.shift-handover-summary-block {
+  display: grid;
+  gap: 2px;
+  margin-top: 14px;
+}
+
+.shift-handover-summary-label {
+  color: var(--zx-text-strong, #12263a);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.shift-handover-summary-block .shift-handover-summary {
+  margin: 0;
+}
+
+/* ─── Round 5: summary facts ─── */
+/* Eight facts on one four-column rail (the shared balanced-rows rule would stretch 5 + 3 with unequal widths); cells are separated by
+   1px gaps over a hairline background, so the outer edge carries a single border. */
+body .content-viewport dl.zx-detail-list[data-testid="shift-handover-detail-facts"] {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--zx-line, #e3e9f1);
+}
+
+body .content-viewport dl.zx-detail-list[data-testid="shift-handover-detail-facts"] > div {
+  flex: initial;
+  border: 0;
+}
+
+@media (max-width: 899px) {
+  body .content-viewport dl.zx-detail-list[data-testid="shift-handover-detail-facts"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Helper text under the primary action reads at body size and aligns with the button. */
+.shift-handover-action-hint {
+  max-width: 360px;
+  color: var(--zx-text, #3b4a5e);
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.shift-handover-summary-label {
+  font-size: 0.875rem;
+}
+
+/* Round 5: the create panel is one row (title left, action right) while collapsed, and stacks once the form is open. */
+.shift-handover-create-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px 24px;
+}
+
+.shift-handover-create-panel:has(details[open]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shift-handover-create-panel > .zx-panel__header {
+  margin: 0;
+}
+
+.shift-handover-create-panel .shift-handover-disclosure {
+  justify-items: end;
+}
+
+.shift-handover-create-panel .shift-handover-disclosure[open] {
+  justify-items: start;
+}
+
+@media (max-width: 640px) {
+  .shift-handover-create-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shift-handover-create-panel .shift-handover-disclosure {
+    justify-items: start;
+  }
+}
+
+.shift-handover-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 32px;
+  color: #4d6078;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.shift-handover-back-link svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.shift-handover-back-link:hover {
+  color: #155eef;
+}
+
+/* Devir notu sits in its own quiet container instead of floating under the grid. */
+.shift-handover-summary-block {
+  padding: 12px 14px;
+  border: 1px solid var(--zx-line, #e3e9f1);
+  border-radius: 10px;
+  background: var(--zx-surface-soft, #f8fafd);
+}
+
+body .content-viewport dl.zx-detail-list[data-testid="shift-handover-detail-facts"] dd {
+  font-weight: 500;
+}
+
+/* Frozen checklist round 3: numeric column right-aligned; all secondary buttons share one height. */
+.shift-handover-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Frozen checklist round 4: the numeric header sits over its right-aligned cells (beats .zx-table thead th), and the empty-state action is centred inside the block. */
+.zx-table thead th.shift-handover-num {
+  text-align: right;
+}
+
+.zx-empty .shift-handover-disclosure {
+  justify-items: center;
+}
+
+.zx-empty .shift-handover-disclosure[open] {
+  justify-items: stretch;
+}

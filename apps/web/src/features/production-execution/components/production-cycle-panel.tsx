@@ -11,6 +11,7 @@ import {
 } from "../domain/production-execution-operations";
 import type { ProductionOrderStatus } from "../domain/production-order";
 import type { recordManualCycleAction } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type CyclePanelProps = Readonly<{
   orderId: string;
@@ -130,7 +131,7 @@ export function ProductionCyclePanel({
 
       {panelState.kind === "error" && (
         <div role="alert" className="ops-panel__error">
-          {panelState.message}
+          {customerMessage(panelState.message)}
           <button
             type="button"
             className="ops-panel__error-dismiss"

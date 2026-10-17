@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import { createScenarioRecoveryRunAction, type CreateScenarioRecoveryActionState } from "../server/scenario-recovery-actions";
 import type { ScenarioRecoveryHistoryItemApi } from "../server/scenario-recovery-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ScenarioRecoveryCreatePanelProps = Readonly<{
   lineId: string;
@@ -22,9 +23,9 @@ export function ScenarioRecoveryCreatePanel(props: ScenarioRecoveryCreatePanelPr
   return (
     <section className="commint-page" data-testid="scenario-recovery-ready">
       <h1>Senaryo Kurtarma</h1>
-      <p>Bu hat için henüz açık bir senaryo çalıştırması seçilmedi. Sayfa görüntülenirken senaryo oluşturulmaz.</p>
+      <p>Bu hat için henüz açık bir senaryo çalışması seçilmedi. Sayfa görüntülenirken senaryo oluşturulmaz.</p>
       {props.history.length > 0 ? (
-        <ul aria-label="Önceki senaryo çalıştırmaları">
+        <ul aria-label="Önceki senaryo çalışmaları">
           {props.history.map((item) => (
             <li key={item.runId}>
               <a href={`/senaryo-kurtarma?runId=${encodeURIComponent(item.runId)}`}>{item.problemSummary}</a>
@@ -47,7 +48,7 @@ export function ScenarioRecoveryCreatePanel(props: ScenarioRecoveryCreatePanelPr
           </button>
           {state.status === "failure" ? (
             <p role="alert" data-testid="scenario-recovery-create-error">
-              {state.message}
+              {customerMessage(state.message)}
             </p>
           ) : null}
         </form>

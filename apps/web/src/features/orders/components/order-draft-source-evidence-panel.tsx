@@ -97,7 +97,7 @@ export function OrderDraftSourceEvidencePanel({
         <ShieldCheck aria-hidden="true" />
 
         <p>
-          AI tarafından çıkarılan sipariş bilgileri,
+          Yapay zekâ tarafından çıkarılan sipariş bilgileri,
           kaynak mesajlar ve bağlı sistem kayıtlarıyla
           birlikte saklanır. Kullanıcı düzeltmeleri ve
           onay geçmişi audit kaydına eklenir.

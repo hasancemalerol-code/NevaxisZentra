@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
 import type { createTransferRequestAction, executeTransferAction } from "../server/production-plan-transfer-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ProductionPlanTransferPanelProps = Readonly<{
   planId: string;
@@ -72,10 +73,10 @@ function RequestDialog({ onCancel, onConfirm, isPending }: RequestDialogProps) {
       className="workflow-action-dialog"
       role="dialog"
       aria-modal="true"
-      aria-label="Transfer Talebi Oluştur"
+      aria-label="Aktarım Talebi Oluştur"
     >
       <div className="workflow-action-dialog__header">
-        <h3>Transfer Talebi Oluştur</h3>
+        <h3>Aktarım Talebi Oluştur</h3>
         <p>
           Hedef sistemi seçin ve transfer talebini oluşturun.
           Talep oluşturulduktan sonra yetkili kullanıcı transferi uygulayabilir.
@@ -115,7 +116,7 @@ function RequestDialog({ onCancel, onConfirm, isPending }: RequestDialogProps) {
           onClick={() => { onConfirm(targetSystem); }}
           disabled={isPending}
         >
-          {isPending ? "Oluşturuluyor…" : "Transfer Talebi Oluştur"}
+          {isPending ? "Oluşturuluyor…" : "Aktarım Talebi Oluştur"}
         </button>
       </div>
     </div>
@@ -256,7 +257,7 @@ export function ProductionPlanTransferPanel({
     <section className="production-plan-workflow-actions">
       <div className="production-plan-workflow-actions__heading">
         <div>
-          <p>ERP/MES Aktarım</p>
+          <p>ERP / MES aktarımı</p>
           <h2>Kontrollü sistem aktarımı</h2>
           <span>
             Zamanlanmış plan yetkili kullanıcı onayı olmadan aktarılmaz.
@@ -272,7 +273,7 @@ export function ProductionPlanTransferPanel({
 
       {state.kind === "error" ? (
         <div className="workflow-action-error" role="alert">
-          <strong>İşlem başarısız:</strong> {state.message}
+          <strong>İşlem başarısız:</strong> {customerMessage(state.message)}
           <button
             type="button"
             className="button button-ghost button-small"
@@ -361,7 +362,7 @@ export function ProductionPlanTransferPanel({
         <Card>
           <div className="workflow-action-request-created">
             <div>
-              <strong>Transfer Talebi Oluşturuldu</strong>
+              <strong>Aktarım Talebi Oluşturuldu</strong>
               <span>
                 Hedef sistem: {state.targetSystem.toUpperCase()} —{" "}
                 {new Date(state.requestedAtUtc).toLocaleString("tr-TR")}
@@ -411,7 +412,7 @@ export function ProductionPlanTransferPanel({
             aria-label={`${planTitle} için transfer talebi oluştur`}
           >
             <ArrowRightLeft aria-hidden="true" />
-            Transfer Talebi Oluştur
+            Aktarım Talebi Oluştur
           </button>
         </div>
       )}

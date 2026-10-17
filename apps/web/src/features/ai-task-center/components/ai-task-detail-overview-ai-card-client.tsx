@@ -3,13 +3,14 @@
 import { useId, useState } from "react";
 import { ChevronDown, Sparkles } from "lucide-react";
 
+import { AssistantOriginBadge } from "@/components/ui/assistant-origin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 import type { AiTask } from "../domain/ai-task";
 import {
-  getAiTaskProviderLabel,
+  isAiTaskRulesBasedProvider,
   type AiTaskDecisionAnalysis,
 } from "../domain/ai-task-decision-intelligence";
 import { formatAiTaskShortDateTime } from "../presentation/ai-task-formatters";
@@ -25,6 +26,7 @@ import {
   getAiTaskDecisionConfidenceLabel,
 } from "../presentation/ai-task-decision-intelligence-labels";
 import { localizeAiTaskFixtureText } from "../presentation/ai-task-decision-intelligence-presentation";
+import { formatPercent } from "@/lib/presentation/format";
 
 type AiTaskDetailOverviewAiCardClientProps = Readonly<{
   task: AiTask;
@@ -43,33 +45,36 @@ export function AiTaskDetailOverviewAiCardClient({
 
   const confidenceLabel = latestAnalysis?.confidenceBand
     ? getAiTaskDecisionConfidenceLabel(latestAnalysis.confidenceBand)
-    : `${Math.round(task.confidence.score * 100)}%`;
+    : formatPercent(Math.round(task.confidence.score * 100), 0);
 
   return (
     <Card className="ai-task-detail-overview__card ai-task-detail-overview__card--ai">
       <div className="ai-task-detail-overview__heading">
         <span>
           <Sparkles aria-hidden="true" />
-          AI değerlendirmesi
+          Kayıtlı öneri
         </span>
-        <div className="ai-task-detail-overview__heading-actions">
-          <Badge tone="ai">
-            {getAiTaskActionTypeLabel(task.recommendation.actionType)}
-          </Badge>
-          <Button
-            aria-controls={inspectionId}
-            aria-expanded={inspectionOpen}
-            className="ai-task-detail-overview__inspect-button"
-            data-testid="ai-task-overview-inspect-button"
-            leadingIcon={<ChevronDown className={inspectionOpen ? "ai-task-detail-overview__inspect-icon--open" : undefined} />}
-            type="button"
-            variant="secondary"
-            onClick={() => setInspectionOpen((open) => !open)}
-          >
-            İncele
-          </Button>
-        </div>
+        <Button
+          aria-controls={inspectionId}
+          aria-expanded={inspectionOpen}
+          className="ai-task-detail-overview__inspect-button"
+          data-testid="ai-task-overview-inspect-button"
+          leadingIcon={<ChevronDown className={inspectionOpen ? "ai-task-detail-overview__inspect-icon--open" : undefined} />}
+          size="small"
+          type="button"
+          variant="secondary"
+          onClick={() => setInspectionOpen((open) => !open)}
+        >
+          {inspectionOpen ? "Ayrıntıları Gizle" : "Ayrıntıları Göster"}
+        </Button>
       </div>
+
+      <span className="ai-task-detail-overview__action-type">
+        Önerilen işlem
+        <Badge tone="ai">
+          {getAiTaskActionTypeLabel(task.recommendation.actionType)}
+        </Badge>
+      </span>
 
       <h3>{localizeAiTaskFixtureText(task.recommendation.title)}</h3>
       <p>{localizeAiTaskFixtureText(task.recommendation.description)}</p>
@@ -120,12 +125,10 @@ export function AiTaskDetailOverviewAiCardClient({
         {latestAnalysis ? (
           <dl className="ai-task-detail-overview__facts ai-task-detail-overview__facts--meta">
             <div>
-              <dt>Sağlayıcı</dt>
-              <dd>{getAiTaskProviderLabel(latestAnalysis.providerName)}</dd>
-            </div>
-            <div>
-              <dt>Model</dt>
-              <dd>{latestAnalysis.modelName}</dd>
+              <dt>Analiz kaynağı</dt>
+              <dd>
+                <AssistantOriginBadge origin={isAiTaskRulesBasedProvider(latestAnalysis.providerName) ? "rules" : "model"} />
+              </dd>
             </div>
           </dl>
         ) : null}

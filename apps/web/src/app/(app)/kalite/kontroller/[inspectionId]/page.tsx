@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Factory, GitBranch, ShieldCheck } from "lucide-react";
+import { Factory, GitBranch } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { QualityInspectionActions } from "@/features/quality-control/components/quality-inspection-actions";
@@ -25,6 +25,8 @@ import {
   rejectQualityInspectionAction,
   startQualityInspectionAction,
 } from "@/features/quality-control/server/quality-control-writer";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   params: Promise<{ inspectionId: string }>;
@@ -47,18 +49,18 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
   if (result.status === "failure") {
     return (
       <QualityPageShell
-        backHref="/kalite"
-        backLabel="Kalite ana sayfası"
         eyebrow="KALİTE KONTROL"
         title="Kalite Kontrol Detayı"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "Kontrol yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen kalite kontrolü bulunamadı." : result.message}</p>
-          </div>
-        </div>
+        <FailureStatePage
+          code={"code" in result ? result.code : undefined}
+          message={result.message}
+          failedTitle="Kontrol yüklenemedi"
+          entityLabel="kalite kontrolü"
+          backHref="/kalite"
+          backLabel="Kalite ana sayfası"
+          inline
+        />
       </QualityPageShell>
     );
   }
@@ -127,7 +129,7 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
             </div>
             <div>
               <dt>Üretim Durumu</dt>
-              <dd>{inspection.productionContext.status}</dd>
+              <dd>{enumLabel(inspection.productionContext.status)}</dd>
             </div>
             <div>
               <dt>İyi Miktar</dt>
@@ -160,8 +162,8 @@ export default async function QualityInspectionDetailPage({ params }: PageProps)
         {inspection.results.length === 0 ? (
           <p className="quality-empty-state">Kontrol sonucu bulunmuyor.</p>
         ) : (
-          <div className="quality-table-wrap">
-            <table className="quality-table">
+          <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="Ölçüm ve kontrol listesi tablosu">
+            <table aria-label="Ölçüm / Kontrol Listesi" className="quality-table">
               <thead>
                 <tr>
                   <th>Kontrol Noktası</th>

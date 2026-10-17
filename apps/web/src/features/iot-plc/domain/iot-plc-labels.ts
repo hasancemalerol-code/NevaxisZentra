@@ -1,7 +1,7 @@
 import type { IotPlcTabId } from "./iot-plc-types";
 
 export const IOT_PLC_DEVELOPMENT_BANNER =
-  "Yerel geliştirme / simülasyon verisi — gerçek PLC veya müşteri verisi değildir.";
+  "Örnek veri — gerçek PLC veya müşteri verisi değildir.";
 
 export const IOT_PLC_CURRENT_STATUS_NOTE =
   "Mevcut durum yalnızca güncel sağlık kanıtından hesaplanır.";
@@ -36,14 +36,14 @@ const PROTOCOL_LABELS: Record<string, string> = {
   "modbus-tcp": "Modbus TCP",
   mqtt: "MQTT",
   "http-push": "HTTP Push",
-  "edge-agent": "Edge Agent",
-  "manual-development-simulator": "Geliştirme simülatörü",
+  "edge-agent": "Saha ajanı",
+  "manual-development-simulator": "Manuel örnek veri",
 };
 
 const DIRECTION_LABELS: Record<string, string> = {
   "read-only-pull": "Salt okunur veri alama",
   "inbound-push": "Gelen veri akışı",
-  "edge-relay": "Edge aktarımı",
+  "edge-relay": "Saha aktarımı",
 };
 
 const ENDPOINT_STATUS_LABELS: Record<string, string> = {
@@ -68,10 +68,10 @@ const QUALITY_STATE_LABELS: Record<string, string> = {
 };
 
 const EVIDENCE_LABELS: Record<string, string> = {
-  measured: "Ölçülmüş",
+  measured: "Ölçülen",
   calculated: "Hesaplanmış",
   estimated: "Tahmini",
-  simulated: "Simülasyon",
+  simulated: "Örnek veri",
   "source-conflict": "Kaynak uyuşmazlığı",
   "insufficient-data": "Veri yetersiz",
 };
@@ -210,6 +210,6 @@ export const IOT_PLC_OUTCOME_FILTER_OPTIONS = [
 
 export const IOT_PLC_EVIDENCE_FILTER_OPTIONS = [
   { value: "", label: "Tüm kanıt türleri" },
-  { value: "simulated", label: "Simülasyon" },
-  { value: "measured", label: "Ölçülmüş" },
+  { value: "simulated", label: "Örnek veri" },
+  { value: "measured", label: "Ölçülen" },
 ] as const;

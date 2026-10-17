@@ -1,3 +1,4 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 import type { ProductionReportingOverview, ProductionShiftReportingRow } from "@/features/production-reporting/domain/production-reporting";
 import type { ProductionResourceWorkspaceApi } from "@/features/production-resources/server/production-resources-api-client";
 import {
@@ -47,7 +48,7 @@ function buildShiftTrendPoints(
   return sorted.map((shift) => {
     const start = shift.activeWindowStartUtc ? new Date(shift.activeWindowStartUtc) : null;
     const label = start
-      ? start.toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })
+      ? start.toLocaleString("tr-TR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: FACILITY_TIME_ZONE })
       : shift.shiftCode;
 
     return {

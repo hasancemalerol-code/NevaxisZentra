@@ -1,39 +1,52 @@
-import Link from "next/link";
-
 import { readIntegrationOperationsCenter } from "@/features/integration/server/integration-operations-reader";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { formatDateTime } from "@/lib/presentation/format";
+
 export const dynamic = "force-dynamic";
+
+const CENTER_DESCRIPTION = "Canlı fabrika verisi, bağlantı sağlığı ve olay akışı.";
 
 export default async function EntegrasyonMerkeziPage() {
   const result = await readIntegrationOperationsCenter();
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <header className="production-execution-header">
-          <p>AYARLAR</p>
-          <h1>Entegrasyon Merkezi</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">{result.message}</div>
-      </main>
+      <div className="production-execution-page">
+        <PageHeader eyebrow="Ayarlar" title="Entegrasyon Merkezi" description={CENTER_DESCRIPTION} />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline />
+      </div>
     );
   }
 
-  return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <p>AYARLAR</p>
-        <h1>Entegrasyon Merkezi</h1>
-        <p>Canlı fabrika verisi, bağlantı sağlığı ve olay akışı.</p>
-        <Link href="/ayarlar/entegrasyonlar">← Entegrasyonlar</Link>
-      </header>
+  const nothingToShow = result.operations.length === 0 && result.events.length === 0;
 
-      <section className="state-panel">
-        <h2>Bağlantı Sağlığı</h2>
-        {result.operations.length === 0 ? (
-          <p>Operasyon verisi henüz yok.</p>
-        ) : (
-          <table>
+  return (
+    <div className="production-execution-page">
+      <PageHeader
+        eyebrow="Ayarlar"
+        title="Entegrasyon Merkezi"
+        description={CENTER_DESCRIPTION}
+        actions={<StatePageLink href="/ayarlar/entegrasyonlar">Entegrasyonlar</StatePageLink>}
+      />
+
+      {nothingToShow ? (
+        <StatePage
+          kind="empty"
+          inline
+          title="Henüz bağlantı verisi yok"
+          description="Bağlantı sağlığı ve işlenen fabrika olayları, bir bağlantı veri göndermeye başladığında burada görünür."
+          actions={<StatePageLink href="/ayarlar/veri-aktarim-merkezi" primary>Veri Aktarım Merkezi</StatePageLink>}
+        />
+      ) : null}
+
+      {result.operations.length > 0 ? (
+        <section className="state-panel">
+          <h2>Bağlantı Sağlığı</h2>
+          <table aria-label="Bağlantı Sağlığı">
             <thead>
               <tr>
                 <th>Bağlantı</th>
@@ -47,9 +60,9 @@ export default async function EntegrasyonMerkeziPage() {
             <tbody>
               {result.operations.map((op) => (
                 <tr key={op.connectorId}>
-                  <td>{op.name} ({op.connectorKind})</td>
-                  <td>{op.healthState}</td>
-                  <td>{op.lastEventReceivedAtUtc ?? "—"}</td>
+                  <td>{op.name} ({enumLabel(op.connectorKind)})</td>
+                  <td>{enumLabel(op.healthState)}</td>
+                  <td>{formatDateTime(op.lastEventReceivedAtUtc)}</td>
                   <td>{op.processedToday}</td>
                   <td>{op.quarantinedToday}</td>
                   <td>{op.failedToday}</td>
@@ -57,15 +70,13 @@ export default async function EntegrasyonMerkeziPage() {
               ))}
             </tbody>
           </table>
-        )}
-      </section>
+        </section>
+      ) : null}
 
-      <section className="state-panel">
-        <h2>Canlı Olay Monitörü</h2>
-        {result.events.length === 0 ? (
-          <p>Henüz işlenmiş fabrika olayı yok.</p>
-        ) : (
-          <table>
+      {result.events.length > 0 ? (
+        <section className="state-panel">
+          <h2>Canlı Olay Monitörü</h2>
+          <table aria-label="Canlı Olay Monitörü">
             <thead>
               <tr>
                 <th>Kaynak</th>
@@ -82,19 +93,19 @@ export default async function EntegrasyonMerkeziPage() {
               {result.events.map((event) => (
                 <tr key={event.canonicalEventId}>
                   <td>{event.sourceSystem}</td>
-                  <td>{event.eventType}</td>
+                  <td>{enumLabel(event.eventType)}</td>
                   <td>{event.machineId ?? "—"}</td>
                   <td>{event.orderId ?? "—"}</td>
-                  <td>{event.occurredAtUtc}</td>
-                  <td>{event.receivedAtUtc}</td>
-                  <td>{event.processingState}</td>
+                  <td>{formatDateTime(event.occurredAtUtc)}</td>
+                  <td>{formatDateTime(event.receivedAtUtc)}</td>
+                  <td>{enumLabel(event.processingState)}</td>
                   <td>{event.routedCaseId ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        )}
-      </section>
-    </main>
+        </section>
+      ) : null}
+    </div>
   );
 }

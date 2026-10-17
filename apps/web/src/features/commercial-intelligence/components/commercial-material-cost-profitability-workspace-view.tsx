@@ -58,6 +58,8 @@ import {
   refreshCommercialMaterialCostProfitabilityWorkspaceAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { isNoDataValue, kpiValueClass } from "./commercial-no-data";
 
 type CommercialMaterialCostProfitabilityWorkspaceViewProps = Readonly<{
   workspace: CommercialMaterialCostProfitabilityWorkspacePayload;
@@ -231,7 +233,7 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
   }, [setActiveLens]);
 
   return (
-    <main className="commint-page" data-testid="commercial-material-cost-profitability-workspace">
+    <div className="commint-page" data-testid="commercial-material-cost-profitability-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -239,11 +241,10 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
             <h1>Malzeme ve Maliyet Kârlılığı</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_MATERIAL_COST_PROFITABILITY_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Karşılaştırma penceresi: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Filtre kapsamı: {workspace.filterScopeLabel}</li>
-              <li>{COMMERCIAL_MATERIAL_COST_PROFITABILITY_SCOPE_NOTE}</li>
             </ul>
           </div>
           <div className="commint-executive__actions">
@@ -259,20 +260,24 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
             </button>
           </div>
         </div>
-        {!workspace.realProfitabilityMappingComplete ? (
-          <p className="commint-provenance-strip" data-testid="commercial-material-cost-profitability-development-banner">
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_PROFITABILITY_DEVELOPMENT_BANNER}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          <p className="commint-executive__scope-note">{COMMERCIAL_MATERIAL_COST_PROFITABILITY_SCOPE_NOTE}</p>
+          {workspace.hasDevelopmentPilotData ? (
+            <p className="commint-provenance-strip" data-testid="commercial-material-cost-profitability-development-banner">
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_PROFITABILITY_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!workspace.realProfitabilityMappingComplete ? (
+            <p className="commint-readonly-note" data-testid="commercial-material-cost-profitability-mapping-note">
+              {REAL_PROFITABILITY_MAPPING_NOTE}
+            </p>
+          ) : null}
+          <p className="commint-readonly-note" data-testid="commercial-material-cost-profitability-readonly-note">
+            {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
           </p>
-        ) : null}
-        {!workspace.realProfitabilityMappingComplete ? (
-          <p className="commint-readonly-note" data-testid="commercial-material-cost-profitability-mapping-note">
-            {REAL_PROFITABILITY_MAPPING_NOTE}
-          </p>
-        ) : null}
-        <p className="commint-readonly-note" data-testid="commercial-material-cost-profitability-readonly-note">
-          {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
-        </p>
+        </details>
         {feedback ? <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p> : null}
       </header>
 
@@ -288,7 +293,7 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
         data-testid="commercial-material-cost-profitability-kpi-grid"
         aria-label="Malzeme ve maliyet kârlılık göstergeleri"
       >
-        {workspace.kpiCards.map((kpi) => {
+        {workspace.kpiCards.filter((kpi) => kpi.id !== "largest-cost-driver").map((kpi) => {
           const Icon = KPI_ICONS[kpi.id] ?? BarChart3;
           return (
             <article
@@ -301,12 +306,17 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
                 <p className="commint-kpi-card__label">{kpi.label}</p>
                 <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
               </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
+              <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
               <p className="commint-kpi-card__detail">{kpi.hint}</p>
             </article>
           );
         })}
       </section>
+      {workspace.kpiCards.filter((kpi) => kpi.id === "largest-cost-driver" && !isNoDataValue(kpi.value) && !isNoDataValue(kpi.hint)).map((kpi) => (
+        <p key={kpi.id} className="commint-kpi-note" data-kpi-id={kpi.id}>
+          {kpi.label}: <strong>{kpi.value}</strong> · {kpi.hint}
+        </p>
+      ))}
 
       <div
         className="commint-tab-rail"
@@ -395,43 +405,45 @@ export function CommercialMaterialCostProfitabilityWorkspaceView({
         </section>
       ) : null}
 
-      <section className="commint-panel" data-testid="commercial-material-cost-profitability-detail">
-        <header className="commint-panel__header">
-          <h2>{activeLens === "material" ? "Malzeme karşılaştırma detayı" : "Maliyet bileşeni detayı"}</h2>
-        </header>
-        {!selectedComparisonId ? (
-          <p className="commint-supplier-row__meta" data-testid="commercial-material-cost-profitability-no-selection" role="status">
-            {COMMERCIAL_MATERIAL_COST_PROFITABILITY_NO_SELECTION_NOTE}
-          </p>
-        ) : null}
-        {selectedComparisonId && !selectedComparison ? (
-          <div className="commint-insufficient-state" data-testid="commercial-material-cost-profitability-insufficient" role="status">
-            <AlertTriangle aria-hidden="true" />
-            <p>Karşılaştırma kaydı yok veya erişilemiyor</p>
-          </div>
-        ) : null}
-        {selectedComparison && unavailableReason ? (
-          <div className="commint-insufficient-state" data-testid="commercial-material-cost-profitability-insufficient" role="status">
-            <AlertTriangle aria-hidden="true" />
-            <p>{unavailableReason}</p>
-          </div>
-        ) : null}
-        {selectedComparisonId && selectedComparison && (detailStatus === "loading" || isPending) ? (
-          <div className="commint-loading-state" data-testid="commercial-material-cost-profitability-detail-loading" role="status">
-            <LoaderCircle className="animate-spin" aria-hidden="true" />
-            <p>Karşılaştırma detayı yükleniyor…</p>
-          </div>
-        ) : null}
-        {detailStatus === "error" ? (
-          <div className="commint-error-banner" data-testid="commercial-material-cost-profitability-error" role="alert">
-            <ShieldAlert aria-hidden="true" />
-            <p>Karşılaştırma detayı yüklenemedi.</p>
-          </div>
-        ) : null}
-        {detailStatus === "ready" && comparisonDetail ? (
-          <CommercialProfitabilityComparisonDetailPanel comparisonDetail={comparisonDetail} />
-        ) : null}
-      </section>
-    </main>
+      {isEmpty && !selectedComparisonId ? null : (
+        <section className="commint-panel" data-testid="commercial-material-cost-profitability-detail">
+          <header className="commint-panel__header">
+            <h2>{activeLens === "material" ? "Malzeme karşılaştırma detayı" : "Maliyet bileşeni detayı"}</h2>
+          </header>
+          {!selectedComparisonId ? (
+            <p className="commint-supplier-row__meta" data-testid="commercial-material-cost-profitability-no-selection" role="status">
+              {COMMERCIAL_MATERIAL_COST_PROFITABILITY_NO_SELECTION_NOTE}
+            </p>
+          ) : null}
+          {selectedComparisonId && !selectedComparison ? (
+            <div className="commint-insufficient-state" data-testid="commercial-material-cost-profitability-insufficient" role="status">
+              <AlertTriangle aria-hidden="true" />
+              <p>Karşılaştırma kaydı yok veya erişilemiyor</p>
+            </div>
+          ) : null}
+          {selectedComparison && unavailableReason ? (
+            <div className="commint-insufficient-state" data-testid="commercial-material-cost-profitability-insufficient" role="status">
+              <AlertTriangle aria-hidden="true" />
+              <p>{unavailableReason}</p>
+            </div>
+          ) : null}
+          {selectedComparisonId && selectedComparison && (detailStatus === "loading" || isPending) ? (
+            <div className="commint-loading-state" data-testid="commercial-material-cost-profitability-detail-loading" role="status">
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+              <p>Karşılaştırma detayı yükleniyor…</p>
+            </div>
+          ) : null}
+          {detailStatus === "error" ? (
+            <div className="commint-error-banner" data-testid="commercial-material-cost-profitability-error" role="alert">
+              <ShieldAlert aria-hidden="true" />
+              <InlineUnavailable subject="Karşılaştırma detayı" />
+            </div>
+          ) : null}
+          {detailStatus === "ready" && comparisonDetail ? (
+            <CommercialProfitabilityComparisonDetailPanel comparisonDetail={comparisonDetail} />
+          ) : null}
+        </section>
+      )}
+    </div>
   );
 }

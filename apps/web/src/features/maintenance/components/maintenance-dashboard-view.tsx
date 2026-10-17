@@ -137,11 +137,11 @@ export function MaintenanceDashboardView({
   const openAnomalyCount = conditionWorkspace ? sumActiveAnomalyCount(conditionWorkspace) : 0;
 
   return (
-    <main className="production-execution-page maintenance-dashboard-page">
+    <div className="production-execution-page maintenance-dashboard-page">
       <header className="maintenance-dashboard-header production-execution-header">
         <div className="maintenance-dashboard-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>Bakım &amp; Arıza</h1>
+          <p>BAKIM VE ARIZA</p>
+          <h1>Bakım ve Arıza</h1>
           <span>
             Makine, kalıp ve yardımcı ekipman bakım işlerini ve arıza kayıtlarını yönetin.
           </span>
@@ -221,9 +221,9 @@ export function MaintenanceDashboardView({
           href="#periyodik-bakim-planlari"
           tone="critical"
           icon={<CalendarClock />}
-          label="Geciken Periyodik Bakım"
+          label="Geciken Bakım"
           value={summary.overduePreventiveCount}
-          description="Vadesi geçmiş planlar"
+          description="Vadesi geçmiş plan"
         />
       </section>
 
@@ -234,9 +234,9 @@ export function MaintenanceDashboardView({
               <BrainCircuit />
             </span>
             <div className="maintenance-predictive-overview-card__copy">
-              <h2 className="maintenance-predictive-overview-card__title">Kestirici Bakım Uyarıları</h2>
+              <h2 className="maintenance-predictive-overview-card__title">Kestirimci Bakım Uyarıları</h2>
               <p className="maintenance-predictive-overview-card__subtitle">
-                Edge gözlemleri ve bakım geçmişinden türetilen durum, eğilim ve anomali kanıtları.
+                Saha gözlemleri ve bakım geçmişinden türetilen durum, eğilim ve anomali kanıtları.
               </p>
             </div>
           </div>
@@ -245,7 +245,7 @@ export function MaintenanceDashboardView({
             className="maintenance-predictive-overview-card__cta maintenance-dashboard-action maintenance-dashboard-action--secondary"
           >
             <Activity aria-hidden="true" />
-            Kestirici Bakımı İncele
+            Kestirimci Riskleri İncele
           </Link>
         </header>
 
@@ -256,15 +256,16 @@ export function MaintenanceDashboardView({
             </div>
           ) : conditionOverview ? (
             <>
-              {conditionOverview.monitoredAssetCount === 0 ? (
-                <p className="maintenance-predictive-overview-card__empty">
-                  Henüz izlenen varlık yok. Durum profilleri eşleştirilmiş makine/varlıklar için
-                  görüntülenir.
-                </p>
-              ) : null}
+              {conditionOverview.monitoredAssetCount === 0 && openAnomalyCount === 0 ? (
+                <MaintenanceEmptyState
+                  icon={<Database aria-hidden="true" size={18} />}
+                  title="Henüz izlenen varlık yok"
+                  description="Durum profilleri eşleştirilmiş makine ve varlıklar için kestirici bakım özeti burada görünür."
+                />
+              ) : (
               <section
                 className="maintenance-predictive-overview-kpis"
-                aria-label="Kestirici bakım durum özeti"
+                aria-label="Kestirimci bakım durum özeti"
               >
                 <PredictiveKpiTile
                   tone="critical"
@@ -302,6 +303,7 @@ export function MaintenanceDashboardView({
                   description="Aktif anomali kaydı"
                 />
               </section>
+              )}
             </>
           ) : null}
         </div>
@@ -317,27 +319,27 @@ export function MaintenanceDashboardView({
               description="Şu anda devam eden veya planlanmış bakım emri yok."
             />
           ) : (
-            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
-              <table className="maintenance-table maintenance-table--compact maintenance-table--work-orders">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit" tabIndex={0} role="region" aria-label="Aktif bakım işleri (kaydırılabilir)">
+              <table aria-label="Aktif bakım işleri" className="maintenance-table maintenance-table--compact maintenance-table--work-orders">
                 <colgroup>
                   <col className="maintenance-table__col--order" />
                   <col className="maintenance-table__col--asset" />
-                  <col className="maintenance-table__col--type" />
+                  <col className="maintenance-table__col--type maintenance-col--narrow" />
                   <col className="maintenance-table__col--priority" />
                   <col className="maintenance-table__col--status" />
-                  <col className="maintenance-table__col--technician" />
-                  <col className="maintenance-table__col--date" />
+                  <col className="maintenance-table__col--technician maintenance-col--low" />
+                  <col className="maintenance-table__col--date maintenance-col--narrow" />
                   <col className="maintenance-table__col--actions" />
                 </colgroup>
                 <thead>
                   <tr>
                     <th>Emir No</th>
                     <th>Varlık</th>
-                    <th>Tür</th>
+                    <th className="maintenance-col--narrow">Tür</th>
                     <th>Öncelik</th>
                     <th>Durum</th>
-                    <th>Teknisyen</th>
-                    <th>Plan</th>
+                    <th className="maintenance-col--low">Teknisyen</th>
+                    <th className="maintenance-col--narrow">Planlanan</th>
                     <th>İşlem</th>
                   </tr>
                 </thead>
@@ -358,7 +360,7 @@ export function MaintenanceDashboardView({
                           href={`/bakim/varliklar/${encodeURIComponent(workOrder.assetReference)}`}
                         />
                       </td>
-                      <td className="maintenance-table__cell--compact">
+                      <td className="maintenance-table__cell--compact maintenance-col--narrow">
                         {getMaintenanceTypeLabel(workOrder.type)}
                       </td>
                       <td>
@@ -371,10 +373,10 @@ export function MaintenanceDashboardView({
                           {getMaintenanceStatusLabel(workOrder.status)}
                         </Badge>
                       </td>
-                      <td className="maintenance-table__cell--compact">
-                        {workOrder.assignedTechnicianSubjectId ?? "—"}
+                      <td className="maintenance-table__cell--compact maintenance-col--low">
+                        {workOrder.assignedTechnicianSubjectId ? "Atandı" : "Atanmadı"}
                       </td>
-                      <td className="maintenance-table__cell--compact">
+                      <td className="maintenance-table__cell--compact maintenance-col--narrow">
                         {formatDate(workOrder.plannedStartUtc)}
                       </td>
                       <td>
@@ -418,7 +420,7 @@ export function MaintenanceDashboardView({
                     <span>
                       {alert.reference} · {alert.reason}
                     </span>
-                    <Badge tone={alert.tone}>{alert.statusLabel}</Badge>
+                    {alert.statusLabel !== getMaintenancePriorityLabel("critical") ? <Badge tone={alert.tone}>{alert.statusLabel}</Badge> : null}
                   </div>
                   <MaintenanceTableActionLink href={alert.href}>Detay</MaintenanceTableActionLink>
                 </li>
@@ -430,14 +432,7 @@ export function MaintenanceDashboardView({
 
       <section className="maintenance-dashboard-section" id="ariza-kayitlari">
         <Card className="production-execution-panel production-execution-panel--wide">
-          <MaintenanceSectionHeader
-            title="Arıza Kayıtları"
-            actionHref="/bakim/arizalar/yeni"
-            actionLabel="Yeni Arıza Kaydı"
-            actionDisabledReason={
-              canManage ? undefined : "Arıza kaydı oluşturma yetkiniz yok."
-            }
-          />
+          <MaintenanceSectionHeader title="Arıza Kayıtları" />
           {openRequests.length === 0 ? (
             <MaintenanceEmptyState
               icon={<AlertTriangle aria-hidden="true" size={18} />}
@@ -445,16 +440,16 @@ export function MaintenanceDashboardView({
               description="Yeni bir arıza kaydı oluşturarak süreci başlatabilirsiniz."
             />
           ) : (
-            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
-              <table className="maintenance-table maintenance-table--compact maintenance-table--requests">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit" tabIndex={0} role="region" aria-label="Açık arıza kayıtları (kaydırılabilir)">
+              <table aria-label="Açık arıza kayıtları" className="maintenance-table maintenance-table--compact maintenance-table--requests">
                 <colgroup>
                   <col className="maintenance-table__col--order" />
                   <col className="maintenance-table__col--asset" />
                   <col className="maintenance-table__col--title" />
-                  <col className="maintenance-table__col--type" />
+                  <col className="maintenance-table__col--type maintenance-col--mid" />
                   <col className="maintenance-table__col--priority" />
                   <col className="maintenance-table__col--status" />
-                  <col className="maintenance-table__col--age" />
+                  <col className="maintenance-table__col--age maintenance-col--low" />
                   <col className="maintenance-table__col--actions-wide" />
                 </colgroup>
                 <thead>
@@ -462,10 +457,10 @@ export function MaintenanceDashboardView({
                     <th>Kayıt No</th>
                     <th>Varlık</th>
                     <th>Başlık</th>
-                    <th>Tür</th>
+                    <th className="maintenance-col--mid">Tür</th>
                     <th>Öncelik</th>
                     <th>Durum</th>
-                    <th>Yaş</th>
+                    <th className="maintenance-col--low">Yaş</th>
                     <th>İşlem</th>
                   </tr>
                 </thead>
@@ -487,7 +482,7 @@ export function MaintenanceDashboardView({
                         />
                       </td>
                       <td className="maintenance-table__cell--wrap">{request.title}</td>
-                      <td className="maintenance-table__cell--compact">
+                      <td className="maintenance-table__cell--compact maintenance-col--mid">
                         {getMaintenanceTypeLabel(request.type)}
                       </td>
                       <td>
@@ -498,7 +493,7 @@ export function MaintenanceDashboardView({
                       <td>
                         <Badge tone="neutral">{getMaintenanceStatusLabel(request.status)}</Badge>
                       </td>
-                      <td className="maintenance-table__cell--compact">
+                      <td className="maintenance-table__cell--compact maintenance-col--low">
                         {formatMaintenanceAge(request.reportedAtUtc)}
                       </td>
                       <td>
@@ -527,14 +522,7 @@ export function MaintenanceDashboardView({
 
       <section className="maintenance-dashboard-section" id="periyodik-bakim-planlari">
         <Card className="production-execution-panel production-execution-panel--wide">
-          <MaintenanceSectionHeader
-            title="Periyodik Bakım Planları"
-            actionHref="/bakim/planlar/yeni"
-            actionLabel="Yeni Plan"
-            actionDisabledReason={
-              canManage ? undefined : "Periyodik bakım planı oluşturma yetkiniz yok."
-            }
-          />
+          <MaintenanceSectionHeader title="Periyodik Bakım Planları" />
           {activePlans.length === 0 ? (
             <MaintenanceEmptyState
               icon={<CalendarClock aria-hidden="true" size={18} />}
@@ -542,13 +530,13 @@ export function MaintenanceDashboardView({
               description="Periyodik bakım planı ekleyerek vadeleri otomatik izleyin."
             />
           ) : (
-            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit">
-              <table className="maintenance-table maintenance-table--compact maintenance-table--preventive">
+            <div className="maintenance-table-wrap maintenance-table-wrap--desktop-fit" tabIndex={0} role="region" aria-label="Periyodik bakım planları (kaydırılabilir)">
+              <table aria-label="Periyodik bakım planları" className="maintenance-table maintenance-table--compact maintenance-table--preventive">
                 <colgroup>
                   <col className="maintenance-table__col--code" />
                   <col className="maintenance-table__col--plan" />
                   <col className="maintenance-table__col--asset" />
-                  <col className="maintenance-table__col--interval" />
+                  <col className="maintenance-table__col--interval maintenance-col--narrow" />
                   <col className="maintenance-table__col--date" />
                   <col className="maintenance-table__col--status" />
                 </colgroup>
@@ -557,7 +545,7 @@ export function MaintenanceDashboardView({
                     <th>Kod</th>
                     <th>Plan</th>
                     <th>Varlık</th>
-                    <th>Periyot</th>
+                    <th className="maintenance-col--narrow">Periyot</th>
                     <th>Sonraki Bakım</th>
                     <th>Durum</th>
                   </tr>
@@ -580,7 +568,7 @@ export function MaintenanceDashboardView({
                           assetType={plan.assetType}
                         />
                       </td>
-                      <td className="maintenance-table__cell--compact">
+                      <td className="maintenance-table__cell--compact maintenance-col--narrow">
                         {getMaintenanceIntervalLabel(plan.intervalType, plan.intervalValue)}
                       </td>
                       <td>
@@ -603,6 +591,6 @@ export function MaintenanceDashboardView({
           )}
         </Card>
       </section>
-    </main>
+    </div>
   );
 }

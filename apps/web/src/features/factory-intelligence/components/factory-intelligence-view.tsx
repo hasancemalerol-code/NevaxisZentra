@@ -11,6 +11,8 @@ import type {
   FactoryIntelligenceOverviewApi,
   FactoryIntelligenceRiskCardApi,
 } from "../server/factory-intelligence-api-client";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import "./factory-intelligence.css";
 
 type FactoryIntelligenceViewProps = Readonly<{
   overview: FactoryIntelligenceOverviewApi;
@@ -24,11 +26,24 @@ function riskStatusVariant(riskState: string): "warning" | "fault" | "pending" |
   return "idle";
 }
 
+const RISK_STATE_LABELS: Readonly<Record<string, string>> = {
+  critical: "Kritik",
+  warning: "Uyarı",
+  watch: "İzleme",
+  normal: "Normal",
+};
+
+function riskStateLabel(riskState: string): string {
+  return RISK_STATE_LABELS[riskState] ?? enumLabel(riskState);
+}
+
 export function FactoryIntelligenceView({ overview, risks }: FactoryIntelligenceViewProps) {
+  // A data-quality verdict needs predictions to judge; with none, the tile says so instead of claiming "İyi".
+  const hasPredictionData = overview.activePredictions > 0 || risks.length > 0;
   return (
-    <main className="fact-workspace" data-testid="factory-intelligence-view">
+    <div className="fact-workspace" data-testid="factory-intelligence-view">
       <WorkspaceHeader
-        context="SİNYAL · RİSK · ÖNGÖRÜ"
+        context="FABRİKA ZEKÂSI"
         title="Fabrika Zekâsı"
         meta="Operasyonel sinyallerden üretilen açıklanabilir risk analizi — kesinlik iddiası yoktur"
         actions={
@@ -43,11 +58,13 @@ export function FactoryIntelligenceView({ overview, risks }: FactoryIntelligence
         aria-label="Öngörü özet"
         items={[
           { label: "Aktif öngörü", value: overview.activePredictions },
-          { label: "Watch", value: overview.watchCount },
-          { label: "Warning", value: overview.warningCount },
-          { label: "Critical", value: overview.criticalCount },
-          { label: "Önlenen (24s)", value: overview.avertedLast24h },
-          { label: "Veri kalitesi", value: overview.dataQualitySummary },
+          { label: "İzleme", value: overview.watchCount },
+          { label: "Uyarı", value: overview.warningCount },
+          { label: "Kritik", value: overview.criticalCount },
+          { label: "Önlenen (24 sa)", value: overview.avertedLast24h },
+          hasPredictionData
+            ? { label: "Veri kalitesi", value: enumLabel(overview.dataQualitySummary) }
+            : { label: "Veri kalitesi · veri yok", value: "—" },
         ]}
       />
 
@@ -58,9 +75,15 @@ export function FactoryIntelligenceView({ overview, risks }: FactoryIntelligence
         </header>
         <div className="fact-section__body">
           {risks.length === 0 ? (
-            <p className="production-execution-empty__desc">Şu anda aktif öngörülen risk yok.</p>
+            <div className="fact-intelligence-empty" data-testid="factory-intelligence-empty">
+              <Activity aria-hidden="true" size={20} />
+              <p className="production-execution-empty__desc">Şu anda aktif öngörülen risk yok.</p>
+              <Link href="/fabrika-karar-merkezi" className="button button-secondary button-medium">
+                Açık vakaları görüntüle
+              </Link>
+            </div>
           ) : (
-            <table className="fact-data-grid">
+            <table aria-label="Aktif öngörüler" className="fact-data-grid">
               <thead>
                 <tr>
                   <th>Durum</th>
@@ -75,7 +98,7 @@ export function FactoryIntelligenceView({ overview, risks }: FactoryIntelligence
                 {risks.map((risk) => (
                   <tr key={risk.riskId}>
                     <td>
-                      <OperationalBadge status={riskStatusVariant(risk.riskState)} label={risk.riskState} />
+                      <OperationalBadge status={riskStatusVariant(risk.riskState)} label={riskStateLabel(risk.riskState)} />
                     </td>
                     <td>
                       <strong>{risk.machineCode}</strong>
@@ -100,6 +123,6 @@ export function FactoryIntelligenceView({ overview, risks }: FactoryIntelligence
           )}
         </div>
       </section>
-    </main>
+    </div>
   );
 }

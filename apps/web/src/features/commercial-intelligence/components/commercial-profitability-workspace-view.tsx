@@ -57,6 +57,8 @@ import {
   refreshCommercialProfitabilityWorkspaceAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { kpiValueClass } from "./commercial-no-data";
 
 type CommercialProfitabilityWorkspaceViewProps = Readonly<{
   workspace: CommercialProfitabilityWorkspacePayload;
@@ -255,7 +257,7 @@ export function CommercialProfitabilityWorkspaceView({
   const isEmpty = workspace.comparisons.length === 0;
 
   return (
-    <main className="commint-page" data-testid="commercial-profitability-workspace">
+    <div className="commint-page" data-testid="commercial-profitability-workspace">
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -263,11 +265,10 @@ export function CommercialProfitabilityWorkspaceView({
             <h1>Ürün Kârlılığı</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_PROFITABILITY_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Karşılaştırma penceresi: {workspace.reportingPeriodLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Kanıt: {workspace.evidenceLabel}</li>
-              <li>Kaynak: {COMMERCIAL_PROFITABILITY_EVIDENCE_SCOPE}</li>
             </ul>
           </div>
           <div className="commint-executive__actions">
@@ -283,20 +284,24 @@ export function CommercialProfitabilityWorkspaceView({
             </button>
           </div>
         </div>
-        {!workspace.realProfitabilityMappingComplete ? (
-          <p className="commint-provenance-strip" data-testid="commercial-profitability-development-banner">
-            <span className="commint-provenance-strip__badge">Geliştirme</span>
-            {COMMERCIAL_PROFITABILITY_DEVELOPMENT_BANNER}
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          <p className="commint-executive__scope-note">Kaynak: {COMMERCIAL_PROFITABILITY_EVIDENCE_SCOPE}</p>
+          {workspace.hasDevelopmentPilotData ? (
+            <p className="commint-provenance-strip" data-testid="commercial-profitability-development-banner">
+              <span className="commint-provenance-strip__badge">Örnek veri</span>
+              {COMMERCIAL_PROFITABILITY_DEVELOPMENT_BANNER}
+            </p>
+          ) : null}
+          {!workspace.realProfitabilityMappingComplete ? (
+            <p className="commint-readonly-note" data-testid="commercial-profitability-mapping-note">
+              {REAL_PROFITABILITY_MAPPING_NOTE}
+            </p>
+          ) : null}
+          <p className="commint-readonly-note" data-testid="commercial-profitability-readonly-note">
+            {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
           </p>
-        ) : null}
-        {!workspace.realProfitabilityMappingComplete ? (
-          <p className="commint-readonly-note" data-testid="commercial-profitability-mapping-note">
-            {REAL_PROFITABILITY_MAPPING_NOTE}
-          </p>
-        ) : null}
-        <p className="commint-readonly-note" data-testid="commercial-profitability-readonly-note">
-          {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
-        </p>
+        </details>
         {feedback ? <p className={`commint-feedback commint-feedback--${feedbackTone}`}>{feedback}</p> : null}
       </header>
 
@@ -325,7 +330,7 @@ export function CommercialProfitabilityWorkspaceView({
                 <p className="commint-kpi-card__label">{kpi.label}</p>
                 <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
               </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
+              <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
               <p className="commint-kpi-card__detail">{kpi.hint}</p>
             </article>
           );
@@ -361,7 +366,7 @@ export function CommercialProfitabilityWorkspaceView({
         </div>
       ) : null}
 
-      {activeTab === "overview" ? (
+      {activeTab === "overview" && !isEmpty ? (
         <section className="commint-panel" data-testid="commercial-profitability-overview">
           <header className="commint-panel__header">
             <h2>Genel karşılaştırma özeti</h2>
@@ -389,15 +394,15 @@ export function CommercialProfitabilityWorkspaceView({
               </div>
             </div>
           ) : null}
-          {unavailableReason ? (
+          {unavailableReason && selectedComparison ? (
             <div className="commint-insufficient-state" data-testid="commercial-profitability-insufficient" role="status">
               <AlertTriangle aria-hidden="true" />
               <p>{unavailableReason}</p>
             </div>
           ) : null}
           {workspace.positionPreviewRows.length > 0 ? (
-            <div className="commint-table-wrap">
-              <table className="commint-table">
+            <div className="commint-table-wrap" tabIndex={0}>
+              <table aria-label="Genel karşılaştırma özeti" className="commint-table">
                 <thead>
                   <tr>
                     <th>Kapsam</th>
@@ -503,13 +508,13 @@ export function CommercialProfitabilityWorkspaceView({
           {detailStatus === "error" ? (
             <div className="commint-error-banner" data-testid="commercial-profitability-error" role="alert">
               <ShieldAlert aria-hidden="true" />
-              <p>Karşılaştırma detayı yüklenemedi.</p>
+              <InlineUnavailable subject="Karşılaştırma detayı" />
             </div>
           ) : null}
           {detailStatus === "ready" && comparisonDetail ? (
             <CommercialProfitabilityComparisonDetailPanel comparisonDetail={comparisonDetail} />
           ) : null}
-          {unavailableReason ? (
+          {unavailableReason && selectedComparison ? (
             <div className="commint-insufficient-state" data-testid="commercial-profitability-detail-insufficient" role="status">
               <AlertTriangle aria-hidden="true" />
               <p>{unavailableReason}</p>
@@ -517,6 +522,6 @@ export function CommercialProfitabilityWorkspaceView({
           ) : null}
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { knownStateLabel } from "@/lib/presentation/enum-labels";
 
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { getProductionResourceTypeLabel } from "@/features/production-resources/domain/production-resources-labels";
 import { buildFactoryWorkspaceHref } from "../application/factory-workspace-selection";
 import type { FactoryWorkspacePayload } from "../domain/factory-workspace-types";
 import { FactoryMachineIntelligence } from "./factory-machine-intelligence";
+import { displayLabel } from "@/lib/presentation/display-label";
 
 type FactoryResourceInspectorProps = Readonly<{
   workspace: FactoryWorkspacePayload;
@@ -30,10 +32,10 @@ export function FactoryResourceInspector({ workspace }: FactoryResourceInspector
         <ContextPanel
           title="Bağlam"
           rows={[
-            { label: "Fabrika", value: workspace.facilityLabel },
+            { label: "Fabrika", value: displayLabel(workspace.facilityLabel, "Fabrika") },
             { label: "Kaynak", value: workspace.resources.status.total },
             { label: "Vardiya", value: workspace.shift?.shiftLabel ?? "—" },
-            { label: "Açık vardiya konu", value: workspace.shift?.openItems ?? "—" },
+            { label: "Açık konu", value: workspace.shift?.openItems ?? "—" },
           ]}
         />
         <p className="fact-workspace__meta">Kaynak veya istasyon seçerek detay inceleyin.</p>
@@ -61,14 +63,14 @@ export function FactoryResourceInspector({ workspace }: FactoryResourceInspector
   ];
 
   const stateRows = [
-    { label: "Durum", value: resource.state },
+    { label: "Durum", value: knownStateLabel(resource.state) ?? resource.state },
     { label: "Operasyon", value: resource.operationCode ?? "—" },
     { label: "Emir", value: resource.orderReference ?? "—" },
-    { label: "GOOD", value: resource.goodCount },
-    { label: "REJECT", value: resource.rejectCount },
-    { label: "REWORK", value: "—" },
-    { label: "WIP", value: resource.bufferQuantity != null ? `${resource.bufferQuantity}/${resource.bufferCapacity ?? "—"}` : "—" },
-    { label: "Kısıt", value: resource.isBlocked ? "BLOCKED" : resource.isStarved ? "STARVED" : "—" },
+    { label: "İyi üretim", value: resource.goodCount },
+    { label: "Fire", value: resource.rejectCount },
+    { label: "Yeniden işleme", value: "—" },
+    { label: "Ara stok", value: resource.bufferQuantity != null ? `${resource.bufferQuantity}/${resource.bufferCapacity ?? "—"}` : "—" },
+    { label: "Kısıt", value: resource.isBlocked ? "Bloke" : resource.isStarved ? "Malzeme bekliyor" : "—" },
   ];
 
   const humanRows = isHuman
@@ -110,8 +112,8 @@ export function FactoryResourceInspector({ workspace }: FactoryResourceInspector
         <ContextPanel
           title="Kalite bağlamı"
           rows={[
-            { label: "Kontrol", value: resource.operationCode ?? "Test/quality" },
-            { label: "REJECT", value: resource.rejectCount },
+            { label: "Kontrol", value: resource.operationCode ?? "Kalite kontrol" },
+            { label: "Fire", value: resource.rejectCount },
           ]}
         />
       ) : null}

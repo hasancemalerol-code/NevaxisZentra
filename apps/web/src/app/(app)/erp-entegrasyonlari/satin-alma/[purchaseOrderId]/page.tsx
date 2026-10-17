@@ -1,7 +1,8 @@
-import { ShoppingCart } from "lucide-react";
+
 
 import { ErpPurchaseOrderDetailView } from "@/features/erp/components/erp-purchase-order-detail-view";
 import { readErpPurchaseOrderDetail } from "@/features/erp/server/erp-purchasing-reader";
+import { ErpFailurePage } from "@/features/erp/components/erp-failure-page";
 
 type ErpPurchaseOrderDetailPageProps = Readonly<{
   params: Promise<{ purchaseOrderId: string }>;
@@ -13,19 +14,16 @@ export default async function ErpPurchaseOrderDetailPage({ params }: ErpPurchase
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
-        <header className="production-execution-header">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>Satın Alma Detayı</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">
-          <ShoppingCart aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "ERP satın alma siparişi yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen ERP kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+      <ErpFailurePage
+        title="Satın Alma Detayı"
+        description="ERP satın alma siparişi ve satır özeti."
+        listHref="/erp-entegrasyonlari/satin-alma"
+        listLabel="Satın Alma Listesine Dön"
+        failedTitle="ERP satın alma siparişi yüklenemedi"
+        entityLabel="satın alma siparişi"
+        code={"code" in result ? result.code : undefined}
+        message={result.message}
+      />
     );
   }
 

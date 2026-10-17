@@ -1,3 +1,5 @@
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { exportRequirementLabel } from "../presentation-requirement-labels";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -47,7 +49,7 @@ function requirementStatusLabel(status: string): string {
     case "rejected":
       return "Reddedildi";
     default:
-      return status;
+      return enumLabel(status);
   }
 }
 
@@ -129,7 +131,7 @@ export function ExportReadinessPanel({ readiness }: ExportReadinessPanelProps) {
           <ul>
             {blockers.map((item) => (
               <li key={item.key}>
-                <strong>{item.label}</strong>
+                <strong>{exportRequirementLabel(item.label)}</strong>
                 <span>
                   {requirementStatusLabel(item.status)} — belgesi doğrulanmadan
                   dosya hazır sayılamaz.
@@ -160,7 +162,7 @@ export function ExportReadinessPanel({ readiness }: ExportReadinessPanelProps) {
                 <AlertTriangle aria-hidden="true" />
               )}
               <div>
-                <strong>{item.label}</strong>
+                <strong>{exportRequirementLabel(item.label)}</strong>
                 <span>
                   {requirementStatusLabel(item.status)}
                   {item.isBlocking ? " · Bloke edici" : ""}

@@ -5,7 +5,7 @@ import { Link2, Send, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
 import {
   getAiTaskDeliveryChannelLabel,
   getAiTaskDeliveryStatusLabel,
@@ -67,35 +67,39 @@ export function AiTaskDeliverySectionClient({
     ? maskEmailForDisplay(emailRecipient.trim())
     : null;
 
+  const loopbackChannel = channels.find((channel) => channel.channelKey === "development-loopback");
+  const secureLinkState = issuedLink ?? activeGrant ? "Hazır" : "Önce güvenli bağlantı oluşturun";
+
+  const readinessLabel = (channel: RawAiTaskDeliveryChannel) =>
+    channel.channelKey === "whatsapp"
+      ? getAiTaskWhatsAppReadinessLabel(channel)
+      : channel.channelKey === "email"
+        ? getAiTaskEmailReadinessLabel(channel)
+        : channel.available
+          ? "Hazır"
+          : "Yapılandırılmadı";
+
   return (
-    <Card className="border-border/70 bg-card/80 p-5 shadow-sm" data-testid="ai-task-delivery-section">
-      <div className="flex items-start justify-between gap-4">
+    <section className="zx-panel zx-delivery" data-testid="ai-task-delivery-section" aria-labelledby="ai-task-delivery-heading">
+      <header className="zx-panel__header">
         <div>
-          <h2 className="text-base font-semibold tracking-tight">
-            Teslimat ve Güvenli Paylaşım
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Kanal teslimatları ve güvenli bağlantı yönetimi.
-          </p>
+          <h2 id="ai-task-delivery-heading" className="zx-panel__title">Teslimat ve Güvenli Paylaşım</h2>
+          <p className="zx-panel__subtitle">Kanal teslimatları ve güvenli bağlantı yönetimi.</p>
         </div>
         {canManage ? (
-          <Badge tone="neutral" className="gap-1">
-            <ShieldCheck className="size-3.5" />
+          <Badge tone="neutral">
+            <ShieldCheck aria-hidden="true" />
             Yönetim
           </Badge>
         ) : null}
-      </div>
+      </header>
 
       {canManage ? (
-        <div className="mt-5 grid gap-4 rounded-lg border border-border/60 bg-muted/20 p-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="grid gap-1 text-sm">
-              <span className="font-medium">Bağlantı Süresi</span>
-              <select
-                className="rounded-md border border-input bg-background px-3 py-2"
-                value={ttlPolicy}
-                onChange={(event) => setTtlPolicy(event.target.value)}
-              >
+        <div className="zx-subpanel">
+          <div className="zx-inline-form">
+            <label className="zx-field">
+              <span>Bağlantı süresi</span>
+              <select value={ttlPolicy} onChange={(event) => setTtlPolicy(event.target.value)}>
                 {AI_TASK_SECURE_ACCESS_TTL_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -106,6 +110,7 @@ export function AiTaskDeliverySectionClient({
             <Button
               type="button"
               disabled={isPending}
+              leadingIcon={<Link2 />}
               onClick={() =>
                 startTransition(async () => {
                   const result = await issueAiTaskSecureAccessAction(taskId, ttlPolicy);
@@ -115,7 +120,6 @@ export function AiTaskDeliverySectionClient({
                 })
               }
             >
-              <Link2 className="mr-2 size-4" />
               Güvenli bağlantı oluştur
             </Button>
             {activeGrant ? (
@@ -156,62 +160,49 @@ export function AiTaskDeliverySectionClient({
           </div>
 
           {issuedLink ? (
-            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-sm">
-              <p className="font-medium text-emerald-700">Güvenli Bağlantı (tek sefer gösterilir)</p>
-              <p className="mt-2 break-all font-mono text-xs">{issuedLink}</p>
+            <div className="zx-notice zx-notice--success">
+              <ShieldCheck aria-hidden="true" />
+              <div className="zx-notice__body">
+                <span className="zx-notice__title">Güvenli Bağlantı (tek sefer gösterilir)</span>
+                <p className="zx-code-box">{issuedLink}</p>
+              </div>
             </div>
           ) : null}
 
           {activeGrant ? (
-            <p className="text-sm text-muted-foreground">
-              Aktif bağlantı süresi: {formatAiTaskShortDateTime(activeGrant.expiresAtUtc)}
-            </p>
+            <p className="zx-hint">Aktif bağlantı süresi: {formatAiTaskShortDateTime(activeGrant.expiresAtUtc)}</p>
           ) : null}
         </div>
       ) : null}
 
-      <div className="mt-5">
-        <h3 className="text-sm font-medium">Kanal Hazırlığı</h3>
-        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+      <div className="zx-block">
+        <h3 className="zx-block__title">Kanal hazırlığı</h3>
+        <ul className="zx-channel-grid" aria-label="Kanal hazırlık durumu">
           {foundationChannels.map((channel) => (
-            <div
-              key={channel.channelKey}
-              className="flex items-center justify-between rounded-md border border-border/60 px-3 py-2 text-sm"
-            >
-              <span>{getAiTaskDeliveryChannelLabel(channel.channelKey)}</span>
-              <span className="text-muted-foreground">
-                {channel.channelKey === "whatsapp"
-                  ? getAiTaskWhatsAppReadinessLabel(channel)
-                  : channel.channelKey === "email"
-                    ? getAiTaskEmailReadinessLabel(channel)
-                    : channel.available
-                      ? "Hazır"
-                      : "Henüz yapılandırılmadı"}
-              </span>
-            </div>
+            <li key={channel.channelKey} className="zx-channel">
+              <span className="zx-channel__name">{getAiTaskDeliveryChannelLabel(channel.channelKey)}</span>
+              <Badge tone={channel.available ? "success" : "neutral"}>{readinessLabel(channel)}</Badge>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
 
       {canManage ? (
-        <div className="mt-5 rounded-lg border border-border/60 bg-muted/10 p-4">
-          <h3 className="text-sm font-medium">WhatsApp ile gönder</h3>
+        <div className="zx-subpanel">
+          <h3 className="zx-subpanel__title">WhatsApp ile gönder</h3>
           {!whatsappChannel?.available ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              WhatsApp Business henüz yapılandırılmadı.
-            </p>
+            <p className="zx-hint">WhatsApp Business henüz yapılandırılmadı.</p>
           ) : (
-            <div className="mt-3 grid gap-3">
-              <label className="grid gap-1 text-sm">
-                <span className="font-medium">Alıcı telefon (E.164)</span>
+            <div className="zx-form-stack">
+              <label className="zx-field">
+                <span>Alıcı telefon (E.164)</span>
                 <input
-                  className="rounded-md border border-input bg-background px-3 py-2"
                   placeholder="+90555..."
                   value={whatsappRecipient}
                   onChange={(event) => setWhatsappRecipient(event.target.value)}
                 />
               </label>
-              <label className="flex items-center gap-2 text-sm">
+              <label className="zx-check">
                 <input
                   type="checkbox"
                   checked={whatsappConsentKnown}
@@ -221,50 +212,47 @@ export function AiTaskDeliverySectionClient({
                   Onay durumu: {getAiTaskWhatsAppConsentLabel(whatsappConsentKnown ? "known" : "unknown")}
                 </span>
               </label>
-              <p className="text-sm text-muted-foreground">
-                Güvenli bağlantı: {issuedLink ?? activeGrant ? "Hazır" : "Önce güvenli bağlantı oluşturun"}
-              </p>
-              <Button
-                type="button"
-                disabled={isPending || !issuedLink || !whatsappRecipient || !whatsappConsentKnown}
-                onClick={() =>
-                  startTransition(async () => {
-                    await enqueueAiTaskDeliveryAction(taskId, {
-                      channel: "whatsapp",
-                      recipientKind: "external",
-                      idempotencyKey: crypto.randomUUID(),
-                      maskedRecipient: whatsappRecipient,
-                      recipientE164: whatsappRecipient,
-                      consentStatus: whatsappConsentKnown ? "known" : "unknown",
-                      secureAccessGrantId: activeGrant?.id,
-                      secureTaskUrl: issuedLink
-                        ? new URL(issuedLink, window.location.origin).toString()
-                        : undefined,
-                    });
-                  })
-                }
-              >
-                <Send className="mr-2 size-3.5" />
-                WhatsApp ile gönder
-              </Button>
+              <p className="zx-hint">Güvenli bağlantı: {secureLinkState}</p>
+              <div>
+                <Button
+                  type="button"
+                  disabled={isPending || !issuedLink || !whatsappRecipient || !whatsappConsentKnown}
+                  leadingIcon={<Send />}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await enqueueAiTaskDeliveryAction(taskId, {
+                        channel: "whatsapp",
+                        recipientKind: "external",
+                        idempotencyKey: crypto.randomUUID(),
+                        maskedRecipient: whatsappRecipient,
+                        recipientE164: whatsappRecipient,
+                        consentStatus: whatsappConsentKnown ? "known" : "unknown",
+                        secureAccessGrantId: activeGrant?.id,
+                        secureTaskUrl: issuedLink
+                          ? new URL(issuedLink, window.location.origin).toString()
+                          : undefined,
+                      });
+                    })
+                  }
+                >
+                  WhatsApp ile gönder
+                </Button>
+              </div>
             </div>
           )}
         </div>
       ) : null}
 
       {canManage ? (
-        <div className="mt-5 rounded-lg border border-border/60 bg-muted/10 p-4" data-testid="email-send-section">
-          <h3 className="text-sm font-medium">E-posta ile gönder</h3>
+        <div className="zx-subpanel" data-testid="email-send-section">
+          <h3 className="zx-subpanel__title">E-posta ile gönder</h3>
           {!emailChannel?.available && emailChannel?.reasonCode !== "degraded" ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              E-posta kanalı henüz yapılandırılmadı.
-            </p>
+            <p className="zx-hint">E-posta kanalı henüz yapılandırılmadı.</p>
           ) : (
-            <div className="mt-3 grid gap-3">
-              <label className="grid gap-1 text-sm">
-                <span className="font-medium">Alıcı e-posta</span>
+            <div className="zx-form-stack">
+              <label className="zx-field">
+                <span>Alıcı e-posta</span>
                 <input
-                  className="rounded-md border border-input bg-background px-3 py-2"
                   placeholder="ornek@firma.com"
                   value={emailRecipient}
                   onChange={(event) => setEmailRecipient(event.target.value)}
@@ -272,50 +260,52 @@ export function AiTaskDeliverySectionClient({
                 />
               </label>
               {maskedEmailPreview ? (
-                <p className="text-sm text-muted-foreground" data-testid="email-recipient-masked">
+                <p className="zx-hint" data-testid="email-recipient-masked">
                   Maskelenmiş alıcı: {maskedEmailPreview}
                 </p>
               ) : null}
-              <p className="text-sm text-muted-foreground">
-                Güvenli bağlantı: {issuedLink ?? activeGrant ? "Hazır" : "Önce güvenli bağlantı oluşturun"}
-              </p>
-              <Button
-                type="button"
-                disabled={isPending || !issuedLink || !emailRecipient.includes("@")}
-                data-testid="email-send-button"
-                onClick={() =>
-                  startTransition(async () => {
-                    await enqueueAiTaskDeliveryAction(taskId, {
-                      channel: "email",
-                      recipientKind: "external",
-                      idempotencyKey: crypto.randomUUID(),
-                      maskedRecipient: maskedEmailPreview ?? emailRecipient,
-                      recipientEmail: emailRecipient.trim(),
-                      recipientEligibility: "eligible",
-                      secureAccessGrantId: activeGrant?.id,
-                      secureTaskUrl: issuedLink
-                        ? new URL(issuedLink, window.location.origin).toString()
-                        : undefined,
-                    });
-                  })
-                }
-              >
-                <Send className="mr-2 size-3.5" />
-                E-posta ile gönder
-              </Button>
+              <p className="zx-hint">Güvenli bağlantı: {secureLinkState}</p>
+              <div>
+                <Button
+                  type="button"
+                  disabled={isPending || !issuedLink || !emailRecipient.includes("@")}
+                  data-testid="email-send-button"
+                  leadingIcon={<Send />}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await enqueueAiTaskDeliveryAction(taskId, {
+                        channel: "email",
+                        recipientKind: "external",
+                        idempotencyKey: crypto.randomUUID(),
+                        maskedRecipient: maskedEmailPreview ?? emailRecipient,
+                        recipientEmail: emailRecipient.trim(),
+                        recipientEligibility: "eligible",
+                        secureAccessGrantId: activeGrant?.id,
+                        secureTaskUrl: issuedLink
+                          ? new URL(issuedLink, window.location.origin).toString()
+                          : undefined,
+                      });
+                    })
+                  }
+                >
+                  E-posta ile gönder
+                </Button>
+              </div>
             </div>
           )}
         </div>
       ) : null}
 
-      <div className="mt-5">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Teslimat Geçmişi</h3>
-          {canManage ? (
+      <div className="zx-block">
+        <div className="zx-block__head">
+          <h3 className="zx-block__title">Teslimat geçmişi</h3>
+          {canManage && loopbackChannel?.available ? (
             <Button
               type="button"
               variant="secondary"
+              size="small"
               disabled={isPending}
+              leadingIcon={<Send />}
               onClick={() =>
                 startTransition(async () => {
                   await enqueueAiTaskDeliveryAction(taskId, {
@@ -326,56 +316,43 @@ export function AiTaskDeliverySectionClient({
                 })
               }
             >
-              <Send className="mr-2 size-3.5" />
-              Test Teslimat
+              Test teslimatı
             </Button>
           ) : null}
         </div>
         {deliveries.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">Henüz teslimat kaydı yok.</p>
+          <p className="zx-hint">Henüz teslimat kaydı yok.</p>
         ) : (
-          <div className="mt-2 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-2 pr-3">Kanal</th>
-                  <th className="py-2 pr-3">Durum</th>
-                  <th className="py-2 pr-3">Sağlayıcı Durumu</th>
-                  <th className="py-2 pr-3">İstenen</th>
-                  <th className="py-2 pr-3">Gönderildi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {deliveries.map((delivery) => (
-                  <tr key={delivery.id} className="border-b border-border/50">
-                    <td className="py-2 pr-3">
-                      {getAiTaskDeliveryChannelLabel(delivery.channel)}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {getAiTaskDeliveryStatusLabel(delivery.status)}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {delivery.channel === "whatsapp"
-                        ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
-                        : delivery.channel === "email"
-                          ? getAiTaskEmailProviderStatusLabel(delivery.providerStatus)
-                          : "—"}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {formatAiTaskShortDateTime(delivery.requestedAtUtc)}
-                    </td>
-                    <td className="py-2 pr-3">
-                      {delivery.sentAtUtc
-                        ? formatAiTaskShortDateTime(delivery.sentAtUtc)
+          <DataTable label="Teslimat geçmişi" minWidth={620}>
+            <thead>
+              <tr>
+                <th scope="col">Kanal</th>
+                <th scope="col">Durum</th>
+                <th scope="col">Sağlayıcı durumu</th>
+                <th scope="col">İstenen</th>
+                <th scope="col">Gönderildi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deliveries.map((delivery) => (
+                <tr key={delivery.id}>
+                  <td>{getAiTaskDeliveryChannelLabel(delivery.channel)}</td>
+                  <td>{getAiTaskDeliveryStatusLabel(delivery.status)}</td>
+                  <td>
+                    {delivery.channel === "whatsapp"
+                      ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
+                      : delivery.channel === "email"
+                        ? getAiTaskEmailProviderStatusLabel(delivery.providerStatus)
                         : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                  </td>
+                  <td>{formatAiTaskShortDateTime(delivery.requestedAtUtc)}</td>
+                  <td>{delivery.sentAtUtc ? formatAiTaskShortDateTime(delivery.sentAtUtc) : "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </DataTable>
         )}
       </div>
-    </Card>
+    </section>
   );
 }

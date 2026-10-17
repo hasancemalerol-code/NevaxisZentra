@@ -15,7 +15,6 @@ import {
   severityBadgeClass,
   SHIFT_RISK_CATEGORY_FILTER_OPTIONS,
   SHIFT_RISK_OUTCOME_FILTER_OPTIONS,
-  SHIFT_RISK_RULE_SET_VERSION,
 } from "../domain/shift-risk-labels";
 import type {
   ShiftRiskAssessmentDetail,
@@ -27,6 +26,7 @@ import {
   loadShiftRiskAssessmentsAction,
   loadShiftRiskOverviewAction,
 } from "../server/shift-risk-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ShiftRiskPanelProps = Readonly<{
   canManage: boolean;
@@ -143,7 +143,7 @@ function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
       {error ? (
         <div role="alert" className="shift-workforce-error-inline">
           <AlertTriangle aria-hidden="true" size={16} />
-          <span>{error}</span>
+          <span>{customerMessage(error)}</span>
         </div>
       ) : null}
 
@@ -212,7 +212,7 @@ function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
         </div>
 
         <div className={`shift-workforce-workspace${detailOpen ? " shift-workforce-workspace--detail-open" : ""}`}>
-          <div className="shift-workforce-registry__table-wrap">
+          <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Tablo (kaydırılabilir)">
             {isPending && !assessments.length ? (
               <div className="shift-workforce-loading">
                 <LoaderCircle className="animate-spin" aria-hidden="true" />
@@ -224,7 +224,7 @@ function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
                 <p>Kayıtlı risk değerlendirmesi bulunamadı.</p>
               </div>
             ) : (
-              <table className="shift-workforce-table">
+              <table aria-label="Vardiya risk değerlendirmeleri" className="shift-workforce-table">
                 <thead>
                   <tr>
                     <th>Vardiya</th>
@@ -300,7 +300,6 @@ function ShiftCoveragePanel({ canManage }: ShiftRiskPanelProps) {
                 <span className={outcomeBadgeClass(detail.outcome)}>
                   {detail.outcomeLabel}
                 </span>
-                <span>Kural seti: {detail.ruleSetVersion || SHIFT_RISK_RULE_SET_VERSION}</span>
                 <span>Gerekli: {formatShiftRiskCount(detail.minimumRequiredCount)}</span>
                 <span>Onaylı: {formatShiftRiskCount(detail.approvedEligibleCount)}</span>
                 <span>Açık: {formatShiftRiskCount(detail.coverageGap)}</span>

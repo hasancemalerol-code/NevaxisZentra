@@ -196,8 +196,8 @@ export function DigitalWorkforceControlCenterView() {
       <section className="dwf-panel">
         <h2>Dijital Çalışan Performansı</h2>
         <p>Oyunlaştırma yok; operasyon yöneticisi değeri görür.</p>
-        <div className="dwf-table-wrap">
-          <table className="dwf-table">
+        <div className="dwf-table-wrap" tabIndex={0} role="region" aria-label="Dijital Çalışan Performansı (kaydırılabilir)">
+          <table aria-label="Dijital Çalışan Performansı" className="dwf-table">
             <thead>
               <tr>
                 <th>Çalışan</th>

@@ -23,6 +23,7 @@ import {
   getAiTaskEscalationBadgeLabel,
   getAiTaskSlaDisplayText,
 } from "../presentation/ai-task-sla-labels";
+import { AiTaskSourceLabel } from "./ai-task-source-label";
 
 type AiTaskCenterItemCardProps = Readonly<{
   item: AiTaskCenterItem;
@@ -66,7 +67,12 @@ export function AiTaskCenterItemCard({
   item,
   now = new Date(),
 }: AiTaskCenterItemCardProps) {
-  const slaText = getAiTaskSlaDisplayText(item.slaState, item.slaDueAt, now);
+  const slaText = getAiTaskSlaDisplayText(
+    item.slaState,
+    item.slaDueAt,
+    now,
+    item.slaBreachType,
+  );
   const escalationBadge = item.escalationLevel
     ? getAiTaskEscalationBadgeLabel(item.escalationLevel)
     : null;
@@ -92,7 +98,7 @@ export function AiTaskCenterItemCard({
       <div className="ai-task-center-card__accent" aria-hidden="true" />
 
       <header className="ai-task-center-card__top">
-        <Badge tone="neutral">{item.sourceLabel}</Badge>
+        <AiTaskSourceLabel label={item.sourceLabel} />
 
         {item.priorityLabel ? (
           <Badge tone={priorityTone}>{item.priorityLabel}</Badge>

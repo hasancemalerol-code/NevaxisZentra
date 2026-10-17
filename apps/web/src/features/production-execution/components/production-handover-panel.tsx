@@ -6,6 +6,7 @@ import { ClipboardList, Plus } from "lucide-react";
 
 import type { ShiftHandoverSummary } from "../domain/production-execution-resources";
 import type { createHandoverAction } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type HandoverPanelProps = Readonly<{
   orderId: string;
@@ -171,7 +172,7 @@ export function ProductionHandoverPanel({
 
           {panelState.kind === "error" && (
             <div className="production-panel__error" role="alert">
-              <p>{panelState.message}</p>
+              <p>{customerMessage(panelState.message)}</p>
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPanelState({ kind: "idle" })}>
                 Kapat
               </button>

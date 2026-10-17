@@ -1,10 +1,12 @@
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
-import { Wrench } from "lucide-react";
+
 
 import { fetchEffectiveAccessCapabilities, hasGrantedPermission } from "@/features/admin-access/server/admin-access-effective-access";
 import { MaintenanceDashboardView } from "@/features/maintenance/components/maintenance-dashboard-view";
 import { readMaintenanceConditionOverviewSnapshot } from "@/features/maintenance/server/maintenance-condition-reader";
 import { readMaintenanceDashboard } from "@/features/maintenance/server/maintenance-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function MaintenancePage() {
   await forbidUnlessGranted("maintenance.read");
@@ -17,19 +19,13 @@ export default async function MaintenancePage() {
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
+      <div className="production-execution-page">
         <header className="production-execution-header">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>Bakım &amp; Arıza</h1>
+          <p>BAKIM VE ARIZA</p>
+          <h1>Bakım ve Arıza</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <Wrench aria-hidden="true" />
-          <div>
-            <h3>Bakım verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bakım verisi yüklenemedi" inline />
+      </div>
     );
   }
 

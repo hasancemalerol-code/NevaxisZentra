@@ -13,6 +13,7 @@ import type {
   recordGoodProductionAction,
   recordScrapAction,
 } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type OperatorActionState =
   | { kind: "idle" }
@@ -142,7 +143,7 @@ export function ProductionOperatorActions({
           className="production-operator-actions__error"
           role="alert"
         >
-          <span>{state.message}</span>
+          <span>{customerMessage(state.message)}</span>
           <button
             type="button"
             className="button button-ghost button-small"
@@ -291,7 +292,7 @@ export function ProductionOperatorActions({
             <div className="workflow-action-dialog__field">
               <label htmlFor="scrap-comment-input">
                 Yorum{" "}
-                <span style={{ color: "#8495aa", fontWeight: 500 }}>
+                <span style={{ color: "#5a697d", fontWeight: 500 }}>
                   — &ldquo;Diğer&rdquo; seçilirse zorunlu
                 </span>
               </label>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, ChevronDown, Search } from "lucide-react";
+import { Building2, ChevronDown, Menu, Search } from "lucide-react";
 import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 
 import { AccountMenu } from "@/features/saas-identity/components/account-menu";
@@ -18,6 +18,8 @@ type TopBarProps = Readonly<{
   searchItems: readonly ShellSearchItem[];
   settingsHref?: string | null;
   notificationsSlot?: ReactNode;
+  menuOpen?: boolean;
+  onMenuToggle?: () => void;
 }>;
 
 export function TopBar({
@@ -27,6 +29,8 @@ export function TopBar({
   searchItems,
   settingsHref = null,
   notificationsSlot = null,
+  menuOpen = false,
+  onMenuToggle,
 }: TopBarProps) {
   const workspacePanelId = useId();
   const [workspaceOpen, setWorkspaceOpen] = useState(false);
@@ -62,6 +66,17 @@ export function TopBar({
 
   return (
     <header className="top-bar">
+      {onMenuToggle ? (
+        <button
+          aria-expanded={menuOpen}
+          aria-label="Ana menüyü aç veya kapat"
+          className="top-bar-menu-button"
+          onClick={onMenuToggle}
+          type="button"
+        >
+          <Menu aria-hidden="true" />
+        </button>
+      ) : null}
       <div
         className="workspace-context shell-anchor"
         ref={workspaceRef}
@@ -96,6 +111,7 @@ export function TopBar({
           <button
             aria-expanded={searchOpen}
             aria-haspopup="dialog"
+            aria-label="Modül veya sayfa ara"
             className="search-placeholder"
             onClick={() => {
               setWorkspaceOpen(false);

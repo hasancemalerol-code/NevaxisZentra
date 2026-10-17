@@ -68,11 +68,21 @@ function kindFromCode(code: string): ApiFailureKind | null {
     return "permission-denied";
   }
 
-  if (/(unavailable|source-unavailable|timeout)/.test(code)) {
+  if (/(unavailable|source-unavailable|timeout|not-configured|configuration-error|provider)/.test(code)) {
     return "source-unavailable";
   }
 
   return null;
+}
+
+/** Classifies a bare failure code as carried by reader results (`permission-denied`, `http-404`, ...). */
+export function classifyFailureCode(code: string | null | undefined): ApiFailureKind {
+  const normalized = (code ?? "").trim().toLowerCase();
+  const http = /^http-(\d{3})$/.exec(normalized);
+  if (http) {
+    return kindFromStatus(Number(http[1]));
+  }
+  return (normalized ? kindFromCode(normalized) : null) ?? "source-unavailable";
 }
 
 function kindFromStatus(status: number): ApiFailureKind {

@@ -124,11 +124,12 @@ const styles: Record<string, CSSProperties> = {
     minWidth: 0,
     minHeight: 0,
     flex: "1 1 auto",
-    overflow: "hidden",
+    overflowX: "auto",
+    overflowY: "hidden",
   },
   table: {
     width: "100%",
-    minWidth: 0,
+    minWidth: 680,
     borderCollapse: "collapse",
     tableLayout: "fixed",
   },
@@ -604,7 +605,7 @@ export function ProductionOrdersTable({
       </div>
 
       <div style={styles.wrapper}>
-        <table style={styles.table}>
+        <table aria-label="Aktif Üretim Emirleri" style={styles.table}>
           <thead>
             <tr>
               <th style={{ ...styles.headerCell, width: "12%" }}>

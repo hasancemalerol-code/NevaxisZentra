@@ -81,6 +81,8 @@ export type ExecutiveDigitalWorkforceStatus = Readonly<{
   failed: number;
   verifiedOutcomes: number;
   drillDownHref: string;
+  /** False when the deferred Digital Workforce module is off: the panel is not rendered at all. */
+  available: boolean;
 }>;
 
 export type ExecutiveVerifiedValueItem = Readonly<{

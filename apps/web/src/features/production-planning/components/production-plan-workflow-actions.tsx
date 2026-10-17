@@ -9,6 +9,7 @@ import type {
   requestRevisionAction,
   submitForReviewAction,
 } from "../server/production-plan-workflow-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ProductionPlanWorkflowActionsProps = Readonly<{
   planId: string;
@@ -219,7 +220,7 @@ export function ProductionPlanWorkflowActions({
           className="production-plan-workflow-actions__error"
           role="alert"
         >
-          <span>{actionState.message}</span>
+          <span>{customerMessage(actionState.message)}</span>
           <button
             type="button"
             className="button button-ghost button-small"

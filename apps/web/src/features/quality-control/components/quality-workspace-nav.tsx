@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SubNav } from "@/components/ui/sub-nav";
 
 type QualityWorkspaceNavProps = Readonly<{
   active: "overview" | "ncr" | "follow-up" | "reporting";
@@ -13,21 +13,9 @@ const NAV_ITEMS = [
 
 export function QualityWorkspaceNav({ active }: QualityWorkspaceNavProps) {
   return (
-    <nav className="quality-workspace-nav" aria-label="Kalite çalışma alanı">
-      {NAV_ITEMS.map((item) => (
-        <Link
-          key={item.id}
-          href={item.href}
-          aria-current={active === item.id ? "page" : undefined}
-          className={
-            active === item.id
-              ? "quality-workspace-nav__link quality-workspace-nav__link--active"
-              : "quality-workspace-nav__link"
-          }
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
+    <SubNav
+      label="Kalite çalışma alanı"
+      groups={[{ items: NAV_ITEMS.map((item) => ({ href: item.href, label: item.label, active: active === item.id })) }]}
+    />
   );
 }

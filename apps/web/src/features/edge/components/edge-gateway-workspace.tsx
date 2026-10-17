@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/presentation/format";
 import {
   formatBufferUtilization,
   getEdgeDeliveryStatusLabel,
@@ -6,6 +7,7 @@ import {
 } from "../presentation/edge-labels";
 import type { EdgeDeliveryHealthReadModel } from "../presentation/edge-reliability-fixtures";
 import type { EdgeGatewayReadModel } from "../domain/edge-types";
+import { displayDataName } from "@/lib/presentation/display-name";
 
 interface EdgeGatewayWorkspaceProps {
   gateways: EdgeGatewayReadModel[];
@@ -16,7 +18,7 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
   if (gateways.length === 0) {
     return (
       <div className="edge-empty-state edge-empty-state--compact">
-        <p className="edge-empty-state__title">Kayıtlı gateway yok</p>
+        <p className="edge-empty-state__title">Kayıtlı ağ geçidi yok</p>
       </div>
     );
   }
@@ -31,11 +33,11 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
     <div className="edge-gateway-panel" data-testid="edge-gateway-workspace">
       <div className="edge-gateway-summary">
         <div className="edge-gateway-summary__item">
-          <span className="edge-gateway-summary__label">Gateway</span>
+          <span className="edge-gateway-summary__label">Ağ geçidi</span>
           <span className="edge-gateway-summary__value">{gateways.length}</span>
         </div>
         <div className="edge-gateway-summary__item">
-          <span className="edge-gateway-summary__label">API Bağlantısı</span>
+          <span className="edge-gateway-summary__label">Bağlantı durumu</span>
           <span className={`edge-gateway-summary__value${deliveryHealth.apiConnected ? " edge-gateway-summary__value--ok" : " edge-gateway-summary__value--warn"}`}>
             {deliveryHealth.apiConnected ? "Bağlı" : "Kesik"}
           </span>
@@ -47,7 +49,7 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
           </span>
         </div>
         <div className="edge-gateway-summary__item">
-          <span className="edge-gateway-summary__label">Dead Letter</span>
+          <span className="edge-gateway-summary__label">Teslim edilemeyen</span>
           <span className={`edge-gateway-summary__value${deliveryHealth.deadLetterCount > 0 ? " edge-gateway-summary__value--warn" : ""}`}>
             {deliveryHealth.deadLetterCount}
           </span>
@@ -68,7 +70,7 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
           </span>
         </div>
         {deliveryHealth.bufferUtilization != null && (
-          <div className="edge-gateway-util-bar" aria-label={`Kuyruk kullanımı ${utilization}`}>
+          <div className="edge-gateway-util-bar" role="img" aria-label={`Kuyruk kullanımı ${utilization}`}>
             <div
               className="edge-gateway-util-bar__fill"
               style={{ width: `${Math.min(100, Math.round(deliveryHealth.bufferUtilization * 100))}%` }}
@@ -77,17 +79,17 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
         )}
       </div>
 
-      <div className="edge-gateway-table-wrap">
-        <table className="edge-gateway-table">
+      <div className="edge-gateway-table-wrap" tabIndex={0} role="region" aria-label="Geçit tablosu">
+        <table aria-label="Saha ağ geçitleri" className="edge-gateway-table">
           <thead>
             <tr>
-              <th>Gateway</th>
+              <th>Ağ geçidi</th>
               <th>Bağlantı Sağlığı</th>
-              <th>Transport</th>
+              <th>Aktarım yöntemi</th>
               <th>Atanan Makine</th>
-              <th>API Bağlantısı</th>
+              <th>Bağlantı durumu</th>
               <th>Bekleyen Olay</th>
-              <th>Dead Letter</th>
+              <th>Teslim edilemeyen</th>
               <th>Son Teslim</th>
             </tr>
           </thead>
@@ -96,7 +98,7 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
               <tr key={g.id}>
                 <td>
                   <span className="edge-gateway-table__code">{g.gatewayCode}</span>
-                  <span className="edge-gateway-table__name">{g.name}</span>
+                  <span className="edge-gateway-table__name">{displayDataName(g.name)}</span>
                 </td>
                 <td>
                   <span className={`edge-status-pill edge-status-pill--conn-${g.status === "online" ? "online" : g.status === "offline" ? "offline" : "unknown"}`}>
@@ -114,12 +116,7 @@ export function EdgeGatewayWorkspace({ gateways, deliveryHealth }: EdgeGatewayWo
                 <td>{deliveryHealth.deadLetterCount}</td>
                 <td className="edge-gateway-table__muted">
                   {deliveryHealth.lastSuccessfulDeliveryAtUtc
-                    ? new Date(deliveryHealth.lastSuccessfulDeliveryAtUtc).toLocaleString("tr-TR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
+                    ? formatDateTime(deliveryHealth.lastSuccessfulDeliveryAtUtc)
                     : "—"}
                 </td>
               </tr>

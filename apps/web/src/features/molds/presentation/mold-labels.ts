@@ -75,7 +75,7 @@ export function getMoldCounterSourceLabel(source?: string): string {
     case "production":
       return "Üretim";
     case "edge":
-      return "Edge";
+      return "Saha verisi";
     case "erp":
       return "ERP";
     case "imported":

@@ -8,6 +8,7 @@ import { readAiTaskCenterUnified } from "@/features/ai-task-center/server/ai-tas
 import { fetchDigitalWorkforceControlCenter } from "@/features/digital-workforce/server/digital-workforce-api-client";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
 import { resolveProductionOrderRequestContextForIncomingRequest } from "@/features/production-execution/server/production-order-request-context";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
 
 export type IslerHubEntry = Readonly<{
   label: string;
@@ -48,7 +49,7 @@ export async function readIslerHubWorkspace(): Promise<IslerHubWorkspace> {
     });
   }
 
-  if (hasGrantedPermission(access, "digital-workforce.read")) {
+  if (deferredSurfacesEnabled() && hasGrantedPermission(access, "digital-workforce.read")) {
     const context = await resolveProductionContext();
     if (context) {
       try {

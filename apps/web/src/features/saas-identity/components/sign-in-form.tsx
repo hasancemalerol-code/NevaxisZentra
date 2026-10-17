@@ -200,7 +200,7 @@ export function SignInForm({
       ) : null}
 
       <div className="auth-form__field">
-        <label htmlFor="sign-in-organization">Kuruluş kodu</label>
+        <label htmlFor="sign-in-organization">Kuruluş kodu <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="sign-in-organization"
           name="organizationContext"
@@ -214,7 +214,7 @@ export function SignInForm({
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="sign-in-email">E-posta</label>
+        <label htmlFor="sign-in-email">E-posta <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="sign-in-email"
           name="email"
@@ -230,7 +230,7 @@ export function SignInForm({
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="sign-in-password">Parola</label>
+        <label htmlFor="sign-in-password">Parola <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="sign-in-password"
           name="password"

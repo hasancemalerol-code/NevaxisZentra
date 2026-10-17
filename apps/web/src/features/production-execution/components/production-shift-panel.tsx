@@ -6,6 +6,7 @@ import { Clock, RefreshCw } from "lucide-react";
 
 import type { ShiftAssignmentSummary } from "../domain/production-execution-resources";
 import type { assignShiftAction, reassignShiftAction } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ShiftPanelProps = Readonly<{
   orderId: string;
@@ -163,7 +164,7 @@ export function ProductionShiftPanel({
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="Vardiya GUID'i"
+                  placeholder="Vardiya kimliği"
                   value={shiftId}
                   onChange={(e) => setShiftId(e.target.value)}
                 />
@@ -215,7 +216,7 @@ export function ProductionShiftPanel({
 
           {panelState.kind === "error" && (
             <div className="production-panel__error" role="alert">
-              <p>{panelState.message}</p>
+              <p>{customerMessage(panelState.message)}</p>
               <button type="button" className="btn btn--ghost btn--sm" onClick={() => setPanelState({ kind: "idle" })}>
                 Kapat
               </button>

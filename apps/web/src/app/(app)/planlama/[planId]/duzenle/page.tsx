@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { PageFrame, PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 import { ArrowLeft } from "lucide-react";
 
 import { readProductionPlanningDetail } from "@/features/production-planning/server/production-plan-reader";
@@ -8,6 +9,7 @@ import { resolveProductionPlanningServerScope } from "@/features/production-plan
 import { ProductionPlanDraftForm } from "@/features/production-planning/components/production-plan-draft-form";
 import { writeUpdateProductionPlanDraft } from "@/features/production-planning/server/production-plan-draft-writer";
 import type { ProductionPlanDraftFormValues } from "@/features/production-planning/components/production-plan-draft-form";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type ProductionPlanEditPageProps = Readonly<{
   params: Promise<{ planId: string }>;
@@ -33,14 +35,29 @@ export default async function ProductionPlanEditPage({
   }
 
   if (detailResult.status === "not-found") {
-    notFound();
+    return (
+      <PageFrame>
+        <PageHeader
+          eyebrow="Üretim Planlama"
+          title="Plan Düzenle"
+          description="Düzenlemek istediğiniz plan bu çalışma alanında bulunamadı."
+        />
+        <StatePage
+          kind="empty"
+          inline
+          title="Düzenlenecek plan bulunamadı"
+          description="Plan mevcut değil, kaldırılmış ya da yetki alanınızın dışında olabilir."
+          actions={<StatePageLink href="/planlama" primary>Planlara dön</StatePageLink>}
+        />
+      </PageFrame>
+    );
   }
 
   const plan = detailResult.productionPlan;
 
   if (!EDITABLE_STATUSES.has(plan.status)) {
     return (
-      <main className="production-plan-edit-page">
+      <div className="production-plan-edit-page">
         <div className="production-plan-edit-page__back">
           <Link href={`/planlama/${planId}`}>
             <ArrowLeft aria-hidden="true" />
@@ -51,12 +68,12 @@ export default async function ProductionPlanEditPage({
         <div className="production-plan-edit-page__not-editable">
           <h1>Plan Düzenlenemiyor</h1>
           <p>
-            Bu plan şu anda <strong>{plan.status}</strong> durumunda olduğundan düzenlenemez.
+            Bu plan şu anda <strong>{enumLabel(plan.status)}</strong> durumunda olduğundan düzenlenemez.
             Yalnızca <em>Taslak</em> veya <em>İnceleme Gerekiyor</em> durumundaki planlar düzenlenebilir.
           </p>
           <Link href={`/planlama/${planId}`}>Plana dön</Link>
         </div>
-      </main>
+      </div>
     );
   }
 
@@ -179,7 +196,7 @@ export default async function ProductionPlanEditPage({
   }
 
   return (
-    <main className="production-plan-edit-page">
+    <div className="production-plan-edit-page">
       <div className="production-plan-edit-page__back">
         <Link href={`/planlama/${planId}`}>
           <ArrowLeft aria-hidden="true" />
@@ -204,6 +221,6 @@ export default async function ProductionPlanEditPage({
         initialValues={initialValues}
         onSubmit={handleUpdate}
       />
-    </main>
+    </div>
   );
 }

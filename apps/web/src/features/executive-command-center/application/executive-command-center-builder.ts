@@ -1,3 +1,4 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 import type { DigitalWorkActivityApiSummary, DigitalWorkApprovalApiSummary, DigitalWorkforceControlCenterSnapshot } from "@/features/digital-workforce/server/digital-workforce-api-client";
 import type { FactoryDecisionCaseQueueItemApi, FactoryDecisionCenterWorkspaceApi, FactoryDecisionEarlyWarningCardApi } from "@/features/factory-decision-center/server/factory-decision-center-api-client";
 import type { RawAiTaskSummary } from "@/features/ai-task-center/server/ai-task-api-client";
@@ -53,7 +54,7 @@ function throughputLineDrillDown(lineId: string): string {
 function formatTimeLabel(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
-  return date.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", timeZone: FACILITY_TIME_ZONE });
 }
 
 function caseDrillDown(caseId: string): string {
@@ -75,7 +76,7 @@ export function buildExecutiveNarrative(
   throughputSummary?: ThroughputOptimizerExecutiveSummaryApi,
 ): string {
   if (!decisionCenter) {
-    return "Karar merkezi verisi yüklenemedi.";
+    return "Karar merkezi özeti şu anda alınamıyor.";
   }
 
   const { summary, liveQueues } = decisionCenter;
@@ -83,7 +84,7 @@ export function buildExecutiveNarrative(
 
   const activeCritical = liveQueues.criticalDecisions.length;
   if (activeCritical > 0) {
-    sentences.push(`Bugün ${activeCritical} kritik outcome vakası aktif.`);
+    sentences.push(`Bugün ${activeCritical} kritik sonuç vakası aktif.`);
   }
 
   const recovery = liveQueues.activeRecoveryOperations[0];
@@ -96,7 +97,7 @@ export function buildExecutiveNarrative(
   const throughputActive = throughputSummary?.activeCases[0];
   if (throughputActive) {
     sentences.push(
-      `${throughputActive.lineCode} hattında throughput optimizasyonu (${throughputActive.observationState.toLowerCase()}) yürütülüyor.`,
+      `${throughputActive.lineCode} hattında verim optimizasyonu (${throughputActive.observationState.toLowerCase()}) yürütülüyor.`,
     );
   }
 
@@ -110,7 +111,7 @@ export function buildExecutiveNarrative(
   );
   if (throughputVerified?.verifiedThroughputGainPerHour) {
     sentences.push(
-      `${throughputVerified.lineCode} hattında +${throughputVerified.verifiedThroughputGainPerHour.toFixed(0)} GOOD/s VERIFIED iyileşme.`,
+      `${throughputVerified.lineCode} hattında +${throughputVerified.verifiedThroughputGainPerHour.toFixed(0)} iyi/sa doğrulanmış iyileşme.`,
     );
   }
 
@@ -119,7 +120,7 @@ export function buildExecutiveNarrative(
   } else if (digitalWorkforce && digitalWorkforce.pendingApprovals > 0) {
     sentences.push(`${digitalWorkforce.pendingApprovals} dijital iş gücü onayı bekliyor.`);
   } else if (throughputSummary && throughputSummary.pendingApprovalCount > 0) {
-    sentences.push(`${throughputSummary.pendingApprovalCount} throughput müdahale onayı bekliyor.`);
+    sentences.push(`${throughputSummary.pendingApprovalCount} verim müdahale onayı bekliyor.`);
   }
 
   if (sentences.length === 0) {
@@ -143,7 +144,7 @@ export function buildExecutiveOutcomeCards(
       id: "outcomes-at-risk",
       label: "Risk altındaki sipariş",
       value: String(summary.outcomesAtRisk),
-      detail: "Açık outcome vakaları",
+      detail: "Açık sonuç vakaları",
       tone: summary.outcomesAtRisk > 0 ? "negative" : "positive",
       drillDownHref: DECISION_CENTER_PATH,
       drillDownLabel: "Karar Merkezi",
@@ -154,7 +155,7 @@ export function buildExecutiveOutcomeCards(
       value: String(
         liveQueues.criticalDecisions.reduce((sum, item) => sum + Math.max(0, item.gapQuantity), 0),
       ),
-      detail: "Kritik vakalardaki toplam gap (iyi parça)",
+      detail: "Kritik vakalardaki toplam fark (iyi parça)",
       tone: "warning",
       drillDownHref: DECISION_CENTER_PATH,
       drillDownLabel: "Karar Merkezi",
@@ -170,7 +171,7 @@ export function buildExecutiveOutcomeCards(
     },
     {
       id: "material-exposure",
-      label: "Malzeme shortage exposure",
+      label: "Malzeme eksikliği riski",
       value: String(decisionCenter.earlyWarnings.materialDepletionRisks.length),
       detail: "Malzeme tükenme riskleri",
       tone: "warning",
@@ -179,7 +180,7 @@ export function buildExecutiveOutcomeCards(
     },
     {
       id: "quality-exposure",
-      label: "Quality exposure",
+      label: "Kalite riski",
       value: String(decisionCenter.earlyWarnings.qualityDeteriorationTrends.length),
       detail: "Kalite bozulma trendleri",
       tone: "warning",
@@ -188,7 +189,7 @@ export function buildExecutiveOutcomeCards(
     },
     {
       id: "active-recovery",
-      label: "Active recovery operations",
+      label: "Aktif kurtarma operasyonları",
       value: String(summary.recoveryOperations),
       detail: "Yürütülen kurtarma operasyonları",
       tone: "neutral",
@@ -197,25 +198,25 @@ export function buildExecutiveOutcomeCards(
     },
     {
       id: "awaiting-decision",
-      label: "Awaiting human decision",
+      label: "İnsan Onayı bekleyen",
       value: String(summary.pendingHumanApproval + (digitalWorkforce?.pendingApprovals ?? 0)),
-      detail: "Karar merkezi + dijital iş gücü onayları",
+      detail: digitalWorkforce ? "Karar merkezi + dijital iş gücü onayları" : "Karar merkezi onayları",
       tone: summary.pendingHumanApproval > 0 ? "warning" : "neutral",
-      drillDownHref: WORKFORCE_APPROVALS_PATH,
+      drillDownHref: digitalWorkforce ? WORKFORCE_APPROVALS_PATH : DECISION_CENTER_PATH,
       drillDownLabel: "Onaylar",
     },
     {
       id: "verified-today",
-      label: "Verified recovery today",
+      label: "Bugün doğrulanan kurtarma",
       value: String(liveQueues.verifiedClosedToday.length),
-      detail: "Bugün VERIFIED kapanan vakalar",
+      detail: "Bugün doğrulanarak kapanan vakalar",
       tone: liveQueues.verifiedClosedToday.length > 0 ? "positive" : "neutral",
       drillDownHref: DECISION_CENTER_PATH,
       drillDownLabel: "Karar Merkezi",
     },
     {
       id: "open-ai-tasks",
-      label: "Açık AI görevleri",
+      label: "Açık yapay zekâ görevleri",
       value: String(openAiTasks),
       detail: "İnsan incelemesi gerektiren görevler",
       tone: openAiTasks > 0 ? "warning" : "neutral",
@@ -229,6 +230,7 @@ function mapCaseToPriority(
   item: FactoryDecisionCaseQueueItemApi,
   section: ExecutivePriorityItem["section"],
   timeToImpact?: string,
+  showWorkers = false,
 ): ExecutivePriorityItem {
   return {
     id: `${section}-${item.caseId}`,
@@ -236,7 +238,7 @@ function mapCaseToPriority(
     outcome: item.orderReference,
     impact: item.riskSummary,
     status: item.status,
-    owner: item.digitalWorkerNames.join(" · ") || "Atanmadı",
+    owner: (showWorkers ? item.digitalWorkerNames.join(" · ") : "") || "Atanmadı",
     nextAction: item.decisionRequired ?? item.recommendedStrategy,
     timeToImpact,
     verificationState: item.verificationState,
@@ -248,6 +250,8 @@ function mapCaseToPriority(
 export function buildExecutivePriorityStack(
   decisionCenter: FactoryDecisionCenterWorkspaceApi | undefined,
   filters: ExecutiveCommandCenterFilters,
+  /** Digital Workforce is deferred: worker names are only attributed as owners when the module is enabled. */
+  showWorkers = false,
 ): readonly ExecutivePriorityItem[] {
   if (!decisionCenter) return [];
 
@@ -258,24 +262,24 @@ export function buildExecutivePriorityStack(
     const risk = earlyWarnings.criticalPredictedRisks.find(
       (card) => card.caseId === item.caseId || card.orderReference === item.orderReference,
     );
-    items.push(mapCaseToPriority(item, "critical-now", risk?.timeToImpactLabel));
+    items.push(mapCaseToPriority(item, "critical-now", risk?.timeToImpactLabel, showWorkers));
   }
 
   for (const item of liveQueues.pendingHumanApproval.filter((row) => matchesSeverityFilter(row, filters.severity))) {
-    items.push(mapCaseToPriority(item, "decision-today"));
+    items.push(mapCaseToPriority(item, "decision-today", undefined, showWorkers));
   }
 
   for (const item of liveQueues.activeRecoveryOperations.filter((row) => matchesSeverityFilter(row, filters.severity))) {
-    items.push(mapCaseToPriority(item, "active-recovery"));
+    items.push(mapCaseToPriority(item, "active-recovery", undefined, showWorkers));
   }
 
   for (const item of liveQueues.pendingVerification.filter((row) => matchesSeverityFilter(row, filters.severity))) {
-    items.push(mapCaseToPriority(item, "pending-verification"));
+    items.push(mapCaseToPriority(item, "pending-verification", undefined, showWorkers));
   }
 
   for (const item of liveQueues.verifiedClosedToday.filter((row) => matchesSeverityFilter(row, filters.severity))) {
     if (!isVerifiedCase(item)) continue;
-    items.push(mapCaseToPriority(item, "verified-today"));
+    items.push(mapCaseToPriority(item, "verified-today", undefined, showWorkers));
   }
 
   return items;
@@ -315,9 +319,9 @@ export function buildExecutiveApprovals(
         caseId: item.caseId,
         decision: item.decisionRequired ?? "Kurtarma planı onayı",
         businessOutcome: item.title,
-        expectedBenefit: `${item.projectedQuantity}/${item.requiredQuantity} iyi parça projeksiyonu`,
+        expectedBenefit: `${item.projectedQuantity}/${item.requiredQuantity} iyi parça öngörüsü`,
         tradeoff: item.recommendedStrategy,
-        requester: item.digitalWorkerNames[0] ?? "Fabrika Koordinatörü",
+        requester: (workforceApprovals ? item.digitalWorkerNames[0] : undefined) ?? "Fabrika Koordinatörü",
         urgency: item.severity,
         drillDownHref: caseDrillDown(item.caseId),
         recoveryContext: item.riskSummary,
@@ -356,6 +360,7 @@ export function buildExecutiveDigitalWorkforceStatus(
       failed: 0,
       verifiedOutcomes: 0,
       drillDownHref: WORKFORCE_PATH,
+      available: false,
     };
   }
 
@@ -373,6 +378,7 @@ export function buildExecutiveDigitalWorkforceStatus(
     failed: snapshot.failedExecutions,
     verifiedOutcomes,
     drillDownHref: WORKFORCE_PATH,
+    available: true,
   };
 }
 
@@ -403,9 +409,9 @@ export function buildExecutiveVerifiedValue(
 
       items.push({
         id: `throughput-${item.caseId}`,
-        outcomeLabel: "VERIFIED throughput iyileşmesi",
+        outcomeLabel: "Doğrulanmış verimlilik iyileşmesi",
         orderReference: item.lineCode,
-        summary: `${item.selectedInterventionTitle ?? "Müdahale"} · +${item.verifiedThroughputGainPerHour.toFixed(0)} GOOD/s`,
+        summary: `${item.selectedInterventionTitle ?? "Müdahale"} · +${item.verifiedThroughputGainPerHour.toFixed(0)} iyi parça/sa`,
         verifiedAtLabel: formatTimeLabel(item.updatedAtUtc),
         drillDownHref: throughputLineDrillDown(item.lineId),
       });
@@ -477,30 +483,30 @@ export function buildExecutiveOperationalExposure(
   return [
     {
       id: "output-gap",
-      label: "Recoverable production opportunity",
+      label: "Kurtarılabilir üretim fırsatı",
       value: `${gapTotal} iyi parça`,
-      detail: "Kritik vakalardaki toplam üretim açığı",
+      detail: "Kritik vakalardaki üretim açığı",
       drillDownHref: DECISION_CENTER_PATH,
     },
     {
       id: "delivery-risk",
-      label: "Delivery risk exposure",
+      label: "Teslimat riski",
       value: String(deliveryRisks),
       detail: "Teslimat riski sinyalleri",
       drillDownHref: INTELLIGENCE_PATH,
     },
     {
       id: "downtime-exposure",
-      label: "Downtime exposure",
+      label: "Duruş riski",
       value: String(downtimeSignals),
       detail: "Makine bozulma trendleri",
       drillDownHref: INTELLIGENCE_PATH,
     },
     {
       id: "pending-verification",
-      label: "Verification backlog",
+      label: "Doğrulama bekleyenler",
       value: String(decisionCenter.summary.pendingVerification),
-      detail: "Doğrulama bekleyen outcome vakaları",
+      detail: "Doğrulama bekleyen sonuç vakaları",
       drillDownHref: DECISION_CENTER_PATH,
     },
   ];
@@ -595,7 +601,7 @@ export function buildExecutiveCommandCenterWorkspace(
       source.digitalWorkforce,
       openAiTasks,
     ),
-    priorityStack: buildExecutivePriorityStack(source.decisionCenter, source.filters),
+    priorityStack: buildExecutivePriorityStack(source.decisionCenter, source.filters, Boolean(source.digitalWorkforce)),
     predictiveRisks: buildExecutivePredictiveRisks(source.decisionCenter),
     approvals,
     digitalWorkforce: buildExecutiveDigitalWorkforceStatus(source.digitalWorkforce),

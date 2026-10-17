@@ -33,6 +33,10 @@ const nextConfig: NextConfig = {
         destination: `${apiBaseUrl}/api/saas-subscription/:path*`,
       },
       {
+        source: "/api/bulk-data-onboarding/:path*",
+        destination: `${apiBaseUrl}/api/bulk-data-onboarding/:path*`,
+      },
+      {
         source: "/api/public/ai-task-access/:path*",
         destination: `${apiBaseUrl}/api/public/ai-task-access/:path*`,
       },

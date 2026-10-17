@@ -41,7 +41,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.28rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #166534;
 }
@@ -98,7 +98,7 @@
 
 .golden-demo-hero__copy {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   line-height: 1.38;
   color: #5b6b7c;
   max-width: 38rem;
@@ -119,11 +119,11 @@
 
 .golden-demo-hero__value-label {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-hero__value-number {
@@ -140,7 +140,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.14rem 0.48rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -180,24 +180,24 @@
 
 .golden-demo-workflow-rail__label {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-workflow-rail__title {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--commint-navy);
 }
 
 .golden-demo-workflow-rail__detail {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 1.32;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-machine-panel {
@@ -245,9 +245,9 @@
 
 .golden-demo-metric__label {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-metric__value {
@@ -265,8 +265,8 @@
 
 .golden-demo-metric__detail {
   margin: 0;
-  font-size: 0.62rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .golden-demo-details-grid {
@@ -290,7 +290,7 @@
 .golden-demo-details-grid ul {
   margin: 0;
   padding-left: 1rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.38;
   color: #475569;
 }
@@ -319,7 +319,7 @@
 
 .golden-demo-digital-stack h3 {
   margin: 0.35rem 0 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #334155;
 }
@@ -327,7 +327,7 @@
 .golden-demo-digital-stack p,
 .golden-demo-digital-stack li {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.38;
   color: #475569;
 }
@@ -360,13 +360,13 @@
 }
 
 .golden-demo-agent-card strong {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--commint-navy);
 }
 
 .golden-demo-agent-card span {
-  font-size: 0.66rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.32;
 }
 
@@ -376,7 +376,7 @@
   width: fit-content;
   border-radius: 999px;
   padding: 0.1rem 0.42rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -412,7 +412,7 @@
   margin: 0;
   padding: 0.38rem 0.52rem;
   border-radius: 8px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 
@@ -436,8 +436,8 @@
 
 .golden-demo-reference {
   margin: 0;
-  font-size: 0.66rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .golden-demo-approval-card {
@@ -470,7 +470,7 @@
 
 .golden-demo-approval-card__eyebrow {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   color: #92400e;
@@ -482,9 +482,9 @@
 
 .golden-demo-approval-card__boundary-note {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.35;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-status-chip--approval-pending {
@@ -526,7 +526,7 @@
 
 .golden-demo-approval-card__message {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   color: #475569;
   max-width: 42rem;
@@ -546,11 +546,11 @@
   align-items: center;
   padding: 0.18rem 0.42rem;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-approval-story__step--complete {
@@ -567,7 +567,7 @@
 
 .golden-demo-approval-story__step--pending {
   border-style: dashed;
-  color: #94a3b8;
+  color: #5d6b7f;
 }
 
 .golden-demo-approval-kpi-grid {
@@ -594,11 +594,11 @@
 
 .golden-demo-approval-kpi__label {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-approval-kpi--emphasis .golden-demo-approval-kpi__label {
@@ -629,11 +629,11 @@
 
 .golden-demo-approval-guardrail__eyebrow {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-approval-guardrail__title {
@@ -645,7 +645,7 @@
 
 .golden-demo-approval-guardrail__detail {
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   line-height: 1.35;
   color: #475569;
 }
@@ -666,17 +666,17 @@
 
 .golden-demo-evidence-pack__eyebrow {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-evidence-pack__summary {
   margin: 0;
-  font-size: 0.66rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .golden-demo-evidence-pack__chips {
@@ -697,7 +697,7 @@
   border: 1px solid #bbf7d0;
   border-radius: 999px;
   background: #f0fdf4;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #166534;
   cursor: pointer;
@@ -713,7 +713,7 @@
 }
 
 .golden-demo-evidence-chip span {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -739,16 +739,16 @@
 
 .golden-demo-approval-meta__label {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-approval-meta__value {
   margin: 0;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.35;
   color: var(--commint-navy);
@@ -775,7 +775,7 @@
 
 .golden-demo-approval-record__label {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -791,7 +791,7 @@
 
 .golden-demo-approval-record__detail {
   margin: 0;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   color: #166534;
 }
 

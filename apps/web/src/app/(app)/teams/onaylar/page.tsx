@@ -11,6 +11,7 @@ import { forbidUnlessGranted } from "@/features/admin-access/server/require-curr
 import { TEAMS_APPROVAL_DISCLAIMER, TEAMS_APPROVAL_STATUSES } from "@/features/teams/domain/teams-constants";
 import { readTeamsApprovals } from "@/features/teams/server/teams-queries";
 import "@/features/teams/components/teams-workspace.css";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -27,10 +28,10 @@ export default async function TeamsApprovalsPage() {
       <PageContent>
         <PageHeader
           description="İnsan kontrollü operasyon onay istekleri."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Onay istekleri"
         />
-        <EmptyState description={result.message} title="Onay istekleri yüklenemedi" />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Onay istekleri yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -39,14 +40,19 @@ export default async function TeamsApprovalsPage() {
     <PageContent data-testid="teams-approvals-page">
       <PageHeader
         description="Kanal veya görev bağlamından oluşturulan insan karar kayıtları."
-        eyebrow="Teams"
+        eyebrow="Operasyon iletişimi"
         title="Onay istekleri"
+        actions={
+          <Link href="/teams" className="button button-primary button-medium" data-testid="teams-approval-create-link">
+            Kanallardan onay iste
+          </Link>
+        }
       />
 
       <Section title="İstekler">
         {result.value.items.length === 0 ? (
           <EmptyState
-            description="Görüntüleyebileceğiniz onay isteği yok."
+            description="Onay isteği, bir kanal mesajından veya görevden başlatılır. Yeni onay isteği için bir kanal seçin."
             title="Onay isteği yok"
           />
         ) : (

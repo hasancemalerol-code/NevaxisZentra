@@ -140,7 +140,7 @@ builder.Services.AddNevaxisZentraIntelligenceRuntimeApi();
 builder.Services.AddNevaxisZentraOperationalValueApi();
 builder.Services.AddNevaxisZentraRealFactoryPilot();
 builder.Services.AddNevaxisZentraBulkDataOnboardingApi();
-builder.Services.AddNevaxisZentraProductionManager();
+builder.Services.AddNevaxisZentraProductionManager(scenarioEnginesEnabled: builder.Environment.IsDevelopment());
 builder.Services.AddNevaxisZentraFactoryLearning();
 builder.Services.AddNevaxisZentraAdaptivePlanning();
 builder.Services.AddNevaxisZentraFactoryNetwork();

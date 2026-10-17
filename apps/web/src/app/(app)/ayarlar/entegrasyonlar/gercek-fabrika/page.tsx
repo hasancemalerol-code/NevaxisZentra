@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   fetchCurrentEffectiveAccessResult,
   hasGrantedPermission,
@@ -8,7 +6,13 @@ import { RealFactoryPilotEmptyState } from "@/features/real-factory-pilot/compon
 import { RealFactoryPilotPanel } from "@/features/real-factory-pilot/components/real-factory-pilot-panel";
 import { readRealFactoryPilotWorkspaceState } from "@/features/real-factory-pilot/server/real-factory-pilot-reader";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
+import { StatePageLink } from "@/components/ui/state-page";
+
 export const dynamic = "force-dynamic";
+
+const DESCRIPTION = "Fabrika sistemlerinizin bağlantı durumunu ve veri kalitesini izleyin.";
 
 type GercekFabrikaPilotPageProps = Readonly<{
   searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -22,16 +26,10 @@ export default async function GercekFabrikaPilotPage({ searchParams }: GercekFab
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <header className="production-execution-header">
-          <p>AYARLAR · ENTEGRASYONLAR</p>
-          <h1>Gerçek Fabrika Bağlantıları</h1>
-          <p>
-            <Link href="/ayarlar/entegrasyonlar">← Entegrasyonlar</Link>
-          </p>
-        </header>
-        <div role="alert" className="state-panel error-state">{result.message}</div>
-      </main>
+      <div className="production-execution-page">
+        <PageHeader eyebrow="Ayarlar" title="Fabrika Bağlantıları" description={DESCRIPTION} actions={<StatePageLink href="/ayarlar/entegrasyonlar">Entegrasyonlar</StatePageLink>} />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline />
+      </div>
     );
   }
 
@@ -42,21 +40,18 @@ export default async function GercekFabrikaPilotPage({ searchParams }: GercekFab
     hasGrantedPermission(access.access, "real-factory-pilot.manage");
 
   return (
-    <main className="production-execution-page">
-      <header className="production-execution-header">
-        <p>AYARLAR · ENTEGRASYONLAR</p>
-        <h1>Gerçek Fabrika Bağlantıları</h1>
-        <p>
-          <Link href="/ayarlar/entegrasyonlar">← Entegrasyonlar</Link>
-          {" · "}
-          <Link href="/ayarlar/entegrasyonlar/merkez">Entegrasyon Merkezi</Link>
-        </p>
-      </header>
+    <div className="production-execution-page">
+      <PageHeader
+        eyebrow="Ayarlar"
+        title="Fabrika Bağlantıları"
+        description={DESCRIPTION}
+        actions={<StatePageLink href="/ayarlar/entegrasyonlar">Entegrasyonlar</StatePageLink>}
+      />
       {result.workspace ? (
         <RealFactoryPilotPanel workspace={result.workspace} />
       ) : (
         <RealFactoryPilotEmptyState canInitialize={canInitialize} notice={notice} />
       )}
-    </main>
+    </div>
   );
 }

@@ -6,7 +6,9 @@ import { useSearchParams } from "next/navigation";
 import {
   Clock3,
   ListChecks,
+  CalendarClock,
   ShieldAlert,
+  ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
 
@@ -18,9 +20,18 @@ import {
   type AiTaskCenterView,
 } from "../domain/ai-task-center-item";
 
+/** A summary metric that a host screen adds to the task KPI row (shown once, not as a second row). */
+export type AiTaskExtraKpi = Readonly<{
+  label: string;
+  value: number;
+  detail: string;
+  href?: string;
+}>;
+
 type AiTaskKpiLinksProps = Readonly<{
   kpis: AiTaskKpiSummary;
   listPath?: string;
+  extraKpis?: readonly AiTaskExtraKpi[];
 }>;
 
 type AiTaskKpiFilterId =
@@ -87,6 +98,7 @@ function isKpiActive(
 export function AiTaskKpiLinks({
   kpis,
   listPath = "/",
+  extraKpis = [],
 }: AiTaskKpiLinksProps) {
   const searchParams = useSearchParams();
   const currentView = parseAiTaskCenterView(searchParams.get("gorunum"));
@@ -104,9 +116,9 @@ export function AiTaskKpiLinks({
     },
     {
       id: "awaiting-approval",
-      ariaLabel: "Onay bekleyen görevleri görüntüle",
-      label: "Onay bekleyen",
-      detail: "İnsan kararı gereken görev",
+      ariaLabel: "Onay ve teslimleri görüntüle",
+      label: "Onay ve teslim",
+      detail: "İnsan kararı gereken kayıt",
       value: String(kpis.awaitingApproval),
       tone: "warning",
       icon: <Clock3 />,
@@ -114,9 +126,9 @@ export function AiTaskKpiLinks({
     },
     {
       id: "critical",
-      ariaLabel: "Kritik risk görevlerini görüntüle",
-      label: "Kritik risk",
-      detail: "Öncelikli müdahale",
+      ariaLabel: "Hizmet seviyesi riski taşıyan görevleri görüntüle",
+      label: "Süre riski",
+      detail: "Aşılan veya yaklaşan hedef",
       value: String(kpis.criticalRisk),
       tone: "neutral",
       icon: <ShieldAlert />,
@@ -126,7 +138,7 @@ export function AiTaskKpiLinks({
       id: "overdue",
       ariaLabel: "Geciken görevleri görüntüle",
       label: "Geciken görev",
-      detail: "SLA / son tarih aşımı",
+      detail: "Çözüm tarihi geçen görev",
       value: String(kpis.overdue),
       tone: "warning",
       icon: <TriangleAlert />,
@@ -136,7 +148,7 @@ export function AiTaskKpiLinks({
 
   return (
     <div
-      aria-label="AI görev merkezi özet göstergeleri"
+      aria-label="Yapay zekâ görev merkezi özet göstergeleri"
       className="kpi-grid ai-task-kpi-links"
     >
       {items.map((item) => (
@@ -155,6 +167,18 @@ export function AiTaskKpiLinks({
           />
         </AiTaskKpiLink>
       ))}
+      {extraKpis.map((extra) => {
+        const card = (
+          <KpiCard detail={extra.detail} icon={extra.label === "Doğrulama" ? <ShieldCheck /> : extra.label === "Vardiya konusu" ? <CalendarClock /> : <ListChecks />} label={extra.label} tone="neutral" value={String(extra.value)} />
+        );
+        return extra.href ? (
+          <Link aria-label={`${extra.label} görüntüle`} className="ai-task-kpi-link" href={extra.href} key={extra.label}>
+            {card}
+          </Link>
+        ) : (
+          <div className="ai-task-kpi-link" key={extra.label}>{card}</div>
+        );
+      })}
     </div>
   );
 }

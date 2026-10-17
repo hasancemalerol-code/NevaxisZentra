@@ -3,13 +3,18 @@
 import "./adaptive-planning.css";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { CheckCircle2, PlayCircle, XCircle } from "lucide-react";
+import { createPortal } from "react-dom";
+import { CalendarClock, CheckCircle2, PlayCircle, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { StatePageLink } from "@/components/ui/state-page";
 
 import {
+  ADAPTIVE_NO_PLAN_CAPTION,
+  formatAdaptiveCountForPlan,
+  formatAdaptivePercentForPlan,
   formatAdaptiveDateTime,
   formatAdaptiveDurationMinutes,
   formatAdaptivePercent,
@@ -27,6 +32,7 @@ import {
   getReplanActionLabel,
   getScenarioStatusLabel,
   getTriggerTypeLabel,
+  hasAdaptivePlanData,
 } from "../domain/adaptive-planning-labels";
 import {
   approveAdaptiveReplanAction,
@@ -38,6 +44,7 @@ import type {
   AdaptivePlanningWorkspaceApi,
   ReplanEvaluationResultApi,
 } from "../server/adaptive-planning-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 const WORKSPACE_TABS = [
   { id: "summary", label: "Planlama Özeti" },
@@ -56,6 +63,10 @@ type AdaptivePlanningWorkspaceClientProps = Readonly<{
   replanEvaluation: ReplanEvaluationResultApi | null;
   initialTab?: WorkspaceTabId;
   onTabChange?: (tab: WorkspaceTabId) => void;
+  /** Host page already offers "Yeni Plan" in its header; avoid a second entry point. */
+  hideCreatePlanAction?: boolean;
+  /** undefined: tabs render inline. null: host slot not mounted yet (tabs wait). Element: tabs render there, full width. */
+  tabsHost?: HTMLElement | null;
 }>;
 
 type ParsedDiffRow = Readonly<{
@@ -136,6 +147,8 @@ export function AdaptivePlanningWorkspaceClient({
   replanEvaluation,
   initialTab = "summary",
   onTabChange,
+  hideCreatePlanAction = false,
+  tabsHost,
 }: AdaptivePlanningWorkspaceClientProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTabId>(initialTab);
   useEffect(() => {
@@ -151,6 +164,7 @@ export function AdaptivePlanningWorkspaceClient({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const hasPlan = hasAdaptivePlanData(workspace);
   const latestChange = workspace.recentChanges[0];
   const diffRows = useMemo(() => parseDiffRows(latestChange), [latestChange]);
   const gantt = useMemo(() => buildGanttRows(workspace.operations), [workspace.operations]);
@@ -202,52 +216,61 @@ export function AdaptivePlanningWorkspaceClient({
     });
   }
 
+  const tabsNode = (
+    <div className="adaptive-planning-workspace__tabs" role="tablist" aria-label="Planlama merkezi görünümleri">
+      {WORKSPACE_TABS.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
+          className={`adaptive-planning-workspace__tab${activeTab === tab.id ? " adaptive-planning-workspace__tab--active" : ""}`}
+          onClick={() => selectTab(tab.id)}
+        >
+          {tab.label}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div className="adaptive-planning-workspace" data-testid="adaptive-planning-workspace-client">
-      <div className="adaptive-planning-workspace__tabs" role="tablist" aria-label="Planlama merkezi görünümleri">
-        {WORKSPACE_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            className={`adaptive-planning-workspace__tab${activeTab === tab.id ? " adaptive-planning-workspace__tab--active" : ""}`}
-            onClick={() => selectTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {tabsHost === undefined ? tabsNode : tabsHost ? createPortal(tabsNode, tabsHost) : null}
 
-      {message ? <p className="adaptive-planning-workspace__message" role="status">{message}</p> : null}
-      {error ? <p className="adaptive-planning-workspace__error" role="alert">{error}</p> : null}
+      {message ? <p className="adaptive-planning-workspace__message" role="status">{customerMessage(message)}</p> : null}
+      {error ? <p className="adaptive-planning-workspace__error" role="alert">{customerMessage(error)}</p> : null}
 
       {activeTab === "summary" ? (
         <section className="adaptive-planning-workspace__section" data-testid="adaptive-planning-summary">
           <div className="commint-kpi-grid">
             <Card>
               <span>Plan uyumu</span>
-              <strong>{formatAdaptivePercent(workspace.metrics.planAdherencePercent)}</strong>
+              <strong>{formatAdaptivePercentForPlan(workspace.metrics.planAdherencePercent, hasPlan)}</strong>
+              {hasPlan ? null : <small>{ADAPTIVE_NO_PLAN_CAPTION}</small>}
             </Card>
             <Card>
               <span>Program uyumu</span>
-              <strong>{formatAdaptivePercent(workspace.metrics.scheduleAdherencePercent)}</strong>
+              <strong>{formatAdaptivePercentForPlan(workspace.metrics.scheduleAdherencePercent, hasPlan)}</strong>
+              {hasPlan ? null : <small>{ADAPTIVE_NO_PLAN_CAPTION}</small>}
             </Card>
             <Card>
               <span>Riskli sipariş</span>
-              <strong>{workspace.metrics.ordersAtRisk}</strong>
+              <strong>{formatAdaptiveCountForPlan(workspace.metrics.ordersAtRisk, hasPlan)}</strong>
+              {hasPlan ? null : <small>{ADAPTIVE_NO_PLAN_CAPTION}</small>}
             </Card>
             <Card>
-              <span>Bugün replan</span>
+              <span>Bugünkü yeniden planlama</span>
               <strong>{workspace.metrics.replansToday}</strong>
             </Card>
             <Card>
               <span>Planlı kullanım</span>
-              <strong>{formatAdaptivePercent(workspace.metrics.plannedUtilizationPercent)}</strong>
+              <strong>{formatAdaptivePercentForPlan(workspace.metrics.plannedUtilizationPercent, hasPlan)}</strong>
+              {hasPlan ? null : <small>{ADAPTIVE_NO_PLAN_CAPTION}</small>}
             </Card>
             <Card>
               <span>Gerçek kullanım</span>
-              <strong>{formatAdaptivePercent(workspace.metrics.actualUtilizationPercent)}</strong>
+              <strong>{formatAdaptivePercentForPlan(workspace.metrics.actualUtilizationPercent, hasPlan)}</strong>
+              {hasPlan ? null : <small>{ADAPTIVE_NO_PLAN_CAPTION}</small>}
             </Card>
           </div>
 
@@ -273,7 +296,7 @@ export function AdaptivePlanningWorkspaceClient({
               <h3>Politika</h3>
               <p>Otonomi: {getAutonomyModeLabel(workspace.policy.autonomyMode)}</p>
               <p>Dondurma penceresi: {workspace.policy.frozenWindowMinutes} dk</p>
-              <p>Sinir eşiği: {workspace.policy.minBenefitThreshold}</p>
+              <p>Asgari kazanç eşiği: {workspace.policy.minBenefitThreshold}</p>
             </Card>
           </div>
         </section>
@@ -302,11 +325,17 @@ export function AdaptivePlanningWorkspaceClient({
             </Card>
           ) : null}
 
+          {workspace.operations.length === 0 ? (
+            <div className="adaptive-planning-empty" data-testid="adaptive-planning-empty">
+              <span className="adaptive-planning-empty__icon" aria-hidden="true">
+                <CalendarClock size={22} />
+              </span>
+              <h3>Henüz planlanmış operasyon yok</h3>
+              <p>Plan oluşturulup zamanlandığında operasyonlar burada sırasıyla listelenir.</p>
+            </div>
+          ) : (
           <ul className="adaptive-planning-operation-list">
-            {workspace.operations.length === 0 ? (
-              <li>Planlanmış operasyon yok.</li>
-            ) : (
-              workspace.operations.slice(0, 12).map((operation) => (
+            {workspace.operations.slice(0, 12).map((operation) => (
                 <li key={operation.id}>
                   <strong>{operation.orderId}</strong>
                   <p>
@@ -315,14 +344,14 @@ export function AdaptivePlanningWorkspaceClient({
                   </p>
                   <p>
                     {formatAdaptiveDateTime(operation.plannedStartUtc)} –{" "}
-                    {formatAdaptiveDateTime(operation.plannedEndUtc)} · Setup{" "}
+                    {formatAdaptiveDateTime(operation.plannedEndUtc)} · Kurulum{" "}
                     {formatAdaptiveDurationMinutes(operation.setupMinutes)} ·{" "}
                     {getMaterialReadinessLabel(operation.materialReadinessState)}
                   </p>
                 </li>
-              ))
-            )}
+            ))}
           </ul>
+          )}
         </section>
       ) : null}
 
@@ -369,7 +398,7 @@ export function AdaptivePlanningWorkspaceClient({
             {diffRows.length === 0 ? (
               <p>Son değişiklik için yapılandırılmış fark satırı yok.</p>
             ) : (
-              <table className="adaptive-planning-diff-table">
+              <table aria-label="Plan farkı" className="adaptive-planning-diff-table">
                 <thead>
                   <tr>
                     <th>Sipariş</th>
@@ -511,9 +540,10 @@ export function AdaptivePlanningWorkspaceClient({
         </section>
       ) : null}
 
+      {workspace.activePlan || !hideCreatePlanAction ? (
       <section className="adaptive-planning-workspace__section adaptive-planning-workspace__actions" data-testid="adaptive-planning-replan">
         <Card>
-          <h3>Replan değerlendirmesi</h3>
+          <h3>Yeniden planlama değerlendirmesi</h3>
           {replanEvaluation ? (
             <>
               <p>
@@ -528,39 +558,50 @@ export function AdaptivePlanningWorkspaceClient({
               ) : null}
             </>
           ) : (
-            <p>Replan değerlendirmesi henüz oluşturulmadı.</p>
+            <p>{workspace.activePlan ? "Yeniden planlama değerlendirmesi henüz oluşturulmadı." : "Değerlendirme, bir plan oluşturulduktan sonra burada görünür."}</p>
           )}
 
-          <div className="adaptive-planning-workspace__action-buttons">
-            <Button
-              variant="primary"
-              leadingIcon={<CheckCircle2 aria-hidden="true" size={16} />}
-              disabled={!canApprove || isPending}
-              onClick={() => runApproval(true)}
-            >
-              Onayla
-            </Button>
-            <Button
-              variant="danger"
-              leadingIcon={<XCircle aria-hidden="true" size={16} />}
-              disabled={!canApprove || isPending}
-              onClick={() => runApproval(false)}
-            >
-              Reddet
-            </Button>
-            <Button
-              variant="secondary"
-              leadingIcon={<PlayCircle aria-hidden="true" size={16} />}
-              disabled={!workspace.activePlan || isPending}
-              onClick={runSimulation}
-            >
-              Simüle Et
-            </Button>
-          </div>
+          {workspace.activePlan ? (
+            <div className="adaptive-planning-workspace__action-buttons">
+              {canApprove ? (
+                <>
+                  <Button
+                    variant="primary"
+                    leadingIcon={<CheckCircle2 aria-hidden="true" size={16} />}
+                    disabled={isPending}
+                    onClick={() => runApproval(true)}
+                  >
+                    Onayla
+                  </Button>
+                  <Button
+                    variant="danger"
+                    leadingIcon={<XCircle aria-hidden="true" size={16} />}
+                    disabled={isPending}
+                    onClick={() => runApproval(false)}
+                  >
+                    Reddet
+                  </Button>
+                </>
+              ) : null}
+              <Button
+                variant={canApprove ? "secondary" : "primary"}
+                leadingIcon={<PlayCircle aria-hidden="true" size={16} />}
+                disabled={isPending}
+                onClick={runSimulation}
+              >
+                Simüle Et
+              </Button>
+            </div>
+          ) : hideCreatePlanAction ? null : (
+            <div className="adaptive-planning-workspace__action-buttons">
+              <StatePageLink href="/planlama/yeni" primary>Yeni Plan Oluştur</StatePageLink>
+            </div>
+          )}
         </Card>
       </section>
+      ) : null}
 
-      <p className="commint-table__secondary">
+      <p className="commint-table__secondary adaptive-planning-workspace__freshness">
         Veri tazeliği: {formatAdaptiveDateTime(workspace.dataFreshnessUtc)}
       </p>
     </div>

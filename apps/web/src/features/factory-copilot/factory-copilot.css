@@ -87,7 +87,7 @@
 }
 
 .factory-copilot-drawer__badge {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
@@ -153,7 +153,7 @@
 }
 
 .factory-copilot-drawer__evidence-chip {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
   background: color-mix(in srgb, var(--primary) 10%, transparent);
@@ -215,4 +215,22 @@
   .factory-copilot-drawer {
     width: 100vw;
   }
+}
+
+.factory-copilot-drawer__badge--model { background: var(--zx-ai-soft, #f0ecfa); color: var(--zx-ai, #5b4496); font-weight: 650; }
+.factory-copilot-drawer__badge--rules { background: var(--zx-neutral-soft, #eef2f6); color: var(--zx-neutral, #4d5e73); font-weight: 650; }
+.factory-copilot-drawer__badge { font-size: 0.75rem; padding: 0.2rem 0.6rem; }
+.factory-copilot-drawer__empty { display: flex; align-items: center; gap: 0.5rem; }
+
+
+.factory-copilot-drawer__question {
+  align-self: flex-end;
+  max-width: 88%;
+  margin: 0 0 8px auto;
+  padding: 8px 12px;
+  border-radius: 12px 12px 2px 12px;
+  background: var(--zx-accent-soft, #e8f0fe);
+  color: var(--zx-text-strong, #0f1b2d);
+  font-size: 0.8125rem;
+  line-height: 1.45;
 }

@@ -2,18 +2,25 @@ import Link from "next/link";
 
 import type { IntelligenceRuntimeControlCenterApi } from "../server/intelligence-runtime-api-client";
 
+import { EmptyPanel } from "@/components/ui/empty-panel";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { formatRatioAsPercent } from "@/lib/presentation/format";
+
 import "../intelligence-runtime.css";
+
+import "@/features/shift-operations/components/shift-operations-workspace.css";
 
 type IntelligenceRuntimeControlCenterViewProps = Readonly<{
   controlCenter: IntelligenceRuntimeControlCenterApi;
 }>;
 
 function formatRate(rate: number): string {
-  return `${(rate * 100).toFixed(1)}%`;
+  return formatRatioAsPercent(rate);
 }
 
-function formatCost(cost: number): string {
-  return `$${cost.toFixed(2)}`;
+/** Routing ratios are only meaningful once at least one routing record exists; until then they read as no data. */
+export function formatRoutingRate(rate: number, routeCount: number): string {
+  return routeCount > 0 ? formatRate(rate) : "—";
 }
 
 function modelStatusClass(status: string): string {
@@ -66,14 +73,14 @@ export function IntelligenceRuntimeControlCenterView({
     <div className="intelligence-runtime-shell" data-testid="intelligence-runtime-control-center">
       <header className="fact-section__header">
         <div>
-          <p className="fact-section__eyebrow">ULTRA H</p>
-          <h1>Intelligence Runtime</h1>
+          <p className="fact-section__eyebrow">ZEKÂ ALTYAPISI</p>
+          <h1>Zekâ Altyapısı Durumu</h1>
           <p className="fact-section__subtitle">
-            Deterministik-first routing, model maliyeti ve yaşam döngüsü kontrol yüzeyi
+            Kural tabanlı yönlendirme, model kullanımı ve değerlendirme sonuçlarının kontrol yüzeyi
           </p>
         </div>
-        <Link className="shift-ops-cta" href="/fabrika">
-          Fabrika
+        <Link className="button button--secondary" href="/fabrika">
+          Fabrika Zekâsı’na git
         </Link>
       </header>
 
@@ -85,7 +92,7 @@ export function IntelligenceRuntimeControlCenterView({
               className="intelligence-runtime-alert intelligence-runtime-alert--blocked"
               data-testid="intelligence-runtime-promotion-blocked"
             >
-              Promosyon engellendi: {item.modelCode} · {item.evaluationMode} · {item.outcome}
+              Yayın engellendi: {item.modelCode} · {enumLabel(item.evaluationMode)} · {enumLabel(item.outcome)}
             </div>
           ))}
           {rollbackEvaluations.map((item) => (
@@ -94,7 +101,7 @@ export function IntelligenceRuntimeControlCenterView({
               className="intelligence-runtime-alert intelligence-runtime-alert--rollback"
               data-testid="intelligence-runtime-rollback"
             >
-              Geri alma tetiklendi: {item.modelCode} · {item.outcome}
+              Geri alma tetiklendi: {item.modelCode} · {enumLabel(item.outcome)}
             </div>
           ))}
           {blockedModels.map((model) => (
@@ -103,74 +110,64 @@ export function IntelligenceRuntimeControlCenterView({
               className="intelligence-runtime-alert intelligence-runtime-alert--blocked"
               data-testid="intelligence-runtime-promotion-blocked"
             >
-              Model promosyonu engelli: {model.modelCode} · {model.evaluationStatus} / {model.safetyStatus}
+              Model yayını engelli: {model.modelCode} · {enumLabel(model.evaluationStatus)} / {enumLabel(model.safetyStatus)}
             </div>
           ))}
         </div>
       )}
 
+      <p className="intelligence-runtime-kpis-note">Oranlar, yönlendirme kararlarının hangi yöntemle işlendiğini gösterir.</p>
+
       <section className="intelligence-runtime-kpis" data-testid="intelligence-runtime-kpis">
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Deterministik</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.deterministicRouteRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Kural tabanlı</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.deterministicRouteRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Analytics</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.analyticsRouteRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Analiz</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.analyticsRouteRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Solver</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.solverRouteRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Optimizasyon</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.solverRouteRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Retrieval</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.retrievalRouteRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Bilgi arama</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.retrievalRouteRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Nevaxis model</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.nevaxisModelCallRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Zentra modeli</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.nevaxisModelCallRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Frontier model</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.frontierModelCallRate)}</div>
+          <div className="intelligence-runtime-kpi__label">Harici model</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.frontierModelCallRate, controlCenter.recentRoutes.length)}</div>
         </div>
         <div className="intelligence-runtime-kpi">
-          <div className="intelligence-runtime-kpi__label">Frontier fallback</div>
-          <div className="intelligence-runtime-kpi__value">{formatRate(metrics.frontierFallbackRate)}</div>
-        </div>
-        <div className="intelligence-runtime-kpi intelligence-runtime-kpi--cost">
-          <div className="intelligence-runtime-kpi__label">Toplam model maliyeti</div>
-          <div className="intelligence-runtime-kpi__value">{formatCost(metrics.totalEstimatedCost)}</div>
-        </div>
-        <div className="intelligence-runtime-kpi intelligence-runtime-kpi--cost">
-          <div className="intelligence-runtime-kpi__label">Doğrulanmış sonuç maliyeti</div>
-          <div className="intelligence-runtime-kpi__value">
-            {metrics.frontierCostPerVerifiedOutcome != null
-              ? formatCost(metrics.frontierCostPerVerifiedOutcome)
-              : "—"}
-          </div>
+          <div className="intelligence-runtime-kpi__label">Harici modele geçiş</div>
+          <div className="intelligence-runtime-kpi__value">{formatRoutingRate(metrics.frontierFallbackRate, controlCenter.recentRoutes.length)}</div>
         </div>
       </section>
 
       <section className="intelligence-runtime-section">
         <div className="intelligence-runtime-section__header">
-          <h2>Son routing kararları</h2>
+          <h2>Son yönlendirme kararları</h2>
         </div>
         <div className="intelligence-runtime-section__body" data-testid="intelligence-runtime-routes">
           {controlCenter.recentRoutes.length === 0 ? (
-            <p className="intelligence-runtime-item__meta">Henüz routing kaydı yok.</p>
+            <EmptyPanel compact title="Henüz yönlendirme kaydı yok" description="Zekâ altyapısı bir istek yönlendirdiğinde kararlar burada listelenir." />
           ) : (
             controlCenter.recentRoutes.map((route) => (
               <div key={route.routeId} className="intelligence-runtime-item">
                 <div className="intelligence-runtime-item__row">
-                  <div className="intelligence-runtime-item__title">{route.taskType}</div>
-                  <span className="intelligence-runtime-badge">{route.routeType}</span>
+                  <div className="intelligence-runtime-item__title">{enumLabel(route.taskType)}</div>
+                  <span className="intelligence-runtime-badge">{enumLabel(route.routeType)}</span>
                   {route.modelInvoked ? (
-                    <span className="intelligence-runtime-badge intelligence-runtime-badge--limited">MODEL</span>
+                    <span className="intelligence-runtime-badge intelligence-runtime-badge--limited">Model kullanıldı</span>
                   ) : null}
                 </div>
                 <div className="intelligence-runtime-item__meta">
-                  {route.routingReason} · {formatCost(route.estimatedCost)} · {route.latencyMs}ms
+                  {route.routingReason} · {route.latencyMs} ms
                 </div>
                 <div className="intelligence-runtime-item__meta">{route.whyModelCalledOrSkipped}</div>
               </div>
@@ -181,22 +178,21 @@ export function IntelligenceRuntimeControlCenterView({
 
       <section className="intelligence-runtime-section">
         <div className="intelligence-runtime-section__header">
-          <h2>Dataset sürümleri</h2>
+          <h2>Veri seti sürümleri</h2>
         </div>
         <div className="intelligence-runtime-section__body" data-testid="intelligence-runtime-datasets">
           {controlCenter.datasetVersions.length === 0 ? (
-            <p className="intelligence-runtime-item__meta">Dataset sürümü bulunamadı.</p>
+            <EmptyPanel compact title="Henüz veri seti sürümü yok" />
           ) : (
             controlCenter.datasetVersions.map((dataset) => (
               <div key={dataset.datasetVersionId} className="intelligence-runtime-item">
                 <div className="intelligence-runtime-item__row">
                   <div className="intelligence-runtime-item__title">{dataset.versionCode}</div>
-                  <span className="intelligence-runtime-badge">{dataset.readinessState}</span>
+                  <span className="intelligence-runtime-badge">{enumLabel(dataset.readinessState)}</span>
                 </div>
                 <div className="intelligence-runtime-item__meta">
-                  {dataset.includedCaseCount} dahil · {dataset.excludedCaseCount} hariç · {dataset.schemaVersion}
+                  {dataset.includedCaseCount} dahil · {dataset.excludedCaseCount} hariç
                 </div>
-                <div className="intelligence-runtime-item__meta">Politika: {dataset.tenantPolicy}</div>
               </div>
             ))
           )}
@@ -209,24 +205,24 @@ export function IntelligenceRuntimeControlCenterView({
         </div>
         <div className="intelligence-runtime-section__body" data-testid="intelligence-runtime-models">
           {controlCenter.models.length === 0 ? (
-            <p className="intelligence-runtime-item__meta">Kayıtlı model yok.</p>
+            <EmptyPanel compact title="Kayıtlı model yok" />
           ) : (
             controlCenter.models.map((model) => (
               <div key={model.modelId} className="intelligence-runtime-item">
                 <div className="intelligence-runtime-item__row">
                   <div className="intelligence-runtime-item__title">{model.modelCode}</div>
                   <span className={`intelligence-runtime-badge ${modelStatusClass(model.status)}`}>
-                    {model.status}
+                    {enumLabel(model.status)}
                   </span>
-                  <span className="intelligence-runtime-badge">{model.evaluationStatus}</span>
-                  <span className="intelligence-runtime-badge">{model.safetyStatus}</span>
+                  <span className="intelligence-runtime-badge">{enumLabel(model.evaluationStatus)}</span>
+                  <span className="intelligence-runtime-badge">{enumLabel(model.safetyStatus)}</span>
                 </div>
                 <div className="intelligence-runtime-item__meta">
-                  {model.version} · {model.baseModel}
-                  {model.trainingDatasetVersion ? ` · dataset ${model.trainingDatasetVersion}` : ""}
+                  Sürüm {model.version}
+                  {model.trainingDatasetVersion ? ` · veri seti ${model.trainingDatasetVersion}` : ""}
                 </div>
                 <div className="intelligence-runtime-item__meta">
-                  {model.taskCapabilities.join(", ")}
+                  {model.taskCapabilities.map((capability) => enumLabel(capability)).join(", ")}
                 </div>
               </div>
             ))
@@ -240,38 +236,38 @@ export function IntelligenceRuntimeControlCenterView({
         </div>
         <div className="intelligence-runtime-section__body" data-testid="intelligence-runtime-evaluations">
           {controlCenter.evaluations.length === 0 ? (
-            <p className="intelligence-runtime-item__meta">Değerlendirme koşusu yok.</p>
+            <EmptyPanel compact title="Değerlendirme koşusu yok" />
           ) : (
             controlCenter.evaluations.map((evaluation) => (
               <div key={evaluation.evaluationRunId} className="intelligence-runtime-item">
                 <div className="intelligence-runtime-item__row">
                   <div className="intelligence-runtime-item__title">{evaluation.modelCode}</div>
                   <span className={`intelligence-runtime-badge ${evaluationOutcomeClass(evaluation.outcome)}`}>
-                    {evaluation.outcome}
+                    {enumLabel(evaluation.outcome)}
                   </span>
-                  <span className="intelligence-runtime-badge">{evaluation.evaluationMode}</span>
+                  <span className="intelligence-runtime-badge">{enumLabel(evaluation.evaluationMode)}</span>
                 </div>
                 <div className="intelligence-runtime-gate-grid">
                   <div className="intelligence-runtime-gate">
-                    <div className="intelligence-runtime-gate__label">Structured output</div>
+                    <div className="intelligence-runtime-gate__label">Yapılandırılmış çıktı</div>
                     <div className="intelligence-runtime-gate__value">
                       {formatRate(evaluation.structuredOutputValidityRate)}
                     </div>
                   </div>
                   <div className="intelligence-runtime-gate">
-                    <div className="intelligence-runtime-gate__label">Safety pass</div>
+                    <div className="intelligence-runtime-gate__label">Güvenlik başarısı</div>
                     <div className="intelligence-runtime-gate__value">{formatRate(evaluation.safetyPassRate)}</div>
                   </div>
                   <div className="intelligence-runtime-gate">
-                    <div className="intelligence-runtime-gate__label">Hallucination rate</div>
+                    <div className="intelligence-runtime-gate__label">Hatalı bilgi oranı</div>
                     <div className="intelligence-runtime-gate__value">
                       {formatRate(evaluation.hallucinatedEntityRate)}
                     </div>
                   </div>
                   <div className="intelligence-runtime-gate">
-                    <div className="intelligence-runtime-gate__label">Maliyet / gecikme</div>
+                    <div className="intelligence-runtime-gate__label">Gecikme</div>
                     <div className="intelligence-runtime-gate__value">
-                      {formatCost(evaluation.estimatedCost)} · {evaluation.latencyMs}ms
+                      {evaluation.latencyMs} ms
                     </div>
                   </div>
                 </div>

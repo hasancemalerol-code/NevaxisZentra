@@ -22,6 +22,7 @@ import type {
   findResearchMissingSourcesAction,
   summarizeResearchAction,
 } from "../server/export-4l-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -196,13 +197,13 @@ export function ExportCountryResearchWorkspace({
 
       {state.kind === "error" ? (
         <div className="export-country-research-workspace__feedback export-country-research-workspace__feedback--error" role="alert">
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
       {state.kind === "success" ? (
         <div className="export-country-research-workspace__feedback export-country-research-workspace__feedback--success" role="status">
           <CheckCircle2 aria-hidden="true" />
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
 
@@ -303,11 +304,11 @@ export function ExportCountryResearchWorkspace({
           </select>
         </label>
         <label>
-          Başlık
+          Başlık <span className="zx-required" aria-hidden="true">*</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} required />
         </label>
         <label>
-          Özet
+          Özet <span className="zx-required" aria-hidden="true">*</span>
           <textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
@@ -316,7 +317,7 @@ export function ExportCountryResearchWorkspace({
           />
         </label>
         <label>
-          Kaynak yayıncı
+          Yayıncı kurum <span className="zx-required" aria-hidden="true">*</span>
           <input
             value={sourcePublisher}
             onChange={(e) => setSourcePublisher(e.target.value)}
@@ -324,7 +325,7 @@ export function ExportCountryResearchWorkspace({
           />
         </label>
         <label>
-          Kaynak başlığı
+          Kaynak başlığı <span className="zx-required" aria-hidden="true">*</span>
           <input
             value={sourceTitle}
             onChange={(e) => setSourceTitle(e.target.value)}
@@ -332,7 +333,7 @@ export function ExportCountryResearchWorkspace({
           />
         </label>
         <label>
-          Güven (%)
+          Güven (%) <span className="zx-required" aria-hidden="true">*</span>
           <input
             type="number"
             min={0}

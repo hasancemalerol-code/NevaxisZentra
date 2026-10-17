@@ -38,7 +38,7 @@ function createResource(overrides: Partial<ProductionResourceRowApi> = {}): Prod
 test("production resources route is registered in navigation", () => {
   const item = navigationItems.find((candidate) => candidate.href === PRODUCTION_RESOURCES_ROUTE_PATH);
   assert.ok(item);
-  assert.equal(item?.label, "Makineler & Kaynaklar");
+  assert.equal(item?.label, "Makineler ve Kaynaklar");
 });
 
 test("production resources filters preserve deep-link query params", () => {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { readActiveShiftPanel } from "@/features/shift-operations/server/shift-operations-reader";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
 import { SHIFT_STATUS_LABELS } from "@/features/shift-operations/domain/shift-operations-labels";
 import "@/features/shift-operations/components/shift-operations-workspace.css";
 
@@ -24,7 +25,7 @@ export async function ActiveShiftDashboardPanel() {
         Kalan: ~{remainingHours} saat
       </p>
       <p>Kritik açık konu: {panel.metrics?.criticalItems ?? 0}</p>
-      <p>Dijital iş gücü vaka: {panel.metrics?.digitalWorkforceCases ?? 0}</p>
+      {deferredSurfacesEnabled() ? <p>Dijital iş gücü vaka: {panel.metrics?.digitalWorkforceCases ?? 0}</p> : null}
       <p>Teslim hazırlığı: {panel.metrics?.handoverReadinessScore ?? panel.shift.handoverReadinessScore}%</p>
       <Link className="shift-ops-cta" href={nearEnd ? "/vardiyalar/teslim" : "/vardiyalar/aktif"}>
         {nearEnd ? "Vardiya Teslimini Hazırla" : "Aktif Vardiyayı Aç"}

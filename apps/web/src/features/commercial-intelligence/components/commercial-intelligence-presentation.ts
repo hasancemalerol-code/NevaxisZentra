@@ -257,7 +257,7 @@ export function buildCommercialIntelligenceKpiCards(input: Readonly<{
   const cards: Record<string, CommercialIntelligenceKpiCard> = {
     "comparable-observations": {
       id: "comparable-observations",
-      label: "Karşılaştırılabilir gözlemler",
+      label: "Karşılaştırılabilir",
       value: formatCount(evidenceContext.comparableTotal),
       detail: "Seçili kanıt bağlamındaki dahil edilen gözlemler",
       tone: evidenceContext.comparableTotal > 0 ? "controlled" : "insufficient",
@@ -366,7 +366,7 @@ export function buildCommercialIntelligenceTemporalChartData(
   if (temporal.length === 0) {
     return {
       points: [],
-      unavailableReason: "Karşılaştırılabilir dönemsel sapma çalıştırması yok",
+      unavailableReason: "Karşılaştırılabilir dönemsel sapma çalışması yok",
     };
   }
 
@@ -750,7 +750,7 @@ export function buildCommercialSupplierComparisonKpiCards(input: Readonly<{
       id: "attention-evidence-issues",
       label: "Dikkat / kanıt sorunu",
       value: formatCount(attentionRecordCount),
-      detail: "Dikkat, yetersiz kanıt veya kaynak çelişkisi veren kayıtlı karşılaştırmalar",
+      detail: "Kanıt sorunu bildiren kayıtlı karşılaştırmalar",
       tone: attentionRecordCount > 0 ? "attention" : "neutral",
       scopeLabel: "Kayıtlı tedarikçi karşılaştırmaları",
       evidenceLabel,
@@ -1018,7 +1018,7 @@ export function buildCommercialSalesPriceKpiCards(input: Readonly<{
       id: "compared-customers",
       label: "Karşılaştırılan müşteriler",
       value: comparedCustomerCount > 0 ? formatCount(comparedCustomerCount) : unavailableValue,
-      detail: selectedCustomer?.materialLabel ?? "Müşteri karşılaştırma çalıştırması",
+      detail: selectedCustomer?.materialLabel ?? "Müşteri karşılaştırma çalışması",
       tone: comparedCustomerCount > 0 ? "controlled" : "insufficient",
       scopeLabel: selectedCustomer ? "Son müşteri karşılaştırması" : "Müşteri bağlamı yok",
       evidenceLabel,
@@ -1044,7 +1044,7 @@ export function buildCommercialSalesPriceTemporalChartData(
   if (temporal.length === 0) {
     return {
       points: [],
-      unavailableReason: "Karşılaştırılabilir dönemsel satış sapma çalıştırması yok",
+      unavailableReason: "Karşılaştırılabilir dönemsel satış sapma çalışması yok",
     };
   }
 

@@ -1,7 +1,7 @@
 export const SHIFT_CONTINUITY_RULE_SET_VERSION = "SHIFT-WORKFORCE-CONTINUITY-RISK-V1";
 
 export const LOCAL_PILOT_DISCLAIMER =
-  "Deterministik yerel pilot verisi. Gerçek ERP/HR veya canlı personel sürekliliği doğrulaması değildir.";
+  "Örnek veri. Gerçek ERP/HR veya canlı personel sürekliliği doğrulaması değildir.";
 
 export const HUMAN_REVIEW_MESSAGE =
   "Bu değerlendirme yalnızca karar desteği sağlar. Operatör atama veya üretim planı değişikliği için yetkili insan onayı gereklidir.";

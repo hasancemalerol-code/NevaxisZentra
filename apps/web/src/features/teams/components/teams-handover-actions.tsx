@@ -8,6 +8,8 @@ import {
   acknowledgeTeamsHandoverAction,
   publishTeamsHandoverAction,
 } from "@/features/teams/server/teams-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { Notice } from "@/components/ui/notice";
 
 type TeamsHandoverActionsProps = Readonly<{
   handoverId: string;
@@ -71,9 +73,7 @@ export function TeamsHandoverActions({
       ) : null}
 
       {error ? (
-        <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-handover-actions-error">
-          {error}
-        </p>
+        <Notice tone="danger" alert data-testid="teams-handover-actions-error">{customerMessage(error)}</Notice>
       ) : null}
     </div>
   );

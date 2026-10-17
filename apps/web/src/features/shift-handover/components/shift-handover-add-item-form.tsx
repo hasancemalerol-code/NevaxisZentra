@@ -20,7 +20,6 @@ export function ShiftHandoverAddItemForm({ handoverId }: ShiftHandoverAddItemFor
     <form
       action={(formData) => submitAddShiftHandoverItem(handoverId, formData)}
       className="shift-handover-form-grid"
-      style={{ marginTop: "1rem" }}
     >
       <label>
         Kategori
@@ -31,12 +30,12 @@ export function ShiftHandoverAddItemForm({ handoverId }: ShiftHandoverAddItemFor
         </select>
       </label>
       <label>
-        Başlık
+        Başlık <span className="zx-required" aria-hidden="true">*</span>
         <input name="title" required />
       </label>
-      <label>
+      <label className="shift-handover-field--wide">
         Açıklama
-        <textarea name="description" rows={3} />
+        <textarea name="description" rows={2} />
       </label>
       <label>
         Öncelik
@@ -46,11 +45,13 @@ export function ShiftHandoverAddItemForm({ handoverId }: ShiftHandoverAddItemFor
           ))}
         </select>
       </label>
-      <label>
+      <label className="shift-handover-check">
         <input name="requiresFollowUp" type="checkbox" />
-        Takip gerektirir
+        <span>Takip gerektirir</span>
       </label>
-      <Button type="submit">Madde Ekle</Button>
+      <div className="shift-handover-form-actions">
+        <Button type="submit">Kalem Ekle</Button>
+      </div>
     </form>
   );
 }

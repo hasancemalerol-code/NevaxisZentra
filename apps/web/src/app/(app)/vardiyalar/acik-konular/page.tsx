@@ -1,5 +1,9 @@
 import { readShiftOperationsWorkspace } from "@/features/shift-operations/server/shift-operations-reader";
 import { HANDOVER_PRIORITY_LABELS, OPEN_ITEM_CATEGORY_LABELS } from "@/features/shift-operations/domain/shift-operations-labels";
+import Link from "next/link";
+import { ListChecks } from "lucide-react";
+
+import { EmptyPanel } from "@/components/ui/empty-panel";
 
 export default async function VardiyalarAcikKonularPage() {
   const workspace = await readShiftOperationsWorkspace();
@@ -7,10 +11,14 @@ export default async function VardiyalarAcikKonularPage() {
 
   return (
     <>
-      <header className="shift-ops-hero">
-        <p className="shift-ops-hero__eyebrow">AÇIK KONULAR</p>
-        <h1>Açık Konular</h1>
-      </header>
+      {items.length === 0 ? (
+        <EmptyPanel
+          icon={<ListChecks />}
+          title="Açık konu yok"
+          description="Açılan vardiya konuları önceliğiyle burada izlenir."
+          action={<Link className="shift-ops-cta" href="/vardiyalar/aktif">Aktif vardiyayı gör</Link>}
+        />
+      ) : null}
       <ul className="shift-ops-item-list">
         {items.map((item) => (
           <li className="shift-ops-item" data-priority={item.handoverPriority} key={item.id}>

@@ -7,7 +7,7 @@ export const AI_TASK_AUDIT_EVENT_LABELS: Readonly<
   Record<AiTaskAuditEventType, string>
 > = {
   created: "Görev oluşturuldu",
-  "analysis-updated": "AI analizi güncellendi",
+  "analysis-updated": "Yapay zekâ analizi güncellendi",
   routed: "Görev yönlendirildi",
   assigned: "Sorumlu atandı",
   reassigned: "Sorumlu yeniden atandı",
@@ -37,7 +37,7 @@ export const AI_TASK_AUDIT_EVENT_LABELS: Readonly<
 export const AI_TASK_AUDIT_ACTOR_TYPE_LABELS: Readonly<
   Record<AiTaskAuditEvent["actorType"], string>
 > = {
-  ai: "AI",
+  ai: "Yapay Zekâ",
   user: "Kullanıcı",
   system: "Sistem",
 };
@@ -105,7 +105,7 @@ export function getAiTaskAuditMetadataSummary(
     }
 
     if (typeof metadata.escalationLevel === "number") {
-      parts.push(`Eskalasyon seviyesi: ${metadata.escalationLevel}`);
+      parts.push(`Üst Seviyeye Aktarım seviyesi: ${metadata.escalationLevel}`);
     }
 
     if (typeof metadata.breachType === "string") {
@@ -120,4 +120,17 @@ export function getAiTaskAuditMetadataSummary(
   } catch {
     return metadataJson;
   }
+}
+
+const AUDIT_ACTOR_LABEL_TRANSLATIONS: Readonly<Record<string, string>> = {
+  "ai task center": "Görev Merkezi",
+  "ai-task-center": "Görev Merkezi",
+  "ai task assistant": "Görev Asistanı",
+  system: "Sistem",
+  ai: "Yapay Zekâ",
+};
+
+/** Actor labels come from the API; English system actors are shown with Turkish product names. */
+export function localizeAiTaskAuditActorLabel(actorLabel: string): string {
+  return AUDIT_ACTOR_LABEL_TRANSLATIONS[actorLabel.trim().toLowerCase()] ?? actorLabel;
 }

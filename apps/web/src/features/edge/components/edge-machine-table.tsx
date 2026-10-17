@@ -58,21 +58,21 @@ export function EdgeMachineTable({
   return (
     <>
       {/* EDGE-UI-1 regression: <th>Makine Durumu</th> <th>Edge Teslimatı</th> */}
-      <div className="edge-machine-table-wrap" data-testid="edge-machine-table">
-      <table className="edge-machine-table">
+      <div className="edge-machine-table-wrap" data-testid="edge-machine-table" tabIndex={0} role="region" aria-label="Makine listesi (kaydırılabilir)">
+      <table aria-label="Makine listesi" className="edge-machine-table">
         <thead>
           <tr>
             <th>Makine</th>
             <th>Kod</th>
-            <th>Gateway</th>
+            <th>Ağ geçidi</th>
             <th>Bağlantı</th>
             <th>Durum</th>
             <th>Aktif Alarm</th>
             <th>Son Çevrim</th>
             <th>Son Veri</th>
             <th>Güncellik</th>
-            <th>Edge</th>
-            <th aria-label="İşlem" />
+            <th>Saha</th>
+            <th><span className="visually-hidden">İşlem</span></th>
           </tr>
         </thead>
         <tbody>
@@ -93,12 +93,9 @@ export function EdgeMachineTable({
               .join(" ");
 
             return (
-              <tr key={m.machineCode} className={rowClass || undefined}>
+              <tr key={m.machineCode} className={rowClass || undefined} data-sample={isSimulatorFixture ? "true" : undefined}>
                 <td className="edge-machine-table__cell-name">
                   <span className="edge-machine-table__name">{m.name}</span>
-                  {isSimulatorFixture && (
-                    <span className="edge-sim-badge edge-sim-badge--inline">Simülatör</span>
-                  )}
                 </td>
                 <td>
                   <span className="edge-machine-table__code">{m.machineCode}</span>

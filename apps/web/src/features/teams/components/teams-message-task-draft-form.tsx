@@ -16,6 +16,8 @@ import {
 } from "@/features/ai-task-center/presentation/ai-task-labels";
 import { createMessageTaskDraftAction } from "@/features/teams/server/teams-actions";
 import type { RawTeamsMessage } from "@/features/teams/server/teams-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { Notice } from "@/components/ui/notice";
 
 type TeamsMessageTaskDraftFormProps = Readonly<{
   message: RawTeamsMessage;
@@ -85,7 +87,7 @@ export function TeamsMessageTaskDraftForm({
       </div>
 
       <label>
-        Görev başlığı
+        Görev başlığı <span className="zx-required" aria-hidden="true">*</span>
         <input
           data-testid="teams-message-task-title-input"
           disabled={pending}
@@ -142,9 +144,7 @@ export function TeamsMessageTaskDraftForm({
       <p className="teams-task-draft-form__disclaimer">{disclaimer}</p>
 
       {error ? (
-        <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-message-task-draft-error">
-          {error}
-        </p>
+        <Notice tone="danger" alert data-testid="teams-message-task-draft-error">{customerMessage(error)}</Notice>
       ) : null}
 
       {pending ? (

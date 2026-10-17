@@ -17,6 +17,7 @@ import type {
   completeSetupSessionAction,
   recoverSetupSessionAction,
 } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type SetupPanelProps = Readonly<{
   orderId: string;
@@ -61,11 +62,11 @@ export function ProductionSetupPanel({
   const isPending = panelState.kind === "pending";
 
   const handleStartSubmit = useCallback(async () => {
-    setPanelState({ kind: "pending", action: "Setup başlatılıyor…" });
+    setPanelState({ kind: "pending", action: "Kurulum başlatılıyor…" });
     try {
       const result = await onStartSetup(orderId, version, selectedType, comment.trim() || undefined);
       if (result.status === "failure") {
-        setPanelState({ kind: "error", message: result.message ?? "Setup başlatılamadı." });
+        setPanelState({ kind: "error", message: result.message ?? "Kurulum başlatılamadı." });
       } else {
         setPanelState({ kind: "idle" });
         setComment("");
@@ -78,11 +79,11 @@ export function ProductionSetupPanel({
 
   const handleComplete = useCallback(async () => {
     if (!activeSetup) return;
-    setPanelState({ kind: "pending", action: "Setup tamamlanıyor…" });
+    setPanelState({ kind: "pending", action: "Kurulum tamamlanıyor…" });
     try {
       const result = await onCompleteSetup(orderId, activeSetup.id, version);
       if (result.status === "failure") {
-        setPanelState({ kind: "error", message: result.message ?? "Setup tamamlanamadı." });
+        setPanelState({ kind: "error", message: result.message ?? "Kurulum tamamlanamadı." });
       } else {
         setPanelState({ kind: "idle" });
         router.refresh();
@@ -94,7 +95,7 @@ export function ProductionSetupPanel({
 
   const handleRecoverSubmit = useCallback(async () => {
     if (!activeSetup || !onRecoverSetup || !recoveryResolution.trim()) return;
-    setPanelState({ kind: "pending", action: "Setup kaydı uzlaştırılıyor…" });
+    setPanelState({ kind: "pending", action: "Kurulum kaydı uzlaştırılıyor…" });
     try {
       const result = await onRecoverSetup(orderId, activeSetup.id, version, recoveryResolution.trim());
       if (result.status === "failure") {
@@ -114,11 +115,11 @@ export function ProductionSetupPanel({
       <div className="ops-panel__header">
         <Settings aria-hidden="true" className="ops-panel__header-icon ops-panel__header-icon--primary" />
         <div>
-          <p className="ops-panel__eyebrow">SETUP & DEĞİŞİM</p>
-          <h2>Setup Yönetimi</h2>
+          <p className="ops-panel__eyebrow">KURULUM VE DEĞİŞİM</p>
+          <h2>Kurulum Yönetimi</h2>
         </div>
         <div className="ops-panel__header-total">
-          <span className="ops-panel__header-total-label">Toplam setup</span>
+          <span className="ops-panel__header-total-label">Toplam kurulum</span>
           <strong className="ops-panel__header-total-value">
             {formatDuration(totalSetupSeconds)}
           </strong>
@@ -129,7 +130,7 @@ export function ProductionSetupPanel({
         <div className={`ops-panel__active-session ops-panel__active-session--setup${setupIsStale ? " ops-panel__active-session--stale" : ""}`}>
           <div className="ops-panel__active-badge">
             <span className="ops-panel__active-dot ops-panel__active-dot--primary" />
-            Aktif Setup
+            Aktif Kurulum
             {setupIsStale && (
               <span className="stale-badge">
                 <Clock aria-hidden="true" />
@@ -154,7 +155,7 @@ export function ProductionSetupPanel({
                 className="button button-ghost button-medium stale-recover-btn"
                 onClick={() => { setRecoveryResolution(""); setPanelState({ kind: "recover-dialog" }); }}
               >
-                Setup Kaydını Kapat
+                Kurulum Kaydını Kapat
               </button>
             )}
           </div>
@@ -164,7 +165,7 @@ export function ProductionSetupPanel({
       {panelState.kind === "recover-dialog" && (
         <div className="workflow-action-dialog">
           <div className="workflow-action-dialog__content">
-            <h3 className="workflow-action-dialog__title">Setup Kaydını Kapat</h3>
+            <h3 className="workflow-action-dialog__title">Kurulum Kaydını Kapat</h3>
             <p className="workflow-action-dialog__description">
               Uzun süredir açık olan setup kaydını kapatmak için bir çözüm notu girin. Üretim otomatik başlamaz.
             </p>
@@ -178,7 +179,7 @@ export function ProductionSetupPanel({
                 className="workflow-action-dialog__textarea"
                 rows={3}
                 maxLength={500}
-                placeholder="Setup neden kapandı, ne yapıldı?…"
+                placeholder="Kurulum neden kapandı, ne yapıldı?…"
                 value={recoveryResolution}
                 onChange={(e) => setRecoveryResolution(e.target.value)}
               />
@@ -199,7 +200,7 @@ export function ProductionSetupPanel({
                 onClick={handleRecoverSubmit}
                 disabled={isPending || !recoveryResolution.trim()}
               >
-                {isPending ? "Kapatılıyor…" : "Setup Kaydını Kapat"}
+                {isPending ? "Kapatılıyor…" : "Kurulum Kaydını Kapat"}
               </button>
             </div>
           </div>
@@ -208,7 +209,7 @@ export function ProductionSetupPanel({
 
       {panelState.kind === "error" && (
         <div role="alert" className="ops-panel__error">
-          {panelState.message}
+          {customerMessage(panelState.message)}
           <button
             type="button"
             className="ops-panel__error-dismiss"
@@ -222,13 +223,13 @@ export function ProductionSetupPanel({
       {panelState.kind === "start-dialog" && (
         <div className="workflow-action-dialog">
           <div className="workflow-action-dialog__content">
-            <h3 className="workflow-action-dialog__title">Setup Başlat</h3>
+            <h3 className="workflow-action-dialog__title">Kurulum Başlat</h3>
             <p className="workflow-action-dialog__description">
-              Setup türünü seçin. Makine ve kalıp değişimleri burada kayıt altına alınır.
+              Kurulum türünü seçin. Makine ve kalıp değişimleri burada kayıt altına alınır.
             </p>
 
             <div className="workflow-action-dialog__field">
-              <label className="workflow-action-dialog__label">Setup Türü</label>
+              <label className="workflow-action-dialog__label">Kurulum Türü</label>
               <div className="ops-panel__reason-grid">
                 {SETUP_TYPES.map((s) => (
                   <button
@@ -273,7 +274,7 @@ export function ProductionSetupPanel({
                 onClick={handleStartSubmit}
                 disabled={isPending}
               >
-                {isPending ? "Başlatılıyor…" : "Setup Başlat"}
+                {isPending ? "Başlatılıyor…" : "Kurulum Başlat"}
               </button>
             </div>
           </div>
@@ -289,7 +290,7 @@ export function ProductionSetupPanel({
             onClick={() => setPanelState({ kind: "start-dialog" })}
           >
             <Settings aria-hidden="true" />
-            Setup Başlat
+            Kurulum Başlat
           </button>
         )}
 
@@ -301,7 +302,7 @@ export function ProductionSetupPanel({
             disabled={isPending}
           >
             <CheckCircle2 aria-hidden="true" />
-            {isPending ? "Tamamlanıyor…" : "Setup Tamamla"}
+            {isPending ? "Tamamlanıyor…" : "Kurulum Tamamla"}
           </button>
         )}
       </div>

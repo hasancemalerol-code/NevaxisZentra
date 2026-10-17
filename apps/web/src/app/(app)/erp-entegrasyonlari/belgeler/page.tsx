@@ -1,26 +1,22 @@
-import { FileText } from "lucide-react";
+
 
 import { ErpDocumentsView } from "@/features/erp/components/erp-documents-view";
 import { readErpDocuments } from "@/features/erp/server/erp-documents-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function ErpBelgelerPage() {
   const result = await readErpDocuments();
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
+      <div className="production-execution-page erp-workspace-page">
         <header className="production-execution-header">
           <p>ERP ENTEGRASYONLARI</p>
           <h1>Belgeler</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <FileText aria-hidden="true" />
-          <div>
-            <h3>ERP belge verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="ERP belge verisi yüklenemedi" inline />
+      </div>
     );
   }
 

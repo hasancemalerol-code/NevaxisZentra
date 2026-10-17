@@ -56,7 +56,7 @@
   border-radius: 999px !important;
   background: rgb(255 255 255 / 86%) !important;
   color: var(--dashboard-text-soft) !important;
-  font-size: 0.72rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   letter-spacing: normal !important;
   line-height: 1 !important;
@@ -132,7 +132,7 @@
   background: #ffffff !important;
   color: var(--dashboard-text-muted) !important;
   font: inherit !important;
-  font-size: 0.73rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   cursor: not-allowed !important;
   opacity: 0.78 !important;
@@ -144,7 +144,7 @@
   border-radius: 999px !important;
   background: var(--dashboard-neutral-soft) !important;
   color: var(--dashboard-neutral) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* KPI metrics */
@@ -176,7 +176,7 @@
   max-width: 420px !important;
   margin: 0 !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.7rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.5 !important;
   text-align: right !important;
 }
@@ -314,7 +314,7 @@
 
 .dashboard-page .daily-operation-metric__tone {
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.64rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -333,7 +333,7 @@
 .dashboard-page .daily-operation-metric__label {
   margin: 16px 0 0 !important;
   color: var(--dashboard-text-soft) !important;
-  font-size: 0.7rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -348,7 +348,7 @@
 .dashboard-page .daily-operation-metric__supporting {
   margin: 9px 0 0 !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.67rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.5 !important;
 }
 
@@ -365,7 +365,7 @@
   gap: 10px !important;
   margin-bottom: 7px !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.62rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .daily-operation-metric__progress-track,
@@ -405,7 +405,7 @@
 .dashboard-page .daily-operations__subheading-description {
   margin: 5px 0 0 !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.67rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.45 !important;
 }
 
@@ -415,7 +415,7 @@
   border-radius: 999px !important;
   background: var(--dashboard-neutral-soft) !important;
   color: var(--dashboard-neutral) !important;
-  font-size: 0.63rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -453,7 +453,7 @@
   gap: 5px !important;
   margin: 5px 0 0 !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.62rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .shift-summary-card__status {
@@ -465,7 +465,7 @@
   border-radius: 999px !important;
   background: var(--dashboard-neutral-soft) !important;
   color: var(--dashboard-neutral) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -509,13 +509,13 @@
 .dashboard-page .shift-summary-card__number-label {
   display: block !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.57rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .shift-summary-card__number strong {
   display: block !important;
   margin-top: 4px !important;
-  font-size: 0.69rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .shift-summary-card__progress {
@@ -542,7 +542,7 @@
 .dashboard-page .critical-risks__summary-label {
   display: block !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -595,13 +595,13 @@
 
 .dashboard-page .critical-risk-card__detail dt {
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.57rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .critical-risk-card__detail dd {
   margin: 4px 0 0 !important;
   color: var(--dashboard-text-soft) !important;
-  font-size: 0.63rem !important;
+  font-size: 0.75rem !important;
   font-weight: 650 !important;
 }
 
@@ -621,7 +621,7 @@
   border-bottom: 1px solid var(--dashboard-border) !important;
   background: var(--dashboard-warning-soft) !important;
   color: var(--dashboard-warning) !important;
-  font-size: 0.66rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.5 !important;
 }
 
@@ -663,7 +663,7 @@
 .dashboard-page .ai-task-card__source {
   margin: 0 !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -682,7 +682,7 @@
   border-radius: 999px !important;
   background: var(--dashboard-neutral-soft) !important;
   color: var(--dashboard-neutral) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -712,7 +712,7 @@
 .dashboard-page .ai-task-card__description {
   margin: 13px 0 0 !important;
   color: var(--dashboard-text-soft) !important;
-  font-size: 0.67rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.55 !important;
 }
 
@@ -732,13 +732,13 @@
 .dashboard-page .ai-task-card__detail-label {
   display: block !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.56rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .ai-task-card__detail strong {
   display: block !important;
   margin-top: 4px !important;
-  font-size: 0.64rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .ai-task-card__confidence {
@@ -751,7 +751,7 @@
   justify-content: space-between !important;
   margin-bottom: 7px !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.6rem !important;
+  font-size: 0.75rem !important;
 }
 
 .dashboard-page .ai-task-card__confidence-track {
@@ -782,7 +782,7 @@
   align-items: center !important;
   gap: 5px !important;
   color: var(--dashboard-text-muted) !important;
-  font-size: 0.61rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -797,7 +797,7 @@
   background: #ffffff !important;
   color: var(--dashboard-text-muted) !important;
   font: inherit !important;
-  font-size: 0.62rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
   cursor: not-allowed !important;
 }

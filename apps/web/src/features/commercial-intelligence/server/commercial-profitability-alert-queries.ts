@@ -1,3 +1,4 @@
+import { resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import type { CommercialProfitabilityAlertApiFilters } from "../application/commercial-profitability-alert-filter";
@@ -217,7 +218,7 @@ export async function readCommercialProfitabilityAlertWorkspace(
     workspace: {
       facilityLabel: "Yetkili tesis",
       ruleSetVersion: workspaceResult.value.ruleSetVersion,
-      provenanceDisclaimer: localizeCommercialProfitabilityProvenance(workspaceResult.value.provenanceDisclaimer),
+      provenanceDisclaimer: resolveCommercialProvenance(workspaceResult.value.provenanceDisclaimer, false, localizeCommercialProfitabilityProvenance),
       automationDisclaimer: workspaceResult.value.automationDisclaimer,
       reportingPeriodLabel: freshnessLabel(alerts),
       freshnessLabel: freshnessLabel(alerts),

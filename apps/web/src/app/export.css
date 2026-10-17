@@ -54,7 +54,7 @@
 .export-header__intro p {
   margin: 0;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -72,7 +72,7 @@
 
 .export-header span {
   max-width: 920px;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -120,8 +120,8 @@
 }
 
 .export-kpis span {
-  color: #718096;
-  font-size: 10px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -136,8 +136,8 @@
 
 .export-kpis small {
   overflow: hidden;
-  color: #8491a4;
-  font-size: 10.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -149,7 +149,7 @@
 }
 
 .export-kpis__item--missing > svg {
-  color: #ad5d0b;
+  color: #8f4a08;
   background: #fff3df;
 }
 
@@ -202,7 +202,7 @@
 .export-safety p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -218,7 +218,7 @@
 .export-safety span {
   display: block;
   max-width: 900px;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -240,7 +240,7 @@
 .export-workspace__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -254,7 +254,7 @@
 }
 
 .export-workspace__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -305,7 +305,7 @@
 .export-empty p {
   margin: 0;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -321,7 +321,7 @@
 .export-empty__desc {
   max-width: 480px;
   margin: 0 auto;
-  color: #66758b;
+  color: #566478;
   font-size: 13px;
   line-height: 1.65;
 }
@@ -375,8 +375,8 @@
 
 .export-case-card__heading p {
   margin: 0;
-  color: #8395aa;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 620;
 }
 
@@ -414,8 +414,8 @@
 }
 
 .export-case-card__summary span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -433,8 +433,8 @@
 
 .export-case-card__summary small {
   overflow: hidden;
-  color: #8491a4;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -456,8 +456,8 @@
 }
 
 .export-case-card__readiness-label {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -481,8 +481,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #ad5d0b;
-  font-size: 11.5px;
+  color: #8f4a08;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -578,7 +578,7 @@
 .export-detail-page__header-eyebrow {
   margin: 0;
   color: #155eef;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -595,7 +595,7 @@
 
 .export-detail-page__header-ref {
   margin: 0;
-  color: #8395aa;
+  color: #566478;
   font-size: 12.5px;
   font-weight: 620;
 }
@@ -647,8 +647,8 @@
 }
 
 .export-detail-page__summary .card span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -666,7 +666,7 @@
 
 .export-detail-page__summary .card small {
   overflow: hidden;
-  color: #8491a4;
+  color: #566478;
   font-size: 12px;
   line-height: 1.35;
   text-overflow: ellipsis;
@@ -703,7 +703,7 @@
 .export-detail-page__context-card p {
   margin: 0 0 2px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -717,8 +717,8 @@
 }
 
 .export-detail-page__context-card span {
-  color: #8a98a9;
-  font-size: 11.5px;
+  color: #55657a;
+  font-size: 0.75rem;
 }
 
 /* ─── Readiness panel ─── */
@@ -760,7 +760,7 @@
 .export-readiness-panel__header p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -774,7 +774,7 @@
 }
 
 .export-readiness-panel__header span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -815,8 +815,8 @@
 
 .export-readiness-panel__stats span {
   display: block;
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -871,8 +871,8 @@
 
 .export-readiness-panel__blockers span,
 .export-readiness-panel__requirements span {
-  color: #8491a4;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -907,7 +907,7 @@
 
 .export-readiness-panel__req--blocking svg,
 .export-readiness-panel__req--missing svg {
-  color: #ad5d0b;
+  color: #8f4a08;
 }
 
 .export-readiness-panel__all-clear {
@@ -937,7 +937,7 @@
 .export-documents-panel__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -951,7 +951,7 @@
 }
 
 .export-documents-panel__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -1017,7 +1017,7 @@
   align-items: center;
   gap: 8px;
   padding: 28px 16px;
-  color: #8491a4;
+  color: #566478;
   text-align: center;
 }
 
@@ -1071,8 +1071,8 @@
 
 .export-documents-panel__item-main span,
 .export-documents-panel__item-main small {
-  color: #8491a4;
-  font-size: 11.5px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .export-documents-panel__item-actions {
@@ -1119,7 +1119,7 @@
 .export-activity-timeline__heading p {
   margin: 0 0 4px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1133,7 +1133,7 @@
 }
 
 .export-activity-timeline__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -1144,7 +1144,7 @@
   align-items: center;
   gap: 8px;
   padding: 28px 16px;
-  color: #8491a4;
+  color: #566478;
   text-align: center;
 }
 
@@ -1218,8 +1218,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  color: #8491a4;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .export-activity-timeline__content h3 {
@@ -1231,14 +1231,14 @@
 
 .export-activity-timeline__content p {
   margin: 0;
-  color: #66758b;
+  color: #566478;
   font-size: 12.5px;
   line-height: 1.5;
 }
 
 .export-activity-timeline__content small {
   color: #a0aec0;
-  font-size: 10.5px;
+  font-size: 0.75rem;
 }
 
 /* ─── Order export summary (compact) ─── */
@@ -1283,7 +1283,7 @@
 .order-export-summary-panel__heading p {
   margin: 0 0 2px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1297,7 +1297,7 @@
 }
 
 .order-export-summary-panel__heading span {
-  color: #8491a4;
+  color: #566478;
   font-size: 12px;
   line-height: 1.45;
 }
@@ -1318,8 +1318,8 @@
 }
 
 .order-export-summary-panel__stats span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -1444,7 +1444,7 @@
 .export-broker-panel__heading p {
   margin: 0 0 2px;
   color: #155eef;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1462,7 +1462,7 @@
 .export-packing-panel__heading span,
 .export-shipment-panel__heading span,
 .export-broker-panel__heading span {
-  color: #758398;
+  color: #566478;
   font-size: 12.5px;
   line-height: 1.5;
 }
@@ -1486,8 +1486,8 @@
 
 .export-packing-panel__summary span,
 .export-broker-panel__summary span {
-  color: #8a98a9;
-  font-size: 10px;
+  color: #55657a;
+  font-size: 0.75rem;
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -1607,7 +1607,7 @@
   display: grid;
   gap: 5px;
   color: #5b6b80;
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1632,7 +1632,7 @@
   align-items: center;
   gap: 8px;
   padding: 24px 12px;
-  color: #8491a4;
+  color: #566478;
   text-align: center;
 }
 
@@ -1694,7 +1694,7 @@
 .export-broker-panel__corrections span,
 .export-shipment-panel__list-item span {
   display: block;
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -1707,7 +1707,7 @@
 .export-broker-panel__hint,
 .export-broker-panel__package-meta {
   margin: 0;
-  color: #8491a4;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -1756,7 +1756,7 @@
 }
 
 .export-shipment-panel__readiness span {
-  color: #66758b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -1791,8 +1791,8 @@
 .export-broker-panel__corrections small {
   display: block;
   margin-top: 4px;
-  color: #8491a4;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 /* ─── EXPORT-3L panels ─── */
@@ -1824,8 +1824,8 @@
 .export-country-knowledge-panel__header p,
 .export-ai-copilot-panel__header p {
   margin: 0;
-  color: #8491a4;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -1866,7 +1866,7 @@
   border: none;
   border-radius: 10px;
   padding: 10px 14px;
-  background: #155eef;
+  background: var(--zx-accent, #2463a7);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
@@ -1977,7 +1977,7 @@
 }
 
 .export-case-card__compliance-badge {
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .export-country-knowledge-panel__entry-actions {
@@ -2000,7 +2000,7 @@
 .export-country-research-workspace__empty,
 .export-country-knowledge-panel__empty,
 .export-ai-copilot-panel__empty {
-  color: #8491a4;
+  color: #566478;
   font-size: 13px;
 }
 
@@ -2035,8 +2035,8 @@
 
 .export-ai-copilot-panel__usage small {
   display: block;
-  color: #64748b;
-  font-size: 11px;
+  color: #566478;
+  font-size: 0.75rem;
 }
 
 .export-ai-copilot-panel__summary > article {
@@ -2055,7 +2055,7 @@
 .export-ai-copilot-panel__summary small {
   display: block;
   margin-top: 4px;
-  color: #64748b;
+  color: #566478;
   font-size: 12px;
 }
 
@@ -2081,7 +2081,7 @@
   align-items: center;
   margin-top: 8px;
   font-size: 12px;
-  color: #64748b;
+  color: #566478;
 }
 
 .export-ai-copilot-panel__human-review {
@@ -2108,7 +2108,7 @@
 
 .export-country-research-workspace__assistant p {
   margin: 0 0 10px;
-  color: #64748b;
+  color: #566478;
   font-size: 13px;
 }
 
@@ -2155,4 +2155,257 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ─── Export pages polish: calm KPI tone, forms at readable width, list and form side by side ─── */
+
+.export-kpis small {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.export-kpis__item--calm > svg {
+  color: #566478;
+  background: #eef2f7;
+}
+
+.export-field-hint {
+  display: block;
+  margin-top: 4px;
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.export-country-research-workspace__form {
+  width: 100%;
+  max-width: 640px;
+}
+
+.export-country-research-workspace__form button,
+.export-country-knowledge-panel__form button {
+  justify-self: start;
+  width: auto;
+}
+
+.export-country-knowledge-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: 16px;
+  align-items: start;
+}
+
+.export-country-knowledge-panel > .export-country-knowledge-panel__header,
+.export-country-knowledge-panel > .export-country-knowledge-panel__feedback {
+  grid-column: 1 / -1;
+}
+
+.export-country-knowledge-panel__empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 32px 16px;
+  border: 1px dashed #c5d5e8;
+  border-radius: 14px;
+  background: #f8fbff;
+  text-align: center;
+}
+
+.export-country-knowledge-panel__empty svg {
+  width: 24px;
+  height: 24px;
+  color: #8aaccc;
+}
+
+.export-country-knowledge-panel__empty strong {
+  color: #15243b;
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 1000px) {
+  .export-country-knowledge-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Country research: form and list sit side by side so neither column leaves dead space. */
+.export-split {
+  display: grid;
+  grid-template-columns: minmax(300px, 5fr) minmax(0, 7fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.export-split > * {
+  min-width: 0;
+}
+
+.export-split .export-country-research-workspace__form {
+  max-width: none;
+}
+
+.export-field-optional {
+  color: #566478;
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+@media (max-width: 1100px) {
+  .export-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Country knowledge: the record column grows to the form height, the empty state fills it instead of leaving a blank band. */
+.export-country-knowledge-panel {
+  align-items: stretch;
+}
+
+.export-country-knowledge-panel__list {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.export-country-knowledge-panel__list > .export-country-knowledge-panel__empty {
+  flex: 1 1 auto;
+  align-content: center;
+}
+
+.export-country-knowledge-panel__form select,
+.export-country-research-workspace__form select {
+  font-weight: 400;
+}
+
+.export-country-knowledge-panel__header > div > span {
+  display: block;
+  margin-top: 6px;
+}
+
+/* Country knowledge: the empty list card is compact (no 600px dead band); form controls share one weight; placeholders read as hints. */
+.export-country-knowledge-panel {
+  align-items: start;
+}
+
+.export-country-knowledge-panel__list > .export-country-knowledge-panel__empty {
+  flex: 0 0 auto;
+  padding: 24px 16px;
+}
+
+body .content-viewport :is(.export-country-knowledge-panel__form, .export-country-research-workspace__form) :is(input, select, textarea) {
+  font-weight: 400;
+}
+
+body .content-viewport :is(.export-country-knowledge-panel__form, .export-country-research-workspace__form) :is(input, textarea)::placeholder {
+  color: #6b7a8d;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.export-country-knowledge-panel__header > div > span,
+.export-workspace__heading span {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Country research: form and list columns end at the same height. */
+.export-split {
+  align-items: stretch;
+}
+
+/* Round 5 — country research / knowledge */
+
+/* Both columns start at the same top edge: the heading row keeps its natural height, the content row takes the rest. */
+.export-split > .export-workspace {
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
+}
+
+.export-split > .export-workspace > .export-empty {
+  align-self: stretch;
+}
+
+.export-workspace__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.export-workspace__title-row h2 {
+  margin: 0;
+}
+
+/* "(isteğe bağlı)" stays on the label line. */
+body .content-viewport .export-country-research-workspace__form label:has(> .export-field-optional) {
+  display: block;
+}
+
+/* Native selects read at the same weight as the inputs next to them. */
+body .content-viewport :is(.export-country-knowledge-panel__form, .export-country-research-workspace__form) select:not([multiple]):not([size]) {
+  font-weight: 400;
+}
+
+/* Record count sits beside the heading, not at the far edge. */
+.export-country-knowledge-panel > .export-country-knowledge-panel__header {
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+
+/* Country knowledge without records: the empty list sits on top and the form below uses two columns instead of leaving a dead column beside a tall form. */
+.export-country-knowledge-panel--empty {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 900px) {
+  .export-country-knowledge-panel--empty .export-country-knowledge-panel__form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    align-items: start;
+  }
+
+  .export-country-knowledge-panel--empty .export-country-knowledge-panel__form-title,
+  .export-country-knowledge-panel--empty .export-country-knowledge-panel__wide,
+  .export-country-knowledge-panel--empty .export-country-knowledge-panel__submit {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Knowledge form: every field is one block (label, control, hint) so two-column rows share a baseline. */
+body .content-viewport .export-country-knowledge-panel__form {
+  padding: 18px;
+  gap: 14px 16px;
+}
+
+body .content-viewport .export-country-knowledge-panel__form .export-country-knowledge-panel__form-title {
+  margin: 0;
+}
+
+body .content-viewport .export-country-knowledge-panel__form label {
+  display: block;
+}
+
+body .content-viewport .export-country-knowledge-panel__form label > :is(input, select, textarea) {
+  display: block;
+  margin-top: 6px;
+}
+
+body .content-viewport .export-country-knowledge-panel__form label > .export-field-hint {
+  display: block;
+  margin-top: 6px;
+}
+
+/* Compact variant of the shared export empty state (same tile, eyebrow and title; less vertical padding). */
+.export-empty.export-empty--compact {
+  padding: 28px 24px;
+  gap: 10px;
+}
+
+/* Both research headings use the same title row height so their lead lines sit on one baseline. */
+.export-workspace__title-row {
+  min-height: 32px;
 }

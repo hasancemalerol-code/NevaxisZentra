@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import {
+  applyOperationalRiskCoverageToKpis,
   buildOperationalRiskDonutArcs,
   resolveOperationalRiskKpiToneClass,
 } from "./operational-risk-presentation";
@@ -82,6 +83,11 @@ function severityBadgeClass(band: string | null): string {
 
 function sourceStateClass(state: string): string {
   return `oprisk-source-card oprisk-source-card--${state}`;
+}
+
+function isMeaningfulLabel(value: string | null | undefined): value is string {
+  const trimmed = value?.trim();
+  return Boolean(trimmed) && trimmed !== "—" && trimmed !== "-";
 }
 
 export function OperationalRiskWorkspaceView({
@@ -162,6 +168,11 @@ export function OperationalRiskWorkspaceView({
   const donutArcs = useMemo(
     () => buildOperationalRiskDonutArcs(workspace.distribution.slices),
     [workspace.distribution.slices],
+  );
+
+  const kpis = useMemo(
+    () => applyOperationalRiskCoverageToKpis(workspace.kpis, workspace.sourceCoverage),
+    [workspace.kpis, workspace.sourceCoverage],
   );
 
   const refreshWorkspace = useCallback(() => {
@@ -290,8 +301,8 @@ export function OperationalRiskWorkspaceView({
         return;
       }
       setFeedback(result.idempotentReplay
-        ? "Tespit çalıştırması zaten kayıtlıydı."
-        : "Tespit çalıştırması tamamlandı.");
+        ? "Kontrol çalışması zaten kayıtlıydı."
+        : "Kontrol çalışması tamamlandı.");
       setFeedbackTone("success");
       refreshWorkspace();
     });
@@ -306,20 +317,20 @@ export function OperationalRiskWorkspaceView({
   };
 
   return (
-    <main className="oprisk-page" data-testid="operational-risk-workspace">
+    <div className="oprisk-page" data-testid="operational-risk-workspace">
       <header className="oprisk-executive">
         <div className="oprisk-executive__top">
           <div className="oprisk-executive__intro">
             <p className="oprisk-executive__eyebrow">OPERASYONEL RİSK YÖNETİMİ</p>
             <h1>Operasyonel Riskler</h1>
             <p className="oprisk-executive__subtitle">
-              Operasyonel risk vakalarını, kanıt zaman çizelgesini ve tespit çalıştırmalarını tek çalışma alanında izleyin.
+              Operasyonel risk vakalarını, kanıt zaman çizelgesini ve kontrol çalışmalarını tek çalışma alanında izleyin.
             </p>
             <ul className="oprisk-executive__meta">
               <li>{workspace.facilityLabel}</li>
-              <li>Dönem: {workspace.reportingPeriodLabel}</li>
-              <li>Güncellik: {workspace.freshnessLabel}</li>
-              <li>Kanıt: {workspace.evidenceLabel}</li>
+              {isMeaningfulLabel(workspace.reportingPeriodLabel) ? <li>Dönem: {workspace.reportingPeriodLabel}</li> : null}
+              {isMeaningfulLabel(workspace.freshnessLabel) ? <li>Güncellik: {workspace.freshnessLabel}</li> : null}
+              {isMeaningfulLabel(workspace.evidenceLabel) ? <li>Kanıt: {workspace.evidenceLabel}</li> : null}
               <li>{OPERATIONAL_RISK_CURRENT_EVIDENCE_SCOPE}</li>
             </ul>
           </div>
@@ -337,7 +348,7 @@ export function OperationalRiskWorkspaceView({
         </div>
         {workspace.hasDevelopmentPilotData ? (
           <p className="oprisk-provenance-strip" data-testid="operational-risk-provenance-strip">
-            <span className="oprisk-provenance-strip__badge">Geliştirme</span>
+            <span className="oprisk-provenance-strip__badge">Örnek veri</span>
             {OPERATIONAL_RISK_DEVELOPMENT_BANNER}
           </p>
         ) : null}
@@ -352,7 +363,7 @@ export function OperationalRiskWorkspaceView({
       </header>
 
       <section className="oprisk-kpi-grid" data-testid="operational-risk-kpi-grid" aria-label="Operasyonel risk göstergeleri">
-        {workspace.kpis.map((kpi) => {
+        {kpis.map((kpi) => {
           const Icon = KPI_ICONS[kpi.id] ?? ShieldAlert;
           return (
             <article
@@ -404,11 +415,11 @@ export function OperationalRiskWorkspaceView({
             <h2 className="oprisk-panel__title">Açık vaka dağılımı</h2>
             {workspace.distribution.total > 0 ? (
               <div className="oprisk-donut" data-testid="operational-risk-distribution-donut">
-                <svg viewBox="0 0 160 160" role="img" aria-label="Şiddet dağılımı">
+                <svg viewBox="0 0 160 160" role="img" aria-label="Kritiklik dağılımı">
                   {donutArcs.map((arc) => (
                     <path key={arc.key} d={arc.path} fill={arc.color} />
                   ))}
-                  <text x="80" y="74" textAnchor="middle" fontSize="11" fill="#64748b">
+                  <text x="80" y="74" textAnchor="middle" fontSize="12" fill="#64748b">
                     Açık vaka
                   </text>
                   <text x="80" y="92" textAnchor="middle" fontSize="20" fontWeight="700" fill="#12263a">
@@ -477,11 +488,11 @@ export function OperationalRiskWorkspaceView({
                 <div className="oprisk-empty-state__icon" aria-hidden="true">
                   <ClipboardList size={20} />
                 </div>
-                <h3>Bu dönemde tespit çalıştırması yok</h3>
-                <p>Sonuçlar, yetkili bir tespit çalıştırması tamamlandığında burada gösterilir.</p>
+                <h3>Bu dönemde kontrol çalışması yok</h3>
+                <p>Sonuçlar, yetkili bir kontrol çalışması tamamlandığında burada gösterilir.</p>
                 {canManage ? (
                   <button type="button" className="oprisk-button" onClick={() => setActiveTab("runs")}>
-                    Tespit Çalıştırmaları
+                    Kontrol Çalışmaları
                   </button>
                 ) : null}
               </div>
@@ -507,7 +518,7 @@ export function OperationalRiskWorkspaceView({
                 <option key={status} value={status}>{getOperationalRiskLifecycleLabel(status)}</option>
               ))}
             </select>
-            <select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)} aria-label="Şiddet filtresi">
+            <select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)} aria-label="Kritiklik filtresi">
               <option value="">Tüm şiddetler</option>
               {[...new Set(workspace.cases.map((item) => item.severityBand).filter(Boolean))].map((band) => (
                 <option key={band} value={band ?? ""}>{getOperationalRiskSeverityLabel(band)}</option>
@@ -527,13 +538,13 @@ export function OperationalRiskWorkspaceView({
               ))}
             </select>
           </div>
-          <div className="oprisk-table-wrap">
-            <table className="oprisk-table">
+          <div className="oprisk-table-wrap" tabIndex={0} role="region" aria-label="Risk vakaları (kaydırılabilir)">
+            <table aria-label="Risk vakaları" className="oprisk-table">
               <thead>
                 <tr>
                   <th>Başlık</th>
                   <th>Referans</th>
-                  <th>Şiddet</th>
+                  <th>Kritiklik</th>
                   <th>Durum</th>
                   <th>Kategori</th>
                   <th>Kapsam</th>
@@ -606,7 +617,7 @@ export function OperationalRiskWorkspaceView({
       {activeTab === "runs" ? (
         <div className="oprisk-runs-workspace" data-testid="operational-risk-runs-workspace">
           <section className="oprisk-panel oprisk-runs-composer">
-            <h2 className="oprisk-panel__title">Yeni tespit çalıştırması</h2>
+            <h2 className="oprisk-panel__title">Yeni kontrol çalışması</h2>
             <p className="oprisk-panel__hint">
               Yalnızca onaylı profiller çalıştırılabilir. Değerlendirme penceresi seçilen kaynak kanıtı aralığını temsil eder.
             </p>
@@ -630,7 +641,7 @@ export function OperationalRiskWorkspaceView({
                   onClick={handleRunExecute}
                   disabled={isPending || !effectiveRunProfileId || !runWindowStart || !runWindowEnd}
                 >
-                  Tespit çalıştır
+                  Kontrolü çalıştır
                 </button>
               </div>
             ) : (
@@ -638,10 +649,10 @@ export function OperationalRiskWorkspaceView({
             )}
           </section>
           <section className="oprisk-panel oprisk-runs-history" data-testid="operational-risk-runs-history">
-            <h2 className="oprisk-panel__title">Son tespit çalıştırmaları</h2>
+            <h2 className="oprisk-panel__title">Son kontrol çalışmaları</h2>
             {workspace.runs.length > 0 ? (
-              <div className="oprisk-table-wrap">
-                <table className="oprisk-table oprisk-table--runs">
+              <div className="oprisk-table-wrap" tabIndex={0} role="region" aria-label="Son kontrol çalışmaları (kaydırılabilir)">
+                <table aria-label="Son kontrol çalışmaları" className="oprisk-table oprisk-table--runs">
                   <thead>
                     <tr>
                       <th>Referans</th>
@@ -667,7 +678,7 @@ export function OperationalRiskWorkspaceView({
                         <td>{formatOperationalRiskCount(run.outcomeCounts["within-threshold"] ?? 0)}</td>
                         <td>{formatOperationalRiskCount(run.outcomeCounts["insufficient-data"] ?? 0)}</td>
                         <td>{formatOperationalRiskCount(run.outcomeCounts["source-conflict"] ?? 0)}</td>
-                        <td>{run.isPilotData ? "Simülasyon" : "Kayıt"}</td>
+                        <td>{run.isPilotData ? "Örnek veri" : "Kayıt"}</td>
                         <td>
                           <button type="button" className="oprisk-button" onClick={() => openRunDetail(run.id)}>
                             Detay
@@ -683,7 +694,7 @@ export function OperationalRiskWorkspaceView({
                 <div className="oprisk-empty-state__icon" aria-hidden="true">
                   <ShieldAlert size={22} />
                 </div>
-                <h3>Henüz tespit çalıştırması yok</h3>
+                <h3>Henüz kontrol çalışması yok</h3>
                 <p>Onaylı bir profille çalıştırma tamamlandığında dönem, sonuç ve kanıt özeti burada görünür.</p>
               </div>
             )}
@@ -724,7 +735,7 @@ export function OperationalRiskWorkspaceView({
                 <div data-testid="operational-risk-case-detail-ready">
                   <DetailSection title="Özet">
                     <div className="oprisk-detail-grid">
-                      <DetailField label="Şiddet" value={caseDetail.summary.severityLabel} />
+                      <DetailField label="Kritiklik" value={caseDetail.summary.severityLabel} />
                       <DetailField label="Durum" value={caseDetail.summary.lifecycleLabel} />
                       <DetailField label="Kategori" value={caseDetail.summary.categoryLabel} />
                       <DetailField label="Kapsam" value={caseDetail.summary.scopeLabel} />
@@ -825,9 +836,9 @@ export function OperationalRiskWorkspaceView({
       {selectedRunId ? (
         <>
           <button type="button" className="oprisk-drawer-backdrop" aria-label="Çalıştırma detayını kapat" onClick={() => setSelectedRunId(null)} />
-          <aside className="oprisk-drawer" aria-label="Tespit çalıştırması detayı">
+          <aside className="oprisk-drawer" aria-label="Kontrol çalışması detayı">
             <div className="oprisk-drawer__header">
-              <h2>{runDetail?.summary.runReference ?? "Tespit çalıştırması"}</h2>
+              <h2>{runDetail?.summary.runReference ?? "Kontrol çalışması"}</h2>
               <p className="oprisk-priority-row__meta">{runDetail?.summary.profileCode}</p>
             </div>
             <div className="oprisk-drawer__body">
@@ -889,7 +900,7 @@ export function OperationalRiskWorkspaceView({
           </aside>
         </>
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -932,12 +943,11 @@ function ProfileHero({
         <span className="oprisk-badge">{profile.statusLabel}</span>
       </div>
       <div className="oprisk-detail-grid oprisk-detail-grid--profile">
-        <DetailField label="Kural seti" value={profile.ruleSetVersion} />
         <DetailField label="Sürüm" value={String(profile.version)} />
         <DetailField label="Aktif kurallar" value={`${formatOperationalRiskCount(profile.activeRuleCount)} / ${formatOperationalRiskCount(profile.ruleCount)}`} />
         <DetailField label="Kaynak modüller" value={profile.sourceModuleLabels.join(" · ")} />
         <DetailField label="Güncellik" value={profile.updatedLabel} />
-        <DetailField label="Kanıt" value={profile.isPilotData ? "Simülasyon" : "Kayıt"} />
+        <DetailField label="Kanıt" value={profile.isPilotData ? "Örnek veri" : "Kayıt"} />
       </div>
       {canManage ? (
         <div className="oprisk-profile-hero__actions">

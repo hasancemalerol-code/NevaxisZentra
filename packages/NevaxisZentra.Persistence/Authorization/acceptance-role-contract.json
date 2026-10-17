@@ -212,8 +212,8 @@
       "label": "Intelligence Runtime",
       "path": "/intelligence-runtime",
       "permissionKey": "intelligence-runtime.read",
-      "nav": "direct",
-      "acceptance": "required",
+      "nav": "deferred",
+      "acceptance": "deferred",
       "api": null
     },
     {
@@ -311,7 +311,7 @@
       "keys": ["intelligence-runtime.read"],
       "ui": true,
       "api": true,
-      "notes": "Manage and evaluate stay off the acceptance role."
+      "notes": "Internal/deferred surface: not part of Production shipping navigation or acceptance; the route is fail-closed in Production. Manage and evaluate stay off the acceptance role."
     },
     {
       "module": "Operational Value",

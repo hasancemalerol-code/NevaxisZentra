@@ -203,8 +203,8 @@ async function loadEmptyState() {
 test("the Production empty state is truthful and offers no synthetic-data control", async () => {
   const RealFactoryPilotEmptyState = await loadEmptyState();
   const html = renderToStaticMarkup(<RealFactoryPilotEmptyState canInitialize={false} notice={null} />);
-  assert.match(html, /Henüz gerçek fabrika bağlantısı yok/);
-  assert.match(html, /herhangi bir\s+bağlantı veya veri oluşturmaz/);
+  assert.match(html, /Henüz fabrika bağlantısı yok/);
+  assert.match(html, /Veri Aktarım Merkezi/);
   assert.doesNotMatch(html, /<form/);
   assert.doesNotMatch(html, /PILOT-|SYNTHETIC_PILOT_PASS/);
 });

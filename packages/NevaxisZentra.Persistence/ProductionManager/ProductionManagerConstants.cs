@@ -58,6 +58,7 @@ public static class ProductionManagerFailureCodes
     public const string LowConfidence = "production-manager.low-confidence";
     public const string AutonomyDenied = "production-manager.autonomy-denied";
     public const string AlreadyExecuted = "production-manager.already-executed";
+    public const string ScenarioUnavailable = "production-manager.scenario-unavailable";
     public const string ConstraintViolation = "production-manager.constraint-violation";
 }
 
@@ -67,4 +68,14 @@ public sealed class ProductionManagerException : Exception
 
     public ProductionManagerException(string failureCode, string message) : base(message) =>
         FailureCode = failureCode;
+}
+
+/// <summary>
+/// The production-manager engines run on a canned demonstration scenario (fixed orders, machines and predictions), not on
+/// tenant signals. Outside Development they stay off, so a Production tenant never receives fabricated predictions,
+/// decisions or state snapshots.
+/// </summary>
+public sealed class ProductionManagerScenarioGate(bool enabled)
+{
+    public bool Enabled { get; } = enabled;
 }

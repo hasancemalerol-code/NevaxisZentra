@@ -155,7 +155,7 @@ function buildKpis(cases: readonly OperationalRiskCaseSummary[]): OperationalRis
       id: "open-cases",
       label: "Açık risk vakaları",
       value: formatOperationalRiskCount(openCases.length),
-      detail: "Terminal olmayan vakalar",
+      detail: "Yaşam döngüsü tamamlanmamış vakalar",
       tone: openCases.length > 0 ? "attention" : "controlled",
       scopeLabel,
       evidenceLabel,
@@ -179,7 +179,7 @@ function buildKpis(cases: readonly OperationalRiskCaseSummary[]): OperationalRis
       tone: detected.length > 0 ? "informational" : "neutral",
       scopeLabel,
       evidenceLabel,
-      stateBadge: detected.length > 0 ? "Yeni" : "Yok",
+      stateBadge: detected.length > 0 ? "Yeni" : "Vaka yok",
     },
     "under-review": {
       id: "under-review",
@@ -189,7 +189,7 @@ function buildKpis(cases: readonly OperationalRiskCaseSummary[]): OperationalRis
       tone: underReview.length > 0 ? "attention" : "neutral",
       scopeLabel,
       evidenceLabel,
-      stateBadge: underReview.length > 0 ? "İncelemede" : "Yok",
+      stateBadge: underReview.length > 0 ? "İncelemede" : "Vaka yok",
     },
     "insufficient-data": {
       id: "insufficient-data",
@@ -199,7 +199,7 @@ function buildKpis(cases: readonly OperationalRiskCaseSummary[]): OperationalRis
       tone: insufficient.length > 0 ? "insufficient" : "neutral",
       scopeLabel: "Tüm vakalar",
       evidenceLabel,
-      stateBadge: insufficient.length > 0 ? "Eksik veri" : "Yok",
+      stateBadge: insufficient.length > 0 ? "Eksik veri" : "Vaka yok",
     },
     "source-conflict": {
       id: "source-conflict",
@@ -209,7 +209,7 @@ function buildKpis(cases: readonly OperationalRiskCaseSummary[]): OperationalRis
       tone: conflict.length > 0 ? "conflict" : "neutral",
       scopeLabel: "Tüm vakalar",
       evidenceLabel,
-      stateBadge: conflict.length > 0 ? "Çelişki" : "Yok",
+      stateBadge: conflict.length > 0 ? "Çelişki" : "Vaka yok",
     },
   };
 
@@ -267,7 +267,7 @@ function buildSourceCoverage(
         module,
         label,
         state: "unavailable" as const,
-        detail: "Kaynak adaptörü henüz kullanılamıyor",
+        detail: "Kaynak bağlantısı henüz kullanılamıyor",
         evidenceLabel: "Kullanılamıyor",
       };
     }
@@ -277,7 +277,7 @@ function buildSourceCoverage(
         module,
         label,
         state: "source-conflict" as const,
-        detail: "Son tespit çalıştırmasında kaynak uyuşmazlığı",
+        detail: "Son kontrol çalışmasında kaynak uyuşmazlığı",
         evidenceLabel: "Kaynak uyuşmazlığı",
       };
     }
@@ -287,7 +287,7 @@ function buildSourceCoverage(
         module,
         label,
         state: "insufficient-data" as const,
-        detail: "Son tespit çalıştırmasında yetersiz veri",
+        detail: "Son kontrol çalışmasında yetersiz veri",
         evidenceLabel: "Veri yetersiz",
       };
     }
@@ -350,7 +350,7 @@ function mapProfile(profile: RawOperationalRiskDetectionProfile): OperationalRis
     isExecutable: profile.status === "approved",
     isPilotData: profile.isPilotData,
     updatedLabel: profile.sourceProvenance.toLowerCase().includes("simul")
-      ? "Simülasyon profili"
+      ? "Örnek veri profili"
       : "Profil kaydı",
   };
 }
@@ -495,10 +495,10 @@ export async function readOperationalRiskWorkspace(): Promise<OperationalRiskWor
     || mappedRuns.some((item) => item.isPilotData);
 
   const workspace: OperationalRiskWorkspacePayload = {
-    facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
+    facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
     reportingPeriodLabel: reportingPeriodLabel(sortedCases),
     freshnessLabel: freshnessLabel(sortedCases),
-    evidenceLabel: hasPilot ? "Simülasyon kanıtı" : "Operasyonel risk kanıtı",
+    evidenceLabel: hasPilot ? "Örnek veri kanıtı" : "Operasyonel risk kanıtı",
     provenanceDisclaimer: casesResult.value.provenanceDisclaimer
       || profilesResult.value.provenanceDisclaimer,
     ruleSetVersion: casesResult.value.ruleSetVersion || runsResult.value.ruleSetVersion,

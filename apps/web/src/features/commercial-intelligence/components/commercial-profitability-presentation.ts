@@ -96,28 +96,28 @@ export function buildMaterialCostProfitabilityKpiCards(
       id: "material-comparisons",
       label: "Malzeme karşılaştırması",
       value: formatCount(materialComparisons.length),
-      hint: "Bu sayfadaki malzeme lens sonucu",
+      hint: "Bu sayfadaki malzeme sonucu",
       tone: "neutral",
     },
     {
       id: "cost-driver-comparisons",
-      label: "Maliyet bileşeni karşılaştırması",
+      label: "Maliyet bileşeni",
       value: formatCount(costMixComparisons.length),
-      hint: "Bu sayfadaki maliyet lens sonucu",
+      hint: "Bu sayfadaki maliyet sonucu",
       tone: "neutral",
     },
     {
       id: "combined-improvement",
       label: "Katkı iyileşmesi",
       value: formatCount(improvement),
-      hint: "Her iki lens sonucu",
+      hint: "Her iki karşılaştırma sonucu",
       tone: improvement > 0 ? "positive" : "neutral",
     },
     {
       id: "combined-deterioration",
       label: "Katkı bozulması",
       value: formatCount(deterioration),
-      hint: "Her iki lens sonucu",
+      hint: "Her iki karşılaştırma sonucu",
       tone: deterioration > 0 ? "negative" : "neutral",
     },
     {
@@ -131,7 +131,7 @@ export function buildMaterialCostProfitabilityKpiCards(
       id: "combined-insufficient-disputed",
       label: "Yetersiz / çakışma",
       value: formatCount(insufficient + conflict),
-      hint: "Sıfır olarak gösterilmez",
+      hint: "Yetersiz kanıt ayrı sayılır",
       tone: insufficient + conflict > 0 ? "warning" : "neutral",
     },
     {
@@ -204,9 +204,9 @@ export function buildCustomerProfitabilityKpiCards(
   return [
     {
       id: "customer-comparisons",
-      label: "Müşteri karşılaştırması",
+      label: "Müşteri sonucu",
       value: formatCount(comparisons.length),
-      hint: "Bu sayfadaki sonuç kümesi",
+      hint: "Sayfadaki küme",
       tone: "neutral",
     },
     {
@@ -234,7 +234,7 @@ export function buildCustomerProfitabilityKpiCards(
       id: "customer-insufficient-disputed",
       label: "Yetersiz / çakışma",
       value: formatCount(insufficient + conflict),
-      hint: "Sıfır olarak gösterilmez",
+      hint: "Yetersiz kanıt ayrı sayılır",
       tone: insufficient + conflict > 0 ? "warning" : "neutral",
     },
   ];
@@ -253,9 +253,9 @@ export function buildProfitabilityKpiCards(
   return [
     {
       id: "comparable-assessments",
-      label: "Karşılaştırılabilir değerlendirme",
+      label: "Karşılaştırılabilir",
       value: formatCount(comparableTotal),
-      hint: `${formatCount(excludedTotal)} hariç tutuldu`,
+      hint: excludedTotal > 0 ? `${formatCount(excludedTotal)} hariç tutuldu` : "Hariç tutulan yok",
       tone: "neutral",
     },
     {
@@ -276,7 +276,7 @@ export function buildProfitabilityKpiCards(
       id: "insufficient-or-conflict",
       label: "Yetersiz / çakışma",
       value: formatCount(insufficient + conflict),
-      hint: "Sıfır olarak gösterilmez",
+      hint: "Yetersiz kanıt ayrı sayılır",
       tone: insufficient + conflict > 0 ? "warning" : "neutral",
     },
   ];

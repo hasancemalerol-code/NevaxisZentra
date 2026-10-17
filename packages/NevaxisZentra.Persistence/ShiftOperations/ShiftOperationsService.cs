@@ -107,6 +107,8 @@ public sealed class ShiftOperationsService : IShiftOperationsService
         Guid shiftInstanceId, CancellationToken cancellationToken)
     {
         var items = await repository.ListOpenItemsAsync(shiftInstanceId, cancellationToken);
+        // One business fact, one calculation: the readiness shown on the overview is the closing-preview readiness.
+        var readiness = (await GetClosingPreviewCoreAsync(shiftInstanceId, cancellationToken)).ReadinessScore;
         var verifiedHandovers = await dbContext.ShiftHandoverAcceptances.CountAsync(
             a => a.ShiftInstanceId == shiftInstanceId && a.Verified,
             cancellationToken);
@@ -116,7 +118,7 @@ public sealed class ShiftOperationsService : IShiftOperationsService
             items.Count(i => i.CarryoverCount > 0),
             items.Count(i => i.DigitalWorkCaseId.HasValue),
             items.Count(i => i.Category == ShiftOpenItemCategories.Approval),
-            items.Count == 0 ? 100m : ComputeReadiness(items, []),
+            readiness,
             verifiedHandovers,
             items.Count(i => i.CarryoverCount >= 2));
     }
@@ -433,7 +435,7 @@ public sealed class ShiftOperationsService : IShiftOperationsService
         }
     }
 
-    private static decimal ComputeReadiness(IReadOnlyList<ShiftOpenItem> items, IReadOnlyList<ShiftHandoverConflict> conflicts)
+    private static decimal ComputeReadiness(List<ShiftOpenItem> items, IReadOnlyList<ShiftHandoverConflict> conflicts)
     {
         if (items.Count == 0)
         {

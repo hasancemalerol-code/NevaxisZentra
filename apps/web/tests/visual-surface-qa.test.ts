@@ -163,7 +163,7 @@ function renderProductionResourcesHtml(): string {
     <header class="fact-workspace__header">
       <div>
         <p class="fact-workspace__context">ÜRETİM · KAYNAKLAR</p>
-        <h1 class="fact-workspace__title">Makineler &amp; Kaynaklar</h1>
+        <h1 class="fact-workspace__title">Makineler ve Kaynaklar</h1>
         <p class="fact-workspace__meta">Hat, istasyon ve üretim kaynaklarının birleşik operasyon görünümü.</p>
       </div>
     </header>
@@ -350,7 +350,7 @@ function renderUygulamalarAnalyticsEmptyHtml(): string {
 
 function renderProductionResourcesEmptyHtml(): string {
   return `<main class="fact-workspace production-resources-workspace" data-testid="production-resources-workspace">
-    <header class="fact-workspace__header"><div><p class="fact-workspace__context">ÜRETİM · KAYNAKLAR</p><h1 class="fact-workspace__title">Makineler &amp; Kaynaklar</h1></div></header>
+    <header class="fact-workspace__header"><div><p class="fact-workspace__context">ÜRETİM · KAYNAKLAR</p><h1 class="fact-workspace__title">Makineler ve Kaynaklar</h1></div></header>
     <div class="production-resources-type-chips" data-testid="production-resources-type-chips"><button type="button" class="production-resources-type-chips__chip production-resources-type-chips__chip--active">Tümü</button><button type="button" class="production-resources-type-chips__chip">Montaj / İnsan İstasyonları</button></div>
     <table class="fact-data-grid"><tbody><tr><td colspan="9"><div class="production-resources-zero-factory" data-testid="production-resources-zero-factory"><p>Henüz üretim kaynağı yok.</p><a href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi'nden yükle</a></div></td></tr></tbody></table>
   </main>`;
@@ -380,8 +380,8 @@ function renderCopilotHtml(pathname: string, search = ""): string {
     .join("");
 
   return drawer.replace(
-    '<div class="factory-copilot-drawer__suggestions">',
-    `<div class="factory-copilot-drawer__suggestions">${suggestionMarkup}`,
+    /<div class="factory-copilot-drawer__suggestions"[^>]*>/,
+    (opening) => `${opening}${suggestionMarkup}`,
   );
 }
 
@@ -526,7 +526,7 @@ function renderFactoryWorkspaceHtml(): string {
     <nav class="factory-workspace-primary-nav" data-testid="factory-workspace-primary-nav" aria-label="Fabrika çalışma alanı">
       <a class="factory-workspace-primary-nav__link factory-workspace-primary-nav__link--active" href="/fabrika">Genel Bakış</a>
       <a class="factory-workspace-primary-nav__link" href="/uretim/hatlar">Hatlar</a>
-      <a class="factory-workspace-primary-nav__link" href="/uretim/kaynaklar">Makineler &amp; Kaynaklar</a>
+      <a class="factory-workspace-primary-nav__link" href="/uretim/kaynaklar">Makineler ve Kaynaklar</a>
     </nav>
     <div class="factory-workspace__layout">
       <aside class="factory-workspace__panel"><div class="factory-workspace__panel-body"><ul class="factory-hierarchy-tree" data-testid="factory-hierarchy-tree"><li><button class="factory-hierarchy-tree__button" data-active="true"><strong>MIX-01</strong></button></li></ul></div></aside>
@@ -635,8 +635,8 @@ test("browser visual QA for critical industrial surfaces", async () => {
     { id: "factory-workspace", title: "Fabrika Çalışma Alanı", html: factoryWorkspace },
     { id: "live-plan-workspace", title: "Canlı Plan Çalışma Alanı", html: livePlanWorkspace },
     { id: "scenario-recovery-workspace", title: "Senaryo Kurtarma Çalışma Alanı", html: scenarioRecoveryWorkspace },
-    { id: "production-resources", title: "Makineler & Kaynaklar", html: productionResources },
-    { id: "production-resources-empty", title: "Makineler & Kaynaklar Boş", html: productionResourcesEmpty },
+    { id: "production-resources", title: "Makineler ve Kaynaklar", html: productionResources },
+    { id: "production-resources-empty", title: "Makineler ve Kaynaklar Boş", html: productionResourcesEmpty },
     { id: "uygulamalar", title: "Uygulamalar Analytics", html: uygulamalarAnalyticsReady },
     { id: "uygulamalar-empty", title: "Uygulamalar Boş Analytics", html: uygulamalarAnalyticsEmpty },
     { id: "uygulamalar-kaynaklar", title: "Uygulamalar Kaynaklar", html: uygulamalarKaynaklar },

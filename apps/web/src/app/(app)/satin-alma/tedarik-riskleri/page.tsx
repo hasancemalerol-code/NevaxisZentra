@@ -6,6 +6,10 @@ import { ProcurementDeliveryRiskWorkspaceView } from "@/features/procurement-del
 import { readProcurementDeliveryRiskWorkspace } from "@/features/procurement-delivery-risk/server/procurement-delivery-risk-reader";
 import "@/features/quality-control/components/quality-workspace.css";
 
+import "@/features/materials/components/material-registry.css";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
+
 type ProcurementDeliveryRiskPageProps = Readonly<{
   searchParams: Promise<
     Readonly<{
@@ -40,26 +44,20 @@ export default async function ProcurementDeliveryRiskPage({
 
   if (result.status === "failure") {
     return (
-      <main className="material-registry-page">
+      <div className="material-registry-page">
         <header className="material-registry-header">
           <div className="material-registry-header__intro">
             <p className="material-registry-header__eyebrow">SATIN ALMA</p>
             <h1>Tedarik Riskleri</h1>
           </div>
         </header>
-        <div role="alert" className="material-registry-error" data-testid="procurement-delivery-risk-server-error">
-          <Truck aria-hidden="true" />
-          <div>
-            <h3>Tedarik risk verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <div data-testid="procurement-delivery-risk-server-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Tedarik risk verisi yüklenemedi" inline /></div>
+      </div>
     );
   }
 
   return (
-    <main className="material-registry-page">
+    <div className="material-registry-page">
       <header className="material-registry-header">
         <div className="material-registry-header__intro">
           <p className="material-registry-header__eyebrow">SATIN ALMA</p>
@@ -83,6 +81,6 @@ export default async function ProcurementDeliveryRiskPage({
         history={result.history}
         historyError={result.historyError}
       />
-    </main>
+    </div>
   );
 }

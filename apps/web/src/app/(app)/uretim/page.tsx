@@ -6,14 +6,13 @@ import {
   Package,
   Pause,
   Play,
-  ShieldCheck,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ProductionOrderCard } from "@/features/production-execution/components/production-order-card";
 import { readProductionOrders } from "@/features/production-execution/server/production-order-reader";
 import type { ProductionOrderSummary } from "@/features/production-execution/domain/production-order";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 function countByStatus(
   orders: ProductionOrderSummary[],
@@ -27,25 +26,14 @@ export default async function ProductionExecutionPage() {
 
   if (result.status === "failure") {
     return (
-      <main className="fact-workspace production-execution-page">
+      <div className="fact-workspace production-execution-page">
         <header className="production-execution-header">
-          <p>ÜRETİM YÖNETİMİ</p>
+          <p>ÜRETİM</p>
           <h1>Üretim Emirleri</h1>
         </header>
 
-        <div role="alert" className="state-panel error-state">
-          <div className="state-icon">
-            <ShieldCheck aria-hidden="true" />
-          </div>
-          <div>
-            <h3>Üretim emirleri yüklenemedi</h3>
-            <p>
-              Veriler alınırken bir hata oluştu. Lütfen sayfayı yenileyin veya
-              sistem yöneticinize başvurun.
-            </p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Üretim emirleri yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -58,26 +46,28 @@ export default async function ProductionExecutionPage() {
   const completedCount = countByStatus(orders, "completed");
 
   return (
-    <main className="fact-workspace production-execution-page">
+    <div className="fact-workspace production-execution-page">
       <header className="production-execution-header">
-        <p>ÜRETİM YÖNETİMİ</p>
+        <div>
+          <p>ÜRETİM</p>
+          <h1>Üretim Emirleri</h1>
+          <span>
+            Planlamadan üretime aktarılan emirleri izleyin, yürütün ve
+            operasyonel ilerlemeyi yönetin.
+          </span>
+        </div>
 
-        <h1>Üretim Emirleri</h1>
+        <div className="production-execution-header__actions">
+          <Link href="/uretim/hatlar" className="production-execution-header__link">
+            <Factory aria-hidden="true" />
+            Üretim Hatları
+          </Link>
 
-        <span>
-          Planlamadan üretime aktarılan emirleri izleyin, yürütün ve
-          operasyonel ilerlemeyi yönetin.
-        </span>
-
-        <Link href="/uretim/hatlar" className="production-execution-header__link">
-          <Factory aria-hidden="true" />
-          Üretim Hatları
-        </Link>
-
-        <Link href="/uretim/raporlama" className="production-execution-header__link">
-          <BarChart3 aria-hidden="true" />
-          Operasyonel Raporlama
-        </Link>
+          <Link href="/uretim/raporlama" className="production-execution-header__link">
+            <BarChart3 aria-hidden="true" />
+            Operasyonel Raporlama
+          </Link>
+        </div>
       </header>
 
       <section className="production-execution-kpis" aria-label="Özet istatistikler">
@@ -87,7 +77,7 @@ export default async function ProductionExecutionPage() {
           <div>
             <span>Toplam Emir</span>
             <strong>{totalCount}</strong>
-            <small>Aktif üretim çalışma alanı</small>
+            <small>Tüm emirler</small>
           </div>
         </Card>
 
@@ -97,7 +87,7 @@ export default async function ProductionExecutionPage() {
           <div>
             <span>Üretimde</span>
             <strong>{inProgressCount}</strong>
-            <small>Aktif yürütme altında</small>
+            <small>Aktif yürütmede</small>
           </div>
         </Card>
 
@@ -107,7 +97,7 @@ export default async function ProductionExecutionPage() {
           <div>
             <span>Hazır</span>
             <strong>{readyCount}</strong>
-            <small>Başlatılmayı bekliyor</small>
+            <small>Başlatma bekliyor</small>
           </div>
         </Card>
 
@@ -117,7 +107,7 @@ export default async function ProductionExecutionPage() {
           <div>
             <span>Duraklatıldı</span>
             <strong>{pausedCount}</strong>
-            <small>Devam etmeyi bekliyor</small>
+            <small>Devam bekliyor</small>
           </div>
         </Card>
 
@@ -127,39 +117,14 @@ export default async function ProductionExecutionPage() {
           <div>
             <span>Tamamlandı</span>
             <strong>{completedCount}</strong>
-            <small>Bu tesiste tamamlanan</small>
+            <small>Tamamlanan emirler</small>
           </div>
         </Card>
-      </section>
-
-      <section className="production-execution-safety" aria-label="Operasyon bilgisi">
-        <div>
-          <ShieldCheck aria-hidden="true" />
-
-          <div>
-            <p>SHOP-FLOOR EXECUTION</p>
-
-            <h2>
-              Üretim emirleri kontrollü operasyon adımlarıyla yürütülür
-            </h2>
-
-            <span>
-              Başlatma, duraklatma, üretim miktarı, fire ve tamamlama kayıtları
-              yetkili kullanıcı işlemleriyle ve denetlenebilir geçmişle
-              yönetilir.
-            </span>
-          </div>
-        </div>
-
-        <Badge tone="information">
-          İzlenebilir Üretim
-        </Badge>
       </section>
 
       <section className="production-execution-workspace" aria-label="Üretim emirleri listesi">
         <div className="production-execution-workspace__heading">
           <div>
-            <p>ÜRETİM ÇALIŞMA ALANI</p>
             <h2>Aktif üretim emirleri</h2>
             <span>
               Üretim durumunu, planlanan miktarı, gerçekleşen üretimi ve
@@ -180,9 +145,13 @@ export default async function ProductionExecutionPage() {
             </div>
 
             <p className="production-execution-empty__desc">
-              Planlama modülünde hazırlanan üretim handoff kayıtları üretime
+              Planlama modülünde hazırlanan üretim devir kayıtları üretime
               aktarıldığında burada görüntülenir.
             </p>
+
+            <Link href="/planlama" className="button button-primary button-medium">
+              Plana git
+            </Link>
           </div>
         ) : (
           <div className="production-execution-workspace__list">
@@ -192,6 +161,6 @@ export default async function ProductionExecutionPage() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }

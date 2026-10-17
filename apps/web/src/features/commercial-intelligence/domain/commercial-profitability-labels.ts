@@ -1,8 +1,8 @@
 export const COMMERCIAL_PROFITABILITY_SUBTITLE =
-  "Ürün kârlılığı karşılaştırma zekâsı; referans ve güncel dönem katkı marjı, maliyet bileşeni ve konum farklarını deterministik olarak gösterir.";
+  "Ürün kârlılığı karşılaştırma zekâsı; referans ve güncel dönem katkı marjı, maliyet bileşeni ve konum farklarını kayıtlı verilere dayanarak gösterir.";
 
 export const COMMERCIAL_PROFITABILITY_DEVELOPMENT_BANNER =
-  "Gerçek gelir ve maliyet veri bağlantısı henüz tamamlanmadı. Gösterilen değerler geliştirme pilot simülasyonundan gelir; otomatik fiyat veya kârlılık kararı üretilmez.";
+  "Gerçek gelir ve maliyet veri bağlantısı henüz tamamlanmadı. Bağlantı kurulana kadar otomatik fiyat veya kârlılık kararı üretilmez.";
 
 export const COMMERCIAL_PROFITABILITY_READONLY_NOTE =
   "Bu çalışma alanı salt okunurdur. Karşılaştırma sonuçları arka uçta hesaplanır; arayüzde yeniden hesaplama yapılmaz.";
@@ -110,7 +110,7 @@ export function getCommercialProfitabilityComponentKindLabel(value: string | nul
 export function localizeCommercialProfitabilityProvenance(value: string | null | undefined): string {
   if (!value?.trim()) return "—";
   if (value.includes("simulated") || value.includes("simülasyon") || value.includes("Development")) {
-    return "Geliştirme pilot simülasyonu";
+    return "Örnek veri";
   }
   return value;
 }

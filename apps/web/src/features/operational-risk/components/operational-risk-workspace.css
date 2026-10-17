@@ -56,9 +56,9 @@
 
 .oprisk-executive__eyebrow {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
-  color: var(--oprisk-blue);
+  color: var(--oprisk-slate-500, #566478);
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -86,7 +86,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.16rem 0.38rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--oprisk-slate-500);
 }
 
@@ -130,11 +130,11 @@
   padding: 0.08rem 0.34rem;
   background: #eef2f7;
   border: 1px solid #e2e8f0;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .oprisk-readonly-note,
@@ -198,7 +198,7 @@
 
 .oprisk-kpi-card {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   gap: 0.24rem;
   min-height: 6.2rem;
   height: 100%;
@@ -223,7 +223,7 @@
 
 .oprisk-kpi-card__tone--critical::before { background: #dc2626; }
 .oprisk-kpi-card__tone--attention::before { background: #d97706; }
-.oprisk-kpi-card__tone--informational::before { background: #2563eb; }
+.oprisk-kpi-card__tone--informational::before { background: #2463a7; }
 .oprisk-kpi-card__tone--controlled::before { background: #16a34a; }
 .oprisk-kpi-card__tone--insufficient::before { background: #64748b; }
 .oprisk-kpi-card__tone--conflict::before { background: #7c3aed; }
@@ -264,8 +264,8 @@
 
 .oprisk-kpi-card__detail {
   margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-kpi-card__footer {
@@ -273,8 +273,8 @@
   flex-wrap: wrap;
   gap: 0.18rem 0.32rem;
   align-items: center;
-  font-size: 0.64rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-kpi-card__badge {
@@ -363,8 +363,8 @@
 
 .oprisk-panel__hint {
   margin: 0 0 0.5rem;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.4;
 }
 
@@ -437,7 +437,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.06rem 0.34rem;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
@@ -445,12 +445,12 @@
 }
 
 .oprisk-source-card__badge--active { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
-.oprisk-source-card__badge--unavailable { color: #64748b; background: #f8fafc; }
+.oprisk-source-card__badge--unavailable { color: #566478; background: #f8fafc; }
 .oprisk-source-card__badge--insufficient-data { color: #475569; background: #f8fafc; }
 .oprisk-source-card__badge--source-conflict { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
 
 .oprisk-source-card--active { border-left: 3px solid #16a34a; }
-.oprisk-source-card--unavailable { border-left: 3px solid #94a3b8; opacity: 0.85; }
+.oprisk-source-card--unavailable { border-left: 3px solid #94a3b8; }
 .oprisk-source-card--insufficient-data { border-left: 3px solid #64748b; }
 .oprisk-source-card--source-conflict { border-left: 3px solid #7c3aed; }
 
@@ -462,8 +462,8 @@
 
 .oprisk-source-card__detail {
   margin: 0.2rem 0 0;
-  font-size: 0.7rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-priority-list,
@@ -501,8 +501,8 @@
 .oprisk-priority-row__meta,
 .oprisk-run-row__meta {
   margin: 0;
-  font-size: 0.7rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-badge {
@@ -510,7 +510,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.08rem 0.42rem;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
@@ -607,8 +607,8 @@
 }
 
 .oprisk-button--primary {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #ffffff;
 }
 
@@ -685,7 +685,7 @@
 .oprisk-empty {
   padding: 1rem;
   text-align: center;
-  color: #64748b;
+  color: #566478;
   font-size: 0.78rem;
 }
 
@@ -722,8 +722,8 @@
 
 .oprisk-outcome-card__label {
   margin: 0.15rem 0 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-table tr:last-child td {
@@ -761,16 +761,16 @@
 .oprisk-empty-state p {
   margin: 0;
   font-size: 0.76rem;
-  color: #64748b;
+  color: #566478;
   line-height: 1.45;
 }
 
 .oprisk-empty-state__eyebrow {
   margin: 0 0 0.45rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #64748b;
+  color: #566478;
 }
 
 .oprisk-empty-state__icon {
@@ -811,22 +811,22 @@
 
 .oprisk-detection-empty p {
   margin: 0;
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   line-height: 1.45;
   max-width: 28rem;
 }
 
 .oprisk-technical-details {
   margin-top: 0.35rem;
-  font-size: 0.68rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .oprisk-technical-details summary {
   cursor: pointer;
   user-select: none;
-  color: #64748b;
+  color: #566478;
 }
 
 .oprisk-technical-details__list {
@@ -837,8 +837,8 @@
 }
 
 .oprisk-technical-details code {
-  font-size: 0.64rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   word-break: break-all;
 }
 
@@ -881,8 +881,8 @@
 
 .oprisk-profile-rail__meta {
   margin: 0;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .oprisk-profile-hero {
@@ -960,8 +960,8 @@
 
 .oprisk-detail-field__label {
   margin: 0;
-  font-size: 0.66rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -984,7 +984,7 @@
   margin: 0.25rem 0 0;
   padding-left: 1rem;
   color: #475569;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .oprisk-case-detail-skeleton {
@@ -1005,4 +1005,217 @@
 
 .oprisk-skeleton-line--short {
   width: 48%;
+}
+
+/* Source coverage tiles: wrap safely in half-width panels (no clipping at 1024/1366). */
+.oprisk-source-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+}
+
+@media (min-width: 1024px) {
+  .oprisk-source-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+  }
+}
+
+.oprisk-source-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.oprisk-source-card__top {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.oprisk-source-card__badge {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.oprisk-source-card__detail {
+  overflow-wrap: anywhere;
+}
+
+/* ---- Round 3: overview composition, KPI footer hierarchy, header contrast ---- */
+.oprisk-executive__top {
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.oprisk-executive__top > .oprisk-executive__intro {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.oprisk-executive__top > .oprisk-executive__actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+@media (max-width: 520px) {
+  .oprisk-executive__top {
+    flex-wrap: wrap;
+  }
+}
+
+.oprisk-executive__subtitle {
+  margin-top: 4px;
+}
+
+.oprisk-executive__meta li {
+  background: #f1f5f9;
+  border-color: #dbe4f0;
+  color: #334155;
+}
+
+/* KPI footer: scope and evidence are plain muted text; the state is the only chip and carries the tone. */
+.oprisk-kpi-card__footer > span:not(.oprisk-kpi-card__badge) {
+  color: #566478;
+}
+
+.oprisk-kpi-card__footer > span:not(.oprisk-kpi-card__badge):not(:last-child)::after {
+  content: "·";
+  margin-left: 0.32rem;
+  color: #566478;
+}
+
+.oprisk-kpi-card__badge {
+  padding: 0.12rem 0.5rem;
+  color: #334155;
+}
+
+.oprisk-kpi-card__tone--controlled .oprisk-kpi-card__badge { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.oprisk-kpi-card__tone--critical .oprisk-kpi-card__badge { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+.oprisk-kpi-card__tone--attention .oprisk-kpi-card__badge { color: #9a3412; background: #fff7ed; border-color: #fed7aa; }
+.oprisk-kpi-card__tone--informational .oprisk-kpi-card__badge { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+.oprisk-kpi-card__tone--conflict .oprisk-kpi-card__badge { color: #6d28d9; background: #f5f3ff; border-color: #ddd6fe; }
+
+/* Overview: two compact panels on top, detection full width, source coverage as an even 3x3 grid below. */
+.oprisk-panel-grid--overview {
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .oprisk-panel-grid--overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "distribution priority"
+      "detection detection"
+      "source source";
+  }
+}
+
+.oprisk-panel-grid--overview .oprisk-panel {
+  display: grid;
+  gap: 0.5rem;
+  align-content: start;
+  padding: 0.9rem 1rem;
+}
+
+.oprisk-panel-grid--overview .oprisk-panel__title {
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.oprisk-panel-grid--overview .oprisk-donut {
+  min-height: 0;
+}
+
+.oprisk-panel-grid--overview .oprisk-empty {
+  display: grid;
+  place-items: center;
+  min-height: 5rem;
+  margin: 0;
+  border: 1px dashed #dbe4f0;
+  border-radius: 12px;
+  background: #fbfdff;
+}
+
+.oprisk-panel-grid--overview .oprisk-source-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .oprisk-panel-grid--overview .oprisk-source-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.oprisk-panel-grid--overview .oprisk-detection-empty {
+  min-height: 0;
+  justify-items: center;
+  text-align: center;
+  padding: 1rem;
+}
+
+.oprisk-panel-grid--overview .oprisk-detection-empty .oprisk-empty-state__eyebrow {
+  display: none;
+}
+
+.oprisk-panel-grid--overview .oprisk-detection-empty p {
+  max-width: 36rem;
+}
+
+/* ---- Round 5: KPI grid column count comes from the shared count-aware rules in zentra-premium.css ---- */
+
+.oprisk-kpi-card__detail,
+.oprisk-kpi-card__footer,
+.oprisk-source-card__detail {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.oprisk-executive__subtitle {
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.oprisk-executive__meta {
+  margin-top: 10px;
+}
+
+.oprisk-executive__meta li {
+  color: #1e293b;
+  background: #eef2f7;
+}
+
+/* Round 5 (slice 3): equal KPI rows (value never stretches, footer pinned) and a counted 3-wide source grid (the shared rail is flex and orphaned the ninth tile). */
+.oprisk-kpi-card__value {
+  align-self: start;
+}
+
+.oprisk-kpi-card__footer {
+  align-self: end;
+}
+
+body .content-viewport .oprisk-panel-grid--overview .oprisk-source-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+@media (min-width: 640px) {
+  body .content-viewport .oprisk-panel-grid--overview .oprisk-source-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* KPI footer: scope and state on one line, the evidence reference on its own line. */
+.oprisk-kpi-card__footer > span:not(.oprisk-kpi-card__badge):not(:last-child)::after {
+  content: none;
+}
+
+.oprisk-kpi-card__footer > span:last-child:not(:first-child) {
+  flex: 1 0 100%;
+  color: var(--zx-accent-strong, #1b528e);
+  font-weight: 600;
+}
+
+/* Tablet keeps the desktop panel order: coverage last, as a 3x3 grid. */
+@media (max-width: 1023px) {
+  .oprisk-panel-grid--overview > .oprisk-panel--source-coverage {
+    order: 5;
+  }
 }

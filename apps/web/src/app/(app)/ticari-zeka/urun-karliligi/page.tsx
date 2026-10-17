@@ -1,4 +1,4 @@
-import { ShieldAlert } from "lucide-react";
+
 
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { CommercialProfitabilityWorkspaceView } from "@/features/commercial-intelligence/components/commercial-profitability-workspace-view";
@@ -14,6 +14,8 @@ import {
   toCommercialProfitabilityApiFilters,
   type CommercialProfitabilityComparisonApiFilters,
 } from "@/features/commercial-intelligence/application/commercial-profitability-filter";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageSearchParams = Readonly<Record<string, string | string[] | undefined>>;
 
@@ -47,7 +49,7 @@ export default async function CommercialProfitabilityPage({
       result.code === "permission-denied" || result.code === "unauthenticated";
 
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">TİCARİ ZEKÂ</p>
@@ -57,18 +59,8 @@ export default async function CommercialProfitabilityPage({
             </p>
           </div>
         </header>
-        <div
-          role="alert"
-          className={isUnauthorized ? "commint-error-banner" : "commint-partial-error"}
-          data-testid={isUnauthorized ? "commercial-profitability-forbidden" : "commercial-profitability-server-error"}
-        >
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{isUnauthorized ? "Bu modüle erişim yetkiniz yok" : "Kârlılık karşılaştırma verisi yüklenemedi"}</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <div data-testid={isUnauthorized ? "commercial-profitability-forbidden" : "commercial-profitability-server-error"}><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Kârlılık karşılaştırma verisi yüklenemedi" inline /></div>
+      </div>
     );
   }
 

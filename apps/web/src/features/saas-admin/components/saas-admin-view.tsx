@@ -14,7 +14,7 @@ import {
   formatDateTime,
   formatDeliveryStatus,
   formatFacilityLabel,
-  formatMemberDisplayName,
+  formatMemberDisplayName, memberTitle,
   formatMemberIdentityHint,
   formatMembershipStatus,
   formatMfaBadgeClass,
@@ -79,6 +79,9 @@ import {
   updateSaasAdminRolePermissionsAction,
 } from "../server/saas-admin-actions";
 import "./saas-admin.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { displayAccountName, displayRoleName, displayTenantName } from "@/lib/presentation/display-name";
 
 const TABS = [
   { id: "users", label: "Kullanıcılar" },
@@ -184,7 +187,7 @@ export function SaasAdminView({
   const filteredMembers = useMemo(() => {
     const query = userSearch.trim().toLowerCase();
     return members.filter((member) => {
-      const displayName = formatMemberDisplayName(member.displayName).toLowerCase();
+      const displayName = memberTitle(member).toLowerCase();
       if (query && !displayName.includes(query) && !member.emailMasked.toLowerCase().includes(query)) {
         return false;
       }
@@ -271,17 +274,15 @@ export function SaasAdminView({
   }, [closeMemberDetail, inviteOpen, roleDialogOpen, selectedMemberRef]);
 
   return (
-    <main className="saas-admin-page">
+    <div className="saas-admin-page">
       <header className="saas-admin-executive">
         <div className="saas-admin-executive__top">
           <div className="saas-admin-executive__intro">
-            <p className="saas-admin-executive__eyebrow">YÖNETİM VE GÜVENLİK</p>
+            <p className="saas-admin-executive__eyebrow">AYARLAR</p>
             <h1>Ayarlar</h1>
             <p className="saas-admin-executive__subtitle">
-              Kiracı kullanıcıları, rolleri, tesis erişimini, oturum güvenliğini ve denetim kayıtlarını yönetin.
-            </p>
-            <p className="saas-admin-tenant-context">
-              Organizasyon: {summary.tenantDisplayName} · {summary.tenantKey}
+              Organizasyon kullanıcıları, rolleri, tesis erişimini, oturum güvenliğini ve denetim kayıtlarını yönetin.{" "}
+              <span className="saas-admin-tenant-context">Organizasyon: {displayTenantName(summary.tenantDisplayName)}</span>
             </p>
           </div>
           <div className="saas-admin-executive__actions">
@@ -319,7 +320,7 @@ export function SaasAdminView({
 
       {error ? (
         <div className="saas-admin-alert" role="alert">
-          <ShieldAlert aria-hidden="true" size={16} /> {error}
+          <ShieldAlert aria-hidden="true" size={16} /> {customerMessage(error)}
         </div>
       ) : null}
 
@@ -457,7 +458,7 @@ export function SaasAdminView({
                       onClick={() => setSelectedRoleRef(role.roleReference)}
                     >
                       <div className="saas-admin-registry-row__top">
-                        <span className="saas-admin-registry-row__name">{role.displayName}</span>
+                        <span className="saas-admin-registry-row__name">{displayRoleName(role.roleReference, role.displayName)}</span>
                         <span className={`saas-admin-badge ${role.systemTemplateOrigin ? "saas-admin-badge--info" : "saas-admin-badge--neutral"}`}>
                           {role.systemTemplateOrigin ? "Yerleşik" : "Özel"}
                         </span>
@@ -476,7 +477,7 @@ export function SaasAdminView({
               <div className="saas-admin-detail-panel">
                 <div className="saas-admin-detail-header">
                   <div className="saas-admin-detail-header__identity">
-                    <h2>{selectedRole.displayName}</h2>
+                    <h2>{displayRoleName(selectedRole.roleReference, selectedRole.displayName)}</h2>
                     <p>{selectedRole.description ?? "—"}</p>
                   </div>
                 </div>
@@ -512,7 +513,7 @@ export function SaasAdminView({
                 <option value="">Tüm kullanıcılar</option>
                 {members.map((member) => (
                   <option key={member.memberReference} value={member.memberReference}>
-                    {formatMemberDisplayName(member.displayName)} · {member.emailMasked}
+                    {memberTitle(member)} · {member.emailMasked}
                   </option>
                 ))}
               </select>
@@ -521,8 +522,8 @@ export function SaasAdminView({
           {facilities.length === 0 ? (
             <div className="saas-admin-empty">Tesis kaydı bulunamadı.</div>
           ) : (
-            <div className="saas-admin-table-wrap">
-              <table className="saas-admin-table">
+            <div className="saas-admin-table-wrap" tabIndex={0} role="region" aria-label="Tesis erişimi (kaydırılabilir)">
+              <table aria-label="Tesis erişimi" className="saas-admin-table">
                 <thead>
                   <tr>
                     <th>Tesis</th>
@@ -579,8 +580,8 @@ export function SaasAdminView({
           {sessions.length === 0 ? (
             <div className="saas-admin-empty">Oturum kaydı bulunamadı.</div>
           ) : (
-            <div className="saas-admin-table-wrap">
-              <table className="saas-admin-table">
+            <div className="saas-admin-table-wrap" tabIndex={0} role="region" aria-label="Kullanıcı oturumları (kaydırılabilir)">
+              <table aria-label="Kullanıcı oturumları" className="saas-admin-table">
                 <thead>
                   <tr>
                     <th>Kullanıcı</th>
@@ -674,8 +675,8 @@ export function SaasAdminView({
           {filteredAuditEvents.length === 0 ? (
             <div className="saas-admin-empty">Denetim kaydı bulunamadı.</div>
           ) : (
-            <div className="saas-admin-table-wrap">
-              <table className="saas-admin-table">
+            <div className="saas-admin-table-wrap" tabIndex={0} role="region" aria-label="Denetim kaydı ara (kaydırılabilir)">
+              <table aria-label="Denetim kaydı ara" className="saas-admin-table">
                 <thead>
                   <tr>
                     <th>Zaman</th>
@@ -787,7 +788,7 @@ export function SaasAdminView({
           }
         />
       ) : null}
-    </main>
+    </div>
   );
 }
 
@@ -890,6 +891,9 @@ function UsersWorkspace({
             <span className="saas-admin-registry-surface__count">
               {formatCount(members.length)} / {formatCount(allMembersCount)} sonuç
             </span>
+            <button type="button" className="saas-admin-button saas-admin-button--ghost saas-admin-button--compact saas-admin-registry-surface__clear" onClick={onClearFilters}>
+              Filtreleri temizle
+            </button>
           </div>
           <div className="saas-admin-registry-toolbar">
             <div className="saas-admin-registry-toolbar__search">
@@ -916,7 +920,7 @@ function UsersWorkspace({
                 <select value={roleFilter} onChange={(event) => onRoleFilterChange(event.target.value)}>
                   <option value="">Tümü</option>
                   {roles.map((role) => (
-                    <option key={role.roleReference} value={role.roleReference}>{role.displayName}</option>
+                    <option key={role.roleReference} value={role.roleReference}>{displayRoleName(role.roleReference, role.displayName)}</option>
                   ))}
                 </select>
               </label>
@@ -938,9 +942,6 @@ function UsersWorkspace({
                   <option value="required">Zorunlu</option>
                 </select>
               </label>
-              <button type="button" className="saas-admin-button saas-admin-button--ghost saas-admin-button--compact" onClick={onClearFilters}>
-                Filtreleri temizle
-              </button>
             </div>
           </div>
           {members.length === 0 ? (
@@ -958,16 +959,26 @@ function UsersWorkspace({
                   }}
                   onClick={() => onSelectMember(member.memberReference)}
                 >
-                  <div className="saas-admin-registry-row__top">
-                    <span className="saas-admin-registry-row__name">{formatMemberDisplayName(member.displayName)}</span>
-                    <span className="saas-admin-badge saas-admin-badge--neutral">{formatMembershipStatus(member.membershipStatus)}</span>
-                  </div>
-                  <span className="saas-admin-registry-row__email">{member.emailMasked}</span>
-                  <div className="saas-admin-registry-row__meta">
-                    <span>{member.roleReferences.map((role) => formatRoleLabel(role)).join(", ") || "—"}</span>
+                  <span className="saas-admin-registry-row__identity">
+                    <span className="saas-admin-registry-row__name">{memberTitle(member)}</span>
+                    {member.emailMasked && member.emailMasked.trim() !== "—" ? <span className="saas-admin-registry-row__email">{member.emailMasked}</span> : null}
+                  </span>
+                  <span className="saas-admin-registry-row__cell">
+                    <span className="saas-admin-registry-row__cell-label">Rol</span>
+                    {member.roleReferences.map((role) => formatRoleLabel(role)).join(", ") || "—"}
+                  </span>
+                  <span className="saas-admin-registry-row__cell">
+                    <span className="saas-admin-registry-row__cell-label">MFA</span>
                     <span className={`saas-admin-badge ${formatMfaBadgeClass(member)}`}>{formatMfaStatus(member)}</span>
-                    <span>{formatDateTime(member.lastSessionActivityUtc)}</span>
-                  </div>
+                  </span>
+                  <span className="saas-admin-registry-row__cell">
+                    <span className="saas-admin-registry-row__cell-label">Son oturum</span>
+                    {member.lastSessionActivityUtc ? formatDateTime(member.lastSessionActivityUtc) : "Henüz oturum açmadı"}
+                  </span>
+                  <span className="saas-admin-registry-row__cell">
+                    <span className="saas-admin-registry-row__cell-label">Durum</span>
+                    <span className={`saas-admin-badge ${member.membershipStatus === "active" ? "saas-admin-badge--success" : "saas-admin-badge--neutral"}`}>{formatMembershipStatus(member.membershipStatus)}</span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -1001,8 +1012,8 @@ function UsersWorkspace({
       {invitations.length > 0 ? (
         <div className="saas-admin-invitations-block" aria-label="Bekleyen davetler">
           <h3>Bekleyen davetler ({formatCount(invitations.length)})</h3>
-          <div className="saas-admin-table-wrap">
-            <table className="saas-admin-table">
+          <div className="saas-admin-table-wrap" tabIndex={0} role="region" aria-label="Bekleyen davetler (kaydırılabilir)">
+            <table aria-label="Bekleyen davetler" className="saas-admin-table">
               <thead>
                 <tr>
                   <th>E-posta</th>
@@ -1024,9 +1035,7 @@ function UsersWorkspace({
             </table>
           </div>
         </div>
-      ) : (
-        <div className="saas-admin-empty">Bekleyen davet yok.</div>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -1075,7 +1084,7 @@ function MemberDetailPanel({
     <aside className="saas-admin-detail-panel" aria-label="Kullanıcı detayı">
       <div className="saas-admin-detail-header">
         <div className="saas-admin-detail-header__identity">
-          <h2>{formatMemberDisplayName(member.displayName)}</h2>
+          <h2>{memberTitle(member)}</h2>
           <p>{member.emailMasked}</p>
           {identityHint ? <p>{identityHint}</p> : null}
         </div>
@@ -1247,7 +1256,7 @@ function InviteDialog({
           <select className="saas-admin-select" value={role} onChange={(event) => setRole(event.target.value)}>
             <option value="">Seçilmedi</option>
             {roles.filter((item) => item.status === "Active").map((item) => (
-              <option key={item.roleReference} value={item.roleReference}>{item.displayName}</option>
+              <option key={item.roleReference} value={item.roleReference}>{displayRoleName(item.roleReference, item.displayName)}</option>
             ))}
           </select>
         </label>
@@ -1318,7 +1327,7 @@ function RolePermissionsDialog({
   return (
     <div className="saas-admin-dialog-backdrop" role="presentation" onClick={onClose}>
       <div className="saas-admin-dialog saas-admin-dialog--wide" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
-        <h2>{role.displayName} · Yetki matrisi</h2>
+        <h2>{displayRoleName(role.roleReference, role.displayName)} · Yetki matrisi</h2>
         <p>{role.isProtected ? "Korumalı rol: son sahip koruması ve platform yönetici reddi sunucu tarafında uygulanır." : "Değişiklikler kaydedilmeden önce etkin erişim etkisini gözden geçirin."}</p>
         <button type="button" className="saas-admin-button saas-admin-button--compact" onClick={() => setShowTechnical((value) => !value)}>
           {showTechnical ? "Teknik ayrıntıları gizle" : "Teknik ayrıntıları göster"}
@@ -1529,7 +1538,7 @@ function BillingWorkspace({
 
       {billingLoadError ? (
         <div className="saas-admin-alert" role="alert">
-          <ShieldAlert aria-hidden="true" /> {billingLoadError}
+          <ShieldAlert aria-hidden="true" /> {customerMessage(billingLoadError)}
         </div>
       ) : null}
 
@@ -1591,7 +1600,7 @@ function BillingWorkspace({
               <dl className="saas-admin-billing-grid">
                 <div>
                   <dt>Görünen ad</dt>
-                  <dd>{account.displayName}</dd>
+                  <dd>{displayAccountName(account.displayName)}</dd>
                 </div>
                 <div>
                   <dt>İletişim</dt>
@@ -1624,7 +1633,7 @@ function BillingWorkspace({
                 ))}
               </ul>
             ) : (
-              <p className="saas-admin-billing-muted">Modül erişim özeti yüklenemedi.</p>
+              <InlineUnavailable subject="Modül erişim özeti" />
             )}
           </section>
 
@@ -1677,7 +1686,7 @@ function BillingWorkspace({
         </header>
 
         {!activeWorkspace ? (
-          <div className="saas-admin-empty">Fatura verileri yüklenemedi.</div>
+          <InlineUnavailable subject="Fatura verileri" />
         ) : filteredInvoices.length === 0 ? (
           <div className="saas-admin-empty">Eşleşen fatura bulunamadı.</div>
         ) : (
@@ -1789,7 +1798,7 @@ function BillingWorkspace({
             </div>
           </dl>
         ) : (
-          <p className="saas-admin-billing-muted">Ödeme sağlayıcı durumu yüklenemedi.</p>
+          <InlineUnavailable subject="Ödeme sağlayıcı durumu" />
         )}
         {providerMode === "sandbox" ? (
           <p className="saas-admin-billing-muted" role="status">{CARD_PROVIDER_SANDBOX_MESSAGE}</p>

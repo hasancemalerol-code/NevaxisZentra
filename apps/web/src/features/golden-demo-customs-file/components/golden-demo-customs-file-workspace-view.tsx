@@ -38,6 +38,7 @@ import {
 } from "../server/golden-demo-customs-file-actions";
 
 import "./golden-demo-customs-file-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 function checklistItemClass(icon: string): string {
   if (icon === "✓") {
@@ -86,7 +87,7 @@ export function GoldenDemoCustomsFileWorkspaceView({
   }
 
   return (
-    <main className="commint-page golden-demo-p1-page golden-demo-customs-page" data-testid="golden-demo-customs-file-workspace">
+    <div className="commint-page golden-demo-p1-page golden-demo-customs-page" data-testid="golden-demo-customs-file-workspace">
       <PresentationModeReturnLink />
       <header className="golden-demo-status-bar" data-testid="golden-demo-customs-file-control">
         <div className="golden-demo-status-bar__intro">
@@ -112,7 +113,7 @@ export function GoldenDemoCustomsFileWorkspaceView({
             role="status"
             className={`golden-demo-feedback ${message.includes("başarısız") ? "golden-demo-feedback--error" : "golden-demo-feedback--success"}`}
           >
-            {message}
+            {customerMessage(message)}
           </p>
         ) : null}
       </header>
@@ -516,6 +517,6 @@ export function GoldenDemoCustomsFileWorkspaceView({
           </ul>
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }

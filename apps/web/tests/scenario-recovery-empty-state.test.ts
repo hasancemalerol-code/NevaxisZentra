@@ -47,8 +47,8 @@ test("/senaryo-kurtarma without a line states what it needs and makes no API cal
   try {
     const { readScenarioRecoveryPage } = await import("../src/features/scenario-recovery/server/scenario-recovery-reader");
     const result = await readScenarioRecoveryPage({});
-    assert.equal(result.status, "failure");
-    assert.match(result.status === "failure" ? result.message : "", /hattı bağlamı gerektirir/);
+    assert.equal(result.status, "empty");
+    assert.match(result.status === "empty" ? result.message : "", /hattı bağlamı gerektirir/);
     assert.deepEqual(
       methods.filter((entry) => !entry.startsWith("GET ")),
       [],

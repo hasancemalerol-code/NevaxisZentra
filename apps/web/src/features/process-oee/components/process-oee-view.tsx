@@ -32,6 +32,8 @@ import {
   loadProcessOeeStabilityDetailAction,
 } from "../server/process-oee-actions";
 import "./process-oee.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type ProcessOeeViewProps = Readonly<{
   summary: ProcessOeeWorkspaceSummary;
@@ -332,6 +334,7 @@ export function ProcessOeeView({
   const kpiAvailability = activeDetail?.availabilityPercent ?? null;
   const kpiPerformance = activeDetail?.performancePercent ?? null;
   const kpiQuality = activeDetail?.qualityPercent ?? null;
+  const kpiMissingHint = activeDetail ? "Veri yok" : "Pencere seçilmedi";
   const kpiWindowLabel = selectedSummary
     ? formatProcessOeeDateRange(selectedSummary.windowStartUtc, selectedSummary.windowEndUtc)
     : `${summary.assessmentCount} kayıt`;
@@ -631,10 +634,6 @@ export function ProcessOeeView({
               <dt>Kaynak sistemi</dt>
               <dd>{detailItem.sourceSystem ?? "—"}</dd>
             </div>
-            <div>
-              <dt>Kural seti</dt>
-              <dd>{detailItem.ruleSetVersion}</dd>
-            </div>
           </dl>
         </section>
         {detailItem.missingFields.length > 0 ? (
@@ -742,7 +741,6 @@ export function ProcessOeeView({
               ) : (
                 <p className="process-oee-empty-inline">—</p>
               )}
-              <p className="process-oee-rule-set">Kural seti: {lossDetail.ruleSetVersion}</p>
             </>
           )}
         </section>
@@ -815,7 +813,6 @@ export function ProcessOeeView({
                   ))}
                 </ul>
               ) : null}
-              <p className="process-oee-rule-set">Kural seti: {stabilityDetail.ruleSetVersion}</p>
             </>
           )}
         </section>
@@ -900,7 +897,7 @@ export function ProcessOeeView({
         <section className="process-oee-detail-section" aria-label="Vardiya Karşılaştırması">
           {shiftComparisonError ? (
             <div className="process-oee-alert process-oee-alert--warning" role="status">
-              <p>{shiftComparisonError}</p>
+              <p>{customerMessage(shiftComparisonError)}</p>
             </div>
           ) : null}
           {!shiftComparison ? (
@@ -926,8 +923,8 @@ export function ProcessOeeView({
               {shiftComparison.rows.length === 0 ? (
                 <p className="process-oee-empty-inline">Vardiya satırı yok.</p>
               ) : (
-                <div className="process-oee-shift-table-wrap">
-                  <table className="process-oee-shift-table">
+                <div className="process-oee-shift-table-wrap" tabIndex={0} role="region" aria-label="Vardiya Karşılaştırması (kaydırılabilir)">
+                  <table aria-label="Vardiya Karşılaştırması" className="process-oee-shift-table">
                     <thead>
                       <tr>
                         <th>Vardiya</th>
@@ -973,7 +970,6 @@ export function ProcessOeeView({
                   ) : null}
                 </dl>
               ) : null}
-              <p className="process-oee-rule-set">Kural seti: {shiftComparison.ruleSetVersion}</p>
             </>
           )}
         </section>
@@ -1059,12 +1055,12 @@ export function ProcessOeeView({
   }
 
   return (
-    <main className="process-oee-page">
+    <div className="process-oee-page">
       <section className="process-oee-executive" aria-label="Proses ve OEE yönetim komuta yüzeyi">
         <div className="process-oee-executive__top">
           <div className="process-oee-executive__intro">
             <p className="process-oee-executive__eyebrow">PROSES VE VERİMLİLİK</p>
-            <h1>Proses &amp; OEE</h1>
+            <h1>Proses ve OEE</h1>
             <p className="process-oee-executive__subtitle">
               Enjeksiyon hatları için makine ve üretim kanıtlarına dayalı OEE değerlendirmelerini
               operasyonel karar düzeyinde izleyin.
@@ -1084,6 +1080,11 @@ export function ProcessOeeView({
                 {isPending ? <LoaderCircle aria-hidden="true" className="animate-spin" size={16} /> : null}
                 OEE Değerlendir
               </button>
+              {!evaluateWindowId ? (
+                <span className="process-oee-executive__action-hint">
+                  Önce bir pencere seçin
+                </span>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -1092,32 +1093,40 @@ export function ProcessOeeView({
           <article className="process-oee-kpi process-oee-kpi--primary">
             <span className="process-oee-kpi__label">OEE</span>
             <strong className="process-oee-kpi__value">{formatPercent(kpiOee)}</strong>
+            {kpiOee == null ? <span className="process-oee-kpi__hint">{kpiMissingHint}</span> : null}
           </article>
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">Kullanılabilirlik</span>
             <strong className="process-oee-kpi__value">{formatPercent(kpiAvailability)}</strong>
+            {kpiAvailability == null ? <span className="process-oee-kpi__hint">{kpiMissingHint}</span> : null}
           </article>
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">Performans</span>
             <strong className="process-oee-kpi__value">{formatPercent(kpiPerformance)}</strong>
+            {kpiPerformance == null ? <span className="process-oee-kpi__hint">{kpiMissingHint}</span> : null}
           </article>
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">Kalite</span>
             <strong className="process-oee-kpi__value">{formatPercent(kpiQuality)}</strong>
+            {kpiQuality == null ? <span className="process-oee-kpi__hint">{kpiMissingHint}</span> : null}
           </article>
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">İncelenen Pencere</span>
             <strong className="process-oee-kpi__value" title={kpiWindowLabel}>
-              {selectedSummary ? "Seçili" : formatProcessOeeNumber(summary.assessmentCount)}
+              {selectedSummary ? "Seçili" : summary.assessmentCount > 0 ? formatProcessOeeNumber(summary.assessmentCount) : "—"}
             </strong>
             <span className="process-oee-kpi__hint">{kpiWindowLabel}</span>
           </article>
           <article className="process-oee-kpi">
             <span className="process-oee-kpi__label">Veri Yeterliliği</span>
             <strong className="process-oee-kpi__value">{kpiDataSufficiency}</strong>
-            {attentionGroups.length > 0 ? (
-              <span className="process-oee-kpi__hint">{attentionGroups.length} operasyonel dikkat</span>
-            ) : null}
+            <span className="process-oee-kpi__hint">
+              {attentionGroups.length > 0
+                ? `${attentionGroups.length} operasyonel dikkat`
+                : summary.assessmentCount > 0
+                  ? `${summary.calculatedCount} / ${summary.assessmentCount} pencere hesaplandı`
+                  : "Henüz değerlendirme yok"}
+            </span>
           </article>
         </div>
 
@@ -1172,12 +1181,12 @@ export function ProcessOeeView({
         </div>
       ) : null}
 
-      {message ? <div className="process-oee-message" role="status">{message}</div> : null}
+      {message ? <div className="process-oee-message" role="status">{customerMessage(message)}</div> : null}
       {error ? (
         <div className="process-oee-alert process-oee-alert--error" role="alert">
           <div>
             <h3>İşlem hatası</h3>
-            <p>{error}</p>
+            <p>{customerMessage(error)}</p>
           </div>
         </div>
       ) : null}
@@ -1197,6 +1206,7 @@ export function ProcessOeeView({
                 <Search aria-hidden="true" className="process-oee-search__icon" size={14} />
                 <input
                   id="process-oee-search"
+                  aria-label="Makine veya üretim emri ara"
                   type="search"
                   placeholder="Makine veya üretim emri ara"
                   value={search}
@@ -1271,7 +1281,7 @@ export function ProcessOeeView({
             </div>
           </div>
 
-          <div className="process-oee-registry__table-wrap">
+          <div className="process-oee-registry__table-wrap" tabIndex={0} role="region" aria-label="OEE değerlendirme penceresi tablosu (kaydırılabilir)">
             {filteredAssessments.length === 0 && !isPending ? (
               <div className="process-oee-empty">
                 <CircleGauge aria-hidden="true" size={28} />
@@ -1323,7 +1333,7 @@ export function ProcessOeeView({
                 ))}
               </ul>
             ) : (
-              <table className="process-oee-table">
+              <table aria-label="OEE değerlendirmeleri" className="process-oee-table">
                 <thead>
                   <tr>
                     <th>Makine / Emir</th>
@@ -1420,7 +1430,7 @@ export function ProcessOeeView({
             >
               <div className="process-oee-detail-header__row">
                 <div className="process-oee-detail-header__identity">
-                  <p className="process-oee-detail-breadcrumb">Proses &amp; OEE</p>
+                  <p className="process-oee-detail-breadcrumb">Proses ve OEE</p>
                   <h2>{formatMachineLabel(selectedSummary.machineCode, selectedSummary.machineDisplayName)}</h2>
                   <p className="process-oee-detail-header__order">
                     {selectedSummary.productionOrderReference ?? "Üretim emri yok"}
@@ -1525,13 +1535,13 @@ export function ProcessOeeView({
                 </>
               ) : (
                 <div className="process-oee-empty">
-                  <p>Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 </div>
               )}
             </div>
           </aside>
         ) : null}
       </div>
-    </main>
+    </div>
   );
 }

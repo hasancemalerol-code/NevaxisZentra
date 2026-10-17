@@ -1,0 +1,19 @@
+/* Empty state: a centred block with a sensible width and a way forward, not a full-width dashed strip. */
+.material-risk-empty {
+  width: 100%;
+  max-width: none;
+  margin: 8px 0 0;
+}
+
+.material-risk-empty__cta {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--zx-accent-strong, #1d4ed8);
+  border-radius: 999px;
+  background: var(--zx-accent-strong, #1d4ed8);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 650;
+}

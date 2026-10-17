@@ -1,22 +1,32 @@
+import { formatDateTime } from "@/lib/presentation/format";
+
 export const ENTERPRISE_RELIABILITY_TITLE = "Sistem Durumu";
 export const ENTERPRISE_RELIABILITY_SUBTITLE =
-  "Platform bileşenleri, entegrasyonlar, kenar ajanları ve teknik uyarıların operasyonel görünümü";
+  "Platform bileşenleri, entegrasyonlar, saha ajanları ve teknik uyarıların operasyonel görünümü";
+export const SYSTEM_STATUS_UNVERIFIED_LABEL = "Doğrulanamadı";
 
 export const SYSTEM_STATUS_ALL_NORMAL_LABEL = "Her şey normal";
 
 export function formatSystemStatusDateTime(value?: string): string {
-  if (!value) {
-    return "—";
-  }
+  return formatDateTime(value);
+}
 
-  try {
-    return new Intl.DateTimeFormat("tr-TR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(value));
-  } catch {
-    return value;
+/** Version strings that are build placeholders rather than a reported release. */
+const PLACEHOLDER_VERSIONS = new Set(["", "unknown", "0.0.0", "0.0.0.0", "1.0.0.0"]);
+
+/** Customer-facing application version: the reported release, or a plain "no information" statement. */
+export function formatApplicationVersion(version: string | null | undefined): string {
+  const text = (version ?? "").trim();
+  return PLACEHOLDER_VERSIONS.has(text.toLowerCase()) ? "Sürüm bilgisi yok" : text;
+}
+
+/** Build detail line, or null when the build is not reported (the caller then shows "Derleme bilgisi yok"). */
+export function formatBuildDetail(buildSha: string | null | undefined): string {
+  const text = (buildSha ?? "").trim();
+  if (!text || text.toLowerCase() === "unknown") {
+    return "Derleme bilgisi yok";
   }
+  return `Derleme ${text.slice(0, 8)}`;
 }
 
 export function getHealthStatusLabel(status: string): string {
@@ -30,7 +40,7 @@ export function getHealthStatusLabel(status: string): string {
     case "recovering":
       return "Kurtarılıyor";
     case "unknown":
-      return "Bilinmiyor";
+      return SYSTEM_STATUS_UNVERIFIED_LABEL;
     default:
       return status;
   }
@@ -141,7 +151,7 @@ export function getIntegrationHealthStatusLabel(status: string): string {
     case "stale":
       return "Eski Veri";
     case "sync-failed":
-      return "Senkronizasyon Başarısız";
+      return "Eşitleme Başarısız";
     case "unknown":
       return "Bilinmiyor";
     case "disabled":
@@ -190,19 +200,19 @@ export function getComponentKindLabel(kind: string): string {
     case "message-broker":
       return "Mesaj Kuyruğu";
     case "ai-provider":
-      return "AI Sağlayıcı";
+      return "Yapay Zekâ Sağlayıcısı";
     case "integration-connector":
       return "Entegrasyon";
     case "edge-agent":
-      return "Kenar Ajan";
+      return "Saha Ajanı";
     case "machine-telemetry":
       return "Makine Telemetri";
     case "erp-adapter":
-      return "ERP Adaptörü";
+      return "ERP bağlantısı";
     case "file-watch":
       return "Dosya İzleme";
     case "webhook-ingestion":
-      return "Webhook Alımı";
+      return "Olay Alımı";
     case "background-jobs":
       return "Arka Plan İşleri";
     default:
@@ -264,7 +274,7 @@ export function getDependencyLabel(key: "database" | "messageBroker" | "aiProvid
     case "messageBroker":
       return "Mesaj Kuyruğu";
     case "aiProvider":
-      return "AI Sağlayıcı";
+      return "Yapay Zekâ Sağlayıcısı";
     case "backgroundJobs":
       return "Arka Plan İşleri";
     default:
@@ -277,11 +287,25 @@ type SystemStatusHeadlineInput = Readonly<{
   operatingMode: string;
   alerts: readonly unknown[];
   components: readonly { healthStatus: string }[];
+  /** Health statuses of the core services shown on the page (API, database, ...). Unknown ones can not be called "normal". */
+  coreStatuses?: readonly string[];
 }>;
 
+type HeadlineTone = "neutral" | "information" | "success" | "warning" | "danger" | "ai";
+
+/** True only when every observed component is positively healthy; an empty or unknown observation is not "verified". */
+export function isSystemStatusVerified(workspace: Pick<SystemStatusHeadlineInput, "components" | "coreStatuses">): boolean {
+  const observed = [...workspace.components.map((component) => component.healthStatus), ...(workspace.coreStatuses ?? [])];
+  return observed.length > 0 && observed.every((status) => status === "healthy");
+}
+
+/**
+ * Overall status, derived truthfully: "Her şey normal" is only claimed when every observed component is healthy.
+ * Any unknown component makes the overall state "Doğrulanamadı", never normal.
+ */
 export function resolveSystemStatusHeadline(workspace: SystemStatusHeadlineInput): {
   label: string;
-  tone: "neutral" | "information" | "success" | "warning" | "danger" | "ai";
+  tone: HeadlineTone;
 } {
   if (workspace.showsFalseHealth) {
     return {
@@ -304,13 +328,18 @@ export function resolveSystemStatusHeadline(workspace: SystemStatusHeadlineInput
     };
   }
 
-  const hasUnhealthyComponent = workspace.components.some(
-    (component) => component.healthStatus !== "healthy",
-  );
-  if (hasUnhealthyComponent) {
+  const observed = [...workspace.components.map((component) => component.healthStatus), ...(workspace.coreStatuses ?? [])];
+  if (observed.some((status) => status !== "healthy" && status !== "unknown")) {
     return {
       label: "Bazı bileşenlerde sorun var",
       tone: "warning",
+    };
+  }
+
+  if (!isSystemStatusVerified(workspace)) {
+    return {
+      label: SYSTEM_STATUS_UNVERIFIED_LABEL,
+      tone: "neutral",
     };
   }
 

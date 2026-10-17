@@ -1,26 +1,22 @@
-import { Factory } from "lucide-react";
+
 
 import { ErpProductionView } from "@/features/erp/components/erp-production-view";
 import { readErpProductionOrders } from "@/features/erp/server/erp-production-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function ErpUretimPage() {
   const result = await readErpProductionOrders();
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
+      <div className="production-execution-page erp-workspace-page">
         <header className="production-execution-header">
           <p>ERP ENTEGRASYONLARI</p>
           <h1>Üretim</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <Factory aria-hidden="true" />
-          <div>
-            <h3>ERP üretim verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="ERP üretim verisi yüklenemedi" inline />
+      </div>
     );
   }
 

@@ -70,7 +70,7 @@ test("shipped detail pages render a truthful not-found state instead of a generi
     const source = readFileSync(path.join(appRoot, relative), "utf8");
     assert.match(
       source,
-      /isNotFoundFailureCode|code === "not-found"/,
+      /isNotFoundFailureCode|code === "not-found"|<FailureStatePage|<ErpFailurePage|<RecordFailureState/,
       `${relative} must distinguish not-found from a load failure`,
     );
   }
@@ -88,6 +88,10 @@ test("a gate failure page says 'no permission' only for a real denial", () => {
     "operasyon/yonetim-merkezi/kararlar/[decisionId]/page.tsx",
   ]) {
     const source = readFileSync(path.join(appRoot, relative), "utf8");
-    assert.match(source, /code === "authorization-denied"/, `${relative} hard-codes a denial for every gate failure`);
+    assert.match(
+      source,
+      /code === "authorization-denied"|<AuthorizationGateState/,
+      `${relative} hard-codes a denial for every gate failure`,
+    );
   }
 });

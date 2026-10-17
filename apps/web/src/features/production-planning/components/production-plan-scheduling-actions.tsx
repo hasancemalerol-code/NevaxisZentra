@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { CalendarCheck } from "lucide-react";
 
 import type { scheduleAction } from "../server/production-plan-scheduling-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ProductionPlanSchedulingActionsProps = Readonly<{
   planId: string;
@@ -238,7 +239,7 @@ export function ProductionPlanSchedulingActions({
 
       {state.kind === "error" ? (
         <div className="workflow-action-error" role="alert">
-          <strong>Zamanlama başarısız:</strong> {state.message}
+          <strong>Zamanlama başarısız:</strong> {customerMessage(state.message)}
           <button
             type="button"
             className="button button-ghost button-small"

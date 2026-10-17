@@ -6,8 +6,8 @@ import { QualityWorkspaceNav } from "./quality-workspace-nav";
 type QualityNavActive = "overview" | "ncr" | "follow-up" | "reporting" | "none";
 
 export type QualityPageShellProps = Readonly<{
-  backHref: string;
-  backLabel: string;
+  backHref?: string;
+  backLabel?: string;
   eyebrow: string;
   title: string;
   subtitle?: string;
@@ -29,9 +29,9 @@ export function QualityPageShell({
   footer,
 }: QualityPageShellProps) {
   return (
-    <main className="production-execution-page quality-page">
+    <div className="production-execution-page quality-page">
       <header className="quality-page-header production-execution-header">
-        <QualityBackLink href={backHref}>{backLabel}</QualityBackLink>
+        {backHref && backLabel ? <QualityBackLink href={backHref}>{backLabel}</QualityBackLink> : null}
         <div className="quality-page-header__intro">
           <p>{eyebrow}</p>
           <h1>{title}</h1>
@@ -45,6 +45,6 @@ export function QualityPageShell({
       <div className="quality-page-content">{children}</div>
 
       {footer}
-    </main>
+    </div>
   );
 }

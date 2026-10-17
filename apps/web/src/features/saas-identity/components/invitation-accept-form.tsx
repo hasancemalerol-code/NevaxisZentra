@@ -94,7 +94,7 @@ export function InvitationAcceptForm({ token }: InvitationAcceptFormProps) {
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <div className="auth-form__field">
-        <label htmlFor="invitation-display-name">Görünen ad</label>
+        <label htmlFor="invitation-display-name">Görünen ad <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="invitation-display-name"
           name="displayName"
@@ -107,7 +107,7 @@ export function InvitationAcceptForm({ token }: InvitationAcceptFormProps) {
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="invitation-password">Parola</label>
+        <label htmlFor="invitation-password">Parola <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="invitation-password"
           name="password"
@@ -122,7 +122,7 @@ export function InvitationAcceptForm({ token }: InvitationAcceptFormProps) {
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="invitation-password-confirm">Parola (tekrar)</label>
+        <label htmlFor="invitation-password-confirm">Parola (tekrar) <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="invitation-password-confirm"
           name="confirmPassword"

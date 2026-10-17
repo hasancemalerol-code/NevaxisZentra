@@ -1,22 +1,4 @@
-const DATE_TIME_FORMATTER = new Intl.DateTimeFormat(
-  "tr-TR",
-  {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Europe/Istanbul",
-  },
-);
-
-const SHORT_DATE_TIME_FORMATTER =
-  new Intl.DateTimeFormat(
-    "tr-TR",
-    {
-      dateStyle: "short",
-      timeStyle: "short",
-      timeZone: "Europe/Istanbul",
-    },
-  );
-
+import { formatDateTime } from "@/lib/presentation/format";
 const INTEGER_FORMATTER = new Intl.NumberFormat(
   "tr-TR",
   {
@@ -45,7 +27,7 @@ export function formatAiTaskDateTime(
     return "Geçersiz tarih";
   }
 
-  return DATE_TIME_FORMATTER.format(date);
+  return formatDateTime(date);
 }
 
 export function formatAiTaskShortDateTime(
@@ -61,7 +43,7 @@ export function formatAiTaskShortDateTime(
     return "Geçersiz tarih";
   }
 
-  return SHORT_DATE_TIME_FORMATTER.format(date);
+  return formatDateTime(date);
 }
 
 export function formatAiTaskInteger(

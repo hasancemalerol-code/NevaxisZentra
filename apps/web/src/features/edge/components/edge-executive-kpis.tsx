@@ -40,7 +40,7 @@ export function EdgeExecutiveKpis({
     { label: "Arıza", value: fault, tone: fault > 0 ? "danger" : undefined },
     { label: "Aktif Alarm", value: activeAlarms, tone: activeAlarms > 0 ? "warn" : undefined },
     {
-      label: "Bekleyen Edge Olayı",
+      label: "Bekleyen saha olayı",
       value: pendingEdge,
       tone: pendingEdge > 0 ? "warn" : undefined,
       meta: staleCount > 0 ? `Son veri: ${staleCount} güncel değil` : undefined,

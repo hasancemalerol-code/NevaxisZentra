@@ -1,8 +1,10 @@
-import { TriangleAlert } from "lucide-react";
+
 
 import { PresentationModeView } from "@/features/presentation-mode/components/presentation-mode-view";
 import { loadPresentationModeDashboard } from "@/features/presentation-mode/server/presentation-mode-reader";
 import { forbidUnlessPresentationModeAccess } from "@/features/presentation-mode/server/require-presentation-mode-access";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function PresentationModePage() {
   await forbidUnlessPresentationModeAccess();
@@ -10,15 +12,9 @@ export default async function PresentationModePage() {
   const result = await loadPresentationModeDashboard();
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
-        <div role="alert" className="commint-error-banner" data-testid="presentation-mode-forbidden">
-          <TriangleAlert aria-hidden="true" />
-          <div>
-            <h3>Veri yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+      <div className="commint-page">
+        <div data-testid="presentation-mode-forbidden"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Veri yüklenemedi" inline /></div>
+      </div>
     );
   }
 

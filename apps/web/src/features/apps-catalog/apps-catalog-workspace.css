@@ -1,6 +1,40 @@
+/* Catalogue tiles fill every row (no lone trailing tile with blank space to its right). */
 .apps-catalog-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
   gap: 8px;
+}
+
+.apps-catalog-grid > .apps-catalog-card {
+  min-width: 0;
+}
+
+.apps-catalog-workspace .fact-workspace__header {
+  padding-bottom: 16px;
+}
+
+.apps-catalog-workspace .fact-workspace__header > div:first-child {
+  display: grid;
+  gap: 6px;
+}
+
+.apps-factory-ops-empty {
+  display: grid;
+  gap: 8px;
+  max-width: 52rem;
+  padding: 12px 0;
+}
+
+.apps-factory-ops-empty__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.apps-factory-ops-empty__body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
 }
 
 .apps-catalog-card {
@@ -13,7 +47,12 @@
   background: var(--fact-surface-elevated);
 }
 
+.apps-catalog-card > div {
+  min-width: 0;
+}
+
 .apps-catalog-card h3 {
+  overflow-wrap: anywhere;
   margin: 0;
   font-size: 0.95rem;
 }
@@ -167,9 +206,30 @@
   box-shadow: none;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1000px) {
   .apps-factory-ops-dashboard .factory-showcase__kpi-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.apps-factory-ops-dashboard .factory-showcase__kpi-grid:empty {
+  display: none;
+}
+
+.apps-factory-ops-dashboard .factory-showcase-kpi {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 820px) {
+  .apps-factory-ops-dashboard .factory-showcase__kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .apps-factory-ops-dashboard .factory-showcase__kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -235,7 +295,7 @@
 .apps-analytics-chart__axis-y,
 .apps-analytics-chart__axis-x {
   fill: var(--color-text-muted);
-  font-size: 10px;
+  font-size: 0.8125rem;
 }
 
 .apps-analytics-chart__bar {
@@ -244,7 +304,7 @@
 
 .apps-analytics-chart__bar-value {
   fill: var(--color-text);
-  font-size: 11px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -323,4 +383,154 @@
   .apps-analytics-panel--wide {
     grid-column: auto;
   }
+}
+
+/* ─── Round 4 ─── */
+
+.apps-catalog-workspace .fact-section__header {
+  padding: 14px 16px;
+}
+
+.apps-catalog-workspace .fact-section__body {
+  padding: 14px 16px;
+}
+
+/* Empty KPI tiles and empty chart panels do not repeat a "no data" cell; one note explains all of them. */
+.apps-factory-ops-dashboard .factory-showcase-kpi__pending {
+  display: none;
+}
+
+.apps-factory-ops-dashboard .factory-showcase-kpi__chart-area:not(:has(*)) {
+  display: none;
+}
+
+.apps-factory-ops-dashboard .factory-showcase__panel:has(> [data-chart-empty="true"]) {
+  display: none;
+}
+
+.apps-factory-ops-dashboard .factory-showcase__bottom-grid:not(:has(> .factory-showcase__panel:not(:has(> [data-chart-empty="true"])))) {
+  display: none;
+}
+
+.apps-factory-ops-note {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px dashed var(--fact-border);
+  border-radius: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* KPI tile content never pushes the icon out of the tile. */
+.apps-factory-ops-dashboard .factory-showcase-kpi__copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.apps-factory-ops-dashboard .factory-showcase-kpi__icon {
+  flex: 0 0 32px;
+}
+
+.apps-catalog-specialist-header {
+  padding-top: 8px;
+}
+
+/* ─── Round 5 ─── */
+
+/* Catalogue tiles keep one width in every section; an unfinished row stays left-aligned instead of stretching. */
+.apps-catalog-card h3 {
+  font-size: 0.9rem;
+}
+
+
+/* Round 9: sections are distributed over two columns by tile count, so both columns end together; one column below tablet width. */
+.apps-catalog-sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.apps-catalog-sections__column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.apps-catalog-sections__column > :last-child {
+  flex: 1 1 auto;
+}
+
+.apps-catalog-sections .apps-catalog-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 699px) {
+  .apps-catalog-sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* KPI tiles without data are slim; their empty chart area is removed. */
+.apps-factory-ops-dashboard .factory-showcase-kpi {
+  min-height: 0;
+  padding-block: 10px;
+}
+
+.apps-factory-ops-dashboard .factory-showcase-kpi__chart-area:has(> .factory-showcase-kpi__pending:only-child) {
+  display: none;
+}
+
+.apps-factory-ops-dashboard .factory-showcase-kpi__value {
+  font-size: 1.5rem;
+}
+
+/* One or two KPI cards fill the panel width instead of sitting in a third of it. */
+.apps-factory-ops-dashboard .factory-showcase__kpi-grid:has(> :only-child) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.apps-factory-ops-dashboard .factory-showcase__kpi-grid:has(> :nth-child(2):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.apps-factory-ops-row {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .apps-factory-ops-row--side {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .apps-factory-ops-row--side > .apps-factory-ops-note {
+    display: grid;
+    align-content: center;
+  }
+}
+
+/* The dashboard keeps only the rows that hold content (an empty chart row no longer reserves 200px). */
+.apps-factory-ops-dashboard .factory-showcase__bottom-grid {
+  min-height: 0;
+}
+
+.apps-factory-ops-row--side > .apps-factory-ops-note {
+  margin: 0;
+}
+
+/* The KPI tile sits directly in the section card (no second border), and the card ends without a dead band. */
+.apps-factory-ops-dashboard .factory-showcase-kpi {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 4px 0;
+}
+
+.apps-catalog-workspace .apps-factory-operations-section > .fact-section__body {
+  padding-bottom: 10px;
 }

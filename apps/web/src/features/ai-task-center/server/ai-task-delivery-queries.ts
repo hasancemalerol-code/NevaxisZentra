@@ -4,6 +4,7 @@ import {
   listAiTaskDeliveryChannels,
   listAiTaskSecureAccessGrants,
   listDeliveryManagement,
+  AiTaskDeliveryApiError,
 } from "./ai-task-delivery-api-client";
 
 async function requireContext() {
@@ -24,11 +25,32 @@ export async function readAiTaskDeliveryWorkspace(taskId: string) {
   return { deliveries, grants, channels, canManage: true };
 }
 
-export async function readAiTaskDeliveryManagement(query: string) {
-  const context = await requireContext();
-  const [result, channels] = await Promise.all([
-    listDeliveryManagement(context, query),
-    listAiTaskDeliveryChannels(context),
-  ]);
-  return { ...result, channels };
+export type AiTaskDeliveryManagementResult =
+  | Readonly<{
+      status: "success";
+      items: Awaited<ReturnType<typeof listDeliveryManagement>>["items"];
+      totalCount: number;
+      channels: Awaited<ReturnType<typeof listAiTaskDeliveryChannels>>;
+    }>
+  | Readonly<{ status: "failure"; code: string }>;
+
+/** Never throws: a refusal, missing licence, unavailable provider or session problem is returned as a classified failure. */
+export async function readAiTaskDeliveryManagement(query: string): Promise<AiTaskDeliveryManagementResult> {
+  const contextResult = await resolveAiTaskRequestContextFromIncomingRequest();
+  if (contextResult.status === "failure") {
+    return { status: "failure", code: "code" in contextResult && typeof contextResult.code === "string" ? contextResult.code : "source-unavailable" };
+  }
+
+  try {
+    const [result, channels] = await Promise.all([
+      listDeliveryManagement(contextResult.context, query),
+      listAiTaskDeliveryChannels(contextResult.context),
+    ]);
+    return { status: "success", ...result, channels };
+  } catch (error) {
+    return {
+      status: "failure",
+      code: error instanceof AiTaskDeliveryApiError ? error.failureCode : "source-unavailable",
+    };
+  }
 }

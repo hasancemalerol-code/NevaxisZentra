@@ -16,18 +16,19 @@ async function resolveAuthorizedContext(permission = "factory-case.read") {
   if (authorization.status === "failure") {
     return {
       status: "failure" as const,
+      code: authorization.code === "authorization-denied" ? "permission-denied" : "source-unavailable",
       message: authorization.code === "authorization-denied" ? "Fabrika Karar Merkezi görüntüleme yetkiniz yok." : authorization.message,
     };
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
-    return { status: "failure" as const, message: configResult.message };
+    return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
   const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
-    return { status: "failure" as const, message: contextResult.message };
+    return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }
 
   return { status: "success" as const, context: contextResult.context };
@@ -35,7 +36,7 @@ async function resolveAuthorizedContext(permission = "factory-case.read") {
 
 export async function loadFactoryDecisionCenterWorkspace(): Promise<
   | { status: "success"; workspace: FactoryDecisionCenterWorkspaceApi }
-  | { status: "failure"; message: string }
+  | { status: "failure"; code?: string; message: string }
 > {
   const resolved = await resolveAuthorizedContext();
   if (resolved.status === "failure") {
@@ -44,14 +45,14 @@ export async function loadFactoryDecisionCenterWorkspace(): Promise<
 
   const result = await readFactoryDecisionCenterWorkspace(resolved.context);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", code: result.code, message: result.message };
   }
   return { status: "success", workspace: result.value };
 }
 
 export async function loadFactoryDecisionCaseDetail(caseId: string): Promise<
   | { status: "success"; detail: FactoryDecisionCaseDetailApi }
-  | { status: "failure"; message: string }
+  | { status: "failure"; code?: string; message: string }
 > {
   const resolved = await resolveAuthorizedContext();
   if (resolved.status === "failure") {
@@ -60,7 +61,7 @@ export async function loadFactoryDecisionCaseDetail(caseId: string): Promise<
 
   const result = await readFactoryDecisionCaseDetail(resolved.context, caseId);
   if (result.status === "failure") {
-    return { status: "failure", message: result.message };
+    return { status: "failure", code: result.code, message: result.message };
   }
   return { status: "success", detail: result.value };
 }

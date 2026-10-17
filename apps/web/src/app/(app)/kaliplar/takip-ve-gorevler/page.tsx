@@ -7,6 +7,8 @@ import "@/features/molds/components/mold-registry.css";
 import "@/features/quality-control/components/quality-workspace.css";
 import { readMoldFollowUpWorkspace } from "@/features/molds/server/mold-follow-up-reader";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+
 type MoldFollowUpPageProps = Readonly<{
   searchParams: Promise<Readonly<{ mold?: string }>>;
 }>;
@@ -19,28 +21,26 @@ export default async function MoldFollowUpPage({ searchParams }: MoldFollowUpPag
 
   if (result.status === "failure") {
     return (
-      <main className="mold-registry-page">
+      <div className="mold-registry-page">
         <header className="mold-registry-header">
           <div className="mold-registry-header__intro">
             <p className="mold-registry-header__eyebrow">KALIP YÖNETİMİ</p>
             <h1>Takip ve Görevler</h1>
           </div>
         </header>
-        <div role="alert" className="mold-registry-error" data-testid="mold-follow-up-server-error">
-          <p>{result.message}</p>
-        </div>
-      </main>
+        <div data-testid="mold-follow-up-server-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bu bilgi şu anda alınamıyor" inline /></div>
+      </div>
     );
   }
 
   return (
-    <main className="mold-registry-page">
+    <div className="mold-registry-page">
       <header className="mold-registry-header">
         <div className="mold-registry-header__intro">
           <p className="mold-registry-header__eyebrow">KALIP YÖNETİMİ</p>
           <h1>Takip ve Görevler</h1>
           <p className="mold-registry-header__subtitle">
-            Kalıp yaşam döngüsü ve sayaç kanıtı için insan incelemeli AI görev taslağı akışı.
+            Kalıp yaşam döngüsü ve sayaç kanıtı için insan incelemeli yapay zekâ görev taslağı akışı.
           </p>
         </div>
         <div className="mold-registry-header__actions">
@@ -56,6 +56,6 @@ export default async function MoldFollowUpPage({ searchParams }: MoldFollowUpPag
         initialMold={result.mold}
         moldError={result.moldError}
       />
-    </main>
+    </div>
   );
 }

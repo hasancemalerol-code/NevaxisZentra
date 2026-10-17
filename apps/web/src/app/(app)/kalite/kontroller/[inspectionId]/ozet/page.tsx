@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { ClipboardCheck, ShieldCheck } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
@@ -10,6 +10,7 @@ import {
 } from "@/features/quality-control/presentation/quality-dashboard-labels";
 import { formatQualityDateTime } from "@/features/quality-control/presentation/quality-ui-labels";
 import { readInspectionSummary } from "@/features/quality-control/server/quality-control-reader";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   params: Promise<{ inspectionId: string }>;
@@ -32,18 +33,18 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
   if (result.status === "failure") {
     return (
       <QualityPageShell
-        backHref={`/kalite/kontroller/${inspectionId}`}
-        backLabel="Kontrol detayı"
         eyebrow="KALİTE KONTROL"
         title="Kontrol Sonuç Özeti"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "Özet yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen kontrol özeti bulunamadı." : result.message}</p>
-          </div>
-        </div>
+        <FailureStatePage
+          code={"code" in result ? result.code : undefined}
+          message={result.message}
+          failedTitle="Özet yüklenemedi"
+          entityLabel="kalite kontrolü"
+          backHref="/kalite"
+          backLabel="Kalite ana sayfası"
+          inline
+        />
       </QualityPageShell>
     );
   }
@@ -183,8 +184,8 @@ export default async function QualityInspectionSummaryPage({ params }: PageProps
         <header className="quality-section__header">
           <h2>Ölçüm Sonuçları</h2>
         </header>
-        <div className="quality-table-wrap">
-          <table className="quality-table">
+        <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="Ölçüm sonuçları tablosu">
+          <table aria-label="Ölçüm Sonuçları" className="quality-table">
             <thead>
               <tr>
                 <th>Kontrol Noktası</th>

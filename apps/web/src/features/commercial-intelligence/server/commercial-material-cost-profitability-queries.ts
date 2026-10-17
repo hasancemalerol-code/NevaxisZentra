@@ -1,3 +1,4 @@
+import { getCommercialWorkspaceEvidenceLabel, resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import type { CommercialMaterialCostProfitabilityApiFilters } from "../application/commercial-material-cost-profitability-filter";
@@ -12,7 +13,6 @@ import {
   selectLatestProfitabilityComparison,
 } from "../components/commercial-profitability-presentation";
 import type { CommercialMaterialCostProfitabilityWorkspacePayload } from "../types/commercial-material-cost-profitability-types";
-import { getCommercialIntelligenceEvidenceStatusLabel } from "../domain/commercial-intelligence-labels";
 import { localizeCommercialProfitabilityProvenance } from "../domain/commercial-profitability-labels";
 import {
   getCommercialProfitabilityWorkspace,
@@ -128,12 +128,12 @@ export async function readCommercialMaterialCostProfitabilityWorkspace(
     status: "success",
     canManage,
     workspace: {
-      facilityLabel: hasPilot ? "Geliştirme pilot tesisi" : "Yetkili tesis",
-      evidenceLabel: getCommercialIntelligenceEvidenceStatusLabel("simulated"),
+      facilityLabel: hasPilot ? "Pilot tesis" : "Yetkili tesis",
+      evidenceLabel: getCommercialWorkspaceEvidenceLabel(hasPilot),
       hasDevelopmentPilotData: hasPilot,
       ruleSetVersion: workspaceResult.value.ruleSetVersion,
       comparisonRuleSetVersion: materialComparisonsResult.value.ruleSetVersion,
-      provenanceDisclaimer: localizeCommercialProfitabilityProvenance(workspaceResult.value.provenanceDisclaimer),
+      provenanceDisclaimer: resolveCommercialProvenance(workspaceResult.value.provenanceDisclaimer, hasPilot, localizeCommercialProfitabilityProvenance),
       realProfitabilityMappingComplete: workspaceResult.value.realProfitabilityMappingComplete,
       reportingPeriodLabel: reportingPeriodLabel(allComparisons),
       freshnessLabel: freshnessLabel(allComparisons),

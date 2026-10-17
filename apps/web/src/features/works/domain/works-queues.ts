@@ -35,7 +35,7 @@ export const WORKS_QUEUE_OPTIONS: readonly WorksQueueOption[] = [
   },
   {
     id: WORKS_QUEUE_TEAM,
-    label: "Ekip",
+    label: "Ekip kuyruğu",
     description: "Tüm ekip iş kuyruğu",
   },
   {

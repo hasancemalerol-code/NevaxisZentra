@@ -1,3 +1,5 @@
+import { enumLabel } from "@/lib/presentation/enum-labels";
+
 import type { RealFactoryPilotWorkspace } from "../server/real-factory-pilot-api-client";
 
 type Props = {
@@ -8,10 +10,10 @@ export function RealFactoryPilotPanel({ workspace }: Props) {
   return (
     <section className="state-panel" data-testid="real-factory-pilot-workspace">
       <header className="production-execution-header">
-        <p>GERÇEK FABRİKA</p>
+        <p>Fabrika Bağlantıları</p>
         <h2>{workspace.lineCode}</h2>
         <p>
-          Faz: <strong>{workspace.currentPhase}</strong> · {workspace.acceptanceKind}
+          Aşama: <strong>{enumLabel(workspace.currentPhase)}</strong> · {enumLabel(workspace.acceptanceKind)}
         </p>
       </header>
 
@@ -21,9 +23,9 @@ export function RealFactoryPilotPanel({ workspace }: Props) {
           <ul>
             {workspace.connectors.map((connector) => (
               <li key={connector.connectorId}>
-                {connector.name} — {connector.healthStatus} / {connector.mappingStatus}
+                {connector.name} — {enumLabel(connector.healthStatus)} / {enumLabel(connector.mappingStatus)}
                 <br />
-                <small>{connector.eventsIngested} canonical event</small>
+                <small>{connector.eventsIngested} alınan olay</small>
               </li>
             ))}
           </ul>
@@ -33,7 +35,7 @@ export function RealFactoryPilotPanel({ workspace }: Props) {
           <h3>Veri Kalitesi</h3>
           {workspace.dataQuality ? (
             <>
-              <p>{workspace.dataQuality.overallState}</p>
+              <p>{enumLabel(workspace.dataQuality.overallState)}</p>
               {workspace.dataQuality.blocksAutonomousAction ? (
                 <p role="alert">Otonom aksiyon engelli</p>
               ) : null}
@@ -44,10 +46,10 @@ export function RealFactoryPilotPanel({ workspace }: Props) {
         </article>
 
         <article className="state-panel">
-          <h3>Shadow Mode</h3>
+          <h3>Gölge Modu</h3>
           {workspace.shadow ? (
             <>
-              <p>{workspace.shadow.mode}</p>
+              <p>{enumLabel(workspace.shadow.mode)}</p>
               <p>
                 Fiziksel aksiyon:{" "}
                 {workspace.shadow.blocksPhysicalActions ? "ENGELLİ" : "İZİNLİ"}
@@ -59,12 +61,12 @@ export function RealFactoryPilotPanel({ workspace }: Props) {
         </article>
 
         <article className="state-panel">
-          <h3>Throughput Case</h3>
+          <h3>Verim Vakası</h3>
           <p>{workspace.activeCaseId ?? "—"}</p>
           {workspace.evidencePack ? (
             <p>
-              Doğrulama: {workspace.evidencePack.verificationOutcome}
-              {workspace.evidencePack.knowledgePromoted ? " · Bilgi promote" : ""}
+              Doğrulama: {enumLabel(workspace.evidencePack.verificationOutcome)}
+              {workspace.evidencePack.knowledgePromoted ? " · Bilgi kalıcılaştırıldı" : ""}
             </p>
           ) : null}
         </article>

@@ -183,9 +183,9 @@ test("operational value control center renders core sections", () => {
   assert.match(html, /data-testid="operational-value-economic-inputs"/);
   assert.match(html, /data-testid="operational-value-report-preview"/);
   assert.match(html, /Operasyonel Değer/);
-  assert.match(html, /ULTRA I/);
+  assert.match(html, /DOĞRULANMIŞ DEĞER/);
   assert.match(html, /Assembly bottleneck recovery/);
-  assert.match(html, /GOOD_OUTPUT_GAIN/);
+  assert.match(html, /İyi çıktı kazanımı/);
   assert.match(html, /MIX-LINE-01/);
   assert.match(html, /\$1\.840/);
   assert.match(html, /612/);
@@ -199,5 +199,5 @@ test("operational value control center shows economic value when configured", ()
   );
 
   assert.match(html, /Doğrulanmış ekonomik değer/);
-  assert.match(html, /Intelligence Runtime/);
+  assert.doesNotMatch(html, /Intelligence Runtime|Zeka maliyeti/);
 });

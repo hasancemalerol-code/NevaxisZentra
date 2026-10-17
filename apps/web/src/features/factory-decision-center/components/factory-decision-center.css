@@ -1,0 +1,99 @@
+/* Decision centre: the page header description may use the full row instead of orphaning its last words. */
+.fdc-page .zx-page-header__description {
+  max-width: 920px;
+}
+
+/* Queue overview: one equal card per decision queue (title, count, status). No loose text grid. */
+.fdc-queues {
+  display: grid;
+  gap: 16px;
+  margin-top: 1.5rem;
+  padding: 0;
+}
+
+.fdc-queues__head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.fdc-queues__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--zx-accent, #2563eb);
+  background: var(--zx-accent-soft, #eaf1fe);
+}
+
+.fdc-queues__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.fdc-queues__title {
+  margin: 0;
+  color: var(--zx-text-strong, #0f172a);
+  font-size: 1.0625rem;
+  font-weight: 700;
+}
+
+.fdc-queues__copy {
+  margin: 2px 0 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.fdc-queues__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fdc-queue-card {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  justify-items: start;
+  gap: 8px;
+  min-height: 132px;
+  padding: 16px 18px;
+  border: 1px solid var(--zx-line, #d8dee9);
+  border-radius: var(--zx-radius, 12px);
+  background: var(--zx-surface-soft, #f8fafc);
+}
+
+.fdc-queue-card__title {
+  margin: 0;
+  color: var(--zx-text, #334155);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.fdc-queue-card__count {
+  margin: 0;
+  color: var(--zx-text-strong, #0f172a);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1099px) {
+  .fdc-queues__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .fdc-queues__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

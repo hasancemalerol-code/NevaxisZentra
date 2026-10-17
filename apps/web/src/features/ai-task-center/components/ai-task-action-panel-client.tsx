@@ -30,6 +30,7 @@ import {
   AiTaskDetailField,
   AiTaskDetailTextarea,
 } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskActionPanelClientProps = Readonly<{
   task: AiTask;
@@ -43,7 +44,7 @@ function getActionExplanation(task: AiTask): string {
   }
 
   if (task.status === "awaiting-review") {
-    return "Görev içeriği, kaynak veriler ve AI gerekçesi bir kullanıcı tarafından incelenmeli.";
+    return "Görev içeriği, kaynak veriler ve yapay zekâ gerekçesi bir kullanıcı tarafından incelenmeli.";
   }
 
   if (task.status === "approved") {
@@ -152,7 +153,7 @@ export function AiTaskActionPanelClient({
       <div className="ai-task-action-panel__heading">
         <div>
           <p>
-            Human-in-the-Loop
+            İnsan Onayı
           </p>
 
           <h2>
@@ -202,7 +203,7 @@ export function AiTaskActionPanelClient({
       {errorMessage ? (
         <div className="ai-task-action-panel__warning" role="alert">
           <Clock3 aria-hidden="true" />
-          <span>{errorMessage}</span>
+          <span>{customerMessage(errorMessage)}</span>
         </div>
       ) : null}
 

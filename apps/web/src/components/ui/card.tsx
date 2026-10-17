@@ -15,7 +15,7 @@ type KpiCardProps = Readonly<{
   preview?: boolean;
 }>;
 
-export function KpiCard({ label, value, detail, icon, tone = "neutral", preview = false }: KpiCardProps) {
+export function KpiCard({ label, value, detail, icon, tone = "neutral", preview: _preview = false }: KpiCardProps) {
   return (
     <Card className={`kpi-card kpi-${tone}`}>
       <div className="kpi-card-heading">
@@ -25,7 +25,7 @@ export function KpiCard({ label, value, detail, icon, tone = "neutral", preview 
       <div className="kpi-value">{value}</div>
       <div className="kpi-footer">
         <span>{detail}</span>
-        {preview ? <span className="preview-label">UI önizleme</span> : null}
+        
       </div>
     </Card>
   );

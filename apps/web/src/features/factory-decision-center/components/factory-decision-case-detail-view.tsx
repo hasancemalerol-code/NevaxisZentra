@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ArrowLeft, CheckCircle2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldAlert } from "lucide-react";
 
+import { PageHeader } from "@/components/ui/page";
+import { FactoryContextBreadcrumb }from "@/components/workspace/factory-context-breadcrumb";
 import { ContextKnowledgePanel } from "@/features/context-knowledge/components/context-knowledge-panel";
 import type { WorkerContextPackageApi } from "@/features/context-knowledge/server/context-knowledge-api-client";
 
@@ -19,13 +20,17 @@ import {
   factoryDecisionVerifyAction,
 } from "../server/factory-decision-center-actions";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { formatPercent } from "@/lib/presentation/format";
 
 type FactoryDecisionCaseDetailViewProps = Readonly<{
   detail: FactoryDecisionCaseDetailApi;
   contextPackage?: WorkerContextPackageApi | null;
+  /** Digital Workforce is deferred: only an explicitly allowed deployment shows it (decided on the server). */
+  showWorkforce?: boolean;
 }>;
 
-export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPackage = null }: FactoryDecisionCaseDetailViewProps) {
+export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPackage = null, showWorkforce = false }: FactoryDecisionCaseDetailViewProps) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [message, setMessage] = useState<string | null>(null);
@@ -49,23 +54,19 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
   const showExecute = detail.status === "executing" && !detail.verifiedOutcome.isVerified;
   const showVerify = detail.status === "verifying" && !detail.verifiedOutcome.isVerified;
   const canApprove = detail.humanDecision?.status === "pending";
+  /** Section numbers stay contiguous when the deferred workforce section is not rendered. */
+  const sectionNo = (base: number) => (showWorkforce || base < 5 ? base : base - 1);
 
   return (
-    <main className="commint-page" data-testid="factory-decision-case-detail-view">
-      <header className="commint-executive">
-        <div className="commint-executive__intro">
-          <Link href="/fabrika-karar-merkezi" className="commint-button commint-button--ghost" style={{ marginBottom: "0.75rem" }}>
-            <ArrowLeft aria-hidden="true" size={16} />
-            Fabrika Karar Merkezi
-          </Link>
-          <p className="commint-executive__eyebrow">{getFactoryDecisionSeverityLabel(detail.severity)}</p>
-          <h1>{detail.orderReference}</h1>
-          <p className="commint-executive__subtitle">{detail.title}</p>
-          <p className="commint-kpi-card__detail">{getFactoryDecisionStatusLabel(detail.status)} · {detail.facilityLabel}</p>
-        </div>
-      </header>
+    <div className="commint-page" data-testid="factory-decision-case-detail-view">
+      <FactoryContextBreadcrumb segments={[{ label: "Karar Merkezi", href: "/fabrika-karar-merkezi" }, { label: "Vaka" }]} />
+      <PageHeader
+        eyebrow={getFactoryDecisionSeverityLabel(detail.severity)}
+        title={detail.orderReference}
+        description={`${detail.title} · ${getFactoryDecisionStatusLabel(detail.status)} · ${detail.facilityLabel}`}
+      />
 
-      {message ? <div className="commint-error-banner">{message}</div> : null}
+      {message ? <div className="commint-error-banner">{customerMessage(message)}</div> : null}
 
       {detail.verifiedOutcome.isVerified ? (
         <section className="commint-panel" data-testid="factory-decision-verified-outcome" style={{ borderColor: "rgba(34, 197, 94, 0.35)" }}>
@@ -74,7 +75,7 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
           </div>
           <div className="commint-kpi-grid" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
             <div><p className="commint-kpi-card__label">Gerekli</p><p className="commint-kpi-card__value">{detail.verifiedOutcome.requiredQuantity}</p></div>
-            <div><p className="commint-kpi-card__label">Doğrulanan projeksiyon</p><p className="commint-kpi-card__value">{detail.verifiedOutcome.verifiedProjection}</p></div>
+            <div><p className="commint-kpi-card__label">Doğrulanan öngörü</p><p className="commint-kpi-card__value">{detail.verifiedOutcome.verifiedProjection}</p></div>
             <div><p className="commint-kpi-card__label">Teslimat taahhüdü</p><p className="commint-kpi-card__value">{detail.verifiedOutcome.deliveryProtected ? "KORUNDU" : "RİSKLİ"}</p></div>
             <div><p className="commint-kpi-card__label">Kurtarma</p><p className="commint-kpi-card__value">+{detail.verifiedOutcome.recoveryGain} iyi parça</p></div>
           </div>
@@ -86,10 +87,10 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
         <p className="commint-executive__subtitle">{detail.businessOutcomeAtRisk}</p>
         <div className="commint-kpi-grid" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))", marginTop: "1rem" }}>
           <div><p className="commint-kpi-card__label">Gerekli</p><p className="commint-kpi-card__value">{detail.outcomeRisk.requiredQuantity}</p></div>
-          <div><p className="commint-kpi-card__label">Projeksiyon</p><p className="commint-kpi-card__value">{detail.outcomeRisk.projectedQuantity}</p></div>
-          <div><p className="commint-kpi-card__label">Gap</p><p className="commint-kpi-card__value">{detail.outcomeRisk.gapQuantity}</p></div>
+          <div><p className="commint-kpi-card__label">Öngörü</p><p className="commint-kpi-card__value">{detail.outcomeRisk.projectedQuantity}</p></div>
+          <div><p className="commint-kpi-card__label">Eksik</p><p className="commint-kpi-card__value">{detail.outcomeRisk.gapQuantity}</p></div>
           <div><p className="commint-kpi-card__label">Kalan süre</p><p className="commint-kpi-card__value" style={{ fontSize: "1rem" }}>{detail.outcomeRisk.timeRemainingLabel}</p></div>
-          <div><p className="commint-kpi-card__label">Güven</p><p className="commint-kpi-card__value">{Math.round(detail.outcomeRisk.confidence * 100)}%</p></div>
+          <div><p className="commint-kpi-card__label">Güven</p><p className="commint-kpi-card__value">{formatPercent(detail.outcomeRisk.confidence * 100, 0)}</p></div>
         </div>
       </section>
 
@@ -183,29 +184,31 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
           {detail.recoveryPlan.map((step) => (
             <li key={`${step.order}-${step.actionKey ?? step.title}`}>
               <strong>{String(step.order).padStart(2, "0")}</strong> — {step.title}
-              <span className="commint-kpi-card__detail"> · {step.workerName}</span>
+              {showWorkforce ? <span className="commint-kpi-card__detail"> · {step.workerName}</span> : null}
             </li>
           ))}
         </ol>
       </section>
 
-      <section className="commint-panel" data-testid="factory-decision-digital-workforce">
-        <div className="commint-panel__header"><h2>4. DİJİTAL İŞ GÜCÜ</h2></div>
-        <div style={{ display: "grid", gap: "0.75rem" }}>
-          {detail.digitalWorkers.map((worker) => (
-            <div key={`${worker.workerCode}-${worker.responsibility}`} className="commint-kpi-card">
-              <p className="commint-kpi-card__label">{worker.workerName}</p>
-              <p className="commint-kpi-card__detail">{worker.responsibility}</p>
-              <p className="commint-kpi-card__badge">{worker.status}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {showWorkforce ? (
+        <section className="commint-panel" data-testid="factory-decision-digital-workforce">
+          <div className="commint-panel__header"><h2>4. DİJİTAL İŞ GÜCÜ</h2></div>
+          <div style={{ display: "grid", gap: "0.75rem" }}>
+            {detail.digitalWorkers.map((worker) => (
+              <div key={`${worker.workerCode}-${worker.responsibility}`} className="commint-kpi-card">
+                <p className="commint-kpi-card__label">{worker.workerName}</p>
+                <p className="commint-kpi-card__detail">{worker.responsibility}</p>
+                <p className="commint-kpi-card__badge">{worker.status}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {detail.humanDecision ? (
         <section className="commint-panel" data-testid="factory-decision-human-approval">
           <div className="commint-panel__header">
-            <h2><ShieldAlert aria-hidden="true" size={20} /> 5. İNSAN KARARI</h2>
+            <h2><ShieldAlert aria-hidden="true" size={20} /> {sectionNo(5)}. İNSAN KARARI</h2>
           </div>
           <p className="commint-executive__eyebrow">İNSAN KARARI GEREKLİ</p>
           <p className="commint-kpi-card__label">Karar</p>
@@ -257,12 +260,12 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
 
       {detail.executionProgress.length > 0 ? (
         <section className="commint-panel" data-testid="factory-decision-execution">
-          <div className="commint-panel__header"><h2>6. CANLI YÜRÜTME</h2></div>
+          <div className="commint-panel__header"><h2>{sectionNo(6)}. CANLI YÜRÜTME</h2></div>
           <div style={{ display: "grid", gap: "0.75rem" }}>
             {detail.executionProgress.map((item) => (
               <div key={`${item.workerCode}-${item.responsibility}`} className="commint-kpi-card">
-                <p className="commint-kpi-card__label">{item.workerName}</p>
-                <p className="commint-kpi-card__detail">{item.responsibility}</p>
+                <p className="commint-kpi-card__label">{showWorkforce ? item.workerName : item.responsibility}</p>
+                {showWorkforce ? <p className="commint-kpi-card__detail">{item.responsibility}</p> : null}
                 <p className="commint-kpi-card__badge">{item.status}</p>
               </div>
             ))}
@@ -286,7 +289,7 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
       ) : null}
 
       <section className="commint-panel" data-testid="factory-decision-evidence">
-        <div className="commint-panel__header"><h2>7. KANIT & DOĞRULAMA</h2></div>
+        <div className="commint-panel__header"><h2>{sectionNo(7)}. KANIT & DOĞRULAMA</h2></div>
         <div style={{ display: "grid", gap: "0.75rem" }}>
           {detail.evidence.map((item) => (
             <div key={`${item.category}-${item.label}`} className="commint-kpi-card">
@@ -316,12 +319,12 @@ export function FactoryDecisionCaseDetailView({ detail: initialDetail, contextPa
       {contextPackage ? (
         <section className="commint-panel" data-testid="factory-decision-context-knowledge">
           <div className="commint-panel__header">
-            <h2>Worker Bağlamı</h2>
+            <h2>Bağlam bilgisi</h2>
           </div>
           <ContextKnowledgePanel package={contextPackage} />
         </section>
       ) : null}
-    </main>
+    </div>
   );
 }
 

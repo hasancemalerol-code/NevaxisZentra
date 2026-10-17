@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
+import { EmptyPanel } from "@/components/ui/empty-panel";
+import { formatDateTime } from "@/lib/presentation/format";
 import {
-  CONTINUOUS_IMPROVEMENT_SUBTITLE,
-  CONTINUOUS_IMPROVEMENT_TITLE,
   formatLossMinutes,
   getFactoryExperimentStatusLabel,
   getFactoryExperimentTypeLabel,
@@ -12,6 +14,22 @@ import {
   getSustainabilityStatusLabel,
 } from "../domain/factory-learning-labels";
 import { readFactoryLearningWorkspace } from "../server/factory-learning-reader";
+import "./continuous-improvement-workspace.css";
+
+function ImprovementSection({
+  title,
+  testId,
+  isEmpty,
+  emptyTitle,
+  children,
+}: Readonly<{ title: string; testId: string; isEmpty: boolean; emptyTitle: string; children: ReactNode }>) {
+  return (
+    <section className="continuous-improvement__section" data-testid={testId}>
+      <h2>{title}</h2>
+      {isEmpty ? <EmptyPanel compact title={emptyTitle} /> : children}
+    </section>
+  );
+}
 
 function ImpactBadge({ classification }: Readonly<{ classification: string }>) {
   return (
@@ -37,52 +55,41 @@ export async function ContinuousImprovementWorkspacePanel() {
   );
 
   return (
-    <section className="commint-panel" data-testid="continuous-improvement-workspace-panel">
-      <header className="commint-panel__header">
-        <div>
-          <p className="commint-executive__eyebrow">SÜREKLİ İYİLEŞTİRME</p>
-          <h2 className="commint-panel__title">{CONTINUOUS_IMPROVEMENT_TITLE}</h2>
-          <p className="commint-panel__subtitle">{CONTINUOUS_IMPROVEMENT_SUBTITLE}</p>
-        </div>
-      </header>
-
+    <section className="commint-panel continuous-improvement" data-testid="continuous-improvement-workspace-panel">
       <div className="commint-kpi-grid" data-testid="continuous-improvement-loss-command">
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">Bugün Kayıp</p>
+          <p className="commint-kpi-card__label">Bugün kayıp</p>
           <p className="commint-kpi-card__value">{formatLossMinutes(commandSummary.todayLossMinutes)}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">7 Gün Kayıp</p>
+          <p className="commint-kpi-card__label">7 gün kayıp</p>
           <p className="commint-kpi-card__value">{formatLossMinutes(commandSummary.sevenDayLossMinutes)}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">30 Gün Kayıp</p>
+          <p className="commint-kpi-card__label">30 gün kayıp</p>
           <p className="commint-kpi-card__value">{formatLossMinutes(commandSummary.thirtyDayLossMinutes)}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">Tekrarlayan Sorun</p>
+          <p className="commint-kpi-card__label">Tekrarlayan sorun</p>
           <p className="commint-kpi-card__value">{commandSummary.recurringLossCount}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">Aktif Deney</p>
+          <p className="commint-kpi-card__label">Aktif deney</p>
           <p className="commint-kpi-card__value">{commandSummary.activeExperimentCount}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">Doğrulanan İyileştirme</p>
+          <p className="commint-kpi-card__label">Doğrulanan</p>
           <p className="commint-kpi-card__value">{commandSummary.verifiedImprovementCount}</p>
         </article>
         <article className="commint-kpi-card">
-          <p className="commint-kpi-card__label">Gerileyen İyileştirme</p>
+          <p className="commint-kpi-card__label">Gerileyen</p>
           <p className="commint-kpi-card__value">{commandSummary.regressingImprovementCount}</p>
         </article>
       </div>
 
-      <section data-testid="continuous-improvement-losses">
-        <h3>Fabrika Kayıpları</h3>
-        {workspace.losses.length === 0 ? (
-          <p className="commint-table__secondary">Son 30 günde kayıt bulunamadı.</p>
-        ) : (
-          <ul>
+      <div className="continuous-improvement__grid">
+      <ImprovementSection title="Fabrika kayıpları" testId="continuous-improvement-losses" isEmpty={workspace.losses.length === 0} emptyTitle="Son 30 günde kayıt yok">
+        <ul>
             {workspace.losses.slice(0, 8).map((loss) => (
               <li key={loss.id}>
                 <strong>{loss.title}</strong>
@@ -95,15 +102,10 @@ export async function ContinuousImprovementWorkspacePanel() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+      </ImprovementSection>
 
-      <section data-testid="continuous-improvement-pareto">
-        <h3>En Büyük Kayıp Kaynakları (Pareto)</h3>
-        {workspace.paretoRows.length === 0 ? (
-          <p className="commint-table__secondary">Pareto analizi için yeterli kayıp yok.</p>
-        ) : (
-          <ul>
+      <ImprovementSection title="En büyük kayıp kaynakları (Pareto analizi)" testId="continuous-improvement-pareto" isEmpty={workspace.paretoRows.length === 0} emptyTitle="Pareto analizi için yeterli kayıp kaydı yok">
+        <ul>
             {workspace.paretoRows.slice(0, 6).map((row) => (
               <li key={`${row.category}-${row.label}`}>
                 <strong>{row.label}</strong>
@@ -115,16 +117,10 @@ export async function ContinuousImprovementWorkspacePanel() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+      </ImprovementSection>
 
-      <div className="commint-two-column">
-        <section data-testid="continuous-improvement-patterns">
-          <h3>Tekrarlayan Sorunlar</h3>
-          {workspace.patterns.length === 0 ? (
-            <p className="commint-table__secondary">Tekrarlayan sorun tespit edilmedi.</p>
-          ) : (
-            <ul>
+        <ImprovementSection title="Tekrarlayan sorunlar" testId="continuous-improvement-patterns" isEmpty={workspace.patterns.length === 0} emptyTitle="Tekrarlayan sorun tespit edilmedi">
+          <ul>
               {workspace.patterns.slice(0, 4).map((pattern) => (
                 <li key={pattern.id}>
                   <strong>{pattern.title}</strong>
@@ -136,15 +132,10 @@ export async function ContinuousImprovementWorkspacePanel() {
                 </li>
               ))}
             </ul>
-          )}
-        </section>
+        </ImprovementSection>
 
-        <section data-testid="continuous-improvement-opportunities">
-          <h3>İyileştirme Fırsatları</h3>
-          {workspace.opportunities.length === 0 ? (
-            <p className="commint-table__secondary">Açık iyileştirme fırsatı yok.</p>
-          ) : (
-            <ul>
+        <ImprovementSection title="İyileştirme fırsatları" testId="continuous-improvement-opportunities" isEmpty={workspace.opportunities.length === 0} emptyTitle="Açık iyileştirme fırsatı yok">
+          <ul>
               {workspace.opportunities.slice(0, 4).map((opportunity) => (
                 <li key={opportunity.id}>
                   <strong>{opportunity.title}</strong>
@@ -154,16 +145,10 @@ export async function ContinuousImprovementWorkspacePanel() {
                 </li>
               ))}
             </ul>
-          )}
-        </section>
-      </div>
+        </ImprovementSection>
 
-      <section data-testid="continuous-improvement-active-experiments">
-        <h3>Aktif Deneyler</h3>
-        {workspace.activeExperiments.length === 0 ? (
-          <p className="commint-table__secondary">Devam eden deney yok.</p>
-        ) : (
-          <ul>
+      <ImprovementSection title="Aktif deneyler" testId="continuous-improvement-active-experiments" isEmpty={workspace.activeExperiments.length === 0} emptyTitle="Devam eden deney yok">
+        <ul>
             {workspace.activeExperiments.slice(0, 4).map((experiment) => (
               <li key={experiment.id}>
                 <strong>{experiment.title}</strong>
@@ -175,16 +160,10 @@ export async function ContinuousImprovementWorkspacePanel() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+      </ImprovementSection>
 
-      <div className="commint-two-column">
-        <section data-testid="continuous-improvement-verified">
-          <h3>Doğrulanan İyileştirmeler</h3>
-          {sustainedImprovements.length === 0 ? (
-            <p className="commint-table__secondary">Doğrulanmış iyileştirme yok.</p>
-          ) : (
-            <ul>
+        <ImprovementSection title="Doğrulanan iyileştirmeler" testId="continuous-improvement-verified" isEmpty={sustainedImprovements.length === 0} emptyTitle="Doğrulanmış iyileştirme yok">
+          <ul>
               {sustainedImprovements.slice(0, 4).map((item) => (
                 <li key={item.id}>
                   <strong>{item.title}</strong>
@@ -197,15 +176,10 @@ export async function ContinuousImprovementWorkspacePanel() {
                 </li>
               ))}
             </ul>
-          )}
-        </section>
+        </ImprovementSection>
 
-        <section data-testid="continuous-improvement-regressing">
-          <h3>Gerileyen İyileştirmeler</h3>
-          {regressingImprovements.length === 0 ? (
-            <p className="commint-table__secondary">Gerileyen iyileştirme yok.</p>
-          ) : (
-            <ul>
+        <ImprovementSection title="Gerileyen iyileştirmeler" testId="continuous-improvement-regressing" isEmpty={regressingImprovements.length === 0} emptyTitle="Gerileyen iyileştirme yok">
+          <ul>
               {regressingImprovements.slice(0, 4).map((item) => (
                 <li key={item.id}>
                   <strong>{item.title}</strong>
@@ -215,16 +189,10 @@ export async function ContinuousImprovementWorkspacePanel() {
                 </li>
               ))}
             </ul>
-          )}
-        </section>
-      </div>
+        </ImprovementSection>
 
-      <section data-testid="continuous-improvement-learning">
-        <h3>Zentra Ne Öğrendi?</h3>
-        {workspace.insights.length === 0 && workspace.learningMemories.length === 0 ? (
-          <p className="commint-table__secondary">Henüz doğrulanmış öğrenme kaydı yok.</p>
-        ) : (
-          <ul>
+      <ImprovementSection title="Zentra neler öğrendi?" testId="continuous-improvement-learning" isEmpty={workspace.insights.length === 0 && workspace.learningMemories.length === 0} emptyTitle="Henüz doğrulanmış öğrenme kaydı yok">
+        <ul>
             {workspace.insights.slice(0, 4).map((insight, index) => (
               <li key={`${insight.insightType}-${index}`}>
                 <strong>{insight.title}</strong>
@@ -240,11 +208,12 @@ export async function ContinuousImprovementWorkspacePanel() {
               </li>
             ))}
           </ul>
-        )}
-      </section>
+      </ImprovementSection>
+
+      </div>
 
       <p className="commint-table__secondary">
-        Veri tazeliği: {new Date(workspace.dataFreshnessUtc).toLocaleString("tr-TR")}
+        Veri güncelliği: {formatDateTime(workspace.dataFreshnessUtc)}
       </p>
     </section>
   );

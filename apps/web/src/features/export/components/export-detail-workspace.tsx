@@ -1,5 +1,6 @@
 "use client";
 
+import { enumLabel } from "@/lib/presentation/enum-labels";
 import { useMemo, useState } from "react";
 
 import type {
@@ -72,7 +73,7 @@ export type ExportDetailTab =
 
 const TABS: readonly { id: ExportDetailTab; label: string }[] = [
   { id: "overview", label: "Genel Bakış" },
-  { id: "ai-copilot", label: "AI Copilot" },
+  { id: "ai-copilot", label: "Asistan" },
   { id: "documents", label: "Belgeler" },
   { id: "packing", label: "Paketleme" },
   { id: "shipment", label: "Sevkiyat" },
@@ -208,11 +209,11 @@ export function ExportDetailWorkspace({
               <p>ÖZET</p>
               <h2>Operasyon durumu</h2>
               <span>
-                Paketleme: {packing?.packingStatus ?? "—"} · Sevkiyat:{" "}
+                Paketleme: {packing?.packingStatus ? enumLabel(packing.packingStatus) : "—"} · Sevkiyat:{" "}
                 {shipments.length} · Broker:{" "}
-                {brokerWorkspace?.status ?? "yok"}
+                {brokerWorkspace?.status ? enumLabel(brokerWorkspace.status) : "yok"}
                 {compliance
-                  ? ` · Uygunluk: ${compliance.complianceStatus}`
+                  ? ` · Uygunluk: ${enumLabel(compliance.complianceStatus)}`
                   : ""}
               </span>
             </div>

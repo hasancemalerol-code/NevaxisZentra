@@ -53,7 +53,7 @@ export async function readAiTaskDecisionWorkspace(
   if (!capabilities.canRead) {
     return {
       status: "failure",
-      message: "AI değerlendirmesini görüntüleme yetkiniz bulunmuyor.",
+      message: "Yapay zekâ değerlendirmesini görüntüleme yetkiniz bulunmuyor.",
       code: "permission-denied",
     };
   }

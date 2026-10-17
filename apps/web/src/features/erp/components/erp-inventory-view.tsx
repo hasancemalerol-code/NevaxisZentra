@@ -3,7 +3,6 @@ import {
   Boxes,
   CircleGauge,
   Package,
-  ShoppingCart,
   Warehouse,
 } from "lucide-react";
 
@@ -53,15 +52,21 @@ export function ErpInventoryView({
     ["warehouses", "inventory", "purchasing"].includes(row.entityType),
   );
 
+  const nothingImported = warehouses.length === 0 && inventoryBalances.length === 0;
+  // A reliability table of dashes (never synced) carries no information: show it once there is a run to report.
+  const hasReliabilityData = inventoryReliability.some(
+    (row) => row.lastSuccessfulSyncAtUtc || row.lastFailedSyncAtUtc || row.lastRunStatus,
+  );
+
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
-        title="Stok & Depolar"
-        description="Harici ERP depo ve stok projeksiyonları — salt okunur görünüm. Stok hareketi veya ERP yazma işlemi yoktur."
+        title="Stok ve Depolar"
+        description="Harici ERP depo ve stok özetleri — salt okunur görünüm. Stok hareketi veya ERP yazma işlemi yoktur."
         notice={
           <>
             <ErpReadonlyNotice>
-              ERP-3L yalnızca ERP Simulator stok ve satın alma projeksiyonlarını içe aktarır.
+              Bu bağlantı ERP stok ve satın alma kayıtlarını salt okunur olarak içe aktarır.
             </ErpReadonlyNotice>
             <ErpSimulatorNotice />
           </>
@@ -74,44 +79,54 @@ export function ErpInventoryView({
         <ErpKpiCard
           label="Depolar"
           value={snapshot.warehouseCount}
-          description="Tanımlı ERP deposu"
+          description="Tanımlı depo"
           icon={<Warehouse aria-hidden="true" />}
         />
         <ErpKpiCard
-          label="Ürün Stok Kayıtları"
+          label="Stok Kaydı"
           value={snapshot.inventoryRecordCount}
-          description="Depo × ürün stok satırı"
+          description="Depo ve ürün satırı"
           icon={<Package aria-hidden="true" />}
         />
         <ErpKpiCard
           label="Güncel Veri"
           value={snapshot.freshRecordCount}
-          description="Kaynak tazeliği: güncel"
+          description="Güncel kayıt"
           icon={<CircleGauge aria-hidden="true" />}
           tone="success"
         />
         <ErpKpiCard
           label="Eski Veri"
           value={snapshot.staleRecordCount}
-          description="Kaynak tazeliği: eski"
+          description="Eski kayıt"
           icon={<AlertTriangle aria-hidden="true" />}
           tone="warning"
         />
         <ErpKpiCard
           label="Yetersiz Stok"
           value={snapshot.insufficientStockCount}
-          description="Kullanılabilir miktar ≤ 0"
+          description="Miktarı sıfır veya altı"
           icon={<Boxes aria-hidden="true" />}
           tone="danger"
         />
-        <ErpKpiCard
-          label="Açık Satın Alma"
-          value={snapshot.openPurchaseOrderCount}
-          description="Açık satır içeren PO"
-          icon={<ShoppingCart aria-hidden="true" />}
-        />
       </ErpKpiGrid>
 
+      {nothingImported ? (
+        <section className="erp-section">
+          <ErpSectionHeader
+            title="Depolar ve Stok Kayıtları"
+            description="Harici ERP depo ve stok özetleri — salt okunur"
+          />
+          <ErpEmptyState
+            title="Henüz ERP depo veya stok kaydı yok."
+            description="Önce depo ve stok eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
+          />
+        </section>
+      ) : null}
+
+      {nothingImported ? null : (
       <section className="erp-section">
         <ErpSectionHeader
           title="Depolar"
@@ -120,10 +135,12 @@ export function ErpInventoryView({
         {warehouses.length === 0 ? (
           <ErpEmptyState
             title="Henüz ERP depo kaydı yok."
-            description="Önce depo senkronizasyonu çalıştırın."
+            description="Önce depo eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable>
+          <ErpDataTable label="ERP depoları">
             <thead>
               <tr>
                 <th>ERP Kodu</th>
@@ -153,19 +170,23 @@ export function ErpInventoryView({
           </ErpDataTable>
         )}
       </section>
+      )}
 
+      {nothingImported ? null : (
       <section className="erp-section">
         <ErpSectionHeader
           title="Stok Kayıtları"
-          description="Depo bazlı ürün stok projeksiyonları"
+          description="Depo bazlı ürün stok özetleri"
         />
         {inventoryBalances.length === 0 ? (
           <ErpEmptyState
             title="Henüz stok kaydı yok."
-            description="Önce stok senkronizasyonu çalıştırın."
+            description="Önce stok eşitlemesini çalıştırın."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
           />
         ) : (
-          <ErpDataTable className="erp-table--inventory">
+          <ErpDataTable label="ERP stok kayıtları" className="erp-table--inventory">
             <thead>
               <tr>
                 <th>Ürün Kodu</th>
@@ -201,20 +222,21 @@ export function ErpInventoryView({
           </ErpDataTable>
         )}
       </section>
+      )}
 
+      {hasReliabilityData ? (
       <section className="erp-section">
         <ErpSectionHeader
-          title="Senkronizasyon Sağlığı"
-          description="Depo, stok ve satın alma senkronizasyon güvenilirliği"
+          title="Eşitleme Sağlığı"
+          description="Depo, stok ve satın alma eşitleme güvenilirliği"
         />
-        {inventoryReliability.length === 0 ? (
-          <ErpEmptyState title="Senkronizasyon güvenilirlik verisi yok." />
-        ) : (
-          <ErpDataTable className="erp-table--sync-reliability">
+        {(
+
+          <ErpDataTable label="Stok eşitleme sağlığı" className="erp-table--sync-reliability">
             <thead>
               <tr>
                 <th>Varlık</th>
-                <th>Son Başarılı Sync</th>
+                <th>Son başarılı eşitleme</th>
                 <th>Son Hata</th>
                 <th>Son Durum</th>
                 <th>Ardışık Hata</th>
@@ -224,13 +246,12 @@ export function ErpInventoryView({
             </thead>
             <tbody>
               {inventoryReliability.map((row) => {
-                const tone = getErpConnectionStatusTone(
+                const tone =
                   row.freshnessStatus === "fresh"
-                    ? "healthy"
+                    ? getErpConnectionStatusTone("healthy")
                     : row.freshnessStatus === "stale"
-                      ? "degraded"
-                      : "configured",
-                );
+                      ? getErpConnectionStatusTone("degraded")
+                      : "neutral";
 
                 return (
                   <tr key={row.entityType}>
@@ -259,6 +280,7 @@ export function ErpInventoryView({
           </ErpDataTable>
         )}
       </section>
-    </main>
+      ) : null}
+    </div>
   );
 }

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 
 import {
   PageContent,
@@ -11,6 +13,7 @@ import { TeamsHandoverForm } from "@/features/teams/components/teams-handover-fo
 import { isHandoverChannelType } from "@/features/teams/domain/teams-constants";
 import { readTeamsWorkspace } from "@/features/teams/server/teams-queries";
 import "@/features/teams/components/teams-workspace.css";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -33,8 +36,8 @@ export default async function TeamsHandoverCreatePage({
   if (workspace.status === "failure") {
     return (
       <PageContent>
-        <PageHeader eyebrow="Teams" title="Vardiya devri oluştur" description="Kanal yüklenemedi." />
-        <EmptyState description={workspace.message} title="Kanal erişimi yok" />
+        <PageHeader eyebrow="Operasyon iletişimi" title="Vardiya devri oluştur" description="Kanal yüklenemedi." />
+        <FailureStatePage code={"code" in workspace ? workspace.code : undefined} message={workspace.message} failedTitle="Kanal erişimi yok" inline />
       </PageContent>
     );
   }
@@ -46,10 +49,11 @@ export default async function TeamsHandoverCreatePage({
       <PageContent>
         <PageHeader
           description="Vardiya devri yalnızca operasyon veya departman kanalında oluşturulur."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Vardiya devri oluştur"
         />
         <EmptyState
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/devretme">Listeye dön</Link></div>}
           description="Erişilebilir operasyon veya departman kanalı yok."
           title="Uygun kanal yok"
         />
@@ -62,8 +66,9 @@ export default async function TeamsHandoverCreatePage({
     if (!selected) {
       return (
         <PageContent>
-          <PageHeader eyebrow="Teams" title="Vardiya devri oluştur" description="Kanal uygun değil." />
+          <PageHeader eyebrow="Operasyon iletişimi" title="Vardiya devri oluştur" description="Kanal uygun değil." />
           <EmptyState
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/devretme">Listeye dön</Link></div>}
             description="Vardiya devri yalnızca erişilebilir bir operasyon veya departman kanalında oluşturulabilir."
             title="Kanal uygun değil"
           />
@@ -79,8 +84,8 @@ export default async function TeamsHandoverCreatePage({
   if (params.message && !message) {
     return (
       <PageContent>
-        <PageHeader eyebrow="Teams" title="Vardiya devri oluştur" description="Mesaj bulunamadı." />
-        <EmptyState description="Seçilen mesaja erişiminiz yok." title="Mesaj bulunamadı" />
+        <PageHeader eyebrow="Operasyon iletişimi" title="Vardiya devri oluştur" description="Mesaj bulunamadı." />
+        <EmptyState action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/devretme">Listeye dön</Link></div>} description="Seçilen mesaja erişiminiz yok." title="Mesaj bulunamadı" />
       </PageContent>
     );
   }
@@ -90,9 +95,10 @@ export default async function TeamsHandoverCreatePage({
     if (taskResult.status === "failure") {
       return (
         <PageContent>
-          <PageHeader eyebrow="Teams" title="Vardiya devri oluştur" description="Görev bulunamadı." />
+          <PageHeader eyebrow="Operasyon iletişimi" title="Vardiya devri oluştur" description="Görev bulunamadı." />
           <EmptyState
-            description="Seçilen AI görevine erişiminiz yok."
+          action={<div className="teams-empty-actions"><Link className="button button-primary button-medium" href="/teams">Kanallara git</Link><Link className="button button-secondary button-medium" href="/teams/devretme">Listeye dön</Link></div>}
+            description="Seçilen göreve erişiminiz yok."
             title="Görev bulunamadı"
           />
         </PageContent>
@@ -103,8 +109,8 @@ export default async function TeamsHandoverCreatePage({
   const initialItems = params.message || params.task
     ? [{
         itemKind: "attention",
-        title: message?.body.slice(0, 80) ?? "Bağlam maddesi",
-        body: message?.body ?? "Mevcut kayıttan aktarılan operasyon notu.",
+        title: message?.body.slice(0, 80) ?? "",
+        body: message?.body ?? "",
         linkKind: params.message ? "message" as const : "task" as const,
         messageId: params.message ?? "",
         aiTaskId: params.task ?? "",
@@ -115,7 +121,7 @@ export default async function TeamsHandoverCreatePage({
     <PageContent data-testid="teams-handover-create-page">
       <PageHeader
         description="Sonraki vardiya için yapılandırılmış operasyon bağlamı kaydedin."
-        eyebrow="Teams"
+        eyebrow="Operasyon iletişimi"
         title="Vardiya devri oluştur"
       />
       <Section title="Devir">

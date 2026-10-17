@@ -79,7 +79,7 @@ const quickActions: readonly QuickAction[] = [
     tone: "orange",
   },
   {
-    label: "ERP Senkronizasyonu",
+    label: "ERP Eşitlemesi",
     description: "Entegrasyon durumunu kontrol et",
     href: "/erp-entegrasyonlari/senkronizasyonlar",
     icon: RefreshCw,

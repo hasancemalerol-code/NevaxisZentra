@@ -1,3 +1,5 @@
+import { TrendBars } from "@/components/ui/trend-bars";
+import { formatDate, formatWeekKey } from "@/lib/presentation/format";
 import {
   AlertTriangle,
   BarChart3,
@@ -10,12 +12,19 @@ import {
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { QualityPageShell } from "@/features/quality-control/components/quality-page-shell";
 import "@/features/quality-control/components/quality-workspace.css";
+import { QualityPeriodSelect } from "@/features/quality-control/components/quality-period-select";
 import { formatQualityPercent } from "@/features/quality-control/domain/quality-control";
+import {
+  formatQualityTrendLabel,
+  hasEnoughQualityTrendData,
+} from "@/features/quality-control/presentation/quality-reporting-labels";
+import { getQualityCategoryLabel } from "@/features/quality-control/presentation/quality-ui-labels";
 import type { QualityReportingTrendPeriod } from "@/features/quality-control/domain/quality-control";
 import { readQualityReportingPage } from "@/features/quality-control/server/quality-control-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   searchParams: Promise<{ period?: string }>;
@@ -40,6 +49,13 @@ function periodLabel(period: QualityReportingTrendPeriod): string {
   }
 }
 
+const DIMENSION_LABELS: Record<string, string> = {
+  "ncr-category": "NCR kategorisi",
+  "ncr-severity": "NCR önem derecesi",
+  "inspection-type": "Kontrol türü",
+  "defect-code": "Hata kodu",
+};
+
 export default async function QualityReportingPage({ searchParams }: PageProps) {
   const { period: periodParam } = await searchParams;
   const period = parsePeriod(periodParam);
@@ -50,17 +66,11 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
       <QualityPageShell
         backHref="/kalite"
         backLabel="Kalite ana sayfası"
-        eyebrow="KALİTE RAPORLAMA"
+        eyebrow="KALİTE KONTROL"
         title="Kalite Raporları"
         nav="reporting"
       >
-        <div role="alert" className="quality-error-panel">
-          <ShieldCheck aria-hidden="true" />
-          <div>
-            <h3>Raporlama verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Raporlama verisi yüklenemedi" inline />
       </QualityPageShell>
     );
   }
@@ -74,11 +84,18 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
     correctiveActionAnalytics,
   } = result;
 
+  const chartPoints = [...trends].reverse().map((row) => ({
+    label: formatQualityTrendLabel(period, row.periodKey, row.periodStartUtc),
+    passed: row.passCount,
+    failed: row.failCount,
+    marker: row.ncrCount,
+  }));
+
   return (
     <QualityPageShell
       backHref="/kalite"
       backLabel="Kalite ana sayfası"
-      eyebrow="KALİTE RAPORLAMA"
+      eyebrow="KALİTE KONTROL"
       title="Kalite Raporları"
       subtitle="Kontrol performansı, uygunsuzluk trendleri ve başarısızlık dağılımını salt okunur raporlama görünümünde izleyin."
       nav="reporting"
@@ -102,6 +119,7 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
           <div>
             <span>Geçme Oranı</span>
             <strong>{formatQualityPercent(overview.passRatePercent)}</strong>
+            {overview.passRatePercent == null ? <small>Veri yok</small> : null}
           </div>
         </div>
         <div className="production-execution-kpis__item--ready">
@@ -109,13 +127,15 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
           <div>
             <span>İlk Geçiş Verimi</span>
             <strong>{formatQualityPercent(overview.firstPassYieldPercent)}</strong>
+            {overview.firstPassYieldPercent == null ? <small>Veri yok</small> : null}
           </div>
         </div>
         <div className="production-execution-kpis__item--in-progress">
           <BarChart3 aria-hidden="true" />
           <div>
-            <span>Serbest Bırakma Oranı</span>
+            <span>Serbest Bırakma</span>
             <strong>{formatQualityPercent(overview.releaseRatePercent)}</strong>
+            {overview.releaseRatePercent == null ? <small>Veri yok</small> : null}
           </div>
         </div>
         <div className="production-execution-kpis__item--paused">
@@ -136,7 +156,7 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
         <div className="production-execution-kpis__item--in-progress">
           <Lock aria-hidden="true" />
           <div>
-            <span>Aktif Blokesi</span>
+            <span>Aktif Bloke</span>
             <strong>{overview.activeHoldCount}</strong>
             <small>Bloklu emir: {overview.blockingProductionOrderCount}</small>
           </div>
@@ -144,19 +164,19 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
         <div className="production-execution-kpis__item--ready">
           <ShieldCheck aria-hidden="true" />
           <div>
-            <span>Düzeltici Aksiyon</span>
+            <span>Aksiyonlar</span>
             <strong>{overview.openCorrectiveActionCount}</strong>
             <small>Geciken: {overview.overdueCorrectiveActionCount}</small>
           </div>
         </div>
       </section>
 
-      <div className="quality-detail-grid">
+      <div className="quality-summary-grid">
         <section className="quality-section" aria-label="NCR analitiği">
           <header className="quality-section__header">
             <h2>NCR</h2>
           </header>
-          <dl className="quality-detail-dl">
+          <dl className="quality-stat-list">
             <div>
               <dt>Açık</dt>
               <dd>{ncrAnalytics.openCount}</dd>
@@ -170,10 +190,16 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
               <dd>{ncrAnalytics.closedCount}</dd>
             </div>
             <div>
-              <dt>Kritik / Majör / Minör</dt>
-              <dd>
-                {ncrAnalytics.criticalCount} / {ncrAnalytics.majorCount} / {ncrAnalytics.minorCount}
-              </dd>
+              <dt>Kritik</dt>
+              <dd>{ncrAnalytics.criticalCount}</dd>
+            </div>
+            <div>
+              <dt>Majör</dt>
+              <dd>{ncrAnalytics.majorCount}</dd>
+            </div>
+            <div>
+              <dt>Minör</dt>
+              <dd>{ncrAnalytics.minorCount}</dd>
             </div>
           </dl>
         </section>
@@ -181,7 +207,7 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
           <header className="quality-section__header">
             <h2>Kalite Blokeleri</h2>
           </header>
-          <dl className="quality-detail-dl">
+          <dl className="quality-stat-list">
             <div>
               <dt>Aktif</dt>
               <dd>{holdAnalytics.activeCount}</dd>
@@ -200,7 +226,7 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
           <header className="quality-section__header">
             <h2>Düzeltici Aksiyonlar</h2>
           </header>
-          <dl className="quality-detail-dl">
+          <dl className="quality-stat-list">
             <div>
               <dt>Açık</dt>
               <dd>{correctiveActionAnalytics.openCount}</dd>
@@ -226,24 +252,23 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
           <div>
             <h2>{periodLabel(period)} Kalite Trendi</h2>
           </div>
-          <form className="quality-filter-panel" method="get">
-            <div className="quality-filter-panel__field">
-              <label htmlFor="report-period">Dönem</label>
-              <select id="report-period" name="period" className="quality-form-select" defaultValue={period}>
-                <option value="day">Günlük</option>
-                <option value="week">Haftalık</option>
-                <option value="month">Aylık</option>
-              </select>
-            </div>
-            <div className="quality-filter-panel__actions">
-              <Button type="submit" variant="secondary" size="medium">
-                Dönemi Güncelle
-              </Button>
-            </div>
-          </form>
+          <QualityPeriodSelect value={period} />
         </header>
-        <div className="quality-table-wrap">
-          <table className="quality-table">
+        {hasEnoughQualityTrendData(chartPoints) ? (
+          <TrendBars
+            ariaLabel={`${periodLabel(period)} kalite trendi: dönem başına geçen ve başarısız kontroller, NCR sayısı`}
+            points={chartPoints}
+            passedLabel="Geçen kontrol"
+            failedLabel="Başarısız kontrol"
+            markerLabel="NCR sayısı"
+          />
+        ) : (
+          <p className="quality-empty-state" data-testid="quality-trend-insufficient">
+            Yeterli veri yok. Trend grafiği için en az iki dönemde kayıt gerekir; mevcut değerler aşağıdaki tabloda yer alır.
+          </p>
+        )}
+        <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="Dönemsel kalite trendi tablosu">
+          <table aria-label="Dönemsel kalite trendi" className="quality-table quality-table--compact">
             <thead>
               <tr>
                 <th>Dönem</th>
@@ -266,9 +291,9 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
                 trends.map((row) => (
                   <tr key={row.periodKey}>
                     <td>
-                      <div className="quality-table__identifier">
-                        <strong>{row.periodKey}</strong>
-                        <small>{new Date(row.periodStartUtc).toLocaleDateString("tr-TR")}</small>
+                      <div className="quality-table__identifier quality-table__identifier--nowrap">
+                        <strong>{formatWeekKey(row.periodKey)}</strong>
+                        <small>{formatDate(row.periodStartUtc)}</small>
                       </div>
                     </td>
                     <td>{row.inspectionCount}</td>
@@ -289,29 +314,27 @@ export default async function QualityReportingPage({ searchParams }: PageProps) 
         <header className="quality-section__header">
           <h2>Hata Dağılımı</h2>
         </header>
-        <div className="quality-table-wrap">
-          <table className="quality-table">
+        <div className="quality-table-wrap" tabIndex={0} role="region" aria-label="Hata dağılımı tablosu">
+          <table aria-label="Hata Dağılımı" className="quality-table quality-table--compact">
             <thead>
               <tr>
                 <th>Boyut</th>
-                <th>Anahtar</th>
-                <th>Etiket</th>
+                <th>Başarısızlık nedeni</th>
                 <th>Adet</th>
               </tr>
             </thead>
             <tbody>
               {failures.length === 0 ? (
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={3}>
                     <span className="quality-empty-state">Başarısızlık kaydı yok.</span>
                   </td>
                 </tr>
               ) : (
                 failures.map((item) => (
                   <tr key={`${item.dimension}-${item.key}`}>
-                    <td>{item.dimension}</td>
-                    <td>{item.key}</td>
-                    <td>{item.label ?? "—"}</td>
+                    <td>{DIMENSION_LABELS[item.dimension] ?? getQualityCategoryLabel(item.dimension)}</td>
+                    <td>{getQualityCategoryLabel(item.label ?? item.key)}</td>
                     <td>
                       <Badge tone={item.count > 0 ? "warning" : "neutral"}>{item.count}</Badge>
                     </td>

@@ -14,6 +14,6 @@ export const COMMERCIAL_MATERIAL_COST_PROFITABILITY_NO_SELECTION_NOTE =
   "Detay görmek için listeden bir karşılaştırma seçin.";
 
 export const COMMERCIAL_MATERIAL_COST_PROFITABILITY_LENS_OPTIONS = [
-  { id: "material", label: "Malzeme Kârlılığı" },
-  { id: "cost-driver", label: "Maliyet Etkisi ve Marj Kaybı" },
+  { id: "material", label: "Malzeme kârlılığı" },
+  { id: "cost-driver", label: "Maliyet etkisi ve marj kaybı" },
 ] as const;

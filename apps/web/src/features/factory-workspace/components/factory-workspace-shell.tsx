@@ -4,7 +4,9 @@ import { useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { FactoryContextBreadcrumb } from "@/components/workspace/factory-context-breadcrumb";
-import { StatusStrip } from "@/components/workspace/status-strip";
+import { Activity, AlertTriangle, CalendarClock, Clock, PauseCircle, ShieldAlert } from "lucide-react";
+import type { ReactNode } from "react";
+
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { buildFactoryWorkspaceHref } from "../application/factory-workspace-selection";
 import type { FactoryWorkspacePayload, FactoryWorkspaceSelection } from "../domain/factory-workspace-types";
@@ -48,6 +50,32 @@ function breadcrumbSegments(workspace: FactoryWorkspacePayload) {
   return segments;
 }
 
+const NO_ACTIVE_SHIFT_LABEL = "Aktif vardiya yok";
+
+type StripTone = "neutral" | "success" | "warning" | "danger";
+
+type StripItem = Readonly<{ label: string; value: string | number; icon: ReactNode; tone: StripTone }>;
+
+/** Page-level summary: same count-aware strip grid as everywhere, with an icon and a status colour per tile. */
+function FactoryStatusStrip({ items }: Readonly<{ items: readonly StripItem[] }>) {
+  return (
+    <section className="fact-status-strip factory-status-strip" aria-label="Fabrika çalışma alanı özet">
+      {items.map((item) => (
+        <article key={item.label} className={`fact-status-strip__item factory-status-strip__item factory-status-strip__item--${item.tone}`}>
+          <span className="factory-status-strip__icon" aria-hidden="true">{item.icon}</span>
+          <span className="fact-status-strip__label">{item.label}</span>
+          <strong className="fact-status-strip__value">{item.value}</strong>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function shiftStripValue(label: string | undefined): string {
+  if (!label) return "Atanmadı";
+  return label === NO_ACTIVE_SHIFT_LABEL ? "—" : label;
+}
+
 export function FactoryWorkspaceShell({ workspace }: FactoryWorkspaceShellProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -68,39 +96,39 @@ export function FactoryWorkspaceShell({ workspace }: FactoryWorkspaceShellProps)
   );
 
   return (
-    <main className="fact-workspace factory-workspace" data-testid="factory-workspace">
+    <div className="fact-workspace factory-workspace" data-testid="factory-workspace">
       <WorkspaceHeader
-        breadcrumb={<FactoryContextBreadcrumb segments={breadcrumbSegments(workspace)} />}
+        breadcrumb={breadcrumbSegments(workspace).length > 0 ? <FactoryContextBreadcrumb segments={breadcrumbSegments(workspace)} /> : undefined}
         context="FABRİKA"
-        meta="Fabrika → Alan → Hat → İstasyon → Kaynak"
+        meta="Alan, hat, istasyon ve kaynak düzeyinde canlı fabrika durumu"
         title="Fabrikada şu anda ne oluyor?"
         actions={<FactoryCopilotWorkspaceActions />}
       />
 
-      <StatusStrip
-        aria-label="Fabrika çalışma alanı özet"
+      <FactoryWorkspacePrimaryNav pathname={pathname} />
+
+      <FactoryStatusStrip
         items={[
-          { label: "Çalışan kaynak", value: workspace.resources.status.running },
-          { label: "Bekleyen", value: workspace.resources.status.waiting },
-          { label: "Arızalı", value: workspace.resources.status.fault },
-          { label: "Risk", value: workspace.resources.status.atRisk },
-          { label: "Vardiya", value: workspace.shift?.shiftLabel ?? "—" },
+          { label: "Çalışan kaynak", value: workspace.resources.status.running, icon: <Activity />, tone: workspace.resources.status.running > 0 ? "success" : "neutral" },
+          { label: "Bekleyen", value: workspace.resources.status.waiting, icon: <Clock />, tone: workspace.resources.status.waiting > 0 ? "warning" : "neutral" },
+          { label: "Boşta", value: workspace.resources.resources.filter((resource) => resource.state === "IDLE" || resource.state === "STOPPED").length, icon: <PauseCircle />, tone: "neutral" },
+          { label: "Arızalı", value: workspace.resources.status.fault, icon: <AlertTriangle />, tone: workspace.resources.status.fault > 0 ? "danger" : "neutral" },
+          { label: "Risk", value: workspace.resources.status.atRisk, icon: <ShieldAlert />, tone: workspace.resources.status.atRisk > 0 ? "warning" : "neutral" },
+          { label: "Vardiya", value: shiftStripValue(workspace.shift?.shiftLabel), icon: <CalendarClock />, tone: "neutral" },
         ]}
       />
-
-      <FactoryWorkspacePrimaryNav pathname={pathname} />
 
       <FactoryOnboardingEmptyState
         resourceCount={workspace.resources.resources.length}
         lineCount={new Set(workspace.resources.resources.map((resource) => resource.lineId)).size}
       />
 
-      <div className="factory-workspace__layout">
-        <aside className="factory-workspace__panel" aria-label="Fabrika hiyerarşisi">
+      <div className={`factory-workspace__layout${workspace.resources.resources.length === 0 ? " factory-workspace__layout--empty" : ""}`}>
+        <aside className="factory-workspace__panel factory-workspace__panel--tree" aria-label="Fabrika hiyerarşisi">
           <div className="factory-workspace__panel-header">
             <h2>Hiyerarşi</h2>
           </div>
-          <div className="factory-workspace__panel-body">
+          <div className="factory-workspace__panel-body factory-workspace__tree-body">
             <input
               aria-label="Fabrika arama"
               className="factory-hierarchy-search"
@@ -151,6 +179,6 @@ export function FactoryWorkspaceShell({ workspace }: FactoryWorkspaceShellProps)
           </div>
         </aside>
       </div>
-    </main>
+    </div>
   );
 }

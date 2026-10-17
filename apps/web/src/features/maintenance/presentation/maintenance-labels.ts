@@ -258,12 +258,12 @@ export function formatMaintenanceAge(isoTimestamp: string): string {
 
 export function getMaintenancePriorityTone(
   priority: string,
-): "neutral" | "information" | "danger" | "success" {
+): "neutral" | "information" | "danger" | "success" | "warning" {
   switch (priority) {
     case "critical":
       return "danger";
     case "high":
-      return "information";
+      return "warning";
     default:
       return "neutral";
   }
@@ -299,6 +299,22 @@ const ACTIVE_WORK_ORDER_STATUSES = new Set([
   "in-progress",
   "waiting",
 ]);
+
+/**
+ * Caption for an empty mean-repair-time (MTTR) value. MTTR only uses COMPLETED fault/corrective work orders that
+ * have both start and completion times, so "no corrective maintenance" is only true when there is no completed one.
+ */
+export function describeMeanRepairUnavailable(
+  workOrders: ReadonlyArray<Readonly<{ type: string; status: string }>>,
+): string {
+  const hasCompletedCorrective = workOrders.some(
+    (item) => (item.type === "fault" || item.type === "corrective") && item.status === "completed",
+  );
+
+  return hasCompletedCorrective
+    ? "Başlangıç ve bitiş zamanı kayıtlı onarım yok"
+    : "Tamamlanmış düzeltici bakım yok";
+}
 
 export function isActiveMaintenanceWorkOrder(status: string): boolean {
   return ACTIVE_WORK_ORDER_STATUSES.has(status);
@@ -468,4 +484,102 @@ export function getMaintenanceFailureCategoryLabel(category: string): string {
     default:
       return "Diğer";
   }
+}
+
+const CONDITION_REASON_LABELS: Readonly<Record<string, string>> = {
+  "critical open maintenance item": "Kritik açık bakım kaydı var",
+  "repeat failure threshold reached": "Tekrarlayan arıza eşiğine ulaşıldı",
+  "preventive maintenance heavily overdue": "Periyodik bakım ciddi şekilde gecikmiş",
+  "recent fault recorded": "Yakın zamanda arıza kaydedildi",
+  "overdue preventive maintenance": "Periyodik bakım vadesi geçmiş",
+  "no active deterministic maintenance risk": "Etkin bakım riski saptanmadı",
+  "insufficient maintenance history": "Bakım geçmişi yetersiz",
+};
+
+/** Turkish text for a backend-generated condition reason; unknown English-looking codes fall back to a neutral phrase. */
+export function getMaintenanceConditionReasonLabel(reason: string): string {
+  const known = CONDITION_REASON_LABELS[reason.trim().toLowerCase()];
+  if (known) {
+    return known;
+  }
+
+  return /^[\x20-\x7e]+$/.test(reason) && !/[ğüşıöçĞÜŞİÖÇ]/.test(reason) && /^[a-z0-9 ._-]+$/i.test(reason)
+    ? "Durum değerlendirmesinde ek bir koşul saptandı"
+    : reason;
+}
+
+const EVENT_ENTITY_LABELS: Readonly<Record<string, string>> = {
+  request: "Arıza kaydı",
+  workorder: "Bakım emri",
+  plan: "Periyodik bakım planı",
+  due: "Periyodik bakım vadesi",
+  note: "Bakım notu",
+  part: "Parça kullanımı",
+};
+
+const EVENT_VERB_LABELS: Readonly<Record<string, string>> = {
+  created: "oluşturuldu",
+  generated: "oluşturuldu",
+  updated: "güncellendi",
+  assigned: "atandı",
+  started: "başlatıldı",
+  completed: "tamamlandı",
+  cancelled: "iptal edildi",
+  canceled: "iptal edildi",
+  closed: "kapatıldı",
+  triaged: "sınıflandırıldı",
+  converted: "bakım emrine dönüştürüldü",
+  waiting: "beklemeye alındı",
+  resumed: "yeniden başlatıldı",
+  added: "eklendi",
+  recorded: "kaydedildi",
+  skipped: "atlandı",
+};
+
+function eventTokens(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/work[\s._-]*order/g, "workorder")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token && token !== "maintenance");
+}
+
+/**
+ * Turkish sentence for a maintenance activity / timeline event ("maintenance.workorder.created" or
+ * "Maintenance workorder created" -> "Bakım emri oluşturuldu"). Returns null for a technical code that cannot be
+ * translated, so callers hide it instead of printing it. Text that is already readable passes through unchanged.
+ */
+export function localizeMaintenanceEventText(text: string | null | undefined): string | null {
+  const value = text?.trim();
+  if (!value) {
+    return null;
+  }
+
+  const tokens = eventTokens(value);
+  const entity = tokens.find((token) => EVENT_ENTITY_LABELS[token]);
+  const verb = [...tokens].reverse().find((token) => EVENT_VERB_LABELS[token]);
+  if (entity && verb) {
+    return `${EVENT_ENTITY_LABELS[entity]} ${EVENT_VERB_LABELS[verb]}`;
+  }
+
+  if (/^[a-z0-9]+(?:[._-][a-z0-9]+)+$/i.test(value)) {
+    return null;
+  }
+
+  if (/^[A-Za-z0-9 ,.'-]+$/.test(value) && !/[ğüşıöçĞÜŞİÖÇ]/.test(value) && /\b(?:the|was|has|is|created|updated|maintenance|work|request|order)\b/i.test(value)) {
+    return null;
+  }
+
+  return value;
+}
+
+/** Event label and optional human detail for one activity entry; the technical code is never returned. */
+export function describeMaintenanceActivity(entry: Readonly<{ eventType?: string; summary?: string }>): Readonly<{
+  label: string;
+  detail: string | null;
+}> {
+  const label =
+    localizeMaintenanceEventText(entry.eventType) ?? localizeMaintenanceEventText(entry.summary) ?? "Bakım olayı";
+  const detail = localizeMaintenanceEventText(entry.summary);
+  return { label, detail: detail && detail !== label ? detail : null };
 }

@@ -7,6 +7,10 @@ import {
   SAAS_IDENTITY_SESSION_COOKIE,
 } from "@/features/saas-identity/lib/saas-identity-constants";
 import { readZentraEnv } from "@/lib/config/zentra-env";
+import { deferredSurfacesEnabled, isDeferredSurfaceHref } from "@/lib/runtime/deferred-surfaces";
+
+/** A path no route matches: the rewrite renders the root not-found page with a real 404 status. */
+const DEFERRED_NOT_FOUND_REWRITE = "/__deferred-surface-not-found";
 
 function isAuthRoute(pathname: string): boolean {
   return SAAS_IDENTITY_AUTH_ROUTES.some(
@@ -43,6 +47,18 @@ function hasIdentitySession(request: NextRequest): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Deferred demo surfaces answer a real 404 before any streaming starts (a layout notFound() can only produce 200),
+  // identically for signed-in and signed-out visitors so their existence is not disclosed.
+  if (isDeferredSurfaceHref(pathname) && !deferredSurfacesEnabled(process.env)) {
+    const url = request.nextUrl.clone();
+    url.pathname = DEFERRED_NOT_FOUND_REWRITE;
+    url.search = "";
+    const response = NextResponse.rewrite(url, { status: 404 });
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  }
 
   if (isPublicRoute(pathname)) {
     return NextResponse.next();

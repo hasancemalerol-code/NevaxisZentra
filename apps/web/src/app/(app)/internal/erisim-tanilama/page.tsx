@@ -35,7 +35,7 @@ export default async function AcceptanceRoleDiagnosticsPage() {
   const catalogMatches = access?.permissionCatalogVersion === acceptanceRoleContract.catalogVersion;
 
   return (
-    <main className="fact-workspace" data-testid="acceptance-role-diagnostics">
+    <div className="fact-workspace" data-testid="acceptance-role-diagnostics">
       <h1>Erişim tanılama</h1>
       <p>Geliştirme tanısı. Oturum belirteci, parola veya bağlantı bilgisi gösterilmez.</p>
       <dl>
@@ -63,6 +63,6 @@ export default async function AcceptanceRoleDiagnosticsPage() {
         <dt>Uygulama kataloğu</dt>
         <dd>{appsCatalogItems.map((item) => item.href).join(", ")}</dd>
       </dl>
-    </main>
+    </div>
   );
 }

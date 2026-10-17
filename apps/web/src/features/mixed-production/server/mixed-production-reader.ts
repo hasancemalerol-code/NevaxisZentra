@@ -22,12 +22,12 @@ async function resolveContext() {
 
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
-    return { status: "failure" as const, message: configResult.message };
+    return { status: "failure" as const, code: "configuration-error", message: configResult.message };
   }
 
   const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
-    return { status: "failure" as const, message: contextResult.message };
+    return { status: "failure" as const, code: contextResult.code, message: contextResult.message };
   }
 
   return { status: "success" as const, context: contextResult.context };
@@ -35,7 +35,7 @@ async function resolveContext() {
 
 export async function loadMixedProductionLinesWorkspace(): Promise<
   | { status: "success"; lines: readonly MixedProductionLineSummaryApi[] }
-  | { status: "failure"; message: string }
+  | { status: "failure"; code?: string; message: string }
 > {
   const resolved = await resolveContext();
   if (resolved.status === "failure") {
@@ -44,7 +44,7 @@ export async function loadMixedProductionLinesWorkspace(): Promise<
 
   const linesResult = await readMixedProductionLines(resolved.context);
   if (linesResult.status === "failure") {
-    return { status: "failure", message: linesResult.message };
+    return { status: "failure", code: linesResult.code, message: linesResult.message };
   }
 
   return { status: "success", lines: linesResult.value };

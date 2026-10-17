@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { StatePage } from "@/components/ui/state-page";
+import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
+
 import {
   FACTORY_NETWORK_SUBTITLE,
   FACTORY_NETWORK_TITLE,
@@ -10,8 +14,28 @@ import { FactoryNetworkWorkspaceClient } from "./factory-network-workspace-clien
 
 export async function FactoryNetworkWorkspacePanel() {
   const result = await readFactoryNetworkWorkspaceDetail();
+  if (result.status === "failure" && isNotFoundFailureCode(result.code)) {
+    return (
+      <StatePage
+        kind="empty"
+        title="Fabrika ağı henüz tanımlı değil"
+        description="Birden fazla tesisi tek ağda yönetmek için önce fabrika ağı kurulmalı. Ağ tanımlandığında kapasite dengesi ve tahsis kararları burada görünür."
+        inline
+      />
+    );
+  }
+
   if (result.status === "failure") {
-    return null;
+    return (
+      <FailureStatePage
+        code={result.code}
+        message={result.message}
+        failedTitle="Fabrika ağı bilgisi yüklenemedi"
+        backHref="/dashboard"
+        backLabel="Ana sayfaya dön"
+        inline
+      />
+    );
   }
 
   return (

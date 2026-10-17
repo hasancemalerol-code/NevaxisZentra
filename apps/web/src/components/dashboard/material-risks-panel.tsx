@@ -93,11 +93,12 @@ const styles: Record<string, CSSProperties> = {
     minWidth: 0,
     minHeight: 0,
     flex: "1 1 auto",
-    overflow: "hidden",
+    overflowX: "auto",
+    overflowY: "hidden",
   },
   table: {
     width: "100%",
-    minWidth: 0,
+    minWidth: 560,
     borderCollapse: "collapse",
     tableLayout: "fixed",
   },
@@ -473,7 +474,7 @@ export function MaterialRisksPanel({
       </div>
 
       <div style={styles.wrapper}>
-        <table style={styles.table}>
+        <table aria-label="Malzeme Riskleri" style={styles.table}>
           <thead>
             <tr>
               <th

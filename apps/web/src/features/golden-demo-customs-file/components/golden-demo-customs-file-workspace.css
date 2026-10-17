@@ -32,7 +32,7 @@
   border: 1px solid #e8edf3;
   border-radius: 8px;
   background: #ffffff;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .golden-demo-customs-checklist__icon {
@@ -50,7 +50,7 @@
 }
 
 .golden-demo-customs-checklist__item--pending .golden-demo-customs-checklist__icon {
-  color: #64748b;
+  color: #566478;
 }
 
 .golden-demo-customs-blocker-list {
@@ -66,7 +66,7 @@
   border: 1px solid #fecaca;
   border-radius: 10px;
   background: #fef2f2;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: #991b1b;
 }
 
@@ -107,12 +107,12 @@
   border: 1px solid #e8edf3;
   border-radius: 8px;
   background: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: #475569;
 }
 
 .golden-demo-customs-activity strong {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--commint-navy);
 }
 
@@ -131,6 +131,6 @@
 .golden-demo-customs-package ul {
   margin: 0;
   padding-left: 1rem;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: #475569;
 }

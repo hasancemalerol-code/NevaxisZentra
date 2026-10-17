@@ -7,7 +7,7 @@ export function AiTaskKpiLoading() {
   return (
     <div
       aria-busy="true"
-      aria-label="AI görev merkezi özet göstergeleri yükleniyor"
+      aria-label="Yapay zekâ görev merkezi özet göstergeleri yükleniyor"
       className="kpi-grid ai-task-kpi-links ai-task-kpi-loading"
     >
       {Array.from(

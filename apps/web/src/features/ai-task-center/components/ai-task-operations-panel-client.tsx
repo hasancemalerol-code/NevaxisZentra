@@ -37,7 +37,8 @@ import {
   getAiTaskEscalationBadgeLabel,
   getAiTaskEscalationStateLabel,
   getAiTaskSlaDisplayText,
-  getAiTaskSlaStateLabel,
+  getAiTaskResolutionDeadlineSummary,
+  getAiTaskSlaBreachLabel,
 } from "../presentation/ai-task-sla-labels";
 import { formatAiTaskShortDateTime } from "../presentation/ai-task-formatters";
 import type {
@@ -61,6 +62,7 @@ import {
   AiTaskDetailTextarea,
   AiTaskDetailValueRow,
 } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskOperationsPanelClientProps = Readonly<{
   task: AiTask;
@@ -165,7 +167,16 @@ export function AiTaskOperationsPanelClient({
     ?? task.sla?.responseDueAt
     ?? task.sla?.acknowledgmentDueAt
     ?? task.dueAt;
-  const slaDisplay = getAiTaskSlaDisplayText(task.slaState, slaDueAt);
+  const slaDisplay = getAiTaskSlaDisplayText(
+    task.slaState,
+    slaDueAt,
+    undefined,
+    task.sla?.breachType,
+  )
+  const resolutionDeadline = getAiTaskResolutionDeadlineSummary(
+    task.slaState,
+    task.sla?.resolutionDueAt ?? task.dueAt,
+  );
   const escalationBadge = task.escalationLevel > 0
     ? getAiTaskEscalationBadgeLabel(task.escalationLevel)
     : null;
@@ -250,11 +261,12 @@ export function AiTaskOperationsPanelClient({
       {errorMessage ? (
         <div className="ai-task-detail-sidebar__alert" role="alert">
           <AlarmClock aria-hidden="true" />
-          <span>{errorMessage}</span>
+          <span>{customerMessage(errorMessage)}</span>
         </div>
       ) : null}
 
-      <AiTaskDetailSectionCard title="Sahiplik" eyebrow="Ownership">
+      <div className="ai-task-detail-anchor" id="ai-task-assignment">
+      <AiTaskDetailSectionCard title="Sorumlu">
         <div className="ai-task-detail-sidebar__owner">
           <span aria-hidden="true" className="ai-task-detail-sidebar__avatar">
             {resolveAssigneeInitials(task.assignee?.displayName ?? teamLabel)}
@@ -308,7 +320,7 @@ export function AiTaskOperationsPanelClient({
               size="small"
               variant="secondary"
             >
-              Bana Ata
+              Bana ata
             </Button>
           ) : null}
 
@@ -358,7 +370,7 @@ export function AiTaskOperationsPanelClient({
               size="small"
               variant="secondary"
             >
-              Yeniden Ata
+              Yeniden ata
             </Button>
           ) : null}
         </div>
@@ -420,6 +432,7 @@ export function AiTaskOperationsPanelClient({
           </div>
         ) : null}
       </AiTaskDetailSectionCard>
+      </div>
 
       <AiTaskDetailSectionCard
         actions={
@@ -429,20 +442,47 @@ export function AiTaskOperationsPanelClient({
             </Badge>
           ) : null
         }
-        eyebrow="SLA"
         title="SLA ve son tarih"
       >
         <AiTaskDetailValueRow
           label="SLA durumu"
           value={
             <Badge tone={AI_TASK_SLA_STATE_TONES[task.slaState]}>
-              {getAiTaskSlaStateLabel(task.slaState)}
+              {getAiTaskSlaBreachLabel(task.slaState, task.sla?.breachType)}
             </Badge>
           }
         />
+        {task.slaState !== "not-applicable" ? (
+          <AiTaskDetailValueRow
+            label="Onay hedefi"
+            value={
+              task.acknowledgedAtUtc ? (
+                <Badge tone="success">Karşılandı</Badge>
+              ) : task.sla?.acknowledgmentDueAt
+                && Date.parse(task.sla.acknowledgmentDueAt) < Date.now() ? (
+                  <Badge tone="danger">Aşıldı</Badge>
+                ) : (
+                  <Badge tone="neutral">Bekleniyor</Badge>
+                )
+            }
+          />
+        ) : null}
         <AiTaskDetailValueRow
-          label="Kalan / gecikme"
-          value={slaDisplay ?? "Aktif SLA hedefi tanımlanmadı"}
+          label="Çözüm hedefi"
+          value={
+            resolutionDeadline ? (
+              <>
+                {task.sla?.resolutionDueAt ? `${formatAiTaskShortDateTime(task.sla.resolutionDueAt)} · ` : ""}
+                <Badge tone={resolutionDeadline.passed ? "danger" : "neutral"}>
+                  {resolutionDeadline.passed
+                    ? `${resolutionDeadline.value} gecikti`
+                    : `${resolutionDeadline.value} kaldı`}
+                </Badge>
+              </>
+            ) : (
+              "SLA hedefi tanımlı değil"
+            )
+          }
         />
         <AiTaskDetailValueRow
           label="Teslim durumu"
@@ -454,12 +494,6 @@ export function AiTaskOperationsPanelClient({
                 : "Atama gerekli"
           }
         />
-        {task.sla?.resolutionDueAt ? (
-          <AiTaskDetailValueRow
-            label="Çözüm hedefi"
-            value={formatAiTaskShortDateTime(task.sla.resolutionDueAt)}
-          />
-        ) : null}
         <AiTaskDetailValueRow
           label="Son tarih"
           value={task.dueAt ? formatAiTaskShortDateTime(task.dueAt) : "Tanımlanmadı"}
@@ -524,7 +558,6 @@ export function AiTaskOperationsPanelClient({
             {getAiTaskPriorityLabel(task.priority)}
           </Badge>
         }
-        eyebrow="Priority"
         title="Öncelik"
       >
         {!showPriorityEdit ? (
@@ -535,7 +568,7 @@ export function AiTaskOperationsPanelClient({
             size="small"
             variant="secondary"
           >
-            Önceliği Değiştir
+            Önceliği değiştir
           </Button>
         ) : (
           <div className="ai-task-detail-sidebar__expand">
@@ -589,8 +622,7 @@ export function AiTaskOperationsPanelClient({
             </Badge>
           ) : null
         }
-        eyebrow="Escalation"
-        title="Eskalasyon"
+        title="Üst seviyeye aktarım"
       >
         <AiTaskDetailValueRow
           label="Durum"
@@ -609,18 +641,18 @@ export function AiTaskOperationsPanelClient({
               size="small"
               variant="secondary"
             >
-              Eskale Et
+              Üst seviyeye aktar
             </Button>
           ) : (
             <div className="ai-task-detail-sidebar__expand">
               <AiTaskDetailField
-                helper="Eskalasyon gerekçesini kısa olarak belirtin"
-                label="Eskalasyon notu"
+                helper="Üst seviyeye aktarım gerekçesini kısa olarak belirtin"
+                label="Üst seviyeye aktarım notu"
               >
                 <AiTaskDetailTextarea
                   disabled={isPending}
                   onChange={(event) => setEscalationNote(event.target.value)}
-                  placeholder="Eskalasyon nedeni"
+                  placeholder="Üst seviyeye aktarım nedeni"
                   rows={2}
                   value={escalationNote}
                 />
@@ -638,7 +670,7 @@ export function AiTaskOperationsPanelClient({
                   size="small"
                   variant="danger"
                 >
-                  Eskale Et
+                  Üst seviyeye aktar
                 </Button>
                 <Button
                   disabled={isPending}
@@ -657,29 +689,12 @@ export function AiTaskOperationsPanelClient({
         ) : null}
       </AiTaskDetailSectionCard>
 
-      <AiTaskDetailSectionCard eyebrow="Actions" title="Hızlı aksiyonlar">
+      {(canAcknowledge || canStart) ? (
+      <AiTaskDetailSectionCard title="Sıradaki işlem">
         <div
           aria-label="Görev operasyon aksiyonları"
           className="ai-task-detail-sidebar__quick-actions"
         >
-          {canAssignToSelf ? (
-            <Button
-              disabled={isPending}
-              leadingIcon={<UserPlus />}
-              onClick={() => {
-                if (!operations.currentMembershipId) {
-                  return;
-                }
-
-                assignToMembership(operations.currentMembershipId, "manual");
-              }}
-              size="small"
-              variant="secondary"
-            >
-              Bana Ata
-            </Button>
-          ) : null}
-
           {canAcknowledge ? (
             <Button
               disabled={isPending}
@@ -690,7 +705,7 @@ export function AiTaskOperationsPanelClient({
               }))}
               size="small"
             >
-              Teslim Aldım
+              Üstlendim
             </Button>
           ) : null}
 
@@ -710,6 +725,7 @@ export function AiTaskOperationsPanelClient({
           ) : null}
         </div>
       </AiTaskDetailSectionCard>
+      ) : null}
 
       {!hasAnyOperations ? (
         <p className="ai-task-detail-sidebar__footnote">

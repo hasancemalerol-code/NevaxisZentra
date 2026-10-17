@@ -1,3 +1,5 @@
+import { CircleCheck, Link2, TriangleAlert } from "lucide-react";
+
 import type { ErpCustomerReconciliation, ErpProductReconciliation } from "../domain/erp";
 import {
   formatErpDateTime,
@@ -6,7 +8,9 @@ import {
 import {
   ErpDataTable,
   ErpEmptyState,
-  ErpInfoBanner,
+  ErpKpiCard,
+  ErpKpiGrid,
+  ErpReadonlyNotice,
   ErpMappingBadge,
   ErpPageHeader,
   ErpProviderBadge,
@@ -38,22 +42,66 @@ const PRODUCT_FILTER_CHIPS = [
 ] as const;
 
 export function ErpReconciliationView({ customers, products }: ErpReconciliationViewProps) {
+  const nothingToReconcile = customers.length === 0 && products.length === 0;
+  const allRows: readonly { mappingStatus: string }[] = [...customers, ...products];
+
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Eşleştirme"
         description="Harici ERP müşteri ve ürün kayıtlarının Zentra operasyonel referanslarıyla eşleştirilmesi. Otomatik onay yoktur."
         notice={
-          <ErpInfoBanner>
-            Öneri durumunda: Öneri — kullanıcı onayı gerekli. AI eşleştirme kullanılmaz.
-          </ErpInfoBanner>
+          <ErpReadonlyNotice>
+            Öneri durumundaki eşleştirmeler kullanıcı onayı gerektirir; otomatik eşleştirme yapılmaz.
+          </ErpReadonlyNotice>
         }
       />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/eslestirme" />
 
+      <ErpKpiGrid columns={3}>
+        <ErpKpiCard
+          label="Öneri"
+          value={allRows.filter((row) => row.mappingStatus === "suggested").length}
+          description="Kullanıcı onayı bekleyen"
+          icon={<Link2 aria-hidden="true" />}
+          tone="info"
+        />
+        <ErpKpiCard
+          label="Eşleşmedi"
+          value={allRows.filter((row) => row.mappingStatus === "unmapped").length}
+          description="Eşleştirme bekleyen kayıt"
+          icon={<TriangleAlert aria-hidden="true" />}
+          tone="warning"
+        />
+        <ErpKpiCard
+          label="Eşleşti"
+          value={allRows.filter((row) => row.mappingStatus === "mapped").length}
+          description="Onaylanmış eşleştirme"
+          icon={<CircleCheck aria-hidden="true" />}
+          tone="success"
+        />
+      </ErpKpiGrid>
+
+      {nothingToReconcile ? (
+        <section className="erp-section">
+          <ErpSectionHeader
+            title="Müşteri ve Ürün Eşleştirmeleri"
+            description="Öneri, eşleşme ve onay durumları"
+          />
+          <ErpEmptyState
+            title="Henüz eşleştirilecek ERP kaydı yok."
+            description="Müşteri ve ürün kayıtları, ERP eşitlemesi tamamlandıktan sonra burada listelenir."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
+          />
+        </section>
+      ) : null}
+
+      {nothingToReconcile ? null : (
       <section className="erp-section">
         <ErpSectionHeader title="Müşteri Eşleştirmeleri" />
+        {customers.length > 0 ? (
         <div className="erp-filter-chips" aria-label="Müşteri eşleştirme filtreleri">
           {CUSTOMER_FILTER_CHIPS.map((chip) => (
             <span
@@ -65,10 +113,11 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
             </span>
           ))}
         </div>
+        ) : null}
         {customers.length === 0 ? (
           <ErpEmptyState title="Henüz ERP müşteri kaydı yok." />
         ) : (
-          <ErpDataTable>
+          <ErpDataTable label="Müşteri eşleştirmeleri">
             <thead>
               <tr>
                 <th>ERP Kaydı</th>
@@ -94,13 +143,13 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
                   <td>{getErpInternalReferenceLabel(row.mappedInternalEntityId)}</td>
                   <td>
                     {row.suggestedInternalEntityId
-                      ? `Öneri — kullanıcı onayı gerekli (${row.suggestedReason ?? "deterministic"})`
+                      ? "Öneri — kullanıcı onayı gerekli"
                       : "—"}
                   </td>
                   <td>{formatErpDateTime(row.updatedAtUtc)}</td>
                   <td>
                     <div className="erp-table-actions">
-                      <span className="erp-action-hint">Eşleştir / Yoksay (API)</span>
+                      <span className="erp-action-hint">Eşleştir / Yoksay</span>
                     </div>
                   </td>
                 </tr>
@@ -110,8 +159,12 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
         )}
       </section>
 
+      )}
+
+      {nothingToReconcile ? null : (
       <section className="erp-section">
         <ErpSectionHeader title="Ürün Eşleştirmeleri" />
+        {products.length > 0 ? (
         <div className="erp-filter-chips" aria-label="Ürün eşleştirme filtreleri">
           {PRODUCT_FILTER_CHIPS.map((chip) => (
             <span
@@ -123,10 +176,11 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
             </span>
           ))}
         </div>
+        ) : null}
         {products.length === 0 ? (
           <ErpEmptyState title="Henüz ERP ürün kaydı yok." />
         ) : (
-          <ErpDataTable>
+          <ErpDataTable label="Ürün eşleştirmeleri">
             <thead>
               <tr>
                 <th>ERP Kaydı</th>
@@ -154,7 +208,7 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
                   <td>{getErpInternalReferenceLabel(row.mappedInternalEntityId)}</td>
                   <td>
                     {row.suggestedInternalEntityId
-                      ? `Öneri — kullanıcı onayı gerekli (${row.suggestedReason ?? "deterministic"})`
+                      ? "Öneri — kullanıcı onayı gerekli"
                       : "—"}
                   </td>
                   <td>
@@ -167,6 +221,7 @@ export function ErpReconciliationView({ customers, products }: ErpReconciliation
           </ErpDataTable>
         )}
       </section>
-    </main>
+      )}
+    </div>
   );
 }

@@ -24,6 +24,7 @@ import {
   getExportReadinessStatusLabel,
 } from "../domain/export-case";
 import type { ensureExportCaseFromOrderAction } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -162,11 +163,11 @@ export function OrderExportSummaryPanel({
       {state.kind === "error" && (
         <div className="order-export-summary-panel__error" role="alert">
           <AlertTriangle aria-hidden="true" />
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 
-      <form onSubmit={handleEnsure}>
+      <form className="zx-inline-form" onSubmit={handleEnsure}>
         <button
           type="submit"
           className="button button-primary button-small"

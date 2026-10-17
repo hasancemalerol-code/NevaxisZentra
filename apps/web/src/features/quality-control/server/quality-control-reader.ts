@@ -446,11 +446,11 @@ export async function readInspectionSummary(
   ]);
 
   if (summaryResult.status === "failure") {
-    return { status: "failure", message: summaryResult.message };
+    return { status: "failure", message: summaryResult.message, code: summaryResult.code };
   }
 
   if (intelligenceResult.status === "failure") {
-    return { status: "failure", message: intelligenceResult.message };
+    return { status: "failure", message: intelligenceResult.message, code: intelligenceResult.code };
   }
 
   return {

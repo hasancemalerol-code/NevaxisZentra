@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Download, Upload } from "lucide-react";
 import { useState } from "react";
 
 import { BULK_DATA_ONBOARDING_ROUTE } from "../domain/bulk-data-onboarding-labels";
 import type { BulkImportJobWorkspaceApi } from "../server/bulk-data-onboarding-api-client";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BulkDataOnboardingWorkflowClientProps = Readonly<{
   facilityId: string;
@@ -84,9 +86,10 @@ export function BulkDataOnboardingWorkflowClient({
     setBusy(true);
     setMessage(null);
     try {
-      await apiCall(`/api/bulk-data-onboarding/jobs/${jobId}/${path}`, { method: "POST" });
+      const result = (await apiCall(`/api/bulk-data-onboarding/jobs/${jobId}/${path}`, { method: "POST" })) as { failedRows?: number } | null;
       await refreshWorkspace(jobId);
-      setMessage(successMessage);
+      const failedRows = path === "commit" ? result?.failedRows ?? 0 : 0;
+      setMessage(failedRows > 0 ? `İçe aktarma kısmen tamamlandı: ${failedRows} kayıt aktarılamadı.` : successMessage);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Adım tamamlanamadı.");
     } finally {
@@ -96,9 +99,9 @@ export function BulkDataOnboardingWorkflowClient({
 
   return (
     <section className="commint-panel bulk-onboarding-actions" data-testid="bulk-onboarding-actions">
-      <h2>Müşteri İçe Aktarma</h2>
+      <h2>Dosyadan İçe Aktarma</h2>
       <p className="bulk-onboarding-actions__hint">
-        CSV/XLSX dosyalarını yükleyin, keşfedin, doğrulayın, dry-run çalıştırın ve kontrollü commit ile kaynakları oluşturun.
+        CSV/XLSX dosyalarını yükleyin, keşfedin, doğrulayın, ön deneme çalıştırın ve onayınızla kaynakları oluşturun.
       </p>
 
       {!jobId ? (
@@ -113,43 +116,51 @@ export function BulkDataOnboardingWorkflowClient({
               <option value="xlsx-file">XLSX</option>
             </select>
           </label>
-          <label>
-            Dosyalar
+          <label className="bulk-onboarding-actions__dropzone">
+            <span className="bulk-onboarding-actions__drop-label">Dosyalar</span>
+            <span className="bulk-onboarding-actions__drop-box">
+              <Upload aria-hidden="true" size={20} />
+              {selectedFiles && selectedFiles.length > 0
+                ? Array.from(selectedFiles).map((file) => file.name).join(", ")
+                : "Dosya seçin veya sürükleyin"}
+            </span>
             <input
               type="file"
               multiple
+              className="bulk-onboarding-actions__file"
               accept={providerKind === "csv-file" ? ".csv,.txt" : ".xlsx"}
               onChange={(event) => setSelectedFiles(event.target.files)}
             />
           </label>
-          <button type="button" disabled={busy} onClick={() => void createJob()}>
+          <button type="button" className="button button-primary button-medium" disabled={busy} onClick={() => void createJob()}>
             Yeni İçe Aktarma Başlat
           </button>
         </div>
       ) : (
         <div className="bulk-onboarding-actions__steps">
-          <button type="button" disabled={busy} onClick={() => void runStep("discover", "Kaynak keşfi tamamlandı.")}>
+          <button type="button" className="button button-secondary button-medium" disabled={busy} onClick={() => void runStep("discover", "Kaynak keşfi tamamlandı.")}>
             Keşif
           </button>
-          <button type="button" disabled={busy} onClick={() => void runStep("mapping/auto", "Otomatik eşleme uygulandı.")}>
+          <button type="button" className="button button-secondary button-medium" disabled={busy} onClick={() => void runStep("mapping/auto", "Otomatik eşleme uygulandı.")}>
             Eşleme
           </button>
-          <button type="button" disabled={busy} onClick={() => void runStep("stage-validate", "Doğrulama tamamlandı.")}>
+          <button type="button" className="button button-secondary button-medium" disabled={busy} onClick={() => void runStep("stage-validate", "Doğrulama tamamlandı.")}>
             Doğrula
           </button>
-          <button type="button" disabled={busy} onClick={() => void runStep("dry-run", "Dry-run tamamlandı.")}>
-            Dry Run
+          <button type="button" className="button button-secondary button-medium" disabled={busy} onClick={() => void runStep("dry-run", "Deneme çalıştırması tamamlandı.")}>
+            Deneme çalıştırması
           </button>
-          <button type="button" disabled={busy} onClick={() => void runStep("commit", "Kontrollü içe aktarma tamamlandı.")}>
-            Commit
+          <button type="button" className="button button-primary button-medium" disabled={busy} onClick={() => void runStep("commit", "Kontrollü içe aktarma tamamlandı.")}>
+            İçe aktar
           </button>
         </div>
       )}
 
       <div className="bulk-onboarding-actions__templates">
-        <span>Örnek şablonlar (SAMPLE / TEMPLATE):</span>
+        <span>Şablonları indir:</span>
         {["areas.csv", "lines.csv", "stations.csv", "resources.csv", "materials.csv"].map((template) => (
-          <a key={template} href={`/api/bulk-data-onboarding/templates/${template}`}>
+          <a key={template} className="bulk-onboarding-actions__template" href={`/api/bulk-data-onboarding/templates/${template}`} download>
+            <Download aria-hidden="true" size={14} />
             {template}
           </a>
         ))}
@@ -161,7 +172,7 @@ export function BulkDataOnboardingWorkflowClient({
         <Link href="/uretim/kaynaklar">Üretim Kaynakları</Link> ekranlarından kaynakları doğrulayın.
       </p>
 
-      {message ? <p data-testid="bulk-onboarding-action-message">{message}</p> : null}
+      {message ? <p data-testid="bulk-onboarding-action-message">{customerMessage(message)}</p> : null}
     </section>
   );
 }

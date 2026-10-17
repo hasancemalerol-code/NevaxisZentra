@@ -1,0 +1,303 @@
+.ai-task-detail-anchor {
+  scroll-margin-top: 88px;
+}
+
+.ai-task-detail-header__code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ai-task-detail-header__badge-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.ai-task-detail-header__badge-group > small {
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ai-task-detail-header__assignee {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+}
+
+.ai-task-detail-header__assignee > span {
+  color: var(--zx-text-muted, #566478);
+}
+
+.ai-task-detail-header__assignee a {
+  color: var(--zx-accent-strong, #1d4ed8);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ai-task-detail-header__assignee a:hover {
+  text-decoration: underline;
+}
+
+.ai-task-detail-overview__action-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.75rem;
+}
+
+/* Activity and delivery form one full-width block under the workspace. */
+.ai-task-detail-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  margin: 0.85rem 0 0;
+}
+
+.content-viewport .ai-task-detail-lower > * {
+  min-width: 0;
+  margin: 0;
+}
+
+.ai-task-detail-lower > :last-child,
+.ai-task-detail-lower > :first-child:nth-last-child(2) {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1100px) {
+  .ai-task-detail-lower {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* One vertical rhythm for the whole main column (section margins would add 20-35px on top of the grid gap). */
+.content-viewport .ai-task-detail-workspace__main > * {
+  margin: 0;
+}
+
+.ai-task-detail-lower .ai-task-detail__source-list {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ai-task-detail-lower .ai-task-detail__source-card > div,
+.ai-task-detail-lower .ai-task-detail__audit-card > div {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.ai-task-detail-lower .ai-task-detail__source-card strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ai-task-detail-lower .ai-task-detail-timeline__content {
+  min-width: 0;
+}
+
+.ai-task-detail-lower .ai-task-detail__audit-card .badge,
+.ai-task-detail-lower .ai-task-detail__audit-card > span {
+  white-space: nowrap;
+}
+
+.ai-task-detail-overview {
+  align-items: stretch;
+}
+
+/* Header: status chips keep one row beside the title on wide screens and drop below it (left aligned) when narrow. */
+.content-viewport .ai-task-detail-header {
+  flex-wrap: wrap;
+}
+
+.content-viewport .ai-task-detail-header__main {
+  flex: 1 1 22rem;
+  min-width: 0;
+}
+
+.content-viewport .ai-task-detail-header__badges {
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+  .content-viewport .ai-task-detail-header__badges {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+/* Right rail: the human-approval decision and the owner/SLA cards share one column so it matches the main column height. */
+.ai-task-detail-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.content-viewport .ai-task-detail-rail .ai-task-detail-sidebar {
+  position: static;
+}
+
+.content-viewport .ai-task-detail-rail > .section,
+.content-viewport .ai-task-detail-rail > section {
+  margin: 0;
+}
+
+/* The shared stacked-section margin (.section + .section) out-ranks plain rules; this keeps one 0.85rem rhythm. */
+body .content-viewport .ai-task-detail-lower > .section.section,
+body .content-viewport .ai-task-detail-workspace__main > .section.section,
+body .content-viewport .ai-task-detail-rail > .section.section {
+  margin: 0;
+}
+
+.ai-task-detail-overview__card:not(.ai-task-detail-overview__card--ai) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Equal-height columns: the rail stretches to the main column and its owner/SLA card grid absorbs the difference. */
+.ai-task-detail-workspace {
+  align-items: stretch;
+}
+
+.content-viewport .ai-task-detail-rail .ai-task-detail-sidebar {
+  flex: 1 1 auto;
+  align-content: stretch;
+}
+
+/* Recommendation card header: label and toggle always share one row; the label wraps before the button drops. */
+.content-viewport .ai-task-detail-overview__card--ai .ai-task-detail-overview__heading {
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.content-viewport .ai-task-detail-overview__card--ai .ai-task-detail-overview__heading > span {
+  min-width: 0;
+}
+
+.content-viewport .ai-task-detail-overview__card--ai .ai-task-detail-overview__inspect-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.content-viewport .ai-task-detail-overview__card--ai .ai-task-detail-overview__heading > span {
+  white-space: nowrap;
+}
+
+/* Tablet: the overview comes first; the decision, owner, SLA and priority cards sit below it as a two-column grid, not a ten-deep stack. */
+@media (max-width: 1080px) {
+  .content-viewport .ai-task-detail-rail .ai-task-detail-sidebar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .content-viewport .ai-task-detail-rail .ai-task-detail-sidebar > * {
+    min-width: 0;
+  }
+}
+
+/* ─── Checklist: detail header matches sibling detail pages (back link, flat header) ─── */
+.ai-task-detail-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 32px;
+  margin-bottom: 4px;
+  color: #4d6078;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ai-task-detail-back-link svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.ai-task-detail-back-link:hover {
+  color: #155eef;
+}
+
+.content-viewport .ai-task-detail-header {
+  padding: 0 0 16px;
+  border: 0;
+  border-bottom: 1px solid var(--zx-line, #e3e9f1);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ─── Checklist C4: no box inside a card; inner groups are tinted and borderless ─── */
+.content-viewport .ai-task-detail-overview__card,
+.content-viewport .ai-task-detail__source-card,
+.content-viewport .ai-task-decision-panel__card,
+.content-viewport .ai-task-decision-panel--unavailable {
+  border: 0;
+  background: #f6f9fd;
+  box-shadow: none;
+}
+
+.content-viewport .ai-task-detail-context__grid > div,
+.content-viewport .ai-task-detail-context__grid {
+  border: 0;
+}
+
+.content-viewport .ai-task-detail-context__grid > div {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f6f9fd;
+}
+
+/* İlgili Bağlam card uses the sibling section padding. */
+.content-viewport .ai-task-detail-context {
+  padding: 20px;
+}
+
+/* Tablet: paired rail cards share their bottom edge. */
+@media (max-width: 1080px) {
+  .content-viewport .ai-task-detail-rail .ai-task-detail-sidebar {
+    align-items: stretch;
+  }
+
+  .content-viewport .ai-task-detail-rail .ai-task-detail-sidebar > * {
+    height: 100%;
+  }
+}
+
+/* The owner card sits in an anchor wrapper: the wrapper stretches to the row and its card fills it (equal bottoms with the SLA card). */
+.content-viewport .ai-task-detail-rail .ai-task-detail-sidebar > .ai-task-detail-anchor {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-viewport .ai-task-detail-rail .ai-task-detail-sidebar > .ai-task-detail-anchor > * {
+  flex: 1 1 auto;
+}
+
+/* Frozen checklist C4: the shared .card rule sets the panel shadow with !important, which left a 1px bottom edge on every inner group. Inner groups are flat tinted blocks: no border, no shadow, no clipping. */
+body .content-viewport .ai-task-detail-overview__card,
+body .content-viewport .ai-task-detail__source-card,
+body .content-viewport .ai-task-decision-panel,
+body .content-viewport .ai-task-decision-panel__card {
+  border: 0 !important;
+  box-shadow: none !important;
+  background: #f6f9fd !important;
+  overflow: visible;
+}

@@ -795,7 +795,7 @@ export const systemHealth: SystemHealthItem[] = [
   {
     id: "health-erp-connector",
     name: "ERP Connector",
-    description: "ERP okuma ve senkronizasyon sınırı",
+    description: "ERP okuma ve eşitleme sınırı",
     status: "offline",
     statusLabel: "Devre dışı",
   },

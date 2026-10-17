@@ -100,7 +100,8 @@ public sealed record AiTaskSummaryReadModel(
     string SlaState,
     string ClosureState,
     int EvidenceCount,
-    bool ClosureApprovalRequired);
+    bool ClosureApprovalRequired,
+    string? SlaBreachType = null);
 
 public sealed record AiTaskDetailReadModel(
     Guid Id,

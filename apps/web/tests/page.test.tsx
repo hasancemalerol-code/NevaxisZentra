@@ -25,7 +25,7 @@ test("renders the AI task center home without implying live operational data", a
   const markup = renderToStaticMarkup(element as ReactElement);
 
   assert.match(markup, /Görev Merkezi/);
-  assert.match(markup, /Gerçek görev verisi bağlı değil/);
+  assert.match(markup, /Görev Merkezi şu anda alınamıyor|şu anda alınamıyor/);
   assert.doesNotMatch(markup, /Active Production Orders|Live Alarms/);
 });
 

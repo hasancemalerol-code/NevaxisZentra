@@ -5,6 +5,7 @@ import { useTransition, useState } from "react";
 
 import type { GoldenDemoP2PresentationStatusApi } from "../server/golden-demo-p2-api-client";
 import { goldenDemoResetPilotEventAction } from "../server/golden-demo-p2-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export function GoldenDemoP2PresentationPanel({
   presentation,
@@ -63,7 +64,7 @@ export function GoldenDemoP2PresentationPanel({
           className={`golden-demo-feedback ${message.includes("başarısız") ? "golden-demo-feedback--error" : "golden-demo-feedback--success"}`}
           data-testid="golden-demo-reset-status"
         >
-          {message}
+          {customerMessage(message)}
         </p>
       ) : null}
     </header>

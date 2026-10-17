@@ -18,6 +18,7 @@ import type {
   createKnowledgeEntryAction,
   verifyKnowledgeEntryAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type PanelState =
   | { kind: "idle" }
@@ -103,36 +104,43 @@ export function ExportCountryKnowledgePanel({
   );
 
   return (
-    <section className="export-country-knowledge-panel">
+    <section className={`export-country-knowledge-panel${entries.length === 0 ? " export-country-knowledge-panel--empty" : ""}`}>
       <header className="export-country-knowledge-panel__header">
         <div>
-          <p>ÜLKE BİLGİ BANKASI</p>
-          <h2>Doğrulanmış ülke bilgisi</h2>
+          <div className="export-workspace__title-row">
+            <h2>Doğrulanmış kayıtlar</h2>
+            <Badge tone="information">{entries.length} kayıt</Badge>
+          </div>
           <span>
             Araştırma bulgularından ve kurallardan türetilen kalıcı bilgi kayıtları
           </span>
         </div>
-        <Badge tone="information">{entries.length} kayıt</Badge>
       </header>
 
       {state.kind === "error" ? (
         <div className="export-country-knowledge-panel__feedback export-country-knowledge-panel__feedback--error" role="alert">
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
       {state.kind === "success" ? (
         <div className="export-country-knowledge-panel__feedback export-country-knowledge-panel__feedback--success" role="status">
           <CheckCircle2 aria-hidden="true" />
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       ) : null}
 
       <div className="export-country-knowledge-panel__list">
         {entries.length === 0 ? (
-          <p className="export-country-knowledge-panel__empty" role="status">
-            <BookOpen aria-hidden="true" />
-            Henüz bilgi kaydı bulunmuyor.
-          </p>
+          <div className="export-empty export-empty--compact" role="status">
+            <div className="export-empty__icon">
+              <BookOpen aria-hidden="true" />
+            </div>
+            <div>
+              <p>BİLGİ KAYDI YOK</p>
+              <h2>Henüz bilgi kaydı bulunmuyor</h2>
+            </div>
+            <p className="export-empty__desc">Aşağıdan yeni bir kayıt oluşturduğunuzda burada listelenir ve doğrulanabilir.</p>
+          </div>
         ) : (
           <ul>
             {entries.map((entry) => (
@@ -174,15 +182,18 @@ export function ExportCountryKnowledgePanel({
       </div>
 
       <form className="export-country-knowledge-panel__form" onSubmit={handleCreate}>
-        <h3>Yeni bilgi kaydı</h3>
+        <h3 className="export-country-knowledge-panel__form-title">Yeni bilgi kaydı</h3>
         <label>
-          Ülke kodu
+          Ülke kodu <span className="zx-required" aria-hidden="true">*</span>
           <input
             value={countryCode}
             onChange={(e) => setCountryCode(e.target.value.toUpperCase())}
             maxLength={2}
+            placeholder="Örn. DE"
+            autoComplete="off"
             required
           />
+          <small className="export-field-hint">İki harfli ülke kodu (TR, DE, FR gibi).</small>
         </label>
         <label>
           Kategori
@@ -193,9 +204,10 @@ export function ExportCountryKnowledgePanel({
               </option>
             ))}
           </select>
+          <small className="export-field-hint">Bilginin ait olduğu konu başlığı.</small>
         </label>
         <label>
-          Otorite
+          Kaynak otorite
           <select value={authority} onChange={(e) => setAuthority(e.target.value)}>
             {KNOWLEDGE_AUTHORITY_OPTIONS.map((option) => (
               <option key={option} value={option}>
@@ -203,37 +215,49 @@ export function ExportCountryKnowledgePanel({
               </option>
             ))}
           </select>
+          <small className="export-field-hint">Bilginin dayandığı kaynağın türü.</small>
         </label>
         <label>
-          Başlık
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
+          Başlık <span className="zx-required" aria-hidden="true">*</span>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Örn. Gümrük beyanı gereksinimleri"
+            required
+          />
+          <small className="export-field-hint">Kaydın kısa ve açık adı.</small>
         </label>
-        <label>
-          Özet
+        <label className="export-country-knowledge-panel__wide">
+          Özet <span className="zx-required" aria-hidden="true">*</span>
           <textarea
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             required
             rows={3}
+            placeholder="Örn. Gümrük beyannamesi için gerekli belgelerin kısa özeti"
           />
         </label>
         <label>
-          Kaynak yayıncı
+          Yayıncı kurum <span className="zx-required" aria-hidden="true">*</span>
           <input
             value={sourcePublisher}
             onChange={(e) => setSourcePublisher(e.target.value)}
+            placeholder="Örn. T.C. Ticaret Bakanlığı"
             required
           />
+          <small className="export-field-hint">Bilgiyi yayımlayan kurum.</small>
         </label>
         <label>
-          Kaynak başlığı
+          Kaynak başlığı <span className="zx-required" aria-hidden="true">*</span>
           <input
             value={sourceTitle}
             onChange={(e) => setSourceTitle(e.target.value)}
+            placeholder="Örn. İhracat rejimi tebliği"
             required
           />
+          <small className="export-field-hint">Bilginin alındığı belge ya da tebliğ.</small>
         </label>
-        <button type="submit" disabled={isPending}>
+        <button type="submit" disabled={isPending} className="export-country-knowledge-panel__submit">
           Kayıt oluştur
         </button>
       </form>

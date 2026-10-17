@@ -1,3 +1,4 @@
+import { enumLabel } from "@/lib/presentation/enum-labels";
 import "./operations-command-center-server-boundary";
 
 import {
@@ -33,10 +34,8 @@ import {
   type RawCommercialProfitabilityAlertSummary,
 } from "../../commercial-intelligence/server/commercial-profitability-alert-api-client";
 import { resolveCommercialIntelligenceRequestContext } from "../../commercial-intelligence/server/commercial-intelligence-request-context";
-import {
-  formatCount,
-  formatDateTime,
-} from "../../commercial-intelligence/domain/commercial-intelligence-formatters";
+import { formatCount } from "../../commercial-intelligence/domain/commercial-intelligence-formatters";
+import { formatDateTime } from "@/lib/presentation/format";
 import {
   getCommercialProfitabilityAlertSeverityLabel,
   getCommercialProfitabilityAlertLifecycleLabel,
@@ -228,7 +227,7 @@ function buildFactoryCaseItems(
       moduleLabel: getOperationsCommandCenterModuleLabel("factory"),
       sourceReference: row.id.slice(0, 8).toUpperCase(),
       title: row.title,
-      statusLabel: `${row.severity} · ${row.status}`,
+      statusLabel: `${enumLabel(row.severity)} · ${enumLabel(row.status)}`,
       evidenceLabel: getFactoryBlockerLabel(row.currentBlockerCode),
       freshnessLabel: formatDateTime(row.updatedAtUtc),
       deepLinkHref: `/operasyon/yonetim-merkezi/vakalar/${row.id}`,
@@ -319,7 +318,7 @@ function buildProductionItems(
         moduleLabel: getOperationsCommandCenterModuleLabel("production"),
         sourceReference: row.productionOrderReference,
         title: row.message || row.exceptionType,
-        statusLabel: `${row.severity} · ${row.exceptionStatus}`,
+        statusLabel: `${enumLabel(row.severity)} · ${enumLabel(row.exceptionStatus)}`,
         evidenceLabel: isDataReview ? "Yetersiz veri" : "Yetkili",
         freshnessLabel: formatDateTime(row.raisedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
@@ -360,7 +359,7 @@ function buildQualityItems(
         moduleLabel: getOperationsCommandCenterModuleLabel("quality"),
         sourceReference: row.ncrNumber,
         title: row.title,
-        statusLabel: `${row.severity} · ${row.status}`,
+        statusLabel: `${enumLabel(row.severity)} · ${enumLabel(row.status)}`,
         evidenceLabel: isDataReview ? "Yetersiz veri" : "Yetkili",
         freshnessLabel: formatDateTime(row.detectedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
@@ -402,8 +401,8 @@ function buildMaintenanceItems(
         moduleLabel: getOperationsCommandCenterModuleLabel("maintenance"),
         sourceReference: row.assetReference,
         title: row.assetName ?? row.assetReference,
-        statusLabel: `${row.riskBand} · ${row.reviewPriority}`,
-        evidenceLabel: isDataReview ? "Yetersiz veri" : row.dataFreshness,
+        statusLabel: `${enumLabel(row.riskBand)} · ${enumLabel(row.reviewPriority)}`,
+        evidenceLabel: isDataReview ? "Yetersiz veri" : enumLabel(row.dataFreshness),
         freshnessLabel: formatDateTime(row.assessedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
         linkedTaskHref: row.linkedAiTaskId ? taskDeepLink(row.linkedAiTaskId) : undefined,
@@ -442,7 +441,7 @@ function buildMoldItems(
         moduleLabel: getOperationsCommandCenterModuleLabel("mold"),
         sourceReference: row.code,
         title: row.name,
-        statusLabel: `${row.lifecycleState} · ${row.followUpStatus}`,
+        statusLabel: `${enumLabel(row.lifecycleState)} · ${enumLabel(row.followUpStatus)}`,
         evidenceLabel: isDataReview ? "Yetersiz veri" : "Yetkili",
         freshnessLabel: formatDateTime(row.updatedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
@@ -484,7 +483,7 @@ function buildMaterialItems(
         sourceReference: row.materialCode,
         title: row.materialName,
         statusLabel: getMaterialAvailabilityRiskStatusLabel(row.status),
-        evidenceLabel: isDataReview ? "Yetersiz veri" : row.sourceFreshness ?? "—",
+        evidenceLabel: isDataReview ? "Yetersiz veri" : row.sourceFreshness ? enumLabel(row.sourceFreshness) : "—",
         freshnessLabel: formatDateTime(row.evaluatedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
         linkedTaskHref: row.linkedAiTaskId ? taskDeepLink(row.linkedAiTaskId) : undefined,
@@ -526,7 +525,7 @@ function buildProcurementItems(
         sourceReference: row.purchaseOrderNumber,
         title: row.supplierName ?? row.purchaseOrderNumber,
         statusLabel: getProcurementDeliveryRiskResultLabel(row.result as ProcurementDeliveryRiskResult),
-        evidenceLabel: isDataReview ? "Yetersiz veri" : row.sourceFreshness ?? "—",
+        evidenceLabel: isDataReview ? "Yetersiz veri" : row.sourceFreshness ? enumLabel(row.sourceFreshness) : "—",
         freshnessLabel: formatDateTime(row.evaluatedAtUtc),
         linkedTaskId: row.linkedAiTaskId,
         linkedTaskHref: row.linkedAiTaskId ? taskDeepLink(row.linkedAiTaskId) : undefined,
@@ -592,8 +591,8 @@ function buildAiTaskItems(
       moduleLabel: getOperationsCommandCenterModuleLabel("ai-task"),
       sourceReference: task.id.slice(0, 8).toUpperCase(),
       title: task.title,
-      statusLabel: `${task.priority} · ${task.status}`,
-      evidenceLabel: task.riskLevel,
+      statusLabel: `${enumLabel(task.priority)} · ${enumLabel(task.status)}`,
+      evidenceLabel: `Risk: ${enumLabel(task.riskLevel)}`,
       freshnessLabel: formatDateTime(task.updatedAt),
       linkedTaskId: task.id,
       linkedTaskHref: taskDeepLink(task.id),
@@ -639,6 +638,7 @@ function buildModuleHealthEntry(
 
 function buildKpiCards(input: Readonly<{
   reviewCount: number;
+  queueCount: number;
   openLinkedTaskCount: number | null;
   aiTaskScope: OperationsCommandCenterScopeState;
   productionCount: number | null;
@@ -655,17 +655,17 @@ function buildKpiCards(input: Readonly<{
   return [
     {
       id: "occ-priority-review",
-      label: "İnceleme gerektiren kayıt",
+      label: "İnsan incelemesi gereken",
       value: formatCount(input.reviewCount),
-      hint: "Öncelik kuyruğu",
+      hint: `Kuyruktaki ${formatCount(input.queueCount)} kayıttan`,
       tone: input.reviewCount > 0 ? "warning" : "neutral",
       scopeState: "complete",
     },
     {
       id: "occ-open-linked-tasks",
-      label: "Açık bağlı AI görevleri",
+      label: "Yapay zekâ görevleri",
       value: input.openLinkedTaskCount === null ? "—" : formatCount(input.openLinkedTaskCount),
-      hint: input.aiTaskScope === "insufficient" ? "ai-task.read gerekli" : "Bağlantılı görevler",
+      hint: input.aiTaskScope === "insufficient" ? "ai-task.read gerekli" : "Açık, bağlantılı görevler",
       tone: input.openLinkedTaskCount && input.openLinkedTaskCount > 0 ? "warning" : "neutral",
       scopeState: input.aiTaskScope,
     },
@@ -1035,6 +1035,7 @@ export async function readOperationsCommandCenterWorkspace(
 
   const kpis = buildKpiCards({
     reviewCount,
+    queueCount: filteredQueue.length,
     openLinkedTaskCount,
     aiTaskScope: aiTaskAccess === "granted" ? scopeState : "insufficient",
     productionCount: productionAccess === "granted" && productionResult.availability !== "unavailable-error"

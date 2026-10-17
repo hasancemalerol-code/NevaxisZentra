@@ -6,8 +6,15 @@ import {
   readDigitalWorkforceApprovals,
   readDigitalWorkforceControlCenter,
 } from "@/features/digital-workforce/server/digital-workforce-reader";
+import { notFound } from "next/navigation";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
 
 export default async function DigitalWorkforceLayout({ children }: Readonly<{ children: ReactNode }>) {
+  // Deferred module: Production answers 404 for every Digital Workforce route (fail closed, nothing is fetched).
+  if (!deferredSurfacesEnabled()) {
+    notFound();
+  }
+
   const [hub, approvals, activity] = await Promise.all([
     readDigitalWorkforceControlCenter(),
     readDigitalWorkforceApprovals(),

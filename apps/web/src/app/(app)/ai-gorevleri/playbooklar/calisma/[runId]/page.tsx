@@ -6,7 +6,7 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { AiTaskPlaybookRunDetailClient } from "@/features/ai-task-center/components/ai-task-playbook-run-detail-client";
 import { buildAiTaskPlaybookLibraryHref } from "@/features/ai-task-center/presentation/ai-task-playbook-library-navigation";
 import {
@@ -14,6 +14,7 @@ import {
   hasGrantedPermission,
 } from "@/features/admin-access/server/admin-access-effective-access";
 import { readAiTaskPlaybookRunDetail } from "@/features/ai-task-center/server/ai-task-playbook-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type AiTaskPlaybookRunPageProps = Readonly<{
   params: Promise<Readonly<{ runId: string }>>;
@@ -29,15 +30,12 @@ export default async function AiTaskPlaybookRunPage({
     return (
       <PageContent>
         <PageHeader
-          description="Playbook çalışması adım akışı"
-          eyebrow="AI Görev Merkezi"
+          eyebrow="Görev Merkezi"
           title="Çalışma Detayı"
         />
-        <EmptyState
-          data-testid="ai-task-playbook-run-detail-error"
-          description={result.message}
-          title="Playbook çalışması bulunamadı"
-        />
+        <div data-testid="ai-task-playbook-run-detail-error">
+          <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Playbook çalışması yüklenemedi" entityLabel="playbook çalışması" backHref="/ai-gorevleri/playbooklar" backLabel="Playbook listesine dön" inline />
+        </div>
       </PageContent>
     );
   }
@@ -60,7 +58,7 @@ export default async function AiTaskPlaybookRunPage({
           </Link>
         }
         description={`${result.run.playbookName} çalışmasının adım durumları ve ilerlemesi.`}
-        eyebrow="AI Görev Merkezi"
+        eyebrow="Görev Merkezi"
         title="Çalışma Detayı"
       />
 

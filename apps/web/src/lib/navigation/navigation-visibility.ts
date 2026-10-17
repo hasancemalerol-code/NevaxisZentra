@@ -5,13 +5,14 @@ import {
   resolveEntitlementCodeFromPath,
 } from "@/features/saas-subscription/domain/saas-subscription-labels";
 import { fetchCurrentTenantSubscription } from "@/features/saas-subscription/server/saas-subscription-queries";
+import { isSurfaceHrefVisible } from "@/lib/runtime/deferred-surfaces";
 import { appsCatalogNavigation } from "@/lib/navigation/apps-catalog-navigation";
 import type {
   SerializableNavigationGroup,
   SerializableNavigationItem,
 } from "@/lib/navigation/navigation-types";
 import {
-  resolveContextualNavigationSection,
+  CONTEXTUAL_NAVIGATION_SECTIONS,
   WORKFLOW_PRIMARY_HOMES,
 } from "@/lib/navigation/workflow-primary-navigation";
 
@@ -21,6 +22,7 @@ function toSerializableItem(item: SerializableNavigationItem): SerializableNavig
     href: item.href,
     iconKey: item.iconKey,
     ...(item.exact ? { exact: true } : {}),
+    ...(item.matchPrefix ? { matchPrefix: item.matchPrefix } : {}),
     ...(item.permissionKey ? { permissionKey: item.permissionKey } : {}),
     ...(item.subscriptionModulePath ? { subscriptionModulePath: item.subscriptionModulePath } : {}),
   };
@@ -74,12 +76,13 @@ function filterNavigationItems(
 ): readonly SerializableNavigationItem[] {
   const grantedPermissionKeys = access?.grantedPermissionKeys ?? [];
   return items
+    .filter((item) => isSurfaceHrefVisible(item.href))
     .filter((item) => isNavigationItemVisible(item, grantedPermissionKeys, subscription))
     .map(toSerializableItem);
 }
 
 export async function resolvePermissionAwareNavigation(
-  pathname: string,
+  _pathname?: string,
 ): Promise<readonly SerializableNavigationGroup[]> {
   const [access, subscription] = await Promise.all([
     fetchEffectiveAccessCapabilities(),
@@ -94,19 +97,12 @@ export async function resolvePermissionAwareNavigation(
     },
   ];
 
-  const contextualSection = resolveContextualNavigationSection(pathname);
-  if (contextualSection) {
-    const contextualItems = filterNavigationItems(
-      contextualSection.items,
-      access,
-      subscription,
-    );
-
+  // Every contextual section is returned and tagged; the client picks the one for the current route. Resolving it here
+  // from the request path went stale on soft navigation (the layout is not re-rendered), leaving the wrong context.
+  for (const section of CONTEXTUAL_NAVIGATION_SECTIONS) {
+    const contextualItems = filterNavigationItems(section.items, access, subscription);
     if (contextualItems.length > 0) {
-      groups.push({
-        label: contextualSection.label,
-        items: contextualItems,
-      });
+      groups.push({ label: section.label, homeId: section.homeId, items: contextualItems });
     }
   }
 

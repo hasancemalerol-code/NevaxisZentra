@@ -1,0 +1,218 @@
+
+/* Round 4: compact progress strip (no duplicate counter chip, no tall rows) */
+.bulk-onboarding-workspace .bulk-onboarding-workflow {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: #566478;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step::before {
+  content: none;
+  display: none;
+}
+
+.bulk-onboarding-workflow__index {
+  flex: 0 0 1.5rem;
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step[aria-current="step"] {
+  border-color: #2463a7;
+  background: #eff4ff;
+  color: #2463a7;
+}
+
+.bulk-onboarding-workflow__step[aria-current="step"] .bulk-onboarding-workflow__index {
+  background: #2463a7;
+  color: #fff;
+}
+
+@container (min-width: 880px) {
+  .bulk-onboarding-workspace .bulk-onboarding-workflow {
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 0.375rem;
+  }
+
+  .bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step {
+    flex-direction: column;
+    justify-content: flex-start;
+    text-align: center;
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+@container (max-width: 360px) {
+  .bulk-onboarding-workspace .bulk-onboarding-workflow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Aligned create row: shared baseline and one control height */
+.bulk-onboarding-workspace .bulk-onboarding-actions__create {
+  align-items: end;
+}
+
+.bulk-onboarding-actions__create > label > select,
+.bulk-onboarding-actions__create > .button {
+  min-height: 3rem;
+  box-sizing: border-box;
+}
+
+.bulk-onboarding-actions__drop-box {
+  min-height: 3rem;
+  box-sizing: border-box;
+  padding-block: 0.5rem;
+}
+
+.bulk-onboarding-actions__create > label {
+  align-content: end;
+}
+
+.bulk-onboarding-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+@media (min-width: 1280px) {
+  .bulk-onboarding-kpi-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1279px) {
+  .bulk-onboarding-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .bulk-onboarding-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Round 5: one step indicator (the shared li::before counter must never show next to the index circle) */
+.bulk-onboarding-workspace .bulk-onboarding-workflow li::before,
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step::before {
+  content: none !important;
+  display: none !important;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step:not([aria-current="step"]) {
+  border-color: transparent;
+  font-weight: 550;
+}
+
+/* Create row: type, files and action share one grid, one label row and one 3rem control height */
+.bulk-onboarding-workspace .bulk-onboarding-actions__create {
+  display: grid;
+  grid-template-columns: minmax(9rem, 11rem) minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > label,
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > .bulk-onboarding-actions__dropzone {
+  flex: none;
+  align-content: end;
+  gap: 0.375rem;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > label > select {
+  width: 100%;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > .button {
+  align-self: end;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .bulk-onboarding-workspace .bulk-onboarding-actions__create {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Empty state as a proper card: icon, title, copy */
+.bulk-onboarding-workspace .bulk-onboarding-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.bulk-onboarding-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.875rem;
+  background: rgba(36, 99, 167, 0.08);
+  color: #2463a7;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-empty p {
+  max-width: 34rem;
+  line-height: 1.55;
+}
+
+/* Round 7: shared select skin must not shrink the type select below the dropzone and button height */
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > label > select {
+  box-sizing: border-box;
+  height: 3rem;
+  min-height: 3rem;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > label > .bulk-onboarding-actions__drop-label,
+.bulk-onboarding-workspace .bulk-onboarding-actions__create > label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+/* Round 9: even step heights (two-line label slot), steps are indicators not buttons, tighter empty card */
+.bulk-onboarding-workspace .bulk-onboarding-workflow__step {
+  cursor: default;
+  align-items: flex-start;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-workflow__label {
+  min-height: 2.5em;
+  display: flex;
+  align-items: center;
+}
+
+.bulk-onboarding-workspace .bulk-onboarding-empty {
+  padding: 1.25rem 1.5rem;
+}
+
+/* Round 16: one container level - the create row has no panel of its own (only the dashed dropzone stays boxed) */
+.bulk-onboarding-workspace .bulk-onboarding-actions__create {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Active step: a filled pill, not a second box */
+.bulk-onboarding-workspace .bulk-onboarding-workflow .bulk-onboarding-workflow__step[aria-current="step"] {
+  border-color: transparent;
+  border-radius: 999px;
+}

@@ -1,0 +1,23 @@
+/* One container for header, divider and form: same left edge, same right edge. */
+body .production-plan-create-page .production-plan-draft-form,
+body .production-plan-edit-page .production-plan-draft-form {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+.production-plan-draft-form__section-hint {
+  color: #475569;
+  font-size: 0.8125rem;
+}
+
+.production-plan-draft-form__field label,
+.production-plan-draft-form__field-error {
+  font-size: 0.8125rem;
+}
+
+/* Round 5: the page container spans the content area so header, divider and form share the shell's right edge */
+body .production-plan-create-page,
+body .production-plan-edit-page {
+  max-width: none;
+}

@@ -189,7 +189,16 @@ export function buildHealthDonutArcs(
   });
 }
 
-export function resolveKpiToneClass(tone: IotPlcKpiCard["tone"]): string {
+/** A zero or empty value carries no status: it is neutral, never a warning colour. */
+export function isIotPlcKpiValueEmpty(value: string): boolean {
+  const text = value.trim();
+  return text === "" || text === "—" || /^%?0([.,]0+)?$/.test(text);
+}
+
+export function resolveKpiToneClass(tone: IotPlcKpiCard["tone"], value?: string): string {
+  if (value !== undefined && tone !== "danger" && tone !== "unavailable" && isIotPlcKpiValueEmpty(value)) {
+    return "iot-plc-kpi-card--neutral";
+  }
   switch (tone) {
     case "success":
       return "iot-plc-kpi-card--success";

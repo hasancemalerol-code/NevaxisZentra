@@ -30,6 +30,7 @@ import type {
   createPackingUnitAction,
   verifyPackingAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type BadgeTone =
   | "neutral"
@@ -252,7 +253,7 @@ export function ExportPackingPanel({
           className="export-packing-panel__flash export-packing-panel__flash--error"
           role="alert"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
       {state.kind === "success" && (
@@ -260,7 +261,7 @@ export function ExportPackingPanel({
           className="export-packing-panel__flash export-packing-panel__flash--success"
           role="status"
         >
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 
@@ -271,7 +272,7 @@ export function ExportPackingPanel({
         </div>
         <div className="export-packing-panel__fields">
           <label>
-            Birim kodu
+            Birim kodu <span className="zx-required" aria-hidden="true">*</span>
             <input
               className="input"
               value={unitCode}
@@ -324,7 +325,7 @@ export function ExportPackingPanel({
           </div>
           <div className="export-packing-panel__fields">
             <label>
-              Birim
+              Birim <span className="zx-required" aria-hidden="true">*</span>
               <select
                 className="input"
                 value={itemUnitId}
@@ -341,7 +342,7 @@ export function ExportPackingPanel({
               </select>
             </label>
             <label>
-              Ürün kodu
+              Ürün kodu <span className="zx-required" aria-hidden="true">*</span>
               <input
                 className="input"
                 value={productCode}
@@ -351,7 +352,7 @@ export function ExportPackingPanel({
               />
             </label>
             <label>
-              Ürün adı
+              Ürün adı <span className="zx-required" aria-hidden="true">*</span>
               <input
                 className="input"
                 value={productName}
@@ -361,7 +362,7 @@ export function ExportPackingPanel({
               />
             </label>
             <label>
-              Miktar
+              Miktar <span className="zx-required" aria-hidden="true">*</span>
               <input
                 className="input"
                 type="number"
@@ -373,7 +374,7 @@ export function ExportPackingPanel({
               />
             </label>
             <label>
-              Birim
+              Birim <span className="zx-required" aria-hidden="true">*</span>
               <input
                 className="input"
                 value={unitOfMeasure}

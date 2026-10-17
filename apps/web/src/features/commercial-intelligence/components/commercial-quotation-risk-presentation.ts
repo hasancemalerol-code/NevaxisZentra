@@ -90,7 +90,7 @@ export function buildQuotationRiskKpiCards(input: Readonly<{
   const cards: Record<string, CommercialIntelligenceKpiCard> = {
     "candidate-assessments": {
       id: "candidate-assessments",
-      label: "İncelenen teklif sayısı",
+      label: "İncelenen teklif",
       value: formatCount(assessments.length),
       detail: `Aday gözlem toplamı: ${formatCount(candidateTotal)}`,
       tone: "neutral",
@@ -102,7 +102,7 @@ export function buildQuotationRiskKpiCards(input: Readonly<{
     },
     "attention-assessments": {
       id: "attention-assessments",
-      label: "Dikkat gerektiren teklifler",
+      label: "Dikkat gerektiren",
       value: formatCount(attentionCount),
       detail: `Kapsam: ${formatCount(assessments.length)} değerlendirme`,
       tone: attentionCount > 0 ? "attention" : "neutral",
@@ -114,7 +114,7 @@ export function buildQuotationRiskKpiCards(input: Readonly<{
     },
     "within-threshold-assessments": {
       id: "within-threshold-assessments",
-      label: "Eşik içinde kalan teklifler",
+      label: "Eşik içinde kalan",
       value: formatCount(withinCount),
       detail: `Kapsam: ${formatCount(assessments.length)} değerlendirme`,
       tone: withinCount > 0 ? "controlled" : "neutral",
@@ -126,7 +126,7 @@ export function buildQuotationRiskKpiCards(input: Readonly<{
     },
     "insufficient-or-conflict": {
       id: "insufficient-or-conflict",
-      label: "Yetersiz veri / kaynak çakışması",
+      label: "Yetersiz / çakışma",
       value: formatCount(insufficientOrConflict),
       detail: "Değerlendirme sonucu bazında",
       tone: insufficientOrConflict > 0 ? "conflict" : "neutral",
@@ -138,7 +138,7 @@ export function buildQuotationRiskKpiCards(input: Readonly<{
     },
     "current-risk-incidence": {
       id: "current-risk-incidence",
-      label: "Güncel gözlenen risk sıklığı",
+      label: "Güncel risk sıklığı",
       value: formatIncidenceFraction(currentIncidence),
       detail: temporalComparison
         ? `Güncel pencere: ${formatCount(temporalComparison.comparableAssessmentCount)} karşılaştırılabilir`
@@ -205,7 +205,7 @@ export function buildQuotationRiskTemporalChartData(
   if (temporal.length === 0) {
     return {
       points: [],
-      unavailableReason: "Karşılaştırılabilir zamansal risk eğilimi çalıştırması yok",
+      unavailableReason: "Karşılaştırılabilir zamansal risk eğilimi çalışması yok",
     };
   }
 

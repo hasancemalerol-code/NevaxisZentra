@@ -1,3 +1,4 @@
+import { resolveCommercialProvenance } from "../domain/commercial-intelligence-labels";
 import "./commercial-intelligence-server-boundary";
 
 import type { CommercialPricingScenarioApiFilters } from "../application/commercial-pricing-scenario-filter";
@@ -40,6 +41,7 @@ import {
   type RawCommercialPricingScenarioEvaluationSnapshot,
   type RawCommercialPricingScenarioSummary,
 } from "./commercial-pricing-scenario-api-client";
+import { listCommercialSalesPriceProfiles } from "./commercial-sales-price-api-client";
 import { resolveCommercialIntelligenceRequestContext } from "./commercial-intelligence-request-context";
 
 export type { CommercialPricingScenarioApiFilters };
@@ -268,9 +270,10 @@ export async function readCommercialPricingScenarioWorkspace(
     return { status: "failure", message: contextResult.message, code: contextResult.code };
   }
 
-  const [workspaceResult, scenariosResult] = await Promise.all([
+  const [workspaceResult, scenariosResult, profilesResult] = await Promise.all([
     getCommercialPricingScenarioWorkspace(contextResult.context),
     listCommercialPricingScenarios(contextResult.context, filters),
+    listCommercialSalesPriceProfiles(contextResult.context),
   ]);
 
   if (workspaceResult.status === "failure") {
@@ -288,9 +291,14 @@ export async function readCommercialPricingScenarioWorkspace(
   return {
     status: "success",
     workspace: {
+      profileOptions: profilesResult.status === "success"
+        ? profilesResult.value.items
+          .filter((profile) => profile.status === "approved")
+          .map((profile) => ({ id: profile.id, version: profile.version, label: profile.displayName || profile.profileCode }))
+        : [],
       facilityLabel: "Yetkili tesis",
       ruleSetVersion: workspaceResult.value.ruleSetVersion,
-      provenanceDisclaimer: localizeCommercialProfitabilityProvenance(workspaceResult.value.provenanceDisclaimer),
+      provenanceDisclaimer: resolveCommercialProvenance(workspaceResult.value.provenanceDisclaimer, false, localizeCommercialProfitabilityProvenance),
       automationDisclaimer: workspaceResult.value.automationDisclaimer,
       reportingPeriodLabel: freshnessLabel(scenarios),
       freshnessLabel: freshnessLabel(scenarios),

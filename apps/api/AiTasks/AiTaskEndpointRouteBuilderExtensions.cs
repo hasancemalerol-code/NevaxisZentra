@@ -252,6 +252,7 @@ public static class AiTaskEndpointRouteBuilderExtensions
         escalationLevel = item.EscalationLevel,
         escalationState = item.EscalationState,
         slaState = item.SlaState,
+        slaBreachType = item.SlaBreachType,
         closureState = item.ClosureState,
         evidenceCount = item.EvidenceCount,
         closureApprovalRequired = item.ClosureApprovalRequired,
@@ -361,6 +362,7 @@ public static class AiTaskEndpointRouteBuilderExtensions
         assignedMembershipId = item.AssignedMembershipId,
         assignedTeamChannelId = item.AssignedTeamChannelId,
         slaPolicyId = item.SlaPolicyId,
+        slaState = item.Sla.State,
         sla = new
         {
             state = item.Sla.State,

@@ -1,9 +1,11 @@
-import { Boxes } from "lucide-react";
+
 
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { MoldRegistryView } from "@/features/molds/components/mold-registry-view";
 import "@/features/molds/components/mold-registry.css";
 import { readMoldRegistry } from "@/features/molds/server/mold-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function MoldRegistryPage() {
   await forbidUnlessGranted("mold.read");
@@ -11,10 +13,8 @@ export default async function MoldRegistryPage() {
   const result = await readMoldRegistry();
 
   if (result.status === "failure") {
-    const isUnauthorized = result.code === "permission-denied" || result.code === "unauthenticated";
-
     return (
-      <main className="mold-registry-page">
+      <div className="mold-registry-page">
         <header className="mold-registry-header">
           <div className="mold-registry-header__intro">
             <p className="mold-registry-header__eyebrow">KALIP YÖNETİMİ</p>
@@ -24,17 +24,8 @@ export default async function MoldRegistryPage() {
             </p>
           </div>
         </header>
-        <div
-          role="alert"
-          className={isUnauthorized ? "mold-registry-unauthorized" : "mold-registry-error"}
-        >
-          <Boxes aria-hidden="true" />
-          <div>
-            <h3>{isUnauthorized ? "Bu modüle erişim yetkiniz yok" : "Kalıp verisi yüklenemedi"}</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Kalıp verisi yüklenemedi" inline />
+      </div>
     );
   }
 

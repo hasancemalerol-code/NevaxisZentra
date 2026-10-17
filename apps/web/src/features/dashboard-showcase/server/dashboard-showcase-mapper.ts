@@ -231,7 +231,7 @@ function buildKpiCards(
   return [
     {
       id: "actual-production",
-      label: "Gerçekleşen Üretim",
+      label: "Gerçekleşen üretim",
       value: formatShowcaseNumber(goodQuantity),
       unit: hasNumericValue(goodQuantity) ? "adet" : undefined,
       supportingText: hasNumericValue(plannedQuantity)
@@ -256,7 +256,7 @@ function buildKpiCards(
     },
     {
       id: "scrap-rate",
-      label: "Fire Oranı",
+      label: "Fire oranı",
       value: formatShowcasePercent(scrapRate),
       tone: "warning",
       iconKey: "scrap",
@@ -265,7 +265,7 @@ function buildKpiCards(
     },
     {
       id: "cycle-time",
-      label: "Çevrim Süresi",
+      label: "Çevrim süresi",
       value: formatShowcaseCycleSeconds(source.cycleDurationMs),
       tone: "info",
       iconKey: "cycle",
@@ -274,7 +274,7 @@ function buildKpiCards(
     },
     {
       id: "quality-compliance",
-      label: "Kalite Uygunluğu",
+      label: "Kalite uygunluğu",
       value: formatShowcasePercent(qualityPercent),
       tone: "success",
       sparklineTone: "quality",
@@ -284,7 +284,7 @@ function buildKpiCards(
     },
     {
       id: "target-achievement",
-      label: "Hedef Gerçekleşmesi",
+      label: "Hedef gerçekleşmesi",
       value: formatShowcasePercent(completionRate),
       tone: "info",
       iconKey: "target",

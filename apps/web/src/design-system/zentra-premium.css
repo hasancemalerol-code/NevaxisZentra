@@ -1,0 +1,1527 @@
+/*
+ * Zentra premium foundation
+ *
+ * One shared layer for every shipping screen:
+ *   1. contrast-safe text tokens (WCAG AA on every shell / card surface)
+ *   2. zero-specificity baselines for bare elements inside the content area, so an element that has no class of its own
+ *      still renders in the Zentra design language (never as raw browser default)
+ *   3. state pages (not found, access denied, unavailable, loading)
+ *   4. reusable primitives: page header, metric cards, panels, data tables, severity badges, notices, detail lists,
+ *      filter and action bars, empty states, master/detail split
+ *
+ * Primitives use the `zx-` prefix. Baselines use :where() so any existing component rule still wins.
+ */
+
+:root {
+  --zx-text-strong: #17263d;
+  --zx-text: #2f4058;
+  --zx-text-muted: #566478;
+  --zx-line: #dce3eb;
+  --zx-line-strong: #c6d1de;
+  --zx-surface: #ffffff;
+  --zx-surface-soft: #f7f9fc;
+  --zx-surface-inset: #f1f4f8;
+  --zx-accent: #2463a7;
+  --zx-accent-strong: #1b528e;
+  --zx-accent-soft: #e6f0fb;
+  --zx-critical: #a3212b;
+  --zx-critical-soft: #fdebed;
+  --zx-critical-line: #f1c8cd;
+  --zx-high: #a4510a;
+  --zx-high-soft: #fff0dc;
+  --zx-high-line: #f2d3a8;
+  --zx-medium: #7a5b00;
+  --zx-medium-soft: #fff8dc;
+  --zx-medium-line: #ecdc9c;
+  --zx-low: #0f6a46;
+  --zx-low-soft: #e6f6ee;
+  --zx-low-line: #c3e4d2;
+  --zx-info: #1f5c9a;
+  --zx-info-soft: #e8f1fb;
+  --zx-info-line: #c9dbef;
+  --zx-ai: #5b4496;
+  --zx-ai-soft: #f0ecfa;
+  --zx-ai-line: #d9d0ef;
+  --zx-neutral: #4d5e73;
+  --zx-neutral-soft: #eef2f6;
+  --zx-neutral-line: #d6dee8;
+  --zx-radius: 12px;
+  --zx-radius-sm: 8px;
+  --zx-shadow: 0 1px 2px rgb(20 37 58 / 4%), 0 6px 18px rgb(20 37 58 / 4%);
+
+  /* the muted text token used across the shell and cards; the previous value failed contrast (3.4:1 – 3.9:1) */
+  --color-text-muted: #566478;
+  --dashboard-text-muted: #566478;
+
+  /* tokens referenced by feature stylesheets (with hard-coded fallbacks) that were never defined */
+  --accent-primary: #1d4ed8;
+  --accent: #1d4ed8;
+  --text-muted: #566478;
+  --border-subtle: #dce3eb;
+  --surface-elevated: #ffffff;
+
+  /* further names referenced by feature stylesheets without a definition (their declarations were silently dropped) */
+  --fact-accent: #2463a7;
+  --fact-surface-elevated: #ffffff;
+  --fact-text-body: #2f4058;
+  --fact-text-secondary: #4d5e73;
+  --fact-text-muted: #566478;
+  --fact-danger: #a3212b;
+  --fact-warning: #9b5209;
+  --destructive: #a3212b;
+  --primary-foreground: #ffffff;
+  --shadow-md: 0 8px 24px rgb(20 37 58 / 12%);
+  --shadow-lg: 0 16px 48px rgb(20 37 58 / 22%);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --card: #ffffff;
+  --surface-base: #f4f6f9;
+  --text-primary: #17263d;
+  --text-secondary: #4d5e73;
+  --text-strong: #17263d;
+  --accent-ai: #5b4496;
+  --border-strong: #c6d1de;
+  --danger-text: #a3212b;
+  --success-text: #0f6a46;
+  --warning-text: #9b5209;
+  --color-status-danger: #a3212b;
+  --color-status-warning: #9b5209;
+  --color-text: #17263d;
+}
+
+/* Tablet and small laptop widths: the page itself must never scroll sideways; wide data scrolls inside its own container. */
+html { min-width: 0; }
+body { overflow-wrap: break-word; }
+.content-viewport { max-width: 100%; overflow-x: clip; }
+
+/* ───────────────────────── 2. baselines for bare elements ───────────────────────── */
+
+:where(.content-viewport :is(h1, h2, h3, h4, h5, h6):not([class])) {
+  margin: 0;
+  color: var(--zx-text-strong);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+}
+:where(.content-viewport h1:not([class])) { font-size: 1.5rem; }
+:where(.content-viewport h2:not([class])) { font-size: 1.0625rem; }
+:where(.content-viewport h3:not([class])) { font-size: 0.9375rem; }
+:where(.content-viewport :is(h4, h5, h6):not([class])) { font-size: 0.8125rem; }
+
+:where(.content-viewport p:not([class])) {
+  margin: 0;
+  color: var(--zx-text);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+:where(.content-viewport :is(ul, ol):not([class])) {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--zx-text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+:where(.content-viewport a:not([class])) {
+  color: var(--zx-accent-strong);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 3px;
+}
+:where(.content-viewport a:not([class]):hover) { text-decoration-color: currentColor; }
+
+:where(.content-viewport hr) { border: 0; border-top: 1px solid var(--zx-line); margin: 16px 0; }
+
+:where(.content-viewport form:not([class])) {
+  display: grid;
+  gap: 14px;
+  max-width: 920px;
+  padding: 20px;
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius);
+  background: var(--zx-surface);
+  box-shadow: var(--zx-shadow);
+}
+
+:where(.content-viewport label:not([class])) {
+  display: grid;
+  gap: 6px;
+  color: var(--zx-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+:where(.content-viewport fieldset:not([class])) {
+  min-width: 0;
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius-sm);
+}
+:where(.content-viewport legend:not([class])) { padding: 0 6px; font-size: 0.8125rem; font-weight: 700; color: var(--zx-text-strong); }
+
+:where(.content-viewport :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"], [type="color"]), select, textarea):not([class])) {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--zx-line-strong);
+  border-radius: var(--zx-radius-sm);
+  color: var(--zx-text-strong);
+  background: var(--zx-surface);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+:where(.content-viewport textarea:not([class])) { min-height: 96px; resize: vertical; }
+:where(.content-viewport :is(input, select, textarea):not([class]):focus-visible) {
+  border-color: var(--zx-accent);
+  outline: 3px solid color-mix(in srgb, var(--color-focus-ring, #1675d1) 30%, transparent);
+  outline-offset: 0;
+}
+:where(.content-viewport :is(input, select, textarea):not([class])::placeholder) { color: #6b7a8e; font-weight: 400; }
+:where(.content-viewport :is(input, select, textarea):not([class]):disabled) { color: var(--zx-text-muted); background: var(--zx-surface-inset); cursor: not-allowed; }
+:where(.content-viewport :is(input[type="checkbox"], input[type="radio"]):not([class])) { width: 16px; height: 16px; accent-color: var(--zx-accent); }
+
+:where(.content-viewport button:not([class])) {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--zx-line-strong);
+  border-radius: var(--zx-radius-sm);
+  color: var(--zx-text-strong);
+  background: var(--zx-surface);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+:where(.content-viewport button:not([class]):hover:not(:disabled)) { border-color: var(--zx-accent); background: var(--zx-accent-soft); }
+:where(.content-viewport button:not([class]):disabled) { opacity: 0.6; cursor: not-allowed; }
+:where(.content-viewport button:not([class]) svg) { width: 16px; height: 16px; }
+
+:where(.content-viewport table:not([class])) {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  color: var(--zx-text);
+}
+:where(.content-viewport table:not([class]) :is(th, td)) {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--zx-line);
+  text-align: left;
+  vertical-align: top;
+}
+:where(.content-viewport table:not([class]) th) {
+  color: var(--zx-text-muted);
+  background: var(--zx-surface-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+:where(.content-viewport dl:not([class])) { margin: 0; display: grid; gap: 10px; }
+:where(.content-viewport dl:not([class]) dt) { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 600; }
+:where(.content-viewport dl:not([class]) dd) { margin: 2px 0 0; color: var(--zx-text-strong); font-size: 0.875rem; }
+
+/* ───────────────────────── 3. state pages ───────────────────────── */
+
+.zx-state-page {
+  display: grid;
+  min-height: calc(100vh - var(--top-bar-height, 72px) - 24px);
+  place-items: center;
+  padding: 32px 20px;
+}
+.zx-state-page--standalone { min-height: 100vh; background: var(--color-background, #f4f6f9); }
+
+.zx-state-card {
+  display: grid;
+  width: min(100%, 520px);
+  justify-items: center;
+  gap: 10px;
+  padding: 36px 32px 32px;
+  border: 1px solid var(--zx-line);
+  border-radius: 16px;
+  background: var(--zx-surface);
+  box-shadow: var(--zx-shadow);
+  text-align: center;
+}
+.zx-state-icon {
+  display: grid;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 16px;
+  color: var(--zx-accent);
+  background: var(--zx-accent-soft);
+}
+.zx-state-icon svg { width: 26px; height: 26px; }
+.zx-state-page--forbidden .zx-state-icon { color: var(--zx-high); background: var(--zx-high-soft); }
+.zx-state-page--error .zx-state-icon,
+.zx-state-page--unavailable .zx-state-icon { color: var(--zx-critical); background: var(--zx-critical-soft); }
+.zx-state-code { margin: 6px 0 0; color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; }
+.zx-state-page--inline { min-height: 0; padding: 24px 0; }
+.zx-state-card h1,
+.zx-state-card h2 { margin: 0; color: var(--zx-text-strong); font-size: 1.375rem; line-height: 1.25; letter-spacing: -0.02em; }
+.zx-state-description { max-width: 420px; margin: 0; color: var(--zx-text); font-size: 0.9rem; line-height: 1.6; }
+.zx-state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 14px; }
+.zx-state-reference { margin: 8px 0 0; color: var(--zx-text-muted); font-size: 0.75rem; }
+.zx-state-reference code { padding: 2px 6px; border-radius: 6px; background: var(--zx-surface-inset); font-family: var(--fact-text-mono, ui-monospace, monospace); }
+
+.zx-page-loading { display: grid; gap: 18px; padding: 28px 32px; }
+.zx-page-loading__header { display: grid; gap: 10px; }
+.zx-page-loading__metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.zx-page-loading__panel { display: grid; gap: 12px; padding: 22px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.zx-skeleton-eyebrow { width: 96px; height: 10px; }
+.zx-skeleton-title { width: 280px; max-width: 70%; height: 24px; }
+.zx-skeleton-subtitle { width: 460px; max-width: 90%; height: 12px; }
+.zx-skeleton-metric { height: 84px; border-radius: var(--zx-radius); }
+.zx-skeleton-line { width: 100%; height: 14px; }
+.zx-skeleton-line--short { width: 60%; }
+
+/* ───────────────────────── 4. primitives ───────────────────────── */
+
+.zx-page {
+  display: grid;
+  width: 100%;
+  max-width: var(--content-max-width, 1680px);
+  min-width: 0;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 26px 28px 44px;
+}
+
+.zx-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--zx-line);
+}
+.zx-page-header__copy { display: grid; flex: 1 1 420px; min-width: 0; gap: 6px; }
+.zx-page-header__eyebrow { margin: 0; color: var(--zx-accent-strong); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.zx-page-header :is(h1, h2) { margin: 0; color: var(--zx-text-strong); font-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem); font-weight: 750; line-height: 1.2; letter-spacing: -0.025em; }
+.zx-page-header__description { max-width: 760px; margin: 0; color: var(--zx-text); font-size: 0.9rem; line-height: 1.55; }
+.zx-page-header__actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+
+.zx-section-title { margin: 0; color: var(--zx-text-strong); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; }
+
+/* Metric cards */
+.zx-metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin: 0; padding: 0; list-style: none; }
+.zx-metric {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  overflow: hidden;
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius);
+  background: var(--zx-surface);
+  box-shadow: var(--zx-shadow);
+}
+.zx-metric::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--zx-neutral-line); content: ""; }
+.zx-metric--critical::before { background: var(--zx-critical); }
+.zx-metric--high::before { background: var(--zx-high); }
+.zx-metric--medium::before { background: #c79a00; }
+.zx-metric--low::before { background: var(--zx-low); }
+.zx-metric--info::before { background: var(--zx-info); }
+.zx-metric__icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 10px; color: var(--zx-neutral); background: var(--zx-neutral-soft); }
+.zx-metric--critical .zx-metric__icon { color: var(--zx-critical); background: var(--zx-critical-soft); }
+.zx-metric--high .zx-metric__icon { color: var(--zx-high); background: var(--zx-high-soft); }
+.zx-metric--medium .zx-metric__icon { color: var(--zx-medium); background: var(--zx-medium-soft); }
+.zx-metric--low .zx-metric__icon { color: var(--zx-low); background: var(--zx-low-soft); }
+.zx-metric--info .zx-metric__icon { color: var(--zx-info); background: var(--zx-info-soft); }
+.zx-metric__body { display: grid; min-width: 0; gap: 2px; }
+.zx-metric__label { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.zx-metric__value { color: var(--zx-text-strong); font-size: 1.625rem; font-weight: 750; line-height: 1.15; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.zx-metric__hint { color: var(--zx-text-muted); font-size: 0.75rem; line-height: 1.4; }
+
+/* Panels */
+.zx-panel { display: grid; min-width: 0; align-content: start; gap: 14px; padding: 18px 20px 20px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); box-shadow: var(--zx-shadow); }
+.zx-panel--flush { padding: 0; gap: 0; }
+.zx-panel__header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 16px; }
+.zx-panel--flush > .zx-panel__header { padding: 18px 20px 14px; }
+.zx-panel__title { margin: 0; color: var(--zx-text-strong); font-size: 1rem; font-weight: 700; letter-spacing: -0.012em; line-height: 1.3; }
+.zx-panel__subtitle { margin: 3px 0 0; color: var(--zx-text-muted); font-size: 0.8125rem; line-height: 1.45; }
+.zx-panel__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.zx-split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; gap: 18px; }
+.zx-split--even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 1180px) { .zx-split, .zx-split--even { grid-template-columns: minmax(0, 1fr); } }
+.zx-sticky { position: sticky; top: calc(var(--top-bar-height, 72px) + 14px); }
+@media (max-width: 1180px) { .zx-sticky { position: static; } }
+
+/* Data tables */
+.zx-table-wrap { max-width: 100%; overflow-x: auto; border-top: 1px solid var(--zx-line); }
+.zx-panel:not(.zx-panel--flush) > .zx-table-wrap { border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); }
+.zx-table-wrap:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-focus-ring, #1675d1) 38%, transparent); outline-offset: -3px; }
+.zx-table { width: 100%; min-width: 560px; border-collapse: separate; border-spacing: 0; color: var(--zx-text); font-size: 0.8125rem; }
+.zx-table caption { padding: 0; }
+.zx-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--zx-line-strong);
+  color: var(--zx-text-muted);
+  background: var(--zx-surface-soft);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.zx-table tbody td { padding: 12px 14px; border-bottom: 1px solid var(--zx-line); vertical-align: middle; }
+.zx-table tbody tr:last-child td { border-bottom: 0; }
+.zx-table tbody tr:hover td { background: #f8fbff; }
+.zx-table tbody tr[aria-selected="true"] td { background: var(--zx-accent-soft); }
+.zx-table tbody tr[aria-selected="true"] td:first-child { box-shadow: inset 3px 0 0 var(--zx-accent); }
+.zx-table .zx-num,
+.zx-table thead th.zx-num { text-align: right; font-variant-numeric: tabular-nums; }
+.zx-table-primary { display: grid; gap: 2px; min-width: 0; }
+.zx-table-link {
+  all: unset;
+  display: inline-block;
+  max-width: 100%;
+  color: var(--zx-accent-strong);
+  font-weight: 700;
+  cursor: pointer;
+  overflow-wrap: break-word;
+}
+.zx-table-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.zx-table-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--color-focus-ring, #1675d1) 38%, transparent); outline-offset: 2px; border-radius: 4px; }
+.zx-table-meta { color: var(--zx-text-muted); font-size: 0.75rem; line-height: 1.35; overflow-wrap: break-word; }
+
+/* Severity / risk / status badges (shared by risk, severity, lifecycle) */
+.zx-sev { display: inline-flex; min-height: 24px; align-items: center; gap: 6px; padding: 2px 10px 2px 8px; border: 1px solid var(--zx-neutral-line); border-radius: 999px; color: var(--zx-neutral); background: var(--zx-neutral-soft); font-size: 0.75rem; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.zx-sev::before { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: currentColor; content: ""; }
+.zx-sev--critical { color: var(--zx-critical); border-color: var(--zx-critical-line); background: var(--zx-critical-soft); }
+.zx-sev--high { color: var(--zx-high); border-color: var(--zx-high-line); background: var(--zx-high-soft); }
+.zx-sev--medium { color: var(--zx-medium); border-color: var(--zx-medium-line); background: var(--zx-medium-soft); }
+.zx-sev--low { color: var(--zx-low); border-color: var(--zx-low-line); background: var(--zx-low-soft); }
+.zx-sev--info { color: var(--zx-info); border-color: var(--zx-info-line); background: var(--zx-info-soft); }
+.zx-sev--ai { color: var(--zx-ai); border-color: var(--zx-ai-line); background: var(--zx-ai-soft); }
+
+/* Notices (information callouts) */
+.zx-notice { display: flex; align-items: flex-start; gap: 12px; padding: 12px 16px; border: 1px solid var(--zx-info-line); border-radius: var(--zx-radius-sm); color: var(--zx-text); background: var(--zx-info-soft); font-size: 0.8125rem; line-height: 1.5; }
+.zx-notice > svg { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 1px; color: var(--zx-info); }
+.zx-notice__body { display: grid; min-width: 0; gap: 2px; }
+.zx-notice__title { color: var(--zx-text-strong); font-weight: 700; }
+.zx-notice p { margin: 0; }
+.zx-notice--warning { border-color: var(--zx-high-line); background: var(--zx-high-soft); }
+.zx-notice--warning > svg { color: var(--zx-high); }
+.zx-notice--danger { border-color: var(--zx-critical-line); background: var(--zx-critical-soft); }
+.zx-notice--danger > svg { color: var(--zx-critical); }
+.zx-notice--success { border-color: var(--zx-low-line); background: var(--zx-low-soft); }
+.zx-notice--success > svg { color: var(--zx-low); }
+.zx-notice--ai { border-color: var(--zx-ai-line); background: var(--zx-ai-soft); }
+.zx-notice--ai > svg { color: var(--zx-ai); }
+.zx-notice--neutral { border-color: var(--zx-neutral-line); background: var(--zx-surface-soft); }
+.zx-notice--neutral > svg { color: var(--zx-neutral); }
+
+/* Detail lists */
+.zx-detail-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0; margin: 0; padding: 0; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); overflow: hidden; }
+.zx-detail-list > div { display: grid; gap: 3px; padding: 11px 14px; border-right: 1px solid var(--zx-line); border-bottom: 1px solid var(--zx-line); background: var(--zx-surface); }
+.zx-detail-list dt { margin: 0; color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.zx-detail-list dd { margin: 0; color: var(--zx-text-strong); font-size: 0.875rem; font-weight: 600; line-height: 1.4; overflow-wrap: break-word; }
+
+/* Grouped content blocks inside a detail panel */
+.zx-block { display: grid; gap: 8px; }
+.zx-block + .zx-block { padding-top: 14px; border-top: 1px solid var(--zx-line); }
+.zx-block__title { margin: 0; color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.07em; text-transform: uppercase; }
+.zx-block p { margin: 0; color: var(--zx-text); font-size: 0.875rem; line-height: 1.6; }
+.zx-bullet-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.zx-bullet-list li { display: grid; gap: 2px; padding: 10px 12px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); font-size: 0.8125rem; line-height: 1.5; color: var(--zx-text); }
+.zx-bullet-list strong { color: var(--zx-text-strong); }
+
+/* Filter and action bars */
+.zx-filter-bar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; padding: 14px 16px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.zx-filter-bar__field { display: grid; min-width: 150px; flex: 1 1 170px; gap: 5px; }
+.zx-filter-bar__field > span { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.zx-filter-bar__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+
+.zx-action-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.zx-action-bar--end { justify-content: flex-end; }
+.zx-action-bar--bordered { padding-top: 14px; border-top: 1px solid var(--zx-line); }
+
+.zx-button { display: inline-flex; min-height: 38px; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; border: 1px solid var(--zx-line-strong); border-radius: var(--zx-radius-sm); color: var(--zx-text-strong); background: var(--zx-surface); font: inherit; font-size: 0.8125rem; font-weight: 650; line-height: 1.2; text-decoration: none; cursor: pointer; transition: background 140ms ease, border-color 140ms ease; }
+.zx-button:hover:not(:disabled) { border-color: var(--zx-accent); background: var(--zx-accent-soft); }
+.zx-button svg { width: 16px; height: 16px; flex: 0 0 16px; }
+.zx-button--primary { border-color: var(--zx-accent); color: #fff; background: var(--zx-accent); }
+.zx-button--primary:hover:not(:disabled) { border-color: var(--zx-accent-strong); background: var(--zx-accent-strong); }
+.zx-button--quiet { border-color: transparent; background: transparent; color: var(--zx-accent-strong); }
+.zx-button:disabled { opacity: 0.6; cursor: not-allowed; }
+.zx-spin { animation: zx-spin 900ms linear infinite; }
+@keyframes zx-spin { to { transform: rotate(360deg); } }
+
+/* Empty / inline states */
+.zx-empty { display: grid; justify-items: center; gap: 6px; padding: 32px 20px; border: 1px dashed var(--zx-line-strong); border-radius: var(--zx-radius); background: var(--zx-surface-soft); text-align: center; }
+.zx-empty__icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 12px; color: var(--zx-accent); background: var(--zx-accent-soft); }
+.zx-empty__icon svg { width: 22px; height: 22px; }
+.zx-empty h3,
+.zx-empty__title { margin: 6px 0 0; color: var(--zx-text-strong); font-size: 0.9375rem; font-weight: 700; }
+.zx-empty p { max-width: 460px; margin: 0; color: var(--zx-text-muted); font-size: 0.8125rem; line-height: 1.55; }
+.zx-empty--compact { padding: 20px 16px; }
+
+@media (max-width: 760px) {
+  .zx-page { padding: 18px 16px 32px; }
+  .zx-metric-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+  .zx-panel { padding: 14px 14px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .zx-spin { animation: none; } }
+
+/* ───────────────────────── 5. layout helpers & table extras ───────────────────────── */
+
+.zx-stack { display: grid; min-width: 0; gap: 12px; }
+.zx-panel__body { padding: 0 20px 22px; }
+.zx-detail-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.zx-table .zx-table-group th {
+  position: static;
+  padding: 8px 14px;
+  border-top: 1px solid var(--zx-line);
+  border-bottom: 1px solid var(--zx-line);
+  color: var(--zx-text);
+  background: var(--zx-surface-inset);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.zx-table tbody:first-of-type .zx-table-group th { border-top: 0; }
+.zx-notice--with-actions { align-items: center; flex-wrap: wrap; }
+.zx-notice--with-actions .zx-notice__body { flex: 1 1 320px; }
+.zx-notice__actions { display: flex; flex: 0 0 auto; gap: 8px; }
+
+.zx-section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.zx-count-chip { display: inline-flex; min-height: 26px; align-items: center; padding: 2px 12px; border: 1px solid var(--zx-line-strong); border-radius: 999px; color: var(--zx-text); background: var(--zx-surface); font-size: 0.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.zx-notice .maintenance-ai-muted,
+.zx-notice .maintenance-ai-stale-warning,
+.zx-notice .maintenance-ai-message { margin: 0; padding: 0; border: 0; background: transparent; color: var(--zx-text); font-size: inherit; line-height: inherit; }
+.zx-notice .maintenance-ai-message.error { color: var(--zx-critical); font-weight: 600; }
+
+/* ───────────────────────── 6. one page-title scale ─────────────────────────
+ * Feature stylesheets historically set the page h1 anywhere between 17px and 32px (some with !important).
+ * Every shipping screen now shares one title scale; state cards and embedded error banners keep their own size.
+ */
+:root { --zx-page-title-size: clamp(1.375rem, 1.1rem + 0.8vw, 1.75rem); }
+.content-viewport h1:not(:is(.zx-state-card, .works-error-banner, .works-partial-error, .golden-demo-digital-stack) h1) {
+  color: var(--zx-text-strong) !important;
+  font-size: var(--zx-page-title-size) !important;
+  font-weight: 750 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.025em !important;
+}
+.production-execution-header > p:first-of-type,
+.production-execution-header > div > p:first-of-type { margin: 0; }
+.production-execution-header > p:not(:first-of-type),
+.production-execution-header > div > p:not(:first-of-type) {
+  max-width: 920px;
+  color: var(--zx-text);
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.55;
+  text-transform: none;
+}
+
+/* Session expiry notice (floating, shown by the shell when a background action detects a missing session) */
+.zx-session-expired { position: fixed; z-index: 90; right: 20px; bottom: 20px; left: 20px; display: flex; justify-content: center; pointer-events: none; }
+.zx-session-expired__card { display: flex; max-width: 640px; flex-wrap: wrap; align-items: center; gap: 14px 18px; padding: 16px 20px; border: 1px solid var(--zx-high-line); border-radius: 14px; background: var(--zx-surface); box-shadow: var(--shadow-lg, 0 16px 48px rgb(20 37 58 / 22%)); pointer-events: auto; }
+.zx-session-expired__card .zx-state-icon { width: 44px; height: 44px; color: var(--zx-high); background: var(--zx-high-soft); }
+.zx-session-expired__copy { display: grid; flex: 1 1 260px; gap: 2px; }
+.zx-session-expired__copy h2 { margin: 0; color: var(--zx-text-strong); font-size: 0.9375rem; }
+.zx-session-expired__copy p { margin: 0; color: var(--zx-text); font-size: 0.8125rem; line-height: 1.5; }
+
+/* state titles that were demoted to h3 under an h1 are h2 now; keep them at card-title size */
+:where([role="alert"], [role="status"], .state-panel) :is(h2):not([class]) { font-size: 0.9375rem; line-height: 1.35; }
+
+/* ─── Table baseline (Wave 1): readable headers, no collapsed columns, scroll inside the card never the page ─── */
+:where(.content-viewport) table:not([data-wrap]) thead th { white-space: nowrap; }
+:where(.content-viewport) table { max-width: 100%; }
+:where(.content-viewport) :is(.erp-table, .works-table, .commint-table, .quality-workspace-table, .edge-machine-table) {
+  min-width: max-content;
+}
+/* Maintenance tables sit in two-column dashboard sections: a finite minimum, the section body scrolls */
+.maintenance-table { min-width: 640px; }
+.maintenance-section__body, .maintenance-dashboard-section__body, .maintenance-table-scroll, .maintenance-dashboard-section { min-width: 0; overflow-x: auto; }
+:where(.content-viewport) :is(.erp-table-wrap, .works-table-wrap, .commint-table-wrap, .edge-table-wrap, .zx-table-wrap) {
+  max-width: 100%;
+  overflow-x: auto;
+}
+/* Action column stays reachable while a wide table scrolls */
+:where(.content-viewport) table th:last-child:where(.zx-actions, [data-sticky-action]),
+:where(.content-viewport) table td:last-child:where(.zx-actions, [data-sticky-action]) {
+  position: sticky;
+  right: 0;
+  background: var(--zx-surface, #fff);
+}
+/* KPI tiles: wrap on word boundaries, never mid-word, never clipped */
+:where([class*="kpi"], [class*="metric"]) :where([class*="label"], [class*="desc"], [class*="caption"]) {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: manual;
+}
+
+/* KPI rows: six tiles sit as 3 + 3, never 5 + 1 */
+:is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid):has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+:is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid):has(> :nth-child(7)) {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 900px) {
+  :is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid):has(> :nth-child(6)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── Evidence / detail baseline (Wave 2): every label/value list in a shipping screen reads as one component ─── */
+:where(.content-viewport) dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius-sm);
+  overflow: hidden;
+}
+:where(.content-viewport) dl > div {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 11px 14px;
+  border-right: 1px solid var(--zx-line);
+  border-bottom: 1px solid var(--zx-line);
+  background: var(--zx-surface);
+}
+:where(.content-viewport) dt {
+  margin: 0;
+  color: var(--zx-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+:where(.content-viewport) dd {
+  margin: 0;
+  color: var(--zx-text-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+/* A dl whose direct children are bare dt/dd (no wrapping div) stacks label over value */
+:where(.content-viewport) dl:not(:has(> div)) { padding: 6px 14px; gap: 2px 18px; grid-template-columns: minmax(120px, 220px) 1fr; }
+:where(.content-viewport) dl:not(:has(> div)) > dt,
+:where(.content-viewport) dl:not(:has(> div)) > dd { padding: 6px 0; }
+@media (max-width: 720px) {
+  :where(.content-viewport) dl:not(:has(> div)) { grid-template-columns: 1fr; }
+}
+
+/* ─── Trend bars ─── */
+.zx-trend { display: grid; gap: 8px; margin: 0 0 14px; width: 100%; min-width: 0; }
+.zx-trend__svg { display: block; width: 100%; height: auto; min-height: 140px; max-height: 220px; }
+.zx-trend__grid { stroke: var(--zx-line); stroke-width: 1; }
+.zx-trend__tick { fill: var(--zx-text-muted); font-size: 12px; }
+.zx-trend__passed { fill: var(--zx-low, #1f8f5f); }
+.zx-trend__failed { fill: var(--zx-critical, #c2342b); }
+.zx-trend__marker { fill: var(--zx-surface, #fff); stroke: var(--zx-accent, #155eef); stroke-width: 2.5; }
+.zx-trend__legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--zx-text); font-size: 0.8125rem; }
+.zx-trend__legend span { display: inline-flex; align-items: center; gap: 6px; }
+.zx-trend__key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; }
+.zx-trend__key--passed { background: var(--zx-low, #1f8f5f); }
+.zx-trend__key--failed { background: var(--zx-critical, #c2342b); }
+.zx-trend__key--marker { border-radius: 50%; border: 2.5px solid var(--zx-accent, #155eef); background: transparent; }
+
+/* ─── Module sub-navigation (one tab system) ─── */
+.zx-subnav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin: 0 0 14px; }
+.zx-subnav__group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.zx-subnav__group + .zx-subnav__group { padding-left: 18px; border-left: 1px solid var(--zx-line); }
+.zx-subnav__group-label { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.07em; text-transform: uppercase; }
+.zx-subnav__link {
+  display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px;
+  border: 1px solid var(--zx-line); border-radius: 999px;
+  color: var(--zx-text); background: var(--zx-surface); font-size: 0.8125rem; font-weight: 650; text-decoration: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.zx-subnav__link:hover { border-color: var(--zx-accent); color: var(--zx-accent-strong); }
+.zx-subnav__link:focus-visible { outline: 2px solid var(--zx-accent); outline-offset: 2px; }
+.zx-subnav__link[aria-current="page"] { border-color: var(--zx-accent); color: #fff; background: var(--zx-accent-strong, #1d4ed8); }
+@media (max-width: 720px) { .zx-subnav__group + .zx-subnav__group { padding-left: 0; border-left: 0; } }
+
+/* Quality/mold/material follow-up detail grids reuse the shared evidence cell look */
+.quality-detail-grid { gap: 0 !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important; }
+
+/* ─── One action/section error look (Wave 2): every legacy per-feature error banner renders as the shared notice ─── */
+:is(.commint-error-banner, .commint-partial-error, .quality-error-panel, .material-registry-error, .maintenance-error-panel,
+    .iot-plc-error-banner, .iot-plc-partial-error, .workflow-action-error, .saas-admin-alert, .shift-workforce-error-inline,
+    .mold-registry-error, .energy-error-banner, .energy-partial-error, .oprisk-error-banner, .oprisk-partial-error,
+    .maintenance-predictive-risk-error, .edge-load-error, .teams-error) {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--zx-critical-line, #f2b8b3);
+  border-left-width: 4px;
+  border-radius: var(--zx-radius-sm, 8px);
+  color: var(--zx-text-strong, #10213c);
+  background: var(--zx-critical-soft, #fdeceb);
+  font-size: 0.875rem;
+  font-weight: 550;
+  line-height: 1.5;
+}
+:is(.commint-error-banner, .quality-error-panel, .maintenance-error-panel, .saas-admin-alert) :is(h2, h3) {
+  margin: 0 0 2px;
+  font-size: 0.9375rem;
+  font-weight: 750;
+  color: var(--zx-text-strong, #10213c);
+}
+:is(.commint-error-banner, .quality-error-panel, .maintenance-error-panel) p { margin: 0; }
+:is(.commint-error-banner, .quality-error-panel, .maintenance-error-panel) > svg { flex: 0 0 18px; width: 18px; height: 18px; color: var(--zx-critical, #c2342b); }
+
+/* ─── Dense tables without their own wrapper: the surrounding panel scrolls, never the page (Wave 2) ─── */
+:where(.content-viewport) :is(.commint-panel, .fact-section__body, .process-oee-compact-row__aside, .energy-registry, .iot-plc-registry) {
+  min-width: 0;
+  overflow-x: auto;
+}
+.energy-registry-table, .iot-plc-registry-table { min-width: 720px; }
+.shift-workforce-table, .process-oee-table { min-width: 640px; }
+.edge-cycle-table, .edge-ops-table, .edge-reliability-table { min-width: 640px; }
+.factory-network-comparison-table, .adaptive-planning-diff-table { min-width: 600px; }
+.fact-data-grid { min-width: 560px; }
+.material-registry-table, .mold-registry-table { min-width: 960px; }
+.material-registry-table--compact { min-width: 520px; }
+
+/* KPI/section grids: no orphan tiles at any width */
+:is(.erp-kpi-grid, .export-kpis, .kpi-grid, .commint-kpi-grid, .executive-command-grid) > :last-child:nth-child(odd):not(:first-child) {
+  grid-column: 1 / -1;
+}
+.commint-kpi-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)) !important; }
+@media (min-width: 1180px) {
+  :is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid):has(> :nth-child(5):last-child) {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.production-execution-header__links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.production-execution-header__links > a { width: auto; }
+.zx-page-header h2 { font-size: 1.375rem !important; line-height: 1.25 !important; }
+.executive-throughput-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .executive-throughput-strip { grid-template-columns: 1fr; } }
+
+/* Two-pane workspaces collapse earlier than the viewport suggests: the sidebar already takes ~260px */
+@media (max-width: 1180px) {
+  .teams-workspace, .saas-admin-registry-layout--detail, .preview-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+
+/* ─── Forms (Wave 2): one label, one required marker, styled date/file controls, calm fieldset/details ─── */
+:where(.content-viewport) form label,
+:where(.content-viewport) form legend {
+  color: var(--zx-text-strong);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+/* required marker: inline right after the label text, never on its own line */
+.zx-required, :where(.content-viewport) form label > span[aria-hidden="true"]:not([class]) {
+  display: inline;
+  margin-left: 4px;
+  color: var(--zx-critical, #c2342b);
+  font-weight: 750;
+}
+:where(.content-viewport) form label:has(> .zx-required, > span[aria-hidden="true"]) { display: block; }
+:where(.content-viewport) form :is(input[type="date"], input[type="datetime-local"], input[type="time"], input[type="month"]) {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--zx-line-strong);
+  border-radius: var(--zx-radius-sm);
+  color: var(--zx-text-strong);
+  background: var(--zx-surface);
+  font: inherit;
+  color-scheme: light;
+}
+:where(.content-viewport) form input[type="file"] {
+  max-width: 100%;
+  padding: 8px;
+  border: 1px dashed var(--zx-line-strong);
+  border-radius: var(--zx-radius-sm);
+  background: var(--zx-surface-soft);
+  color: var(--zx-text);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+:where(.content-viewport) form input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--zx-line-strong);
+  border-radius: var(--zx-radius-sm);
+  background: var(--zx-surface);
+  color: var(--zx-text-strong);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+:where(.content-viewport) form fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius-sm);
+}
+:where(.content-viewport) form fieldset > legend { padding: 0 6px; }
+:where(.content-viewport) form details {
+  border: 1px solid var(--zx-line);
+  border-radius: var(--zx-radius-sm);
+  background: var(--zx-surface-soft);
+}
+:where(.content-viewport) form details > summary {
+  padding: 10px 14px;
+  color: var(--zx-text-strong);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+:where(.content-viewport) form details[open] > summary { border-bottom: 1px solid var(--zx-line); }
+:where(.content-viewport) form details > :not(summary) { padding: 12px 14px; }
+/* Form action row: primary first, secondary after, consistent spacing */
+.zx-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--zx-line); }
+.zx-form-hint { margin: 0; color: var(--zx-text-muted); font-size: 0.8125rem; line-height: 1.5; }
+
+/* ─── One tab look: legacy per-module tab rails adopt the shared sub-navigation appearance ─── */
+:is(.energy-tab-rail, .iot-plc-tab-rail, .oprisk-tab-rail, .shift-workforce-workspace-tabs, .factory-workspace-primary-nav, .maintenance-workspace-nav, .quality-workspace-nav) {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; padding: 0; border: 0; background: transparent;
+}
+:is(.energy-tab, .iot-plc-tab, .oprisk-tab, .shift-workforce-workspace-tab, .factory-workspace-primary-nav__link) {
+  display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px;
+  border: 1px solid var(--zx-line); border-radius: 999px;
+  color: var(--zx-text); background: var(--zx-surface); font: inherit; font-size: 0.8125rem; font-weight: 650; text-decoration: none; cursor: pointer;
+}
+:is(.energy-tab, .iot-plc-tab, .oprisk-tab, .shift-workforce-workspace-tab, .factory-workspace-primary-nav__link):hover { border-color: var(--zx-accent); color: var(--zx-accent-strong); }
+:is(.energy-tab, .iot-plc-tab, .oprisk-tab, .shift-workforce-workspace-tab, .factory-workspace-primary-nav__link):focus-visible { outline: 2px solid var(--zx-accent); outline-offset: 2px; }
+:is(.energy-tab, .iot-plc-tab, .oprisk-tab, .shift-workforce-workspace-tab, .factory-workspace-primary-nav__link)[aria-selected="true"],
+:is(.oprisk-tab--active, .shift-workforce-workspace-tab--active, .factory-workspace-primary-nav__link--active),
+.factory-workspace-primary-nav__link[aria-current="page"] {
+  border-color: var(--zx-accent); color: #fff; background: var(--zx-accent-strong, #1d4ed8);
+}
+
+/* Search fields with a leading icon: the text never sits under the icon */
+:is(.material-registry-search, .mold-registry-search, .process-oee-search, .shift-workforce-search, .saas-admin-registry-toolbar__search,
+    .ai-task-filter-bar__search, .order-draft-filter-bar__search, .production-plan-filter-bar__search) input {
+  padding-left: 2.35rem !important;
+}
+/* Registry names wrap instead of ending in an ellipsis that hides what the record is */
+:is(.material-identity__name, .mold-identity__name) { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: break-word; line-height: 1.3; }
+.maintenance-table-wrap { min-width: 0; max-width: 100%; overflow-x: auto; }
+
+/* Disabled controls read as disabled (neutral, not a washed-out version of the primary colour) */
+:is(.button, .zx-button, .commint-button, .oprisk-button, .quality-form-actions button, .maintenance-form-actions button):disabled,
+:is(.button, .zx-button)[aria-disabled="true"] {
+  border-color: var(--zx-line) !important;
+  color: #475569 !important;
+  background: var(--zx-surface-soft) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+.adaptive-planning-workspace__actions > * { display: grid; gap: 10px; padding: 16px 18px; }
+
+.zx-subnav-bar { padding: 16px 24px 0; }
+.zx-subnav-bar .zx-subnav { margin-bottom: 0; }
+/* Metric/KPI grids of the commercial, operational-risk and similar workspaces: one fluid pattern, no orphan row */
+:is(.commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid, .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)) !important;
+  gap: 12px;
+}
+
+/* ─── One page gutter and one flat page header across every shipping screen (Wave 2) ─── */
+:is(.commint-page, .oprisk-page, .energy-page, .iot-plc-page, .material-registry-page, .mold-registry-page, .saas-admin-page, .process-oee-page,
+    .shift-ops-page, .export-page, .edge-workspace-page, .bulk-onboarding-workspace) {
+  padding-inline: 28px !important;
+  padding-block: 24px !important;
+  box-sizing: border-box;
+}
+.page-content { padding-inline: 28px; }
+:is(.commint-executive, .energy-executive, .oprisk-executive, .saas-admin-executive, .material-registry-header, .mold-registry-header,
+    .process-oee-header, .shift-ops-hero, .export-header, .iot-plc-executive, .erp-workspace-header) {
+  padding: 0 0 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--zx-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.commint-detail-grid { gap: 10px 28px !important; align-items: start; }
+.commint-detail-field { gap: 2px !important; min-height: 0 !important; }
+.commint-detail-field__value { font-size: 0.875rem !important; font-weight: 600; }
+
+/* Counted rows: 5 or 6 tiles sit in one row on wide screens and as 3 + 3 / 3 + 2 below, never 5 + 1 */
+:is(.commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid, .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid):has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+@media (min-width: 1240px) {
+  :is(.commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid, .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid):has(> :nth-child(6):last-child) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+}
+
+.production-plan-create-page { margin-inline: 0 !important; margin-left: 0 !important; }
+
+:is(.mold-executive, .material-executive, .process-oee-executive, .bulk-onboarding-workspace__hero, .golden-demo-executive) {
+  padding: 0 0 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--zx-line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+:is(.intelligence-runtime-shell, .operational-value-shell, .continuous-optimization-shell) > header { padding-left: 0 !important; padding-right: 0 !important; }
+.quality-detail-grid dd, .quality-detail-grid dt { margin: 0 !important; }
+.quality-detail-grid > div { padding: 10px 14px !important; gap: 2px !important; }
+
+/* Fresh tenant: no hierarchy to browse, so the live-status panel takes the full width */
+.factory-workspace__layout--empty { grid-template-columns: minmax(0, 1fr) !important; }
+.factory-workspace__layout--empty > aside { display: none; }
+
+/* Balanced KPI rows: a short last row stretches to full width instead of leaving an empty slot (5 -> 3+2, 7 -> 4+3) */
+:is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid, .commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid,
+    .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid, .erp-kpi-grid, .export-kpis, .kpi-grid):has(> :nth-child(7):last-child) {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+:is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid, .commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid,
+    .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid, .erp-kpi-grid, .export-kpis, .kpi-grid):has(> :nth-child(7):last-child) > * {
+  flex: 1 1 calc(25% - 12px);
+  min-width: 150px;
+}
+@media (min-width: 1500px) {
+  :is(.maintenance-kpi-grid, .quality-dashboard-kpi-grid, .production-execution-kpis, .edge-kpi-grid, .commint-metric-grid, .commint-kpi-grid, .oprisk-kpi-grid,
+      .iot-plc-kpi-grid, .energy-kpi-grid, .process-oee-kpi-grid, .shift-workforce-kpi-grid, .erp-kpi-grid, .export-kpis, .kpi-grid):has(> :nth-child(7):last-child) > * {
+    flex-basis: calc(14.28% - 12px);
+  }
+}
+/* (Five-tile flex rows below 1180px removed: the count-aware grids below decide 5-tile layout.) */
+
+/* /makineler gateway table: contained scroll, readable minimum widths, nothing clipped */
+.edge-gateway-panel, .edge-gateway-panel > * { min-width: 0; }
+.edge-gateway-table-wrap { max-width: 100%; overflow-x: auto; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); }
+.edge-gateway-table { min-width: 760px; width: 100%; border-collapse: collapse; }
+.edge-gateway-table th { white-space: nowrap; }
+.edge-gateway-table th, .edge-gateway-table td { padding: 10px 12px; }
+.edge-gateway-table th:last-child, .edge-gateway-table td:last-child { position: sticky; right: 0; background: var(--zx-surface, #fff); }
+
+.zx-inline-form { display: contents; }
+/* Notices and banners use the full content width like the rest of the page */
+.erp-info-banner, .erp-simulator-notice, .erp-readonly-notice, .erp-workspace-page :is(p, div)[role="note"] { max-width: none !important; width: 100%; box-sizing: border-box; }
+.production-execution-header span { max-width: none; }
+small, sub, sup { font-size: max(0.75rem, 0.83em); }
+
+/* Task-center queue tabs wrap instead of hiding the last tabs in a scroller */
+.ai-task-center-unified__toolbar { flex-wrap: wrap; row-gap: 10px; }
+.ai-task-center-unified__view-rail { flex-wrap: wrap; overflow: visible; max-width: 100%; }
+.ai-task-center-unified__view-tab { white-space: nowrap; }
+
+/* production reporting cards */
+.production-report-card { display: grid; gap: 10px; padding: 14px 16px; }
+.production-report-card h3 { margin: 0; font-size: 0.95rem; font-weight: 650; color: var(--zx-text); }
+.production-report-card p { margin: 0; color: var(--zx-text-muted); font-size: 0.75rem; letter-spacing: 0.04em; }
+.production-report-card__facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px 14px; margin: 0; }
+.production-report-card__facts > div { display: grid; gap: 2px; }
+.production-report-card__facts dt { color: var(--zx-text-muted); font-size: 0.75rem; }
+.production-report-card__facts dd { margin: 0; font-size: 1rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+/* Sidebar: when a contextual page item is current, the workflow home above it is shown as the quiet parent, not a second selection. */
+.sidebar-navigation[data-context-active="true"] .navigation-group:first-child .navigation-link[data-active="true"] {
+  background: transparent !important;
+  border-color: transparent;
+  box-shadow: none !important;
+  color: #1f3350 !important;
+}
+.sidebar-navigation[data-context-active="true"] .navigation-group:first-child .navigation-link[data-active="true"] .navigation-label { color: #465b72 !important; font-weight: 560; }
+
+/* Settings user registry: filter labels read as field labels above compact selects. */
+.saas-admin-registry-toolbar__filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
+.saas-admin-registry-toolbar__filter { display: grid; gap: 4px; color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 650; letter-spacing: 0.02em; }
+.saas-admin-registry-toolbar__filter select { min-width: 120px; font-size: 0.8125rem; font-weight: 500; color: var(--zx-text); }
+
+/* Maintenance tables: content-sized columns inside a contained scroller. Nothing is truncated with an ellipsis; identifiers never break mid-code. */
+.maintenance-table-wrap, .maintenance-table-wrap--desktop-fit { overflow-x: auto !important; }
+.maintenance-table { table-layout: auto !important; min-width: 760px; }
+.maintenance-table__cell, .maintenance-table__cell--compact, .maintenance-table__identifier small, .maintenance-asset-cell__meta {
+  white-space: normal !important; overflow: visible !important; text-overflow: clip !important; overflow-wrap: break-word; }
+.maintenance-table__identifier a, .maintenance-table__identifier strong, .maintenance-asset-cell__reference { white-space: nowrap !important; overflow: visible !important; text-overflow: clip !important; }
+.maintenance-table td, .maintenance-table th { vertical-align: top; }
+.maintenance-table td:last-child { position: sticky; right: 0; background: var(--zx-surface, #fff); }
+.maintenance-table th:last-child { position: sticky; right: 0; background: inherit; }
+
+.factory-operational-empty { display: grid; gap: 6px; padding: 6px 2px; color: var(--zx-text-muted); font-size: 0.875rem; line-height: 1.5; }
+.factory-operational-empty p { margin: 0; }
+.factory-operational-empty strong { color: var(--zx-text); }
+
+/* Maintenance intelligence (durum zekâsı / kestirimci riskler): one card language, quiet notices, real buttons. */
+.maintenance-condition-page { gap: 16px; }
+.maintenance-predictive-risk-card, .maintenance-condition-table-card, .maintenance-ai-section, .maintenance-condition-detail-card { padding: 18px 20px; }
+.maintenance-predictive-risk-detail-card, .maintenance-condition-detail-card { align-self: start; padding: 16px 18px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); box-shadow: none; }
+.maintenance-predictive-risk-detail-grid, .maintenance-condition-detail-grid { align-items: start; }
+.maintenance-predictive-risk-card > .maintenance-predictive-risk-safety-copy,
+.maintenance-predictive-risk-card > .maintenance-predictive-risk-simulator-copy { padding: 0; max-width: 78ch; }
+.maintenance-predictive-risk-error { background: #fff8eb; border: 1px solid #f3d8a4; border-radius: var(--zx-radius); padding: 10px 14px; }
+.maintenance-predictive-risk-error p { color: #8a4b08; font-size: 0.875rem; }
+.maintenance-empty-inline { margin: 0; padding: 12px 14px; border: 1px dashed var(--zx-line); border-radius: var(--zx-radius); color: var(--zx-text-muted); font-size: 0.875rem; }
+.maintenance-condition-metric-list li { padding: 10px 12px; border: 1px solid var(--zx-line); border-radius: 10px; }
+.maintenance-condition-context-list li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--zx-line); font-size: 0.875rem; }
+.maintenance-condition-context-list li:last-child { border-bottom: 0; }
+.maintenance-ai-buttons, .maintenance-ai-empty { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.maintenance-ai-buttons button, .maintenance-ai-empty button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1px solid var(--zx-line-strong, #c9d4e3); border-radius: 10px; background: #fff; color: var(--zx-text); font: inherit; font-size: 0.875rem; font-weight: 650; cursor: pointer; }
+.maintenance-ai-buttons button.primary, .maintenance-ai-empty button.primary { border-color: #1769e0; background: #1769e0; color: #fff; }
+.maintenance-ai-buttons button:disabled, .maintenance-ai-empty button:disabled { opacity: 0.55; cursor: not-allowed; }
+.maintenance-ai-buttons svg, .maintenance-ai-empty svg { width: 16px; height: 16px; }
+.maintenance-ai-empty { justify-content: space-between; padding: 12px 14px; border: 1px dashed var(--zx-line); border-radius: var(--zx-radius); }
+.maintenance-ai-empty p { margin: 0; color: var(--zx-text-muted); font-size: 0.875rem; }
+.maintenance-ai-edit { display: grid; gap: 6px; max-width: 640px; }
+.maintenance-ai-edit label { font-size: 0.75rem; font-weight: 650; color: var(--zx-text-muted); }
+
+/* ERP: the read-only notice and the sample-connection notice read as one banner, not two stacked boxes. */
+.erp-readonly-notice { margin: 0 !important; border-radius: var(--zx-radius) var(--zx-radius) 0 0 !important; border-bottom: 0 !important; }
+.erp-readonly-notice + .erp-simulator-notice { margin: 0 !important; border-radius: 0 0 var(--zx-radius) var(--zx-radius) !important; background: #eef5ff !important; border: 1px solid #d3e3fa !important; border-top: 1px dashed #bcd2f2 !important; color: #3b5d8f; font-size: 0.8125rem; }
+.erp-readonly-notice:not(:has(+ .erp-simulator-notice)) { border-radius: var(--zx-radius) !important; border-bottom: 1px solid #d3e3fa !important; }
+
+/* Apps overview: KPI tiles size to their content (the standalone showcase fixes row heights to the viewport). */
+.apps-factory-ops-dashboard .factory-showcase__kpi-grid { grid-template-rows: none; grid-auto-rows: minmax(104px, auto); }
+.apps-factory-ops-dashboard .factory-showcase-kpi { min-height: 104px; }
+.apps-factory-ops-dashboard .factory-showcase-kpi svg { max-height: 52px; }
+.apps-factory-ops-dashboard .factory-showcase__hourly { min-height: 160px; }
+
+/* Commercial intelligence: one compact header notice group, dense definition fields. */
+.commint-executive { display: grid; gap: 8px; }
+.commint-executive .commint-readonly-note { background: none; border: 0; padding: 0 2px; color: var(--zx-text-muted); font-size: 0.8125rem; line-height: 1.5; }
+.commint-executive .commint-provenance-strip { padding: 8px 12px; border-radius: 10px; background: #f3f7fd; border-color: #d9e5f5; font-size: 0.8125rem; line-height: 1.45; }
+.commint-detail-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px 24px; }
+.commint-detail-field { gap: 2px; }
+.commint-detail-field p { margin: 0; }
+.commint-detail-field__label { font-size: 0.75rem; font-weight: 650; }
+.commint-detail-field__value { font-size: 0.9375rem; font-weight: 600; line-height: 1.35; }
+.commint-detail-section { gap: 10px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--zx-line); }
+.commint-detail-section:last-child { border-bottom: 0; margin-bottom: 0; }
+.commint-detail-section h3 { font-size: 0.8125rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--zx-text-muted); }
+
+/* Shift operations: metric tiles share one row rhythm, hero reads as a header, empty lists say so. */
+.shift-ops-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+.shift-ops-card { display: grid; align-content: start; gap: 6px; padding: 16px 18px; }
+.shift-ops-card h2 { margin: 0; font-size: 0.8125rem; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; color: var(--zx-text-muted); }
+.shift-ops-card p { margin: 0; font-size: 0.9375rem; color: var(--zx-text); line-height: 1.45; }
+.shift-ops-hero__eyebrow { margin: 0; color: #1d4f9a !important; opacity: 1 !important; font-size: 0.75rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.shift-ops-empty { margin: 0; padding: 12px 14px; border: 1px dashed var(--zx-line); border-radius: var(--zx-radius); color: var(--zx-text-muted); font-size: 0.875rem; }
+
+/* Registry tables (materials, molds): names and codes wrap instead of ending in "…"; the wrapper scrolls, the page never does. */
+.material-registry-table, .mold-registry-table { table-layout: auto !important; min-width: 860px; }
+.material-registry-table--compact { min-width: 0; }
+.material-identity__name, .material-identity__code, .material-cell-truncate,
+.mold-identity__name, .mold-identity__code {
+  white-space: normal !important; overflow: visible !important; text-overflow: clip !important; overflow-wrap: break-word; }
+.material-registry-table td, .material-registry-table th { vertical-align: top; }
+
+/* Executive command centre: every section is a card with a section title; the unavailable state sits quietly inside the page flow. */
+.executive-command-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; align-items: start; }
+.executive-command-grid > section, .executive-narrative { padding: 16px 18px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); display: grid; gap: 10px; }
+.executive-section-title { margin: 0 0 4px; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--zx-text-muted); }
+.executive-stack { display: grid; gap: 10px; }
+.executive-stack-item { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--zx-line); border-radius: 10px; }
+[data-testid="executive-command-center-view"] .zx-state-page--inline { margin: 4px 0; }
+
+/* Forms: hints sit under their label, table-row controls align on the centre line. */
+label > .zx-form-hint { display: block; margin-top: 2px; font-weight: 400; }
+.quality-table td { vertical-align: middle; }
+
+/* Maintenance assistant status line: success is quiet, failure is a soft warning banner (never bare text). */
+.maintenance-ai-message { margin: 0; padding: 10px 14px; border: 1px solid var(--zx-line); border-radius: 10px; background: var(--zx-surface-soft, #f6f8fb); color: var(--zx-text); font-size: 0.875rem; line-height: 1.45; }
+.maintenance-ai-message.error { background: #fff8eb; border-color: #f3d8a4; color: #8a4b08; }
+
+/* Export readiness requirement rows: title above status, never run together. */
+.export-readiness-panel__requirements li > div, .export-readiness-panel__blockers li { display: grid; gap: 2px; }
+.export-readiness-panel__requirements li > div > span, .export-readiness-panel__blockers li > span { color: var(--zx-text-muted); font-size: 0.8125rem; }
+
+/* Planning detail panels: notes inside plan cards are body text, not eyebrow labels. */
+.production-plan-card__note { margin: 4px 0 0 !important; color: var(--zx-text) !important; font-size: 0.875rem !important; font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; line-height: 1.5; }
+
+/* KPI grids are count-aware: every row is full, a lone orphan tile never wraps onto its own line. */
+@media (min-width: 900px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1100px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(5):last-child) { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1280px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(6):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) and (max-width: 1279px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(6):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1200px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(7):last-child) { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(8):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid):has(> :nth-child(9):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+:is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid) > * { min-width: 0; }
+
+/* State pages sit at the top of the content area (no viewport-centred void) and never need more than two actions. */
+.zx-state-page:not(.zx-state-page--standalone):not(.zx-state-page--inline) { min-height: 0; place-items: start center; padding-top: 48px; }
+.zx-state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+/* AI task overview card: the action chip and the inspect button wrap instead of clipping at the card edge. */
+.ai-task-detail-overview__heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 8px 12px; }
+.ai-task-detail-overview__heading-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; max-width: 100%; }
+
+/* Executive headers are flat page headers (no white card). Higher specificity than the legacy module rules that load later. */
+body :is(.commint-executive, .energy-executive, .oprisk-executive, .saas-admin-executive, .material-registry-header, .mold-registry-header,
+    .process-oee-header, .shift-ops-hero, .export-header, .iot-plc-executive, .erp-workspace-header) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+body .commint-executive { display: grid !important; gap: 8px; }
+body .commint-executive > p { margin: 0 !important; }
+body .commint-executive .commint-readonly-note { padding: 0 !important; }
+
+/* Grid/flex page containers never grow wider than the content column because a table or card inside has a min-width; wide content scrolls inside its own wrapper. */
+.content-viewport :is([class*="-page"], [class*="workspace"], [class*="executive"], [class*="layout"]) > * { min-width: 0; }
+
+/* Predictive card header: a row-axis flex-basis must not become a 320px height when the header stacks on narrow screens. */
+.maintenance-predictive-overview-card__intro { flex: 1 1 auto !important; }
+
+/* Today screen: the embedded task centre reads as a second section of the same page, not a second page. */
+[data-testid="bugun-page"] .page-content > .zx-page-header { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--zx-line); }
+[data-testid="bugun-page"] .page-content > .zx-page-header h2 { font-size: 1.125rem; }
+
+/* Commercial intelligence tables scroll inside their wrapper; cells never clip. */
+.commint-table-wrap { overflow-x: auto !important; max-width: 100%; }
+.commint-table { min-width: 820px; }
+.commint-table td, .commint-table th { overflow-wrap: break-word; }
+
+/* Empty-state descriptions are sentences, never blue uppercase labels. */
+.production-execution-empty__desc, .export-empty p.export-empty__desc, .export-empty__desc { color: var(--zx-text-muted) !important; font-size: 0.875rem !important; font-weight: 400 !important; letter-spacing: 0 !important; text-transform: none !important; line-height: 1.6; }
+
+/* KPI grids v2: higher specificity so legacy per-module column counts cannot leave an orphan tile. */
+@media (min-width: 900px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(3):last-child) { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(4):last-child) { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1100px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(5):last-child) { display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 700px) and (max-width: 1099px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(5):last-child) { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1500px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(6):last-child) { display: grid !important; grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 700px) and (max-width: 1499px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(6):last-child) { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 1500px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(7):last-child) { display: grid !important; grid-template-columns: repeat(7, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) and (max-width: 1499px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(7):last-child) { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(8):last-child) { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+}
+@media (min-width: 900px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .maintenance-predictive-overview-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .process-oee-executive__kpis, .material-registry-kpis, .mold-registry-kpis, .material-executive__kpis, .mold-executive__kpis, .shift-workforce-executive__kpis, .shift-assignment-kpis, .saas-admin-executive__kpis, .production-planning-kpis, .kpi-grid, .command-center__kpis, .shift-ops-grid, .process-oee-loss-kpi-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid, .order-draft-kpis, .iot-plc-kpi-grid):has(> :nth-child(9):last-child) { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+
+/* Shared state system: standard page header above a calm, neutral state card; no red for not-found / empty. */
+.zx-state-header { padding: 4px 0 16px; margin-bottom: 24px; border-bottom: 1px solid var(--zx-line); }
+.zx-state-header h1 { margin: 0; }
+.zx-state-page--not-found .zx-state-icon, .zx-state-page--empty .zx-state-icon { background: var(--zx-surface-soft, #eef3f9); color: var(--zx-accent-strong); }
+.zx-state-page:not(.zx-state-page--standalone):not(.zx-state-page--inline) { display: grid; gap: 0; place-items: start stretch; }
+.zx-state-page:not(.zx-state-page--standalone):not(.zx-state-page--inline) .zx-state-card { justify-self: center; }
+
+/* Collapsible sections: one compact row when closed. */
+.zx-collapsible { border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.zx-collapsible > summary { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; list-style: none; }
+.zx-collapsible > summary::-webkit-details-marker { display: none; }
+.zx-collapsible__title { font-weight: 700; font-size: 0.9375rem; color: var(--zx-text); }
+.zx-collapsible__hint { margin-left: auto; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.zx-collapsible__chevron { flex: none; color: var(--zx-text-muted); transition: transform 120ms ease; margin-left: 4px; }
+.zx-collapsible:not([open]) > summary .zx-collapsible__hint + .zx-collapsible__chevron { margin-left: 4px; }
+.zx-collapsible[open] > summary .zx-collapsible__chevron { transform: rotate(180deg); }
+.zx-collapsible[open] > summary { border-bottom: 1px solid var(--zx-line); }
+.zx-collapsible__body { padding: 0; }
+.zx-collapsible__body > * { margin: 0 !important; border: 0 !important; box-shadow: none !important; }
+.zx-collapsible:not(:has(.zx-collapsible__hint)) > summary .zx-collapsible__chevron { margin-left: auto; }
+
+/* Filter bars: fields wrap in rows and keep a readable minimum width, so option labels are never cut with an ellipsis. */
+body :is(.order-draft-filter-bar, .production-plan-filter-bar) { display: flex !important; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
+body :is(.order-draft-filter-bar, .production-plan-filter-bar) > :is(label, div) { flex: 1 1 200px; min-width: 200px; }
+body :is(.order-draft-filter-bar, .production-plan-filter-bar) > .order-draft-filter-bar__search, body :is(.order-draft-filter-bar, .production-plan-filter-bar) > [class*="__search"] { flex: 2 1 300px; }
+body :is(.order-draft-filter-bar, .production-plan-filter-bar) select { width: 100%; min-width: 0; text-overflow: clip; }
+body :is(.order-draft-filter-bar, .production-plan-filter-bar) > button { flex: 0 0 auto; min-width: 0; }
+
+/* Form pages: one consistent reading width, centred in the content column, two-column field grids where space allows. */
+.content-viewport :is(.production-plan-draft-form, .quality-form, .maintenance-form, .zx-form-page, .teams-handover-form, .ai-task-create-form) { max-width: 1040px; margin-inline: auto; }
+.content-viewport :is(.production-plan-draft-form__section) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; align-items: start; }
+.content-viewport :is(.production-plan-draft-form__section) > :is(h2, p, .production-plan-draft-form__hint, textarea, .production-plan-draft-form__field--wide) { grid-column: 1 / -1; }
+@media (max-width: 820px) { .content-viewport :is(.production-plan-draft-form__section) { grid-template-columns: 1fr; } }
+
+/* Disabled primary actions read as disabled (muted, not a faded brand colour). */
+.button:disabled, button.button-primary:disabled { opacity: 1; background: #e6ebf2 !important; color: #475569 !important; border-color: #d5dde8 !important; cursor: not-allowed; box-shadow: none !important; }
+
+/* Responsive hardening (tablet/narrow): row-axis flex-basis never becomes a height, wide tables keep a minimum width inside their scroller. */
+.content-viewport [class*="__intro"], .content-viewport [class*="__copy"] { flex-basis: auto !important; min-width: min(320px, 100%); }
+.erp-table, .works-table, .quality-table, .process-oee-table, .saas-admin-table, .oprisk-table, .material-registry-table, .mold-registry-table { min-width: 720px; }
+.saas-admin-table { min-width: 640px; }
+[role="tablist"] { flex-wrap: wrap; row-gap: 6px; }
+.content-viewport { padding-bottom: 88px; }
+.apps-factory-ops-dashboard .factory-showcase__bottom-grid svg, .apps-factory-ops-dashboard .factory-showcase__panel svg { max-height: 260px; }
+.apps-factory-ops-dashboard .factory-showcase__bottom-grid text { font-size: 14px; }
+
+.apps-factory-operations-section > .fact-section__body { overflow: visible !important; min-width: 0; }
+
+/* Narrow/tablet KPI grids: five tiles stay in one row from 880px, below that two columns with a full-width last tile. */
+@media (min-width: 880px) and (max-width: 1099px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .shift-ops-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets):has(> :nth-child(5):last-child) { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 879px) {
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .shift-ops-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid) { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  body :is(.commint-kpi-grid, .production-execution-kpis, .quality-dashboard-kpi-grid, .maintenance-kpi-grid, .maintenance-predictive-risk-kpis, .oprisk-kpi-grid, .export-kpis, .iot-plc-kpi-grid, .intelligence-runtime-kpis, .edge-exec-kpi-grid, .shift-ops-grid, .fact-status-strip, .erp-kpi-grid, .zx-metric-grid, .maintenance-report-aging-buckets, .erp-connection-grid) > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Table wrappers carry no painted scroll shadow: it showed as a lighter strip over header cells even when the table fits. */
+.content-viewport :is([class*="table-wrap"], [class*="table-scroll"], [class*="__scroll"]) { background: transparent; }
+
+/* Settings user list: no inner clipped scroll box; the page scrolls. */
+.saas-admin-registry-list { max-height: none !important; overflow: visible !important; }
+
+/* Copilot launcher: compact round button on narrow screens so it never covers content labels. */
+@media (max-width: 1100px) { .factory-copilot-toggle { font-size: 0; gap: 0; padding: 12px; border-radius: 999px; } .factory-copilot-toggle svg { width: 20px; height: 20px; } }
+
+/* Copilot send: clearly disabled and clearly busy. */
+.factory-copilot-drawer__submit:disabled { background: #e6ebf2 !important; color: #6b7a8d !important; border-color: #d5dde8 !important; cursor: not-allowed; }
+
+/* Interactive station rows sit inside a list item wrapper (a button may not carry the listitem role). */
+.fact-station-cell {
+  display: flex;
+  flex: 1 1 140px;
+  min-width: 130px;
+}
+
+.fact-station-cell > .fact-station-row {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Context panel: label/value rows stack in one column (the generic dl grid must not lay rows side by side). */
+.fact-context-panel__body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  padding: 4px 12px 8px;
+  border: 0;
+  border-radius: 0;
+}
+
+.fact-context-panel__row {
+  grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 0;
+  border-right: 0;
+  border-bottom: 1px solid var(--zx-line);
+  background: transparent;
+}
+
+.fact-context-panel__row:last-child {
+  border-bottom: 0;
+}
+
+/* ─── Native controls: every select and date/time input uses one control skin (no browser-default chrome) ─── */
+body .content-viewport select:not([multiple]):not([size]) {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  min-height: 40px;
+  padding: 8px 34px 8px 12px;
+  border: 1px solid var(--zx-line-strong, #c5d0de);
+  border-radius: var(--zx-radius-sm, 8px);
+  background-color: var(--zx-surface, #fff) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2358667a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  background-size: 14px !important;
+  color: var(--zx-text-strong, #14233a);
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+body .content-viewport select:not([multiple]):not([size]):hover { border-color: var(--zx-accent, #2563eb); }
+body .content-viewport select:not([multiple]):not([size]):focus-visible { outline: 2px solid var(--zx-accent, #2563eb); outline-offset: 1px; }
+body .content-viewport select:disabled { background-color: var(--zx-surface-inset, #eef2f7) !important; cursor: not-allowed; color: var(--zx-text-muted, #5b6b80); }
+body .content-viewport input:is([type="date"], [type="datetime-local"], [type="time"], [type="month"]) {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--zx-line-strong, #c5d0de);
+  border-radius: var(--zx-radius-sm, 8px);
+  background-color: var(--zx-surface, #fff);
+  color: var(--zx-text-strong, #14233a);
+  font: inherit;
+  font-size: 0.875rem;
+}
+body .content-viewport input:is([type="date"], [type="datetime-local"], [type="time"], [type="month"])::-webkit-calendar-picker-indicator { opacity: 0.65; cursor: pointer; }
+
+/* ─── Balanced rows: definition lists and filter/form rails fill every row (no lone trailing cell, no empty slot) ─── */
+body .content-viewport dl:not(.fact-context-panel__body):has(> div) {
+  display: flex !important;
+  flex-wrap: wrap;
+}
+body .content-viewport dl:not(.fact-context-panel__body):has(> div) > div {
+  flex: 1 1 190px;
+  min-width: 0;
+}
+body .content-viewport :is(.commint-filter-rail, .maintenance-form-grid, .quality-form-grid, .saas-admin-registry-toolbar__filters, .process-oee-registry__filters, .ai-task-create-form__advanced-grid, .oprisk-source-grid, .zx-channel-grid, .quality-action-bar__row, .order-draft-kpi-links, .ai-task-automation-policy-cards, .ai-task-automation-simulation__controls) {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+body .content-viewport :is(.commint-filter-rail, .maintenance-form-grid, .quality-form-grid, .saas-admin-registry-toolbar__filters, .process-oee-registry__filters, .ai-task-create-form__advanced-grid, .oprisk-source-grid, .zx-channel-grid, .quality-action-bar__row, .order-draft-kpi-links, .ai-task-automation-policy-cards, .ai-task-automation-simulation__controls) > * {
+  flex: 1 1 210px;
+  min-width: 0;
+}
+
+/* ─── One page-header system: eyebrow colour/size/case identical everywhere, state pages share the content gutter ─── */
+body .content-viewport :is(
+  .zx-page-header__eyebrow, .fact-workspace__context, .commint-executive__eyebrow, .erp-page-eyebrow, .shift-ops-hero__eyebrow,
+  .material-registry-header__eyebrow, .mold-registry-header__eyebrow, .material-executive__eyebrow, .mold-executive__eyebrow,
+  .saas-admin-executive__eyebrow, .energy-executive__eyebrow, .iot-plc-executive__eyebrow, .oprisk-executive__eyebrow,
+  .process-oee-executive__eyebrow, .ai-task-detail-header__eyebrow, .export-header__eyebrow, .process-oee-header__eyebrow
+),
+body .content-viewport :is(p, span):has(+ h1):not([class*="badge"]):not([class*="pill"]) {
+  margin: 0;
+  color: var(--zx-accent-strong, #1b528e) !important;
+  font-size: 0.75rem !important;
+  font-weight: 750 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+  line-height: 1.3;
+}
+.zx-state-page:not(.zx-state-page--standalone):not(.zx-state-page--inline) { padding-inline: 28px; }
+
+/* ─── Narrow screens: tables with four or more columns reflow into labelled cards (no clipped columns) ─── */
+@media (max-width: 820px) {
+  body .content-viewport table[data-zx-stack] { display: block; width: 100% !important; min-width: 0 !important; }
+  body .content-viewport table[data-zx-stack] thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  body .content-viewport table[data-zx-stack] tbody { display: grid; gap: 0; padding: 0; }
+  body .content-viewport table[data-zx-stack] tr { display: grid; gap: 2px; padding: 12px 0; border: 0 !important; border-bottom: 1px solid var(--zx-line, #d9e1ec) !important; border-radius: 0; background: transparent !important; }
+  body .content-viewport table[data-zx-stack] tr:last-child { border-bottom: 0 !important; }
+  body .content-viewport table[data-zx-stack] td {
+    display: grid;
+    grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    position: static !important;
+    padding: 5px 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    text-align: left !important;
+    white-space: normal !important;
+    box-shadow: none !important;
+  }
+  body .content-viewport table[data-zx-stack] td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    color: var(--zx-text-muted, #5b6b80);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  body .content-viewport table[data-zx-stack] td[data-label=""] { grid-template-columns: minmax(0, 1fr); }
+  body .content-viewport table[data-zx-stack] td:empty { display: none; }
+  body .content-viewport table[data-zx-stack] td > * { min-width: 0; }
+}
+
+/* ─── Rhythm: calmer empty states and a little more air in page headers ─── */
+.zx-empty__title, .zx-empty h3 { font-size: 1rem; }
+.zx-empty p { font-size: 0.875rem; }
+.zx-empty:not(.zx-empty--compact) { padding: 40px 24px; }
+.zx-page-header__copy { gap: 8px; }
+.zx-page-header__description { margin-top: 2px; }
+
+/* ─── Module sub-navigation on tablet/phone: one scrollable row (no 3-row wrap, no orphan pill), edge fade as scroll cue ─── */
+@media (max-width: 900px) {
+  body .content-viewport .zx-subnav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  body .content-viewport .zx-subnav__group { flex: 0 0 auto; flex-wrap: nowrap; }
+  body .content-viewport .zx-subnav__link { white-space: nowrap; }
+}
+
+/* A button label inside a header region keeps the button's own colour (header helper rules colour every span muted). */
+body .content-viewport :is(.production-execution-header, .maintenance-page-header__actions) :is(.button, button) span { color: inherit; }
+
+/* ─── Round 5 shared: stronger sub-nav scroll cue with snap, collapsed rail inset, state card breathing room ─── */
+@media (max-width: 900px) {
+  body .content-viewport .zx-subnav {
+    scroll-snap-type: x proximity;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent);
+  }
+  body .content-viewport .zx-subnav__link { scroll-snap-align: start; }
+}
+.zx-state-page:not(.zx-state-page--standalone):not(.zx-state-page--inline):has(> .zx-state-header) { padding-top: 20px; }
+
+/* Round 6 shared: the last sidebar item clears the footer instead of sitting half-cut under it. */
+.sidebar-navigation { padding-bottom: 32px; }
+
+/* Short viewports (e.g. 1366x768): a tighter item pitch so the whole sidebar fits instead of cutting its last item under the footer. */
+@media (max-height: 820px) and (min-width: 1100px) {
+  .sidebar-navigation { padding-top: 8px; padding-bottom: 28px; }
+  .sidebar-navigation .navigation-link { min-height: 33px; padding-block: 5px; }
+  .sidebar-navigation .navigation-list { gap: 1px; }
+  .sidebar-navigation .navigation-group + .navigation-group { margin-top: 10px; }
+}
+
+/* Collapsed icon rail: the decorative environment dot alone in the footer reads as an unexplained mark, so it is hidden there. */
+.app-shell[data-sidebar-collapsed="true"] .sidebar-footer .environment-dot { display: none; }
+
+
+/* Tablet and phone (<= 1099px): the sidebar is an off-canvas drawer with full labels, opened from the top bar. */
+.top-bar-menu-button { display: none; }
+.app-shell-backdrop { display: none; }
+@media (max-width: 1099px) {
+  .app-shell { --active-sidebar-width: 0px; grid-template-columns: minmax(0, 1fr); }
+  .app-shell .app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 272px;
+    max-width: 86vw;
+    z-index: 60;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform 180ms ease, visibility 0s linear 180ms;
+  }
+  .app-shell[data-drawer-open="true"] .app-sidebar {
+    transform: none;
+    visibility: visible;
+    transition: transform 180ms ease;
+    box-shadow: 0 0 40px rgb(15 35 65 / 28%);
+  }
+  .app-shell-backdrop { display: block; position: fixed; inset: 0; z-index: 55; border: 0; padding: 0; background: rgb(15 35 65 / 38%); cursor: default; }
+  .top-bar-menu-button {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+    border: 1px solid var(--zx-line, #d6dee8);
+    border-radius: 10px;
+    background: #fff;
+    color: #35506b;
+    cursor: pointer;
+  }
+  .top-bar-menu-button svg { width: 20px; height: 20px; }
+  .top-bar-menu-button:hover { background: #f3f7fb; }
+}
+
+/* Page header: the actions stay beside the title down to phone width (no lone left-aligned button under the description at tablet). */
+.zx-page-header { flex-wrap: nowrap; align-items: flex-start; }
+.zx-page-header__copy { flex: 1 1 280px; }
+.zx-page-header__actions { flex: 0 0 auto; }
+@media (max-width: 600px) {
+  .zx-page-header { flex-wrap: wrap; }
+  .zx-page-header__actions { justify-content: flex-start; }
+}
+
+/* Empty native date/time fields: a themed Turkish placeholder instead of the browser mask (tagged by DateFieldEnhancer). The input becomes a one-line flex row so the calendar glyph stays on the same line as the placeholder. */
+:is(input[type="date"], input[type="datetime-local"], input[type="time"])[data-zx-empty="true"]:not(:focus) {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+:is(input[type="date"], input[type="datetime-local"], input[type="time"])[data-zx-empty="true"]:not(:focus)::-webkit-datetime-edit { display: none; }
+:is(input[type="date"], input[type="datetime-local"], input[type="time"])[data-zx-empty="true"]:not(:focus)::before {
+  content: attr(data-zx-placeholder);
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #5a6b80;
+  font-weight: 400;
+}
+:is(input[type="date"], input[type="datetime-local"], input[type="time"])[data-zx-empty="true"]:not(:focus)::-webkit-calendar-picker-indicator { flex: 0 0 auto; margin: 0 0 0 8px; }
+
+/* Missing task origin: a quiet dash, not a chip (see ai-task-source-label.tsx). */
+.ai-task-source-none { color: #5a6b80; font-weight: 400; }
+
+
+/* ─── Frozen checklist: shared fixes ─── */
+/* C2: page-header descriptions never end on a single-word widow. */
+.zx-page-header__description, .zx-empty p, .fact-workspace__meta { text-wrap: pretty; }
+.zx-page-header h1, .fact-workspace__title { text-wrap: balance; }
+
+/* C7: page-header actions share one control height. */
+.zx-page-header__actions > :is(a, button, form > button, .button, .zx-button) { min-height: 40px; }
+.zx-page-header__actions > form { display: flex; }
+
+/* C4: sibling cards in a summary row stretch to equal height. */
+:is(.quality-summary-grid, .production-plan-summary-grid, .oprisk-summary-grid, .commint-summary-grid) { align-items: stretch; }
+
+/* C6: KPI cards keep one value baseline when a label wraps. */
+.kpi-card-heading { align-items: flex-start; min-height: 2.6em; }
+.kpi-label { line-height: 1.3; }
+
+/* C7: filter-rail text inputs match the selects beside them. */
+.ai-task-filter-bar :is(input:not([type="checkbox"]):not([type="radio"]), select) { min-height: 40px; box-sizing: border-box; }
+.zx-page-header__actions > :is(a, button, .button, .zx-button, form > button) { font-weight: 650; }
+
+/* In-card empty states: an empty message inside a bordered section card or panel is borderless and transparent (no box in a box). Standalone page-level empties keep their frame. */
+:is(.zx-panel, .fact-section, .production-report-section, .fact-context-panel, .commint-panel, .commint-card, .maintenance-panel, .quality-panel)
+  :is(.zx-empty, .production-report-empty, .continuous-optimization-empty, .quality-empty-panel, .quality-dashboard-empty, .quality-empty-state,
+      .maintenance-empty-inline, .maintenance-empty-state, .maintenance-dashboard-empty, .maintenance-ai-empty, .shift-ops-empty,
+      .commint-empty, .commint-empty-state, .apps-factory-ops-empty, .fact-intelligence-empty, .energy-empty, .erp-empty, .erp-empty-state,
+      .iot-plc-empty, .oprisk-empty-state, .process-oee-empty) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Monospace entity codes (LINE-01, ST-001): 13px so the narrower monospace glyphs never read below the 12px minimum. */
+.fact-station-row__code,
+.mlp-line-row__code {
+  font-size: 0.8125rem;
+}

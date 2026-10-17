@@ -1,3 +1,4 @@
+import { formatPercent } from "@/lib/presentation/format";
 import {
   Activity,
   AlertTriangle,
@@ -68,7 +69,7 @@ export function ProductionHealthPanel({ summary }: HealthPanelProps) {
         {summary.setupIsStale && (
           <div className="health-panel__signal health-panel__signal--warning">
             <Clock aria-hidden="true" />
-            <span>Setup uzun süredir açık — uzlaştırma gerekebilir</span>
+            <span>Kurulum uzun süredir açık — uzlaştırma gerekebilir</span>
           </div>
         )}
 
@@ -103,14 +104,14 @@ export function ProductionHealthPanel({ summary }: HealthPanelProps) {
 
       {summary.quantityProgress !== undefined && (
         <div className="health-panel__progress">
-          <div className="health-panel__progress-bar" role="meter" aria-valuenow={Math.round(summary.quantityProgress * 100)} aria-valuemin={0} aria-valuemax={100} aria-label="Üretim ilerleme">
+          <div className="health-panel__progress-bar" role="meter" aria-valuenow={Math.round(summary.quantityProgress)} aria-valuemin={0} aria-valuemax={100} aria-label="Üretim ilerleme">
             <div
               className="health-panel__progress-fill"
-              style={{ width: `${Math.min(100, Math.round(summary.quantityProgress * 100))}%` }}
+              style={{ width: `${Math.min(100, Math.round(summary.quantityProgress))}%` }}
             />
           </div>
           <span className="health-panel__progress-label">
-            {Math.round(summary.quantityProgress * 100)}% tamamlandı
+            {formatPercent(summary.quantityProgress, 0)} tamamlandı
           </span>
         </div>
       )}

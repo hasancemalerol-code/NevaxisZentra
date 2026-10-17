@@ -10,13 +10,18 @@ import {
   MAINTENANCE_REQUEST_TYPE_OPTIONS,
 } from "../presentation/maintenance-form-options";
 import type { createMaintenanceRequestAction } from "../server/maintenance-writer";
+import { MaintenanceAssetReferenceField } from "./maintenance-asset-reference-field";
+import type { MaintenanceAssetOption } from "../domain/maintenance-asset-option";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type MaintenanceRequestCreateFormProps = Readonly<{
+  assetOptions?: readonly MaintenanceAssetOption[];
   onCreate: typeof createMaintenanceRequestAction;
 }>;
 
 export function MaintenanceRequestCreateForm({
   onCreate,
+  assetOptions = [],
 }: MaintenanceRequestCreateFormProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -54,13 +59,13 @@ export function MaintenanceRequestCreateForm({
     >
       {message ? (
         <div className="maintenance-error-panel" role="alert">
-          <p>{message}</p>
+          <p>{customerMessage(message)}</p>
         </div>
       ) : null}
 
-      <div className="maintenance-form-grid">
+      <div className="maintenance-form-grid maintenance-form-grid--four">
         <div className="maintenance-form-field">
-          <label htmlFor="title">Başlık</label>
+          <label htmlFor="title">Başlık <span className="zx-required" aria-hidden="true">*</span></label>
           <input
             className="maintenance-form-input"
             disabled={pending}
@@ -69,41 +74,7 @@ export function MaintenanceRequestCreateForm({
             required
           />
         </div>
-        <div className="maintenance-form-field">
-          <label htmlFor="assetReference">Varlık referansı</label>
-          <input
-            className="maintenance-form-input"
-            disabled={pending}
-            id="assetReference"
-            name="assetReference"
-            required
-          />
-        </div>
-        <div className="maintenance-form-field">
-          <label htmlFor="assetName">Varlık adı</label>
-          <input
-            className="maintenance-form-input"
-            disabled={pending}
-            id="assetName"
-            name="assetName"
-          />
-        </div>
-        <div className="maintenance-form-field">
-          <label htmlFor="assetType">Varlık türü</label>
-          <select
-            className="maintenance-form-select"
-            defaultValue="machine"
-            disabled={pending}
-            id="assetType"
-            name="assetType"
-          >
-            {MAINTENANCE_ASSET_TYPE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <MaintenanceAssetReferenceField disabled={pending} options={assetOptions} />
         <div className="maintenance-form-field">
           <label htmlFor="type">Kayıt türü</label>
           <select
@@ -136,6 +107,37 @@ export function MaintenanceRequestCreateForm({
             ))}
           </select>
         </div>
+        <details className="maintenance-form-more">
+          <summary>Varlık adı ve türü (isteğe bağlı)</summary>
+          <div className="maintenance-form-more__grid">
+        <div className="maintenance-form-field">
+          <label htmlFor="assetName">Varlık adı</label>
+          <input
+            className="maintenance-form-input"
+            disabled={pending}
+            id="assetName"
+            name="assetName"
+          />
+          <small className="maintenance-form-hint">İsteğe bağlı; listeden seçince otomatik dolar.</small>
+        </div>
+        <div className="maintenance-form-field">
+          <label htmlFor="assetType">Varlık türü</label>
+          <select
+            className="maintenance-form-select"
+            defaultValue="machine"
+            disabled={pending}
+            id="assetType"
+            name="assetType"
+          >
+            {MAINTENANCE_ASSET_TYPE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+          </div>
+        </details>
       </div>
 
       <div className="maintenance-form-field">
@@ -151,6 +153,9 @@ export function MaintenanceRequestCreateForm({
       <div className="maintenance-form-actions">
         <Button disabled={pending} type="submit" variant="primary">
           {pending ? "Kaydediliyor…" : "Arıza kaydını oluştur"}
+        </Button>
+        <Button type="button" variant="secondary" onClick={() => router.push("/bakim")}>
+          Vazgeç
         </Button>
       </div>
     </form>

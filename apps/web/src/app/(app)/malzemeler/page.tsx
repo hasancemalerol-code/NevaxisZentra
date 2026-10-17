@@ -1,9 +1,11 @@
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
-import { Package } from "lucide-react";
+
 
 import { MaterialRegistryView } from "@/features/materials/components/material-registry-view";
 import "@/features/materials/components/material-registry.css";
 import { readMaterialRegistry } from "@/features/materials/server/material-reader";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function MaterialRegistryPage() {
   await forbidUnlessGranted("material.read");
@@ -11,10 +13,8 @@ export default async function MaterialRegistryPage() {
   const result = await readMaterialRegistry();
 
   if (result.status === "failure") {
-    const isUnauthorized = result.code === "permission-denied" || result.code === "unauthenticated";
-
     return (
-      <main className="material-registry-page">
+      <div className="material-registry-page">
         <header className="material-registry-header">
           <div className="material-registry-header__intro">
             <p className="material-registry-header__eyebrow">MALZEME YÖNETİMİ</p>
@@ -24,17 +24,8 @@ export default async function MaterialRegistryPage() {
             </p>
           </div>
         </header>
-        <div
-          role="alert"
-          className={isUnauthorized ? "material-registry-unauthorized" : "material-registry-error"}
-        >
-          <Package aria-hidden="true" />
-          <div>
-            <h3>{isUnauthorized ? "Bu modüle erişim yetkiniz yok" : "Malzeme verisi yüklenemedi"}</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Malzeme verisi yüklenemedi" inline />
+      </div>
     );
   }
 

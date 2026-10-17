@@ -18,6 +18,7 @@ import { resolveProductionOrderRequestContextForIncomingRequest } from "@/featur
 import { buildExecutiveCommandCenterWorkspace } from "../application/executive-command-center-builder";
 import type { ExecutiveCommandCenterFilters } from "../types/executive-command-center-types";
 import type { ExecutiveCommandCenterWorkspacePayload } from "../types/executive-command-center-types";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
 
 const EXECUTIVE_READ_PERMISSIONS = [
   "factory-case.read",
@@ -71,21 +72,23 @@ export async function readExecutiveCommandCenterWorkspace(
     ? readFactoryDecisionCenterWorkspace(context)
     : Promise.resolve({ status: "failure" as const, code: "forbidden", message: "factory-case.read" });
 
-  const workforcePromise = hasGrantedPermission(access, "digital-workforce.read")
+  const workforceEnabled = deferredSurfacesEnabled() && hasGrantedPermission(access, "digital-workforce.read");
+
+  const workforcePromise = workforceEnabled
     ? fetchDigitalWorkforceControlCenter(context).then(
         (value) => ({ status: "success" as const, value }),
         () => ({ status: "failure" as const, message: "digital-workforce" }),
       )
     : Promise.resolve({ status: "failure" as const, message: "digital-workforce.read" });
 
-  const approvalsPromise = hasGrantedPermission(access, "digital-workforce.read")
+  const approvalsPromise = workforceEnabled
     ? fetchApprovals(context, "pending").then(
         (value) => ({ status: "success" as const, value }),
         () => ({ status: "failure" as const, message: "approvals" }),
       )
     : Promise.resolve({ status: "failure" as const, message: "digital-workforce.read" });
 
-  const activityPromise = hasGrantedPermission(access, "digital-workforce.read")
+  const activityPromise = workforceEnabled
     ? fetchActivity(context).then(
         (value) => ({ status: "success" as const, value }),
         () => ({ status: "failure" as const, message: "activity" }),
@@ -110,29 +113,26 @@ export async function readExecutiveCommandCenterWorkspace(
       throughputPromise,
     ]);
 
-  if (decisionCenterResult.status === "failure") {
-    unavailableSources.push("factory-decision-center");
-  }
-  if (workforceResult.status === "failure") {
-    unavailableSources.push("digital-workforce");
-  }
-  if (approvalsResult.status === "failure") {
-    unavailableSources.push("digital-workforce-approvals");
-  }
-  if (activityResult.status === "failure") {
-    unavailableSources.push("digital-workforce-activity");
-  }
-  if (aiTasksResult.status === "failure") {
-    unavailableSources.push("ai-task-center");
-  }
-  if (throughputResult.status === "failure") {
-    unavailableSources.push("throughput-optimizer");
+  // A source the account may not read, or one that is deferred in this deployment, is "not applicable": it is not reported
+  // as unavailable and it never counts towards collapsing the page. Only a source that was actually asked and failed does.
+  const sources = [
+    { name: "factory-decision-center", attempted: hasGrantedPermission(access, "factory-case.read"), ok: decisionCenterResult.status === "success" },
+    { name: "digital-workforce", attempted: workforceEnabled, ok: workforceResult.status === "success" },
+    { name: "digital-workforce-approvals", attempted: workforceEnabled, ok: approvalsResult.status === "success" },
+    { name: "digital-workforce-activity", attempted: workforceEnabled, ok: activityResult.status === "success" },
+    { name: "ai-task-center", attempted: hasGrantedPermission(access, "ai-task.read"), ok: aiTasksResult.status === "success" },
+    { name: "throughput-optimizer", attempted: hasGrantedPermission(access, "throughput-optimizer.read"), ok: throughputResult.status === "success" },
+  ];
+  for (const source of sources) {
+    if (source.attempted && !source.ok) {
+      unavailableSources.push(source.name);
+    }
   }
 
-  if (decisionCenterResult.status === "failure" && workforceResult.status === "failure") {
+  if (!sources.some((source) => source.ok)) {
     return {
       status: "failure",
-      message: "Yönetici özet verisi yüklenemedi. Karar merkezi ve dijital iş gücü erişilemedi.",
+      message: "Yönetici özet verisi yüklenemedi.",
     };
   }
 

@@ -121,7 +121,7 @@ export function GoldenDemoP3OutcomePanel({ outcome }: Readonly<{ outcome: Golden
             </article>
           ) : null}
         </div>
-        <table>
+        <table aria-label="Önce ve sonra karşılaştırması">
           <thead>
             <tr>
               <th>Metrik</th>

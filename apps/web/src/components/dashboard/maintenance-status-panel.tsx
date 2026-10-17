@@ -289,7 +289,7 @@ export function MaintenanceStatusPanel({
             className="dashboard-section-heading__title"
             id="maintenance-status-title"
           >
-            Bakım &amp; Arıza
+            Bakım ve Arıza
           </h2>
         </div>
 

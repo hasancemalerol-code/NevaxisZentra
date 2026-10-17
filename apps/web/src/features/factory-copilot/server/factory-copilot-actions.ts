@@ -23,7 +23,7 @@ import {
   fetchFactoryCopilotSuggestedQuestions,
 } from "./factory-copilot-api-client";
 
-type ActionFailure = Readonly<{ status: "failure"; message: string }>;
+type ActionFailure = Readonly<{ status: "failure"; message: string; category?: string }>;
 
 const SESSION_EXPIRED_MESSAGE = "Oturumunuzun süresi doldu. Devam etmek için yeniden oturum açın.";
 
@@ -79,6 +79,9 @@ export async function queryFactoryCopilotAction(
     return {
       status: "failure",
       message: describeCopilotError(error),
+      category: error instanceof FactoryCopilotRequestError
+        ? describeFactoryCopilotRequestFailure(error.failure, error.backendMessage).category
+        : undefined,
     };
   }
 }

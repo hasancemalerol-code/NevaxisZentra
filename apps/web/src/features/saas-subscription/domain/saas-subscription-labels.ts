@@ -21,7 +21,7 @@ const BILLING_CADENCE_LABELS: Record<string, string> = {
 };
 
 const SOURCE_PROVENANCE_LABELS: Record<string, string> = {
-  "local-development-pilot": "Geliştirme ortamı",
+  "local-development-pilot": "Örnek ortam",
   "non-production": "Üretim dışı ortam",
   "billing-system": "Faturalama sistemi",
   "manual-override": "Manuel atama",
@@ -251,8 +251,16 @@ export function formatInsufficientData(): string {
   return "Abonelik bilgisi şu anda yüklenemedi. Lütfen daha sonra tekrar deneyin.";
 }
 
+const ACTIVE_STATUSES = new Set(["active"]);
+
+/** True when the subscription itself looks healthy, so the blocking reason is unknown. */
+export function isSubscriptionHealthy(subscription: TenantSubscriptionCurrent | null): boolean {
+  return ACTIVE_STATUSES.has(subscription?.subscription.subscriptionStatus ?? "");
+}
+
 export function formatAccessDeniedHeadline(
   denialReason: "paid-application" | "module" | "service-unavailable" | null,
+  subscription: TenantSubscriptionCurrent | null = null,
 ): string {
   if (denialReason === "module") {
     return "Bu modüle erişim aboneliğinizde tanımlı değil";
@@ -260,6 +268,10 @@ export function formatAccessDeniedHeadline(
 
   if (denialReason === "service-unavailable") {
     return "Abonelik bilgisi şu anda yüklenemedi";
+  }
+
+  if (isSubscriptionHealthy(subscription)) {
+    return "Erişim doğrulanamadı";
   }
 
   return "Uygulama erişimi şu anda kullanılamıyor";
@@ -284,6 +296,8 @@ export function formatAccessDeniedSummary(
   }
 
   switch (subscription.subscription.subscriptionStatus) {
+    case "active":
+      return "Aboneliğiniz etkin görünüyor ancak uygulama erişimi doğrulanamadı. Yeniden deneyin; sorun sürerse yöneticinizle veya destek ekibiyle iletişime geçin.";
     case "suspended":
       return "Aboneliğiniz askıya alındı. Faturalandırma veya destek ekibiyle iletişime geçerek erişimi yeniden açabilirsiniz.";
     case "cancelled":

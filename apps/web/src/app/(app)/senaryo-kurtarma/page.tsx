@@ -1,9 +1,13 @@
-import { ShieldAlert } from "lucide-react";
+
 
 import { ScenarioRecoveryCreatePanel } from "@/features/scenario-recovery/components/scenario-recovery-create-panel";
 import { ScenarioRecoveryWorkspaceView } from "@/features/scenario-recovery/components/scenario-recovery-workspace-view";
 import { readScenarioRecoveryPage } from "@/features/scenario-recovery/server/scenario-recovery-reader";
 import "@/features/scenario-recovery/scenario-recovery-workspace.css";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { PageHeader } from "@/components/ui/page";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 
 type ScenarioRecoveryPageProps = Readonly<{
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -23,37 +27,44 @@ export default async function ScenarioRecoveryPage({ searchParams }: ScenarioRec
     constraintStationCode: readParam(params.constraintStationCode),
   });
 
+  if (result.status === "empty") {
+    return (
+      <div className="commint-page" data-testid="scenario-recovery-empty">
+        <PageHeader
+          eyebrow="Üretim Planlama"
+          title="Senaryo Kurtarma"
+          description="Plan aksamalarında alternatif kurtarma seçeneklerini karşılaştırın."
+        />
+        <StatePage
+          kind="empty"
+          inline
+          title="Henüz kurtarma senaryosu yok"
+          description="Canlı Plan ekranında bir plan için kurtarma simülasyonu başlatıldığında senaryolar burada listelenir."
+          actions={<StatePageLink href="/planlama" primary>Canlı Plana Git</StatePageLink>}
+        />
+      </div>
+    );
+  }
+
   if (result.status === "forbidden") {
     return (
-      <main className="commint-page">
-        <div role="alert" className="commint-error-banner" data-testid="scenario-recovery-forbidden">
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h1>Senaryo Kurtarma</h1>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+      <div className="commint-page">
+        <div data-testid="scenario-recovery-forbidden"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Senaryo kurtarma şu anda alınamıyor" backHref="/dashboard" backLabel="Ana sayfaya dön" /></div>
+      </div>
     );
   }
 
   if (result.status === "failure") {
     return (
-      <main className="commint-page">
-        <div role="alert" className="commint-error-banner" data-testid="scenario-recovery-error">
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h1>Senaryo Kurtarma</h1>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+      <div className="commint-page">
+        <div data-testid="scenario-recovery-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Senaryo kurtarma şu anda alınamıyor" backHref="/dashboard" backLabel="Ana sayfaya dön" /></div>
+      </div>
     );
   }
 
   if (result.status === "ready") {
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <ScenarioRecoveryCreatePanel
           lineId={result.lineId}
           entryPoint={result.entryPoint}
@@ -62,13 +73,13 @@ export default async function ScenarioRecoveryPage({ searchParams }: ScenarioRec
           canSimulate={result.canSimulate}
           history={result.history}
         />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="fact-workspace">
+    <div className="fact-workspace">
       <ScenarioRecoveryWorkspaceView workspace={result.workspace} history={result.history} />
-    </main>
+    </div>
   );
 }

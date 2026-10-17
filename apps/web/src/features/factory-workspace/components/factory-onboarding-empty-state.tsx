@@ -17,13 +17,13 @@ export function FactoryOnboardingEmptyState({
 
   return (
     <section className="commint-panel factory-onboarding-empty" data-testid="factory-onboarding-empty">
-      <h2>Fabrika verisi henüz tanımlanmadı</h2>
+      <h2>Hat ve kaynak tanımı henüz yok</h2>
       <p>
-        Yeni müşteri kurulumunda makine ve üretim kaynaklarını toplu yükleyebilir veya tek tek tanımlayabilirsiniz.
+        Bu görünüm hat, istasyon ve kaynak tanımlarından oluşur. Tanımlar eklendiğinde canlı durum burada görünür; üretim emirleri ve makineler diğer çalışma alanlarında izlenmeye devam eder.
       </p>
       <div className="factory-onboarding-empty__actions">
         <Link href={BULK_DATA_ONBOARDING_ROUTE}>Veri Aktarım Merkezi&apos;nden toplu yükle</Link>
-        <Link href="/uretim/kaynaklar">Makineler &amp; Kaynaklar</Link>
+        <Link href="/uretim/kaynaklar">Makineler ve Kaynaklar</Link>
       </div>
     </section>
   );

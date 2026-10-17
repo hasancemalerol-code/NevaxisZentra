@@ -1,11 +1,11 @@
-import { isNotFoundFailureCode } from "@/lib/api/api-failure-classifier";
+
+import { enumLabel } from "@/lib/presentation/enum-labels";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Factory, Wrench } from "lucide-react";
+import { ArrowLeft, Factory } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
-import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import {
   formatMaintenanceAge,
@@ -15,8 +15,13 @@ import {
   getMaintenanceAssetTypeLabel,
   getMaintenanceConditionStatusLabel,
   getMaintenanceConditionStatusTone,
+  getMaintenanceConditionReasonLabel,
   getMaintenancePriorityLabel,
   getMaintenancePriorityTone,
+  describeMeanRepairUnavailable,
+  isActiveMaintenanceWorkOrder,
+  isOpenMaintenanceRequest,
+  isOverduePreventiveDue,
   getMaintenanceStatusLabel,
   getMaintenanceTypeLabel,
   getMaintenanceWorkNoteTypeLabel,
@@ -25,6 +30,8 @@ import {
   getPreventiveDueStatusTone,
 } from "@/features/maintenance/presentation/maintenance-labels";
 import { readMaintenanceAssetHistory, readMaintenanceAssetReliability } from "@/features/maintenance/server/maintenance-reader";
+import { displayActor } from "@/lib/presentation/display-label";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   params: Promise<{ assetReference: string }>;
@@ -41,27 +48,24 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
   ]);
 
   if (result.status === "failure") {
+    if (result.code === "not-found" || result.code === "permission-denied") {
+      notFound();
+    }
+
     return (
-      <main className="production-execution-page maintenance-page">
+      <div className="production-execution-page maintenance-page">
         <header className="maintenance-page-header production-execution-header">
           <Link href="/bakim" className="maintenance-back-link">
             <ArrowLeft aria-hidden="true" />
             Bakım ana sayfası
           </Link>
           <div className="maintenance-page-header__intro">
-            <p>BAKIM &amp; ARIZA</p>
+            <p>BAKIM VE ARIZA</p>
             <h1>Varlık Bakım Geçmişi</h1>
           </div>
         </header>
-        <MaintenanceWorkspaceNav active="overview" />
-        <div role="alert" className="maintenance-error-panel">
-          <Wrench aria-hidden="true" />
-          <div>
-            <h3>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "Kayıt bulunamadı" : "Varlık geçmişi yüklenemedi"}</h3>
-            <p>{isNotFoundFailureCode("code" in result ? result.code : undefined) ? "İstenen varlık kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Varlık geçmişi yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -71,21 +75,38 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
     notFound();
   }
 
+  const assetName =
+    reliability?.assetName
+    ?? history.requests.find((item) => item.assetName)?.assetName
+    ?? history.workOrders.find((item) => item.assetName)?.assetName;
+  const assetTitle = assetName?.trim() || history.assetReference;
+  // "Son arıza" is derived from fault and corrective records only; the source record is named under the date.
+  const lastFaultRecord = [...history.requests]
+    .filter((item) => item.type === "fault" || item.type === "corrective")
+    .sort((a, b) => b.reportedAtUtc.localeCompare(a.reportedAtUtc))[0];
+  const openRequestCount = history.requests.filter((item) => isOpenMaintenanceRequest(item.status)).length;
+  const activeWorkOrders = history.workOrders.filter((item) => isActiveMaintenanceWorkOrder(item.status));
+  const criticalActiveWorkOrderCount = activeWorkOrders.filter((item) => item.priority === "critical").length;
+  const planNameById = new Map(history.preventivePlans.map((plan) => [plan.id, plan.name]));
+  const hasCostValues = history.costSummaries.some((summary) =>
+    [summary.actualPartsCost, summary.externalServiceCost, summary.otherCost, summary.totalMaintenanceCost].some(
+      (value) => value !== undefined && value !== null,
+    ),
+  );
+
   return (
-    <main className="production-execution-page maintenance-page">
+    <div className="production-execution-page maintenance-page">
       <header className="maintenance-page-header production-execution-header">
         <Link href="/bakim" className="maintenance-back-link">
           <ArrowLeft aria-hidden="true" />
           Bakım ana sayfası
         </Link>
         <div className="maintenance-page-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
-          <h1>{history.assetReference}</h1>
-          <span>Varlık bakım geçmişi (salt okunur)</span>
+          <p>BAKIM VE ARIZA</p>
+          <h1>{assetTitle}</h1>
+          <span>{assetTitle === history.assetReference ? "Varlık bakım geçmişi (salt okunur)" : `${history.assetReference} · Varlık bakım geçmişi (salt okunur)`}</span>
         </div>
       </header>
-
-      <MaintenanceWorkspaceNav active="overview" />
 
       <div className="maintenance-page-content">
         {reliability ? (
@@ -93,61 +114,74 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
             <header className="maintenance-section__header">
               <h2>Güvenilirlik</h2>
             </header>
-            <div className="maintenance-detail-grid">
-              <dl className="maintenance-report-metrics">
+            <dl className="maintenance-detail-dl maintenance-detail-dl--metrics">
+              <div className={reliability.costAnalytics ? undefined : "maintenance-detail-dl__span2"}>
+                <dt>Durum</dt>
+                <dd>
+                  <Badge tone={getMaintenanceConditionStatusTone(reliability.conditionStatus)}>
+                    {getMaintenanceConditionStatusLabel(reliability.conditionStatus)}
+                  </Badge>
+                </dd>
+                {reliability.conditionReasons.map((reason) => (
+                  <dd key={reason}><small>{getMaintenanceConditionReasonLabel(reason)}</small></dd>
+                ))}
+              </div>
+              <div>
+                <dt>Açık arıza kaydı</dt>
+                <dd>{openRequestCount}</dd>
+                <dd><small>Toplam arıza kaydı: {history.requests.length}</small></dd>
+              </div>
+              <div>
+                <dt>Açık bakım emri</dt>
+                <dd>{activeWorkOrders.length}</dd>
+                <dd><small>Kritik: {criticalActiveWorkOrderCount}</small></dd>
+              </div>
+              <div>
+                <dt title="Güvenilirlik hesabına giren kayıtlı arıza olayları">Arıza olayı</dt>
+                <dd>{reliability.totalFaults}</dd>
+                <dd><small>Tekrarlayan: {reliability.repeatFaultCount}</small></dd>
+              </div>
+              <div>
+                <dt>Ort. onarım süresi</dt>
+                <dd>
+                  {reliability.meanRepairMinutes !== undefined
+                    ? `${Math.round(reliability.meanRepairMinutes)} dk`
+                    : <span className="maintenance-detail-dl__empty">Hesaplanamadı</span>}
+                </dd>
+                {reliability.meanRepairMinutes === undefined ? <dd><small>{describeMeanRepairUnavailable(history.workOrders)}</small></dd> : null}
+              </div>
+              <div>
+                <dt>Periyodik uyum</dt>
+                <dd>
+                  {reliability.preventiveComplianceRate !== undefined
+                    ? `%${reliability.preventiveComplianceRate.toLocaleString("tr-TR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`
+                    : <span className="maintenance-detail-dl__empty">Hesaplanamadı</span>}
+                </dd>
+                <dd><small>Tamamlanan / vadesi gelen</small></dd>
+              </div>
+              <div>
+                <dt>Son arıza</dt>
+                <dd>
+                  {reliability.lastFailureAtUtc
+                    ? formatMaintenanceDateTime(reliability.lastFailureAtUtc)
+                    : "Kayıtlı arıza yok"}
+                </dd>
+                {lastFaultRecord ? (
+                  <dd><small>{lastFaultRecord.requestNumber} · {getMaintenanceTypeLabel(lastFaultRecord.type)}</small></dd>
+                ) : null}
+              </div>
+              {reliability.costAnalytics ? (
                 <div>
-                  <dt>Durum</dt>
+                  <dt>Bakım maliyeti</dt>
                   <dd>
-                    <Badge tone={getMaintenanceConditionStatusTone(reliability.conditionStatus)}>
-                      {getMaintenanceConditionStatusLabel(reliability.conditionStatus)}
-                    </Badge>
+                    {reliability.costAnalytics.totalMaintenanceCost === undefined || reliability.costAnalytics.totalMaintenanceCost === null
+                      ? <span className="maintenance-detail-dl__empty">Girilmedi</span>
+                      : formatMaintenanceCurrency(reliability.costAnalytics.totalMaintenanceCost)}
                   </dd>
-                  {reliability.conditionReasons.map((reason) => (
-                    <small key={reason}>{reason}</small>
-                  ))}
+                  <dd><small>{enumLabel(reliability.costAnalytics.dataCompletenessStatus)}</small></dd>
                 </div>
-                <div>
-                  <dt>Arıza Sayısı</dt>
-                  <dd>{reliability.totalFaults}</dd>
-                  <small>Tekrar: {reliability.repeatFaultCount}</small>
-                </div>
-                <div>
-                  <dt>MTTR</dt>
-                  <dd>
-                    {reliability.meanRepairMinutes !== undefined
-                      ? `${Math.round(reliability.meanRepairMinutes)} dk`
-                      : "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Periyodik Bakım Uyumu</dt>
-                  <dd>
-                    {reliability.preventiveComplianceRate !== undefined
-                      ? `%${reliability.preventiveComplianceRate.toFixed(1)}`
-                      : "—"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Açık Bakım</dt>
-                  <dd>{reliability.openWorkOrders}</dd>
-                  <small>Kritik: {reliability.criticalOpenWorkOrders}</small>
-                </div>
-                <div>
-                  <dt>Son Arıza</dt>
-                  <dd>
-                    {reliability.lastFailureAtUtc
-                      ? formatMaintenanceDateTime(reliability.lastFailureAtUtc)
-                      : "—"}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-            {reliability.costAnalytics ? (
-              <p className="maintenance-report-period">
-                Bakım maliyeti: {formatMaintenanceCurrency(reliability.costAnalytics.totalMaintenanceCost)}{" "}
-                ({reliability.costAnalytics.dataCompletenessStatus})
-              </p>
-            ) : null}
+              ) : null}
+            </dl>
           </section>
         ) : null}
 
@@ -158,8 +192,8 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
           {history.workOrders.length === 0 ? (
             <p className="maintenance-empty-state">Bakım emri kaydı bulunmuyor.</p>
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Bakım Emirleri (kaydırılabilir)">
+              <table aria-label="Bakım Emirleri" className="maintenance-table maintenance-table--compact">
                 <thead>
                   <tr>
                     <th>Emir No</th>
@@ -204,8 +238,8 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
           {history.requests.length === 0 ? (
             <p className="maintenance-empty-state">Arıza kaydı bulunmuyor.</p>
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Arıza Kayıtları (kaydırılabilir)">
+              <table aria-label="Arıza Kayıtları" className="maintenance-table maintenance-table--compact">
                 <thead>
                   <tr>
                     <th>Kayıt No</th>
@@ -228,7 +262,9 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
                           {getMaintenancePriorityLabel(request.priority)}
                         </Badge>
                       </td>
-                      <td>{getMaintenanceStatusLabel(request.status)}</td>
+                      <td>
+                        <Badge tone="neutral">{getMaintenanceStatusLabel(request.status)}</Badge>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -256,7 +292,7 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
                         <span>{getMaintenanceAssetTypeLabel(plan.assetType)}</span>
                         <span>{getMaintenanceStatusLabel(plan.status)}</span>
                         {plan.nextDueAtUtc ? (
-                          <span>Sonraki: {formatMaintenanceDate(plan.nextDueAtUtc)}</span>
+                          <span title="Bu planın, açık vadeden sonra üretilecek planlı vadesi">Sonraki planlı vade: {formatMaintenanceDate(plan.nextDueAtUtc)}</span>
                         ) : null}
                       </div>
                     </div>
@@ -277,12 +313,19 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
                 {history.preventiveDues.map((due) => (
                   <li key={due.id} className="maintenance-ca-item">
                     <div className="maintenance-ca-item__body">
-                      <strong>{due.preventivePlanCode ?? due.preventivePlanId}</strong>
+                      <strong>
+                        {due.preventivePlanName ?? planNameById.get(due.preventivePlanId) ?? due.preventivePlanCode ?? "Periyodik bakım planı"}
+                      </strong>
                       <div className="maintenance-ca-item__meta">
-                        <span>{formatMaintenanceDate(due.dueAtUtc)}</span>
-                        <Badge tone={getPreventiveDueStatusTone(due.status)}>
-                          {getPreventiveDueStatusLabel(due.status)}
-                        </Badge>
+                        {due.preventivePlanCode ? <span>{due.preventivePlanCode}</span> : null}
+                        <span title="Plandan üretilmiş vade kaydı">{isOverduePreventiveDue(due) ? "Gecikmiş vade" : "Vade tarihi"}: {formatMaintenanceDate(due.dueAtUtc)}</span>
+                        {isOverduePreventiveDue(due) ? (
+                          <Badge tone="danger">Vadesi geçmiş</Badge>
+                        ) : (
+                          <Badge tone={getPreventiveDueStatusTone(due.status)}>
+                            {getPreventiveDueStatusLabel(due.status)}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </li>
@@ -292,39 +335,45 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
           </section>
         </div>
 
+        {history.workNotes.length === 0 && history.partUsages.length === 0 ? (
+          <section className="maintenance-section maintenance-section--wide" aria-label="Notlar ve Parçalar">
+            <header className="maintenance-section__header">
+              <h2>Notlar ve Parçalar</h2>
+            </header>
+            <p className="maintenance-empty-state">Bu varlık için bakım notu veya parça kullanım kaydı bulunmuyor.</p>
+          </section>
+        ) : null}
+
+        {history.workNotes.length > 0 ? (
         <section className="maintenance-section maintenance-section--wide" aria-label="Bakım Notları">
           <header className="maintenance-section__header">
             <h2>Bakım Notları</h2>
           </header>
-          {history.workNotes.length === 0 ? (
-            <p className="maintenance-empty-state">Bakım notu bulunmuyor.</p>
-          ) : (
-            <ul className="maintenance-ca-list">
-              {history.workNotes.map((note) => (
-                <li key={note.id} className="maintenance-ca-item">
-                  <div className="maintenance-ca-item__body">
-                    <strong>{getMaintenanceWorkNoteTypeLabel(note.noteType)}</strong>
-                    <p>{note.text}</p>
-                    <div className="maintenance-ca-item__meta">
-                      <span>{formatMaintenanceDateTime(note.createdAtUtc)}</span>
-                      <span>{note.createdBySubjectId}</span>
-                    </div>
+          <ul className="maintenance-ca-list">
+            {history.workNotes.map((note) => (
+              <li key={note.id} className="maintenance-ca-item">
+                <div className="maintenance-ca-item__body">
+                  <strong>{getMaintenanceWorkNoteTypeLabel(note.noteType)}</strong>
+                  <p>{note.text}</p>
+                  <div className="maintenance-ca-item__meta">
+                    <span>{formatMaintenanceDateTime(note.createdAtUtc)}</span>
+                    <span>{displayActor(note.createdBySubjectId)}</span>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
+        ) : null}
 
+        {history.partUsages.length > 0 ? (
         <section className="maintenance-section maintenance-section--wide" aria-label="Parça Kullanımları">
           <header className="maintenance-section__header">
             <h2>Parça Kullanımları</h2>
           </header>
-          {history.partUsages.length === 0 ? (
-            <p className="maintenance-empty-state">Parça kullanım kaydı bulunmuyor.</p>
-          ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+          {(
+            <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Parça Kullanımları (kaydırılabilir)">
+              <table aria-label="Parça Kullanımları" className="maintenance-table maintenance-table--compact">
                 <thead>
                   <tr>
                     <th>Parça</th>
@@ -354,16 +403,17 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
             </div>
           )}
         </section>
+        ) : null}
 
         <section className="maintenance-section maintenance-section--wide" aria-label="Maliyet Özetleri">
           <header className="maintenance-section__header">
             <h2>Maliyet Özetleri</h2>
           </header>
-          {history.costSummaries.length === 0 ? (
-            <p className="maintenance-empty-state">Maliyet özeti bulunmuyor.</p>
+          {!hasCostValues ? (
+            <p className="maintenance-empty-state">Henüz maliyet girilmedi.</p>
           ) : (
-            <div className="maintenance-table-wrap">
-              <table className="maintenance-table maintenance-table--compact">
+            <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Maliyet Özetleri (kaydırılabilir)">
+              <table aria-label="Maliyet Özetleri" className="maintenance-table maintenance-table--compact">
                 <thead>
                   <tr>
                     <th>Emir</th>
@@ -378,7 +428,7 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
                     <tr key={summary.workOrderId}>
                       <td>
                         <Link href={`/bakim/emirler/${summary.workOrderId}`}>
-                          {summary.workOrderId}
+                          {history.workOrders.find((item) => item.id === summary.workOrderId)?.workOrderNumber ?? "Bakım emri"}
                         </Link>
                       </td>
                       <td>{formatMaintenanceCurrency(summary.actualPartsCost)}</td>
@@ -398,6 +448,6 @@ export default async function MaintenanceAssetHistoryPage({ params }: PageProps)
         <Factory aria-hidden="true" />
         Varlık bakım geçmişi salt okunurdur; kayıt oluşturma bu ekrandan yapılmaz.
       </footer>
-    </main>
+    </div>
   );
 }

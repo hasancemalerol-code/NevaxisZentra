@@ -1,4 +1,5 @@
 "use client";
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 
 import Link from "next/link";
 import {
@@ -10,11 +11,14 @@ import {
   type FormEvent,
 } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { LoaderCircle, RefreshCw } from "lucide-react";
+import { Inbox, LoaderCircle, RefreshCw } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { EmptyPanel } from "@/components/ui/empty-panel";
+import { PageHeader } from "@/components/ui/page";
 import { ContextPanel } from "@/components/workspace/context-panel";
 import { StatusStrip } from "@/components/workspace/status-strip";
-import { WorkspaceHeader } from "@/components/workspace/workspace-header";
+import { useScrollFade } from "@/lib/hooks/use-scroll-fade";
 import { FactoryCopilotWorkspaceActions } from "@/features/factory-copilot/components/factory-copilot-workspace-actions";
 
 import {
@@ -26,6 +30,7 @@ import {
 } from "../domain/works-queues";
 import {
   formatWorksApprovalStatus,
+  blockerText,
   formatWorksBlockerStatus,
   resolveWorksDisplayBadgeClass,
   resolveWorksPriorityBadgeClass,
@@ -40,11 +45,13 @@ import { decideWorkApprovalAction, loadCaseDetailAction } from "../server/works-
 
 type WorksWorkspaceViewProps = Readonly<{
   page: WorksWorkspacePagePayload;
+  /** Digital Workforce is deferred: the link is only rendered when the server allows the module. */
+  showWorkforce?: boolean;
 }>;
 
 function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
-  return new Date(value).toLocaleString("tr-TR");
+  return new Date(value).toLocaleString("tr-TR", { timeZone: FACILITY_TIME_ZONE });
 }
 
 function formatNumber(value: number | null | undefined, digits = 0): string {
@@ -52,7 +59,12 @@ function formatNumber(value: number | null | undefined, digits = 0): string {
   return value.toFixed(digits);
 }
 
-export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProps) {
+/** Digital Workforce is deferred: its wording never reaches Production screens, the acting system reads as an assistant. */
+function actingSystemText(label: string): string {
+  return label.replace(/\s*Dijital Çalışan(ı|lar)?/g, " Asistanı").trim();
+}
+
+export function WorksWorkspaceView({ page: initialPage, showWorkforce = false }: WorksWorkspaceViewProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -179,40 +191,44 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
   }, [caseDetail?.summary, page.workspace.items, selectedCaseId]);
 
   const queueLabel = getWorksQueueLabel(activeQueue);
+  const queueRailRef = useScrollFade<HTMLElement>(activeQueue);
 
   return (
     <div className="works-workspace" data-testid="works-workspace">
-      <WorkspaceHeader
-        context="İŞLER"
-        title="Operasyonel iş akışı"
-        meta="İş · Sorun · Onay · Engel · Sonuç · Doğrulama"
+      <PageHeader
+        eyebrow="İşler"
+        title="Açık İşler"
+        description="İşleri, onayları, engelleri ve doğrulama bekleyen sonuçları tek yerden izleyin."
         actions={(
           <FactoryCopilotWorkspaceActions>
-            <button
-              type="button"
-              className="works-action-button"
+            <Button
               data-testid="works-refresh"
               disabled={isPending}
+              leadingIcon={isPending ? <LoaderCircle className="spin" size={14} /> : <RefreshCw size={14} />}
               onClick={() => router.refresh()}
+              variant="secondary"
             >
-              {isPending ? <LoaderCircle aria-hidden="true" className="spin" size={14} /> : <RefreshCw aria-hidden="true" size={14} />}
-              {" "}
               Yenile
-            </button>
+            </Button>
           </FactoryCopilotWorkspaceActions>
         )}
       />
 
-      <StatusStrip
-        aria-label="İş özeti"
-        items={[
-          { label: "Kuyruk", value: queueLabel },
-          { label: "Kayıt", value: page.workspace.items.length },
-          { label: "Onay", value: page.workspace.queueCounts.pendingApproval },
-          { label: "Engel", value: page.workspace.queueCounts.blocked },
-          { label: "Doğrulama", value: page.workspace.queueCounts.verificationPending },
-        ]}
-      />
+      {/* The queue tabs below already carry these counts; the summary only appears when it adds information. */}
+      {page.workspace.items.length > 0
+        || page.workspace.queueCounts.pendingApproval > 0
+        || page.workspace.queueCounts.blocked > 0
+        || page.workspace.queueCounts.verificationPending > 0 ? (
+        <StatusStrip
+          aria-label="İş özeti"
+          items={[
+            { label: "Kayıt", value: page.workspace.items.length },
+            { label: "Onay", value: page.workspace.queueCounts.pendingApproval },
+            { label: "Engel", value: page.workspace.queueCounts.blocked },
+            { label: "Doğrulama", value: page.workspace.queueCounts.verificationPending },
+          ]}
+        />
+      ) : null}
 
       {feedback ? (
         <p className="works-feedback" data-testid="works-feedback" data-tone={feedbackTone}>
@@ -220,44 +236,41 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
         </p>
       ) : null}
 
-      <div className="works-workspace__grid">
-        <aside className="works-workspace__left" data-testid="works-queue-nav">
-          <section className="fact-section">
-            <header className="fact-section__header">
-              <h2 className="fact-section__title">Kuyruklar</h2>
-            </header>
-            <div className="fact-section__body works-queue-nav">
-              {WORKS_QUEUE_OPTIONS.map((option) => {
-                const count = getWorksQueueCount(page.workspace.queueCounts, option.id);
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className="works-queue-nav__item"
-                    data-testid={`works-queue-${option.id}`}
-                    data-active={activeQueue === option.id ? "true" : "false"}
-                    onClick={() => selectQueue(option.id)}
-                  >
-                    <span className="works-queue-nav__label">
-                      <strong>{option.label}</strong>
-                      <span>{option.description}</span>
-                    </span>
-                    <span className="works-queue-nav__count">{count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        </aside>
+      <nav
+        aria-label="İş kuyrukları"
+        className="works-queue-nav"
+        data-testid="works-queue-nav"
+        ref={queueRailRef}
+      >
+        {WORKS_QUEUE_OPTIONS.map((option) => {
+          const count = getWorksQueueCount(page.workspace.queueCounts, option.id);
+          return (
+            <button
+              key={option.id}
+              type="button"
+              className="works-queue-nav__item"
+              data-testid={`works-queue-${option.id}`}
+              data-active={activeQueue === option.id ? "true" : "false"}
+              aria-pressed={activeQueue === option.id}
+              title={option.description}
+              onClick={() => selectQueue(option.id)}
+            >
+              <span className="works-queue-nav__label">{option.label}</span>
+              <span className="works-queue-nav__count">{count}</span>
+            </button>
+          );
+        })}
+      </nav>
 
-        <main className="works-workspace__center" data-testid="works-list-panel">
+      <div className="works-workspace__grid" data-detail={selectedCaseId ? "open" : "closed"}>
+        <div className="works-workspace__center" data-testid="works-list-panel">
           <section className="fact-section">
             <header className="fact-section__header">
               <h2 className="fact-section__title">{queueLabel}</h2>
             </header>
             <div className="fact-section__body">
               <div className="works-toolbar">
-                <form onSubmit={submitSearch} data-testid="works-search-form">
+                <form className="zx-inline-form" onSubmit={submitSearch} data-testid="works-search-form">
                   <input
                     type="search"
                     className="works-search"
@@ -277,8 +290,17 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
                 ) : null}
               </div>
 
-              <div className="works-table-wrap">
-                <table className="works-table" data-testid="works-table">
+              {page.workspace.items.length === 0 ? (
+                <EmptyPanel
+                  compact
+                  data-testid="works-table-empty"
+                  description={searchQuery ? "Aramanızla eşleşen iş bulunamadı." : "Yeni bir iş veya sorun oluştuğunda bu kuyrukta görünür."}
+                  icon={<Inbox />}
+                  title="Bu kuyrukta görüntülenecek iş yok"
+                />
+              ) : (
+              <div className="works-table-wrap" role="region" aria-label="İş kuyruğu tablosu" tabIndex={0}>
+                <table aria-label="Kuyruklar" className="works-table" data-testid="works-table">
                   <thead>
                     <tr>
                       <th>İş / Sorun</th>
@@ -293,33 +315,25 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
                     </tr>
                   </thead>
                   <tbody>
-                    {page.workspace.items.length === 0 ? (
-                      <tr data-testid="works-table-empty">
-                        <td colSpan={9}>Bu kuyrukta görüntülenecek iş yok.</td>
-                      </tr>
-                    ) : (
-                      page.workspace.items.map((item) => (
-                        <WorksTableRow
-                          key={item.id}
-                          item={item}
-                          selected={selectedCaseId === item.id}
-                          onSelect={() => selectCase(item.id)}
-                        />
-                      ))
-                    )}
+                    {page.workspace.items.map((item) => (
+                      <WorksTableRow
+                        key={item.id}
+                        item={item}
+                        selected={selectedCaseId === item.id}
+                        onSelect={() => selectCase(item.id)}
+                      />
+                    ))}
                   </tbody>
                 </table>
               </div>
+              )}
             </div>
           </section>
-        </main>
+        </div>
 
+        {selectedCaseId ? (
         <aside className="works-workspace__right" data-testid="works-inspector">
-          {!selectedCaseId ? (
-            <div className="works-inspector-empty" data-testid="works-inspector-empty">
-              Detay görmek için listeden bir iş seçin.
-            </div>
-          ) : caseDetailStatus === "loading" ? (
+          {caseDetailStatus === "loading" ? (
             <div className="works-inspector-empty" data-testid="works-inspector-loading">
               <LoaderCircle aria-hidden="true" className="spin" size={16} />
               {" "}
@@ -332,6 +346,7 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
           ) : caseDetail ? (
             <WorksInspectorPanel
               detail={caseDetail}
+              showWorkforce={showWorkforce}
               canDecideApproval={page.canDecideApproval}
               isPending={isPending}
               onApprovalDecision={handleApprovalDecision}
@@ -345,6 +360,7 @@ export function WorksWorkspaceView({ page: initialPage }: WorksWorkspaceViewProp
             </div>
           )}
         </aside>
+        ) : null}
       </div>
     </div>
   );
@@ -380,7 +396,7 @@ function WorksTableRow({ item, selected, onSelect }: WorksTableRowProps) {
       </td>
       <td>{item.factoryContextLabel}</td>
       <td>{item.ownerLabel}</td>
-      <td>{item.actingSystemLabel}</td>
+      <td>{actingSystemText(item.actingSystemLabel)}</td>
       <td>{formatWorksApprovalStatus(item.hasPendingApproval)}</td>
       <td>{formatWorksBlockerStatus(item)}</td>
       <td>{item.lastUpdateLabel}</td>
@@ -419,6 +435,7 @@ function WorksInspectorSummary({ item, onClose }: WorksInspectorSummaryProps) {
 
 type WorksInspectorPanelProps = Readonly<{
   detail: WorksCaseDetailSnapshot;
+  showWorkforce: boolean;
   canDecideApproval: boolean;
   isPending: boolean;
   onApprovalDecision: (
@@ -431,6 +448,7 @@ type WorksInspectorPanelProps = Readonly<{
 
 function WorksInspectorPanel({
   detail,
+  showWorkforce,
   canDecideApproval,
   isPending,
   onApprovalDecision,
@@ -551,8 +569,7 @@ function WorksInspectorPanel({
             <ContextPanel
               title="Aktif engel"
               rows={[
-                { label: "Kod", value: detail.blocker.code },
-                { label: "Etiket", value: detail.blocker.label },
+                { label: "Engel", value: blockerText(detail.blocker.label) },
                 { label: "Başlangıç", value: formatDateTime(detail.blocker.sinceUtc) },
                 { label: "Detay", value: detail.blocker.detail },
               ]}
@@ -706,7 +723,7 @@ function WorksInspectorPanel({
               Senaryo
             </Link>
           ) : null}
-          {detail.digitalWorkforceHref ? (
+          {showWorkforce && detail.digitalWorkforceHref ? (
             <Link href={detail.digitalWorkforceHref} className="works-action-button" data-testid="works-digital-workforce-link">
               Dijital iş gücü
             </Link>

@@ -1,11 +1,14 @@
 export const COMMERCIAL_PROFITABILITY_ALERT_SUBTITLE =
-  "Kârlılık uyarıları; karşılaştırma motoru kanıtına dayalı bozulma ve inceleme sinyallerini insan onaylı iş akışında gösterir.";
+  "Kârlılık uyarıları; kayıtlı karşılaştırma kanıtına dayalı bozulma ve inceleme sinyallerini insan onaylı iş akışında gösterir.";
 
 export const COMMERCIAL_PROFITABILITY_ALERT_SCOPE_NOTE =
   "Uyarılar otomatik ticari karar üretmez; yalnızca inceleme, görev taslağı ve yaşam döngüsü geçişleri desteklenir.";
 
 export const COMMERCIAL_PROFITABILITY_ALERT_EMPTY_NOTE =
-  "Seçili filtreler için kârlılık uyarısı bulunamadı. Uyarıları materyalize etmek için yönetim yetkisi gerekir.";
+  "Seçili filtreler için kârlılık uyarısı bulunamadı.";
+
+export const COMMERCIAL_PROFITABILITY_ALERT_EMPTY_MANAGE_HINT =
+  " Uyarıları oluşturmak için yönetim yetkisi gerekir.";
 
 export const COMMERCIAL_PROFITABILITY_ALERT_NO_SELECTION_NOTE =
   "Detay görmek için tablodan bir kârlılık uyarısı seçin.";

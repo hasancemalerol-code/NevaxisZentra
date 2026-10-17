@@ -29,9 +29,9 @@ import {
 } from "../application/commercial-pricing-scenario-filter";
 import {
   COMMERCIAL_PRICING_SCENARIO_AUTOMATION_DISCLAIMER,
+  COMMERCIAL_PRICING_SCENARIO_EMPTY_MANAGE_HINT,
   COMMERCIAL_PRICING_SCENARIO_EMPTY_NOTE,
   COMMERCIAL_PRICING_SCENARIO_NO_SELECTION_NOTE,
-  COMMERCIAL_PRICING_SCENARIO_PILOT_PROFILE_ID,
   COMMERCIAL_PRICING_SCENARIO_PILOT_SALES_EVIDENCE_BELOW_ID,
   COMMERCIAL_PRICING_SCENARIO_PILOT_SALES_EVIDENCE_WITHIN_ID,
   COMMERCIAL_PRICING_SCENARIO_SCOPE_NOTE,
@@ -54,6 +54,9 @@ import {
   transitionCommercialPricingScenarioAction,
 } from "../server/commercial-intelligence-actions";
 import "./commercial-intelligence-workspace.css";
+import { displayActor } from "@/lib/presentation/display-label";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { kpiValueClass } from "./commercial-no-data";
 
 type CommercialPricingScenarioWorkspaceViewProps = Readonly<{
   workspace: CommercialPricingScenarioWorkspacePayload;
@@ -69,8 +72,7 @@ const KPI_ICONS: Record<string, typeof ShieldCheck> = {
   "scenario-approved": CheckCircle2,
 };
 
-const DEFAULT_SOURCE_PROVENANCE =
-  "Deterministic local Development pilot — pricing-scenario UI";
+const DEFAULT_SOURCE_PROVENANCE = "Fiyat koruma senaryosu girişi";
 
 function guardrailToneClass(guardrail: string | null): string {
   if (guardrail === "blocked") return "commint-variance--negative";
@@ -151,8 +153,8 @@ function CommercialPricingScenarioTable({
   onSelect,
 }: ScenarioTableProps) {
   return (
-    <div className="commint-table-wrap" data-testid="commercial-pricing-scenario-table">
-      <table className="commint-table">
+    <div className="commint-table-wrap" tabIndex={0} data-testid="commercial-pricing-scenario-table">
+      <table aria-label="Fiyat koruma senaryoları" className="commint-table">
         <thead>
           <tr>
             <th>Referans</th>
@@ -247,7 +249,7 @@ function CommercialPricingScenarioEvaluationDetailPanel({ evaluation }: Evaluati
         <p className="commint-detail-field__value">{evaluation.profileMinimumContributionMarginRatioLabel}</p>
       </div>
       <div className="commint-detail-field">
-        <p className="commint-detail-field__label">Önde gelen sürücü</p>
+        <p className="commint-detail-field__label">Başlıca etken</p>
         <p className="commint-detail-field__value">{evaluation.leadingDriverLabel}</p>
       </div>
       <div className="commint-detail-field">
@@ -294,13 +296,13 @@ export function CommercialPricingScenarioWorkspaceView({
   const [rejectNote, setRejectNote] = useState("");
   const [isHydrated, setIsHydrated] = useState(false);
   const [createForm, setCreateForm] = useState({
-    profileId: COMMERCIAL_PRICING_SCENARIO_PILOT_PROFILE_ID,
+    profileId: "",
     expectedProfileVersion: "1",
-    salesEvidenceObservationId: COMMERCIAL_PRICING_SCENARIO_PILOT_SALES_EVIDENCE_WITHIN_ID,
-    proposedUnitPrice: "125.00",
+    salesEvidenceObservationId: "",
+    proposedUnitPrice: "",
     proposedDiscountRatio: "",
-    quantity: "1000",
-    commercialRationale: "Pilot fiyat koruma senaryosu — eşik içi satış kanıtı ile değerlendirme.",
+    quantity: "",
+    commercialRationale: "",
     sourceProvenance: DEFAULT_SOURCE_PROVENANCE,
   });
 
@@ -316,6 +318,7 @@ export function CommercialPricingScenarioWorkspaceView({
   const selectedScenarioId = searchParams.get("scenario") ?? workspace.selectedScenarioId;
   const selectedScenario = workspace.scenarios.find((item) => item.id === selectedScenarioId) ?? null;
   const isEmpty = workspace.tableRows.length === 0;
+  const profileOptions = workspace.profileOptions ?? [];
 
   const refreshWorkspace = useCallback((
     scenarioId?: string | null,
@@ -384,6 +387,12 @@ export function CommercialPricingScenarioWorkspaceView({
       const proposedUnitPrice = Number(createForm.proposedUnitPrice);
       if (!Number.isFinite(proposedUnitPrice) || proposedUnitPrice <= 0) {
         setFeedback("Geçerli bir önerilen birim fiyat girin.");
+        setFeedbackTone("error");
+        return;
+      }
+
+      if (!createForm.profileId || !createForm.salesEvidenceObservationId) {
+        setFeedback("Satış fiyat profili ve satış kanıtı seçin.");
         setFeedbackTone("error");
         return;
       }
@@ -522,7 +531,7 @@ export function CommercialPricingScenarioWorkspaceView({
     && !["approved", "rejected", "withdrawn"].includes(scenarioDetail.lifecycleStatus);
 
   return (
-    <main className="commint-page" data-testid="commercial-pricing-scenario-workspace" data-hydrated={isHydrated ? "true" : "false"}>
+    <div className="commint-page" data-testid="commercial-pricing-scenario-workspace" data-hydrated={isHydrated ? "true" : "false"}>
       <header className="commint-executive">
         <div className="commint-executive__top">
           <div className="commint-executive__intro">
@@ -530,10 +539,9 @@ export function CommercialPricingScenarioWorkspaceView({
             <h1>Fiyat Koruma ve Onay</h1>
             <p className="commint-executive__subtitle">{COMMERCIAL_PRICING_SCENARIO_SUBTITLE}</p>
             <ul className="commint-executive__meta">
-              <li>{workspace.facilityLabel}</li>
+              <li>Kapsam: {workspace.facilityLabel}</li>
               <li>Güncellik: {workspace.freshnessLabel}</li>
               <li>Sayfa sonucu: {workspace.returnedCount}</li>
-              <li>{COMMERCIAL_PRICING_SCENARIO_SCOPE_NOTE}</li>
             </ul>
           </div>
           <div className="commint-executive__actions">
@@ -549,13 +557,17 @@ export function CommercialPricingScenarioWorkspaceView({
             </button>
           </div>
         </div>
-        <p className="commint-provenance-strip" data-testid="commercial-pricing-scenario-automation-disclaimer">
-          <span className="commint-provenance-strip__badge">Otomasyon</span>
-          {workspace.automationDisclaimer || COMMERCIAL_PRICING_SCENARIO_AUTOMATION_DISCLAIMER}
-        </p>
-        <p className="commint-readonly-note" data-testid="commercial-pricing-scenario-readonly-note">
-          {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
-        </p>
+        <details className="commint-notes">
+          <summary>Kapsam ve sınırlar</summary>
+          <p className="commint-executive__scope-note">{COMMERCIAL_PRICING_SCENARIO_SCOPE_NOTE}</p>
+          <p className="commint-provenance-strip" data-testid="commercial-pricing-scenario-automation-disclaimer">
+            <span className="commint-provenance-strip__badge">Otomasyon</span>
+            {workspace.automationDisclaimer || COMMERCIAL_PRICING_SCENARIO_AUTOMATION_DISCLAIMER}
+          </p>
+          <p className="commint-readonly-note" data-testid="commercial-pricing-scenario-readonly-note">
+            {COMMERCIAL_PROFITABILITY_READONLY_NOTE}
+          </p>
+        </details>
         {feedback ? (
           <p
             className={`commint-feedback commint-feedback--${feedbackTone}`}
@@ -590,7 +602,7 @@ export function CommercialPricingScenarioWorkspaceView({
                 <p className="commint-kpi-card__label">{kpi.label}</p>
                 <span className="commint-kpi-card__icon" aria-hidden="true"><Icon size={16} /></span>
               </div>
-              <p className="commint-kpi-card__value">{kpi.value}</p>
+              <p className={kpiValueClass(kpi.value)}>{kpi.value}</p>
               <p className="commint-kpi-card__detail">{kpi.hint}</p>
             </article>
           );
@@ -598,28 +610,40 @@ export function CommercialPricingScenarioWorkspaceView({
       </section>
 
       {workspace.canManage ? (
+        profileOptions.length === 0 ? (
+          isEmpty ? null : (
+          <section className="commint-panel" data-testid="commercial-pricing-scenario-create-unavailable">
+            <header className="commint-panel__header">
+              <h2>Yeni senaryo</h2>
+              <p>Senaryo oluşturmak için onaylı bir satış fiyat profili gerekir. Profil oluşturulduğunda form burada açılır.</p>
+            </header>
+          </section>
+          )
+        ) : (
         <section className="commint-panel" data-testid="commercial-pricing-scenario-create-form">
           <header className="commint-panel__header">
             <h2>Yeni senaryo</h2>
-            <p>Pilot profil ve satış kanıtı kimlikleri varsayılan olarak doldurulur.</p>
+            <p>Bir satış fiyat profili ve kanıt seçin, ardından önerilen fiyatı girin.</p>
           </header>
           <div className="commint-detail-grid">
             <label className="commint-filter-field">
-              <span>Profil kimliği</span>
-              <input
-                type="text"
+              <span>Satış fiyat profili</span>
+              <select
                 value={createForm.profileId}
-                onChange={(event) => setCreateForm((current) => ({ ...current, profileId: event.target.value }))}
-              />
-            </label>
-            <label className="commint-filter-field">
-              <span>Profil sürümü</span>
-              <input
-                type="number"
-                min={1}
-                value={createForm.expectedProfileVersion}
-                onChange={(event) => setCreateForm((current) => ({ ...current, expectedProfileVersion: event.target.value }))}
-              />
+                onChange={(event) => {
+                  const option = profileOptions.find((item) => item.id === event.target.value);
+                  setCreateForm((current) => ({
+                    ...current,
+                    profileId: event.target.value,
+                    expectedProfileVersion: String(option?.version ?? 1),
+                  }));
+                }}
+              >
+                <option value="">Profil seçin</option>
+                {profileOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
             </label>
             <label className="commint-filter-field">
               <span>Satış kanıtı</span>
@@ -627,6 +651,7 @@ export function CommercialPricingScenarioWorkspaceView({
                 value={createForm.salesEvidenceObservationId}
                 onChange={(event) => setCreateForm((current) => ({ ...current, salesEvidenceObservationId: event.target.value }))}
               >
+                <option value="">Kanıt seçin</option>
                 <option value={COMMERCIAL_PRICING_SCENARIO_PILOT_SALES_EVIDENCE_WITHIN_ID}>
                   Eşik içi kanıt
                 </option>
@@ -640,6 +665,7 @@ export function CommercialPricingScenarioWorkspaceView({
               <input
                 type="text"
                 inputMode="decimal"
+                placeholder="Örn. 125,00"
                 value={createForm.proposedUnitPrice}
                 onChange={(event) => setCreateForm((current) => ({ ...current, proposedUnitPrice: event.target.value }))}
               />
@@ -650,7 +676,7 @@ export function CommercialPricingScenarioWorkspaceView({
                 type="text"
                 inputMode="decimal"
                 value={createForm.proposedDiscountRatio}
-                placeholder="Opsiyonel"
+                placeholder="İsteğe bağlı"
                 onChange={(event) => setCreateForm((current) => ({ ...current, proposedDiscountRatio: event.target.value }))}
               />
             </label>
@@ -659,11 +685,12 @@ export function CommercialPricingScenarioWorkspaceView({
               <input
                 type="text"
                 inputMode="decimal"
+                placeholder="İsteğe bağlı"
                 value={createForm.quantity}
                 onChange={(event) => setCreateForm((current) => ({ ...current, quantity: event.target.value }))}
               />
             </label>
-            <label className="commint-filter-field" style={{ gridColumn: "1 / -1" }}>
+            <label className="commint-filter-field commint-filter-field--wide">
               <span>Ticari gerekçe</span>
               <textarea
                 rows={2}
@@ -672,10 +699,10 @@ export function CommercialPricingScenarioWorkspaceView({
               />
             </label>
           </div>
-          <div className="commint-executive__actions" style={{ marginTop: "1rem" }}>
+          <div className="commint-form-actions">
             <button
               type="button"
-              className="commint-button"
+              className="commint-button commint-button--primary"
               disabled={isPending}
               data-testid="commercial-pricing-scenario-create-button"
               onClick={createScenario}
@@ -684,6 +711,7 @@ export function CommercialPricingScenarioWorkspaceView({
             </button>
           </div>
         </section>
+        )
       ) : null}
 
       {isPending && workspace.tableRows.length === 0 ? (
@@ -697,7 +725,16 @@ export function CommercialPricingScenarioWorkspaceView({
         <div className="commint-empty-state" data-testid="commercial-pricing-scenario-empty" role="status">
           <ShieldCheck aria-hidden="true" />
           <h2>Fiyat senaryosu yok</h2>
-          <p>{COMMERCIAL_PRICING_SCENARIO_EMPTY_NOTE}</p>
+          <p>
+            {COMMERCIAL_PRICING_SCENARIO_EMPTY_NOTE}
+            {workspace.canManage ? "" : COMMERCIAL_PRICING_SCENARIO_EMPTY_MANAGE_HINT}
+            {workspace.canManage && profileOptions.length === 0
+              ? " Yeni senaryo oluşturmak için onaylı bir satış fiyat profili gerekir."
+              : ""}
+          </p>
+          {workspace.canManage && profileOptions.length === 0 ? (
+            <Link className="commint-button" href="/ticari-zeka/satis-fiyat-analizi">Satış fiyat analizine git</Link>
+          ) : null}
         </div>
       ) : null}
 
@@ -734,6 +771,7 @@ export function CommercialPricingScenarioWorkspaceView({
         </section>
       ) : null}
 
+      {isEmpty && !selectedScenarioId ? null : (
       <section className="commint-panel" data-testid="commercial-pricing-scenario-detail-panel">
         <header className="commint-panel__header">
           <h2>Senaryo detayı</h2>
@@ -758,7 +796,7 @@ export function CommercialPricingScenarioWorkspaceView({
         {detailStatus === "error" ? (
           <div className="commint-error-banner" data-testid="commercial-pricing-scenario-error" role="alert">
             <ShieldAlert aria-hidden="true" />
-            <p>Senaryo detayı yüklenemedi.</p>
+            <InlineUnavailable subject="Senaryo detayı" />
           </div>
         ) : null}
         {detailStatus === "ready" && scenarioDetail ? (
@@ -914,7 +952,7 @@ export function CommercialPricingScenarioWorkspaceView({
                       <p className="commint-detail-field__label">{event.occurredLabel}</p>
                       <p className="commint-detail-field__value">
                         {event.eventTypeLabel}
-                        {event.actorSubjectId ? ` · ${event.actorSubjectId}` : ""}
+                        {event.actorSubjectId ? ` · ${displayActor(event.actorSubjectId)}` : ""}
                       </p>
                     </li>
                   ))}
@@ -924,6 +962,7 @@ export function CommercialPricingScenarioWorkspaceView({
           </div>
         ) : null}
       </section>
-    </main>
+      )}
+    </div>
   );
 }

@@ -73,7 +73,7 @@ export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDeta
     readinessTone === "neutral" ? "in-progress" : readinessTone;
 
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={order.orderNumber}
         description={`${order.externalCustomerCode ?? order.externalCustomerId} · ERP sipariş özeti ve operasyonel hazırlık`}
@@ -173,7 +173,7 @@ export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDeta
       </ErpDetailSection>
 
       <ErpDetailSection title="Sipariş Satırları">
-        <ErpDataTable>
+        <ErpDataTable label="Sipariş satırları">
           <thead>
             <tr>
               <th>Satır</th>
@@ -208,15 +208,15 @@ export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDeta
         {materialAvailability?.freshnessNote ? (
           <ErpInfoBanner>{materialAvailability.freshnessNote}</ErpInfoBanner>
         ) : (
-          <ErpInfoBanner>ERP stok projeksiyonuna dayalı bilgi</ErpInfoBanner>
+          <ErpInfoBanner>ERP stok özetine dayalı bilgi</ErpInfoBanner>
         )}
         {!materialAvailability || materialAvailability.lines.length === 0 ? (
           <ErpEmptyState
             title="Malzeme uygunluk verisi yok."
-            description="Stok senkronizasyonu tamamlandığında satır bazlı uygunluk burada görünür."
+            description="Stok eşitlemesi tamamlandığında satır bazlı uygunluk burada görünür."
           />
         ) : (
-          <ErpDataTable className="erp-table--material-availability">
+          <ErpDataTable label="Malzeme uygunluğu" className="erp-table--material-availability">
             <thead>
               <tr>
                 <th>Satır</th>
@@ -272,6 +272,6 @@ export function ErpOrderDetailView({ order, materialAvailability }: ErpOrderDeta
         {" · "}
         <Link href="/erp-entegrasyonlari/eslestirme">Eşleştirme workspace</Link>
       </p>
-    </main>
+    </div>
   );
 }

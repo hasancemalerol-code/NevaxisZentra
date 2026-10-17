@@ -21,6 +21,7 @@ import type {
   rejectExportDocumentAction,
   verifyExportDocumentAction,
 } from "../server/export-case-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 const DOCUMENT_TYPE_OPTIONS = [
   "commercial-invoice",
@@ -219,7 +220,7 @@ export function ExportDocumentsPanel({
           </label>
 
           <label>
-            Görünen ad
+            Görünen ad <span className="zx-required" aria-hidden="true">*</span>
             <input
               className="input"
               value={displayName}
@@ -244,13 +245,13 @@ export function ExportDocumentsPanel({
 
       {state.kind === "error" && (
         <div className="export-documents-panel__flash export-documents-panel__flash--error" role="alert">
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 
       {state.kind === "success" && (
         <div className="export-documents-panel__flash export-documents-panel__flash--success" role="status">
-          {state.message}
+          {customerMessage(state.message)}
         </div>
       )}
 

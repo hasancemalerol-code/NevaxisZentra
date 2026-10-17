@@ -85,7 +85,7 @@ export function MfaVerifyForm() {
 
       {mode === "totp" ? (
         <div className="auth-form__field">
-          <label htmlFor="mfa-totp">Kimlik doğrulama kodu</label>
+          <label htmlFor="mfa-totp">Kimlik doğrulama kodu <span className="zx-required" aria-hidden="true">*</span></label>
           <input
             id="mfa-totp"
             name="totpCode"
@@ -99,7 +99,7 @@ export function MfaVerifyForm() {
         </div>
       ) : (
         <div className="auth-form__field">
-          <label htmlFor="mfa-recovery">Kurtarma kodu</label>
+          <label htmlFor="mfa-recovery">Kurtarma kodu <span className="zx-required" aria-hidden="true">*</span></label>
           <input
             id="mfa-recovery"
             name="recoveryCode"

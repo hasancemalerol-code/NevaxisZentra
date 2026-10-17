@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 
-import { IntelligenceRuntimeControlCenterView } from "../src/features/intelligence-runtime/components/intelligence-runtime-control-center-view";
+import { IntelligenceRuntimeControlCenterView, formatRoutingRate } from "../src/features/intelligence-runtime/components/intelligence-runtime-control-center-view";
 
 const sampleControlCenter = {
   metrics: {
@@ -136,12 +136,23 @@ test("intelligence runtime control center renders core sections", () => {
   assert.match(html, /data-testid="intelligence-runtime-datasets"/);
   assert.match(html, /data-testid="intelligence-runtime-models"/);
   assert.match(html, /data-testid="intelligence-runtime-evaluations"/);
-  assert.match(html, /Intelligence Runtime/);
-  assert.match(html, /ROOT_CAUSE_CANDIDATE/);
+  assert.match(html, /Zekâ Altyapısı Durumu/);
+  assert.match(html, /Root cause candidate/);
   assert.match(html, /ds-2026-09/);
   assert.match(html, /nevaxis-mfg-v1/);
-  assert.match(html, /PROMOTION_BLOCKED/);
-  assert.match(html, /ROLLBACK_TRIGGERED/);
-  assert.match(html, /62\.0%/);
-  assert.match(html, /\$18\.64/);
+  assert.match(html, /Yayın engellendi/);
+  assert.match(html, /Geri alma tetiklendi/);
+  assert.match(html, /%62,0/);
+  assert.doesNotMatch(html, /\$18\.64|USD|Frontier|Solver|Retrieval/);
+});
+
+test("routing ratios read as no data until a routing record exists", () => {
+  assert.equal(formatRoutingRate(1, 0), "—");
+  assert.notEqual(formatRoutingRate(0.62, 2), "—");
+  const markup = renderToStaticMarkup(
+    <IntelligenceRuntimeControlCenterView
+      controlCenter={{ ...sampleControlCenter, recentRoutes: [] } as never}
+    />,
+  );
+  assert.ok(!markup.includes("%100"));
 });

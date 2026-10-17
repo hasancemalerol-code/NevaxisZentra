@@ -30,6 +30,7 @@ import {
   goldenDemoExecutePlanAction,
   goldenDemoVerifyOutcomeAction,
 } from "../server/golden-demo-p1-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type Metrics = Readonly<{
   shiftTargetGoodParts?: number;
@@ -140,7 +141,7 @@ export function GoldenDemoP1WorkspaceView({
   }
 
   return (
-    <main className="commint-page golden-demo-p1-page" data-testid="golden-demo-p1-workspace">
+    <div className="commint-page golden-demo-p1-page" data-testid="golden-demo-p1-workspace">
       <PresentationModeReturnLink />
       {presentation ? (
         <GoldenDemoP2PresentationPanel presentation={presentation} eventId={eventId} />
@@ -265,7 +266,7 @@ export function GoldenDemoP1WorkspaceView({
           role="status"
           className={`golden-demo-feedback ${message.includes("başarısız") ? "golden-demo-feedback--error" : "golden-demo-feedback--success"}`}
         >
-          {message}
+          {customerMessage(message)}
         </p>
       ) : null}
       {pending ? (
@@ -412,6 +413,6 @@ export function GoldenDemoP1WorkspaceView({
       </section>
 
       {outcome ? <GoldenDemoP3OutcomePanel outcome={outcome} /> : null}
-    </main>
+    </div>
   );
 }

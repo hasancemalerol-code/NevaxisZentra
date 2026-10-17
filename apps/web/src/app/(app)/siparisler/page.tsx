@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { calculateOrderDraftSummary } from "@/features/orders/application/order-draft-query";
 import { OrderDraftKpiLinks } from "@/features/orders/components/order-draft-kpi-links";
@@ -21,6 +22,8 @@ import {
 } from "@/components/ui/page";
 import { OrderDraftFilteredWorkspace } from "@/features/orders/components/order-draft-filtered-workspace";
 import { ORDER_DRAFT_PREVIEW_DATA } from "@/features/orders/data/order-draft-preview-data";
+import "@/features/orders/components/orders-page.css";
+
 
 const intakeSources = [
   {
@@ -45,7 +48,7 @@ const intakeSources = [
     description:
       "Müşteri, ürün, fiyat, stok ve termin verileri doğrulanır.",
     icon: RefreshCw,
-    status: "Adaptör bekliyor",
+    status: "ERP bağlantısı bekleniyor",
   },
 ] as const;
 
@@ -98,8 +101,16 @@ export default function OrdersPage() {
   return (
     <PageContent>
       <PageHeader
-        description="E-posta, WhatsApp, ERP ve bağlı satış kanallarından gelen talepleri AI destekli sipariş taslaklarına dönüştürün."
-        eyebrow="Omnichannel Sipariş Yönetimi"
+        actions={
+          <Link
+            className="button button-primary button-medium"
+            href="/ayarlar/entegrasyonlar"
+          >
+            Kanal bağla
+          </Link>
+        }
+        description="E-posta, WhatsApp, ERP ve bağlı satış kanallarından gelen talepleri yapay zekâ destekli sipariş taslaklarına dönüştürün."
+        eyebrow="Çok kanallı sipariş yönetimi"
         preview
         title="Siparişler"
       />
@@ -111,11 +122,11 @@ export default function OrdersPage() {
         action={
           <Badge tone="ai">
             <Bot aria-hidden="true" />
-            Human-in-the-Loop
+            İnsan Onayı
           </Badge>
         }
-        description="AI kaynak verileri toplar ve sipariş taslağını hazırlar. Son işlem yetkili kullanıcı onayına bağlıdır."
-        title="AI sipariş toplama merkezi"
+        description="Yapay zekâ kaynak verileri toplar ve sipariş taslağını hazırlar. Son işlem yetkili kullanıcı onayına bağlıdır."
+        title="Yapay zekâ sipariş toplama merkezi"
       >
         <div className="orders-intake-sources">
           {intakeSources.map((source) => {
@@ -151,7 +162,7 @@ export default function OrdersPage() {
             {ORDER_DRAFT_PREVIEW_DATA.length} aktif taslak
           </Badge>
         }
-        description="Farklı kanallardan toplanan sipariş taleplerini, AI güven puanlarını, açık sorunları ve onay durumlarını inceleyin."
+        description="Farklı kanallardan toplanan sipariş taleplerini, yapay zekâ güven puanlarını, açık sorunları ve onay durumlarını inceleyin."
         title="Sipariş taslakları"
       >
         <Suspense fallback={<OrderDraftFilteredWorkspaceFallback />}>
@@ -168,7 +179,7 @@ export default function OrdersPage() {
             Sipariş taslağı
           </Badge>
         }
-        description="Her sipariş, kaynak mesajları ve AI çıkarımlarıyla birlikte izlenebilir biçimde hazırlanır."
+        description="Her sipariş, kaynak mesajları ve yapay zekâ çıkarımlarıyla birlikte izlenebilir biçimde hazırlanır."
         title="Sipariş oluşturma akışı"
       >
         <div className="orders-workflow">
@@ -197,7 +208,7 @@ export default function OrdersPage() {
             Kontrollü aktarım
           </Badge>
         }
-        description="AI açıkça belirtilmeyen ürün, miktar, fiyat veya teslim şartını uyduramaz."
+        description="Yapay zekâ açıkça belirtilmeyen ürün, miktar, fiyat veya teslim şartını uyduramaz."
         title="Güvenlik sınırları"
       >
         <Card className="orders-safety-card">

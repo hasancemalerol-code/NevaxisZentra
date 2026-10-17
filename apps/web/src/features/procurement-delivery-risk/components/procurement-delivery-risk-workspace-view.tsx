@@ -1,5 +1,6 @@
 "use client";
 
+import { keepCode } from "@/lib/presentation/format";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -37,6 +38,9 @@ import {
   getProcurementDeliveryRiskResultBadgeClass,
   getProcurementDeliveryRiskResultLabel,
 } from "../presentation/procurement-delivery-risk-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { formatEvidenceValue } from "@/lib/presentation/format";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type ProcurementDeliveryRiskWorkspaceViewProps = Readonly<{
   workspace: ProcurementDeliveryRiskWorkspacePayload;
@@ -176,8 +180,8 @@ export function ProcurementDeliveryRiskWorkspaceView({
     return (
       <div className="quality-empty-panel" data-testid="procurement-delivery-risk-empty">
         <FileWarning aria-hidden="true" />
-        <h3>Değerlendirilmiş tedarik riski yok</h3>
-        <p>Yetkili tesis kapsamında tedarik teslimat riski değerlendirmesi bulunamadı.</p>
+        <strong>Değerlendirilmiş tedarik riski yok</strong>
+        <p>Yetkili tesis kapsamında tedarik teslimat riski değerlendirmesi yok.</p>
       </div>
     );
   }
@@ -230,7 +234,6 @@ export function ProcurementDeliveryRiskWorkspaceView({
       </div>
 
       <div className="quality-workspace-toolbar">
-        <span className="quality-workspace-toolbar__meta">Kural seti: {workspace.ruleSetVersion}</span>
         <div className="quality-workspace-toolbar__actions">
           <button
             type="button"
@@ -258,13 +261,13 @@ export function ProcurementDeliveryRiskWorkspaceView({
 
       {actionError ? (
         <div role="alert" className="material-registry-error" data-testid="procurement-delivery-risk-action-error">
-          {actionError}
+          {customerMessage(actionError)}
         </div>
       ) : null}
 
       <div className="quality-workspace-split">
-        <Card className="quality-workspace-table-card">
-          <table className="quality-workspace-table" data-testid="procurement-delivery-risk-table">
+        <Card className="quality-workspace-table-card" tabIndex={0}>
+          <table aria-label="Kaynak tazeliği" className="quality-workspace-table" data-testid="procurement-delivery-risk-table">
             <thead>
               <tr>
                 <th>Tedarikçi</th>
@@ -284,7 +287,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
                   data-testid={`procurement-delivery-risk-row-${row.id}`}
                 >
                   <td>{row.supplierName ?? row.externalSupplierCode ?? "—"}</td>
-                  <td>{row.purchaseOrderNumber}</td>
+                  <td>{keepCode(row.purchaseOrderNumber)}</td>
                   <td>{formatDateTime(row.commitmentDateUtc)}</td>
                   <td>{formatQuantity(row.openQuantity, row.unit)}</td>
                   <td>
@@ -306,14 +309,14 @@ export function ProcurementDeliveryRiskWorkspaceView({
             </div>
           ) : assessmentError ? (
             <div role="alert" className="material-registry-error" data-testid="procurement-delivery-risk-detail-error">
-              {assessmentError}
+              {customerMessage(assessmentError)}
             </div>
           ) : assessment ? (
             <>
               <header className="quality-workspace-detail-header">
                 <div>
                   <p className="quality-workspace-detail-eyebrow">Tedarik teslimat riski</p>
-                  <h3>{assessment.purchaseOrderNumber}</h3>
+                  <h2>{assessment.purchaseOrderNumber}</h2>
                   <p>{assessment.supplierName ?? assessment.externalSupplierCode ?? "Tedarikçi bilinmiyor"}</p>
                 </div>
                 <span className={getProcurementDeliveryRiskResultBadgeClass(assessment.result)}>
@@ -322,7 +325,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
               </header>
 
               <dl className="quality-workspace-detail-grid">
-                <div><dt>Sipariş durumu</dt><dd>{assessment.orderStatus}</dd></div>
+                <div><dt>Sipariş durumu</dt><dd>{enumLabel(assessment.orderStatus)}</dd></div>
                 <div><dt>Satır</dt><dd>{assessment.lineNumber}</dd></div>
                 <div><dt>Taahhüt tarihi</dt><dd>{formatDateTime(assessment.commitmentDateUtc)}</dd></div>
                 <div><dt>Teslim alınan</dt><dd>{formatQuantity(assessment.receivedQuantity, assessment.unit)}</dd></div>
@@ -369,7 +372,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
 
               {assessment.drivers.length > 0 ? (
                 <section>
-                  <h4>Kanıt gerekçeleri</h4>
+                  <h3>Kanıt gerekçeleri</h3>
                   <ul className="quality-workspace-driver-list">
                     {assessment.drivers.map((driver) => (
                       <li key={driver.code}>
@@ -383,12 +386,12 @@ export function ProcurementDeliveryRiskWorkspaceView({
 
               {assessment.evidence.length > 0 ? (
                 <section>
-                  <h4>Kaynak kanıtları</h4>
+                  <h3>Kaynak kanıtları</h3>
                   <ul className="quality-workspace-evidence-list">
                     {assessment.evidence.map((item) => (
                       <li key={`${item.field}-${item.source ?? "unknown"}`}>
                         <span>{getProcurementDeliveryRiskEvidenceFieldLabel(item.field)}</span>
-                        <span>{item.isUnknown ? "—" : (item.value ?? "—")}</span>
+                        <span>{item.isUnknown ? "—" : formatEvidenceValue(item.value)}</span>
                       </li>
                     ))}
                   </ul>
@@ -397,7 +400,7 @@ export function ProcurementDeliveryRiskWorkspaceView({
 
               {assessment.auditEvents.length > 0 ? (
                 <section data-testid="procurement-delivery-risk-follow-up-audit">
-                  <h4>Takip geçmişi</h4>
+                  <h3>Takip geçmişi</h3>
                   <ul className="quality-workspace-history-list">
                     {assessment.auditEvents.map((event) => (
                       <li key={`${event.eventType}-${event.occurredAtUtc}`}>
@@ -412,8 +415,8 @@ export function ProcurementDeliveryRiskWorkspaceView({
 
               {history && history.length > 0 ? (
                 <section data-testid="procurement-delivery-risk-history">
-                  <h4>Değerlendirme geçmişi</h4>
-                  {historyError ? <p>{historyError}</p> : null}
+                  <h3>Değerlendirme geçmişi</h3>
+                  {historyError ? <p>{customerMessage(historyError)}</p> : null}
                   <ul className="quality-workspace-history-list">
                     {history.map((entry) => (
                       <li key={entry.id}>

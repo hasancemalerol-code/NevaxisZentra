@@ -1,0 +1,119 @@
+/*
+ * Zentra surface bridge — feature screens (part 2). See zentra-surfaces.css for the rationale.
+ */
+
+/* ───────────────────────── AI task center forms and panels ───────────────────────── */
+
+.ai-task-create-form { padding: 22px 24px 24px; }
+.ai-task-create-form > form { display: grid; gap: 18px; max-width: none; padding: 0; border: 0; box-shadow: none; background: transparent; }
+.ai-task-create-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
+.ai-task-create-form__grid > label:has(textarea),
+.ai-task-create-form__grid > .ai-task-create-form__advanced { grid-column: 1 / -1; }
+.ai-task-create-form__advanced { border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); }
+.ai-task-create-form__advanced > summary { padding: 11px 14px; color: var(--zx-text); font-size: 0.8125rem; font-weight: 650; cursor: pointer; }
+.ai-task-create-form__advanced-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; padding: 4px 14px 16px; }
+.ai-task-create-form__error { margin: 0; padding: 10px 14px; border: 1px solid var(--zx-critical-line); border-radius: var(--zx-radius-sm); color: var(--zx-critical); background: var(--zx-critical-soft); font-size: 0.875rem; font-weight: 600; }
+.ai-task-create-form__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.button--secondary { border-color: var(--color-border-strong); color: var(--color-text-primary); background: var(--color-surface); }
+@media (max-width: 900px) { .ai-task-create-form__grid, .ai-task-create-form__advanced-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.ai-task-impact-panel { display: grid; gap: 14px; padding: 18px 20px; }
+.ai-task-impact-panel__heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.ai-task-impact-panel__heading p { margin: 0; color: var(--zx-accent-strong); font-size: 0.75rem; font-weight: 750; letter-spacing: 0.1em; text-transform: uppercase; }
+.ai-task-impact-panel__heading h2 { margin: 2px 0 0; color: var(--zx-text-strong); font-size: 1rem; font-weight: 700; }
+.ai-task-impact-panel__summary { margin: 0; color: var(--zx-text); font-size: 0.875rem; line-height: 1.6; }
+.ai-task-impact-panel__metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 0; }
+.ai-task-impact-panel__metrics > div { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); }
+.ai-task-impact-panel__metrics dt { display: flex; align-items: center; gap: 6px; margin: 0; color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.ai-task-impact-panel__metrics dt svg { width: 14px; height: 14px; }
+.ai-task-impact-panel__metrics dd { margin: 0; color: var(--zx-text-strong); font-size: 1.0625rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.ai-task-impact-panel__empty { margin: 0; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.ai-task-action-panel__reject-form { display: grid; gap: 10px; margin-top: 10px; }
+.ai-task-action-panel__reject-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ai-task-center-card__origin { color: var(--zx-text-muted); font-size: 0.75rem; }
+.ai-task-detail-header__main { display: grid; min-width: 0; gap: 6px; }
+.ai-task-detail-field__select { width: 100%; min-height: 38px; padding: 6px 12px; border: 1px solid var(--zx-line-strong); border-radius: var(--zx-radius-sm); color: var(--zx-text-strong); background: var(--zx-surface); font: inherit; font-size: 0.8125rem; }
+.ai-task-automation-policies__group { display: grid; gap: 10px; }
+.ai-task-kpi-links { display: grid; }
+.ai-task-source-reference__empty { color: var(--zx-text-muted); font-size: 0.8125rem; }
+
+/* ───────────────────────── Teams (direct messages, notifications) ───────────────────────── */
+
+.teams-workspace-sidebar { display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.teams-workspace-sidebar-header { padding: 14px 16px; border-bottom: 1px solid var(--zx-line); }
+.teams-workspace-sidebar-header h2 { margin: 0; color: var(--zx-text-strong); font-size: 0.9375rem; font-weight: 700; }
+.teams-channel-list { flex: 1; margin: 0; padding: 0; overflow: auto; list-style: none; }
+.teams-channel-list > li > button { display: grid; width: 100%; gap: 4px; padding: 12px 16px; border: 0; border-bottom: 1px solid var(--zx-line); color: inherit; background: transparent; font: inherit; text-align: left; cursor: pointer; }
+.teams-channel-list > li > button:hover { background: var(--zx-surface-soft); }
+.teams-channel-list > li > button.is-active { background: var(--zx-accent-soft); box-shadow: inset 3px 0 0 var(--zx-accent); }
+.teams-channel-name { display: flex; align-items: center; gap: 8px; color: var(--zx-text-strong); font-size: 0.875rem; font-weight: 650; }
+.teams-channel-preview { overflow: hidden; color: var(--zx-text); font-size: 0.8125rem; text-overflow: ellipsis; white-space: nowrap; }
+.teams-channel-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--zx-text-muted); font-size: 0.75rem; }
+.teams-empty-hint { padding: 20px 16px; color: var(--zx-text-muted); font-size: 0.8125rem; line-height: 1.5; }
+.teams-direct-compose { display: grid; gap: 8px; padding: 14px 16px; border-top: 1px solid var(--zx-line); background: var(--zx-surface-soft); }
+.teams-direct-compose > label { color: var(--zx-text-muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+.teams-workspace-main { display: flex; min-width: 0; min-height: 640px; flex-direction: column; border: 1px solid var(--zx-line); border-radius: var(--zx-radius); background: var(--zx-surface); }
+.teams-workspace-header { padding: 14px 18px; border-bottom: 1px solid var(--zx-line); }
+.teams-workspace-header h2 { margin: 0; color: var(--zx-text-strong); font-size: 1rem; }
+.teams-workspace-header p { margin: 2px 0 0; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.teams-message-thread { display: flex; flex: 1; flex-direction: column; gap: 10px; padding: 16px 18px; overflow: auto; }
+.teams-message-thread .teams-message.is-own { align-self: flex-end; background: var(--zx-accent-soft); }
+.teams-message header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 4px; color: var(--zx-text-muted); font-size: 0.75rem; }
+.teams-message p { margin: 0; color: var(--zx-text-strong); font-size: 0.875rem; line-height: 1.55; }
+.teams-message-form { display: grid; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--zx-line); }
+.teams-empty-state { display: grid; flex: 1; place-content: center; justify-items: center; gap: 8px; padding: 40px 20px; color: var(--zx-text-muted); font-size: 0.875rem; text-align: center; }
+.teams-empty-state svg { color: var(--zx-accent); }
+.teams-error { margin: 0 18px 10px; padding: 10px 14px; border: 1px solid var(--zx-critical-line); border-radius: var(--zx-radius-sm); color: var(--zx-critical); background: var(--zx-critical-soft); font-size: 0.8125rem; }
+.teams-notification-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface); }
+.teams-notification-row.is-unavailable { color: var(--zx-text-muted); background: var(--zx-surface-soft); }
+.teams-composer--readonly { opacity: 0.85; }
+@media (max-width: 1100px) { .teams-workspace { grid-template-columns: minmax(0, 1fr); } }
+
+/* ───────────────────────── bulk onboarding / factory onboarding ───────────────────────── */
+
+.bulk-onboarding-workspace__hero { display: grid; gap: 6px; }
+.bulk-onboarding-actions { display: grid; gap: 14px; }
+.bulk-onboarding-actions__hint { margin: 0; color: var(--zx-text); font-size: 0.875rem; line-height: 1.55; }
+.bulk-onboarding-actions__create { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; padding: 14px 16px; border: 1px solid var(--zx-line); border-radius: var(--zx-radius-sm); background: var(--zx-surface-soft); }
+.bulk-onboarding-actions__create > label { flex: 1 1 200px; }
+.bulk-onboarding-actions__steps { display: flex; flex-wrap: wrap; gap: 8px; }
+.bulk-onboarding-actions__templates { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--zx-text-muted); font-size: 0.8125rem; }
+.bulk-onboarding-actions__templates a { padding: 3px 10px; border: 1px solid var(--zx-line-strong); border-radius: 999px; color: var(--zx-accent-strong); background: var(--zx-surface); font-weight: 650; text-decoration: none; }
+.bulk-onboarding-actions__templates a:hover { border-color: var(--zx-accent); background: var(--zx-accent-soft); }
+.bulk-onboarding-actions__links { margin: 0; color: var(--zx-text); font-size: 0.8125rem; }
+.bulk-onboarding-actions__links a { color: var(--zx-accent-strong); font-weight: 650; }
+.bulk-onboarding-actions input[type="file"] { width: 100%; padding: 8px; border: 1px dashed var(--zx-line-strong); border-radius: var(--zx-radius-sm); background: var(--zx-surface); font-size: 0.8125rem; }
+
+.factory-onboarding-empty { display: grid; gap: 8px; }
+.factory-onboarding-empty__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.factory-onboarding-empty__actions a { display: inline-flex; min-height: 38px; align-items: center; padding: 0 15px; border: 1px solid var(--zx-line-strong); border-radius: var(--zx-radius-sm); color: var(--zx-accent-strong); background: var(--zx-surface); font-size: 0.8125rem; font-weight: 650; text-decoration: none; }
+.factory-onboarding-empty__actions a:first-child { border-color: var(--zx-accent); color: #fff; background: var(--zx-accent); }
+.adaptive-planning-workspace { display: grid; gap: 16px; }
+.adaptive-planning-workspace__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.adaptive-planning-panel { display: grid; gap: 12px; }
+.factory-network-panel,
+.factory-network-workspace { display: grid; gap: 14px; }
+
+/* ───────────────────────── ERP workspace leftovers ───────────────────────── */
+
+.erp-kpi--neutral .erp-kpi__icon { color: var(--zx-neutral); background: var(--zx-neutral-soft); }
+.erp-kpi__body { display: grid; min-width: 0; gap: 2px; }
+.erp-simulator-notice--info { border-color: var(--zx-info-line); color: var(--zx-text); background: var(--zx-info-soft); }
+.erp-connection-card__badge-note { color: var(--zx-text-muted); font-size: 0.75rem; }
+.erp-table--sync-runs { width: 100%; }
+
+/* ───────────────────────── apps catalog / showcase leftovers ───────────────────────── */
+
+.apps-factory-operations-section { display: grid; gap: 14px; }
+.apps-operational-overview { display: grid; gap: 14px; }
+.factory-showcase-kpi__copy { display: grid; min-width: 0; gap: 2px; }
+.apps-analytics-chart { display: grid; gap: 8px; min-width: 0; }
+.apps-analytics-chart__title { margin: 0; color: var(--zx-text-strong); font-size: 0.875rem; font-weight: 700; }
+.apps-analytics-chart__line { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.5; }
+.dashboard-state--empty { display: grid; gap: 4px; padding: 16px; color: var(--zx-text-muted); text-align: center; }
+.dashboard-state__copy { display: grid; gap: 2px; }
+
+/* numbered workflow steps (base list styling comes from the feature stylesheet) */
+.bulk-onboarding-workflow { counter-reset: step; }
+.bulk-onboarding-workflow li { display: flex; align-items: center; gap: 10px; color: var(--zx-text-strong); font-weight: 650; counter-increment: step; }
+.bulk-onboarding-workflow li::before { display: grid; width: 22px; height: 22px; flex: 0 0 22px; place-items: center; border-radius: 50%; color: #fff; background: var(--zx-accent); font-size: 0.75rem; font-weight: 750; content: counter(step); }

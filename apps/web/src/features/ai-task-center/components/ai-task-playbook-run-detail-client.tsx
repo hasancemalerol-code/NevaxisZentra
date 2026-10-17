@@ -40,6 +40,7 @@ import {
 } from "../server/ai-task-playbook-actions";
 import type { AiTaskPlaybookCapabilities } from "../server/ai-task-playbook-queries";
 import { AiTaskDetailField, AiTaskDetailInput } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskPlaybookRunDetailClientProps = Readonly<{
   run: AiTaskPlaybookRunDetail;
@@ -124,7 +125,7 @@ export function AiTaskPlaybookRunDetailClient({
   return (
     <div className="ai-task-playbook-run-detail" data-testid="ai-task-playbook-run-detail">
       {actionError ? (
-        <p className="ai-task-playbook-run-detail__error" role="alert">{actionError}</p>
+        <p className="ai-task-playbook-run-detail__error" role="alert">{customerMessage(actionError)}</p>
       ) : null}
 
       <Card className="ai-task-playbook-run-detail__overview">

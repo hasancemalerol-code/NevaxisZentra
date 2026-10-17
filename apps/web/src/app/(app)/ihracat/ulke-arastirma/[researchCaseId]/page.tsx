@@ -13,6 +13,7 @@ import {
   summarizeResearchAction,
 } from "@/features/export/server/export-4l-writer";
 import { readCountryResearchCase } from "@/features/export/server/export-case-reader";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type CountryResearchDetailPageProps = Readonly<{
   params: Promise<{ researchCaseId: string }>;
@@ -30,16 +31,14 @@ export default async function CountryResearchDetailPage({
     }
 
     return (
-      <main className="export-detail-page">
-        <div role="alert" className="state-panel error-state">
-          <p>Araştırma dosyası yüklenemedi.</p>
-        </div>
-      </main>
+      <div className="export-detail-page">
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Araştırma dosyası yüklenemedi" inline />
+      </div>
     );
   }
 
   return (
-    <main className="export-detail-page">
+    <div className="export-detail-page">
       <div className="export-detail-page__back">
         <Link href="/ihracat/ulke-arastirma">
           <ArrowLeft aria-hidden="true" />
@@ -57,6 +56,6 @@ export default async function CountryResearchDetailPage({
           onFindMissingSources: findResearchMissingSourcesAction,
         }}
       />
-    </main>
+    </div>
   );
 }

@@ -42,7 +42,7 @@ function getPurchaseOrderStatusTone(
 
 export function ErpPurchaseOrderDetailView({ purchaseOrder }: ErpPurchaseOrderDetailViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={purchaseOrder.purchaseOrderNumber}
         description="ERP satın alma siparişi özeti — salt okunur."
@@ -96,7 +96,7 @@ export function ErpPurchaseOrderDetailView({ purchaseOrder }: ErpPurchaseOrderDe
 
       <ErpDetailSection title="Satın Alma Satırları">
         <p>Sipariş edilen, teslim alınan ve açık miktarlar</p>
-        <ErpDataTable>
+        <ErpDataTable label="Satın alma satırları">
           <thead>
             <tr>
               <th>Satır</th>
@@ -127,8 +127,8 @@ export function ErpPurchaseOrderDetailView({ purchaseOrder }: ErpPurchaseOrderDe
       <p>
         <Link href="/erp-entegrasyonlari/satin-alma">← Satın alma listesine dön</Link>
         {" · "}
-        <Link href="/erp-entegrasyonlari/stok">Stok & Depolar</Link>
+        <Link href="/erp-entegrasyonlari/stok">Stok ve Depolar</Link>
       </p>
-    </main>
+    </div>
   );
 }

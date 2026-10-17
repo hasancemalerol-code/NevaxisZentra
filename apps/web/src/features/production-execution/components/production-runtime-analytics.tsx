@@ -2,6 +2,7 @@ import { Clock, TrendingUp, AlertTriangle, Settings, Activity, Timer } from "luc
 
 import type { ProductionRuntimeSummary } from "../domain/production-execution-operations";
 import { formatDuration, formatDurationMs } from "../domain/production-execution-operations";
+import { formatPercent } from "@/lib/presentation/format";
 
 type RuntimeAnalyticsProps = Readonly<{
   summary: ProductionRuntimeSummary;
@@ -67,7 +68,7 @@ export function ProductionRuntimeAnalytics({ summary }: RuntimeAnalyticsProps) {
         <AnalyticsTile
           label="Net Çalışma"
           value={formatDuration(summary.netRunningSeconds)}
-          subValue={summary.currentElapsedSeconds > 0 ? `${Math.round((summary.netRunningSeconds / summary.currentElapsedSeconds) * 100)}%` : undefined}
+          subValue={summary.currentElapsedSeconds > 0 ? formatPercent(Math.round((summary.netRunningSeconds / summary.currentElapsedSeconds) * 100), 0) : undefined}
           icon={<TrendingUp aria-hidden="true" />}
           tone="success"
         />
@@ -78,7 +79,7 @@ export function ProductionRuntimeAnalytics({ summary }: RuntimeAnalyticsProps) {
           tone={summary.totalDowntimeSeconds > 0 ? "warning" : "neutral"}
         />
         <AnalyticsTile
-          label="Setup Süresi"
+          label="Kurulum Süresi"
           value={formatDuration(summary.totalSetupSeconds)}
           icon={<Settings aria-hidden="true" />}
           tone={summary.totalSetupSeconds > 0 ? "primary" : "neutral"}

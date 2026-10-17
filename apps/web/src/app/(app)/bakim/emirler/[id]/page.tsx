@@ -1,6 +1,7 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Factory, Wrench } from "lucide-react";
+import { ArrowLeft, Factory } from "lucide-react";
 
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { isMaintenanceRecordId } from "@/features/maintenance/lib/maintenance-record-id";
@@ -13,7 +14,6 @@ import {
   MaintenanceWorkOrderPreventiveSourcePanel,
   MaintenanceWorkOrderTimelinePanel,
 } from "@/features/maintenance/components/maintenance-work-order-execution-panels";
-import { MaintenanceWorkspaceNav } from "@/features/maintenance/components/maintenance-workspace-nav";
 import "@/features/maintenance/components/maintenance-workspace.css";
 import {
   formatMaintenanceAge,
@@ -24,6 +24,7 @@ import {
   getMaintenanceStatusLabel,
   getMaintenanceTypeLabel,
   getMaintenanceWorkOrderStatusTone,
+  describeMaintenanceActivity,
 } from "@/features/maintenance/presentation/maintenance-labels";
 import {
   readMaintenanceWorkOrderDetail,
@@ -34,13 +35,17 @@ import {
   createMaintenanceWorkNoteAction,
 } from "@/features/maintenance/server/maintenance-writer";
 
+import { displayActor } from "@/lib/presentation/display-label";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+
 type PageProps = Readonly<{
   params: Promise<{ id: string }>;
 }>;
 
-function formatDateTime(iso?: string): string {
+function formatDateTime(iso?: string, emptyLabel = "—"): string {
   if (!iso) {
-    return "—";
+    return emptyLabel;
   }
 
   return new Date(iso).toLocaleString("tr-TR", {
@@ -49,7 +54,12 @@ function formatDateTime(iso?: string): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: FACILITY_TIME_ZONE,
   });
+}
+
+function withAgo(age: string): string {
+  return age === "Az önce" || age === "—" ? age : `${age} önce`;
 }
 
 export default async function MaintenanceWorkOrderDetailPage({ params }: PageProps) {
@@ -71,26 +81,19 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
     }
 
     return (
-      <main className="production-execution-page maintenance-page">
+      <div className="production-execution-page maintenance-page">
         <header className="maintenance-page-header production-execution-header">
           <Link href="/bakim" className="maintenance-back-link">
             <ArrowLeft aria-hidden="true" />
             Bakım ana sayfası
           </Link>
           <div className="maintenance-page-header__intro">
-            <p>BAKIM &amp; ARIZA</p>
+            <p>BAKIM VE ARIZA</p>
             <h1>Bakım Emri Detayı</h1>
           </div>
         </header>
-        <MaintenanceWorkspaceNav active="work-orders" />
-        <div role="alert" className="maintenance-error-panel">
-          <Wrench aria-hidden="true" />
-          <div>
-            <h3>Bakım emri yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Bakım emri yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -109,70 +112,84 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
           costSummary: null,
         };
 
+  const hasPlanningData = Boolean(
+    workOrder.assignedTechnicianSubjectId ||
+      workOrder.plannedStartUtc ||
+      workOrder.plannedEndUtc ||
+      workOrder.startedAtUtc ||
+      workOrder.completedAtUtc ||
+      workOrder.resolutionCode ||
+      workOrder.completionNote,
+  );
+
   return (
-    <main className="production-execution-page maintenance-page">
+    <div className="production-execution-page maintenance-page">
       <header className="maintenance-page-header production-execution-header">
         <Link href="/bakim" className="maintenance-back-link">
           <ArrowLeft aria-hidden="true" />
           Bakım ana sayfası
         </Link>
         <div className="maintenance-page-header__intro">
-          <p>BAKIM &amp; ARIZA</p>
+          <p>BAKIM VE ARIZA</p>
           <h1>{workOrder.workOrderNumber}</h1>
           <span>{workOrder.title}</span>
         </div>
       </header>
-
-      <MaintenanceWorkspaceNav active="work-orders" />
 
       <div className="maintenance-page-content">
         <section className="maintenance-section" aria-label="Bakım Emri Özeti">
           <header className="maintenance-section__header">
             <h2>Bakım Emri Özeti</h2>
           </header>
-          <div className="maintenance-badge-row">
-            <Badge tone={getMaintenanceWorkOrderStatusTone(workOrder.status)}>
-              {getMaintenanceStatusLabel(workOrder.status)}
-            </Badge>
-            <Badge tone={getMaintenancePriorityTone(workOrder.priority)}>
-              {getMaintenancePriorityLabel(workOrder.priority)}
-            </Badge>
-            <Badge tone="neutral">{getMaintenanceTypeLabel(workOrder.type)}</Badge>
-          </div>
-          <dl className="maintenance-detail-dl">
+          <dl className="maintenance-detail-dl maintenance-detail-dl--summary">
+            <div>
+              <dt>Durum</dt>
+              <dd>
+                <Badge tone={getMaintenanceWorkOrderStatusTone(workOrder.status)}>
+                  {getMaintenanceStatusLabel(workOrder.status)}
+                </Badge>
+              </dd>
+            </div>
+            <div>
+              <dt>Öncelik</dt>
+              <dd>
+                <Badge tone={getMaintenancePriorityTone(workOrder.priority)}>
+                  {getMaintenancePriorityLabel(workOrder.priority)}
+                </Badge>
+              </dd>
+            </div>
+            <div>
+              <dt>Tür</dt>
+              <dd>
+                <Badge tone="neutral">{getMaintenanceTypeLabel(workOrder.type)}</Badge>
+              </dd>
+            </div>
             <div>
               <dt>Emir No</dt>
               <dd>{workOrder.workOrderNumber}</dd>
             </div>
             <div>
-              <dt>Başlık</dt>
-              <dd>{workOrder.title}</dd>
-            </div>
-            <div>
-              <dt>Açıklama</dt>
-              <dd>{workOrder.description || "—"}</dd>
-            </div>
-            <div>
               <dt>Oluşturan</dt>
-              <dd>{workOrder.createdBySubjectId}</dd>
+              <dd>{displayActor(workOrder.createdBySubjectId)}</dd>
             </div>
             <div>
               <dt>Oluşturulma</dt>
               <dd>{formatDateTime(workOrder.createdAtUtc)}</dd>
             </div>
-            <div>
-              <dt>Son Güncelleme</dt>
-              <dd>{formatMaintenanceAge(workOrder.updatedAtUtc)}</dd>
+            <div className="maintenance-detail-dl__wide">
+              <dt>Açıklama</dt>
+              <dd>{workOrder.description || "Açıklama girilmedi"}</dd>
             </div>
           </dl>
+          <p className="maintenance-detail-note">Son Güncelleme: {withAgo(formatMaintenanceAge(workOrder.updatedAtUtc))}</p>
         </section>
 
         <div className="maintenance-detail-grid">
-          <section className="maintenance-section" aria-label="Varlık">
+          <section className="maintenance-section maintenance-section--wide" aria-label="Varlık ve Bağlam">
             <header className="maintenance-section__header">
-              <h2>Varlık</h2>
+              <h2>Varlık ve Bağlam</h2>
               <Link href={`/bakim/varliklar/${encodeURIComponent(workOrder.assetReference)}`}>
-                Geçmişi Gör
+                Varlık Geçmişi
               </Link>
             </header>
             <dl className="maintenance-detail-dl">
@@ -185,117 +202,79 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
                 <dd>{workOrder.assetReference}</dd>
               </div>
               <div>
-                <dt>Ad</dt>
-                <dd>{workOrder.assetName ?? "—"}</dd>
+                <dt>Varlık Adı</dt>
+                <dd>{workOrder.assetName ?? "Adı girilmedi"}</dd>
               </div>
-              <div>
-                <dt>Varlık Kimliği</dt>
-                <dd>{workOrder.assetId ?? "—"}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="maintenance-section" aria-label="Bağlı Üretim">
-            <header className="maintenance-section__header">
-              <h2>Bağlı Üretim</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
-              <div>
-                <dt>Üretim Emri</dt>
-                <dd>{workOrder.productionOrderReference ?? workOrder.productionOrderId ?? "—"}</dd>
-              </div>
-              <div>
-                <dt>Üretim Durumu</dt>
-                <dd>{workOrder.productionOrderStatus ?? "—"}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="maintenance-section" aria-label="Arıza/Talep">
-            <header className="maintenance-section__header">
-              <h2>Arıza/Talep</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
               <div>
                 <dt>Talep No</dt>
-                <dd>{workOrder.maintenanceRequestNumber ?? "—"}</dd>
-              </div>
-              <div>
-                <dt>Talep Kimliği</dt>
-                <dd>{workOrder.maintenanceRequestId ?? "—"}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="maintenance-section" aria-label="Atanan Teknisyen">
-            <header className="maintenance-section__header">
-              <h2>Atanan Teknisyen</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
-              <div>
-                <dt>Teknisyen</dt>
-                <dd>{workOrder.assignedTechnicianSubjectId ?? "Atanmadı"}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="maintenance-section" aria-label="Planlama">
-            <header className="maintenance-section__header">
-              <h2>Planlama</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
-              <div>
-                <dt>Planlanan Başlangıç</dt>
-                <dd>{formatDateTime(workOrder.plannedStartUtc)}</dd>
-              </div>
-              <div>
-                <dt>Planlanan Bitiş</dt>
-                <dd>{formatDateTime(workOrder.plannedEndUtc)}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section className="maintenance-section" aria-label="Çalışma Durumu">
-            <header className="maintenance-section__header">
-              <h2>Çalışma Durumu</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
-              <div>
-                <dt>Durum</dt>
-                <dd>{getMaintenanceStatusLabel(workOrder.status)}</dd>
-              </div>
-              <div>
-                <dt>Başlangıç</dt>
-                <dd>{formatDateTime(workOrder.startedAtUtc)}</dd>
-              </div>
-            </dl>
-          </section>
-
-          <MaintenanceWorkOrderPreventiveSourcePanel workOrder={workOrder} />
-
-          <section className="maintenance-section maintenance-section--wide" aria-label="Çözüm/Tamamlama">
-            <header className="maintenance-section__header">
-              <h2>Çözüm/Tamamlama</h2>
-            </header>
-            <dl className="maintenance-detail-dl">
-              <div>
-                <dt>Tamamlanma</dt>
-                <dd>{formatDateTime(workOrder.completedAtUtc)}</dd>
-              </div>
-              <div>
-                <dt>Çözüm Kodu</dt>
                 <dd>
-                  {workOrder.resolutionCode
-                    ? getMaintenanceResolutionCodeLabel(workOrder.resolutionCode)
-                    : "—"}
+                  {workOrder.maintenanceRequestId ? (
+                    <Link href={`/bakim/arizalar/${workOrder.maintenanceRequestId}`}>
+                      {workOrder.maintenanceRequestNumber ?? "Arıza talebini aç"}
+                    </Link>
+                  ) : (
+                    workOrder.maintenanceRequestNumber ?? "Talepten oluşturulmadı"
+                  )}
                 </dd>
               </div>
               <div>
-                <dt>Tamamlama Notu</dt>
-                <dd>{workOrder.completionNote ?? "—"}</dd>
+                <dt>Üretim Emri</dt>
+                <dd>
+                  {workOrder.productionOrderReference
+                    ? `${workOrder.productionOrderReference}${workOrder.productionOrderStatus ? ` · ${enumLabel(workOrder.productionOrderStatus)}` : ""}`
+                    : "Bağlı üretim emri yok"}
+                </dd>
               </div>
             </dl>
           </section>
+
+          <section className="maintenance-section maintenance-section--wide" aria-label="Planlama ve Yürütme">
+            <header className="maintenance-section__header">
+              <h2>Planlama ve Yürütme</h2>
+            </header>
+            {hasPlanningData ? (
+            <dl className="maintenance-detail-dl">
+              <div>
+                <dt>Atanan Teknisyen</dt>
+                <dd>{workOrder.assignedTechnicianSubjectId ? displayActor(workOrder.assignedTechnicianSubjectId, "Atanan teknisyen") : "Atanmadı"}</dd>
+              </div>
+              <div>
+                <dt>Planlanan Başlangıç</dt>
+                <dd>{formatDateTime(workOrder.plannedStartUtc, "Planlanmadı")}</dd>
+              </div>
+              <div>
+                <dt>Planlanan Bitiş</dt>
+                <dd>{formatDateTime(workOrder.plannedEndUtc, "Planlanmadı")}</dd>
+              </div>
+              <div>
+                <dt>Fiili Başlangıç</dt>
+                <dd>{formatDateTime(workOrder.startedAtUtc, "Henüz başlamadı")}</dd>
+              </div>
+              <div>
+                <dt>Tamamlanma</dt>
+                <dd>{formatDateTime(workOrder.completedAtUtc, "Henüz tamamlanmadı")}</dd>
+              </div>
+              {workOrder.resolutionCode ? (
+                <div>
+                  <dt>Çözüm Kodu</dt>
+                  <dd>{getMaintenanceResolutionCodeLabel(workOrder.resolutionCode)}</dd>
+                </div>
+              ) : null}
+              {workOrder.completionNote ? (
+                <div className="maintenance-detail-dl__wide">
+                  <dt>Tamamlama Notu</dt>
+                  <dd>{workOrder.completionNote}</dd>
+                </div>
+              ) : null}
+            </dl>
+            ) : (
+              <p className="maintenance-empty-state">
+                Teknisyen ataması ve planlama bekleniyor; henüz başlangıç, bitiş veya tamamlanma kaydı yok.
+              </p>
+            )}
+          </section>
+
+          <MaintenanceWorkOrderPreventiveSourcePanel workOrder={workOrder} />
 
           <MaintenanceWorkOrderCostSummaryPanel
             costSummary={execution.costSummary}
@@ -316,6 +295,7 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
 
           <MaintenanceWorkOrderTimelinePanel timeline={execution.timeline} />
 
+          {execution.timeline.length === 0 ? (
           <section className="maintenance-section maintenance-section--wide" aria-label="Aktivite">
             <header className="maintenance-section__header">
               <h2>Aktivite</h2>
@@ -323,30 +303,35 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
             {workOrder.activity.length === 0 ? (
               <p className="maintenance-empty-state">Aktivite kaydı bulunmuyor.</p>
             ) : (
-              <div className="maintenance-table-wrap">
-                <table className="maintenance-table maintenance-table--compact">
+              <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Aktivite (kaydırılabilir)">
+                <table aria-label="Aktivite" className="maintenance-table maintenance-table--compact maintenance-table--timeline">
                   <thead>
                     <tr>
                       <th>Zaman</th>
                       <th>Olay</th>
-                      <th>Özet</th>
                       <th>Aktör</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {workOrder.activity.map((entry, index) => (
-                      <tr key={`${entry.occurredAtUtc}-${index}`}>
-                        <td>{formatDateTime(entry.occurredAtUtc)}</td>
-                        <td>{entry.eventType}</td>
-                        <td className="maintenance-table__cell--wrap">{entry.summary}</td>
-                        <td>{entry.actorSubjectId ?? "—"}</td>
-                      </tr>
-                    ))}
+                    {workOrder.activity.map((entry, index) => {
+                      const activity = describeMaintenanceActivity(entry);
+                      return (
+                        <tr key={`${entry.occurredAtUtc}-${index}`}>
+                          <td data-label="Zaman">{formatDateTime(entry.occurredAtUtc)}</td>
+                          <td data-label="Olay" className="maintenance-table__cell--wrap">
+                            {activity.label}
+                            {activity.detail ? <small>{activity.detail}</small> : null}
+                          </td>
+                          <td data-label="Aktör">{entry.actorSubjectId ? displayActor(entry.actorSubjectId) : "—"}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             )}
           </section>
+          ) : null}
         </div>
       </div>
 
@@ -354,6 +339,6 @@ export default async function MaintenanceWorkOrderDetailPage({ params }: PagePro
         <Factory aria-hidden="true" />
         Üretim emri verileri salt okunurdur; bakım emri durumu üretim akışından bağımsız izlenir.
       </footer>
-    </main>
+    </div>
   );
 }

@@ -1,28 +1,40 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
-import { Badge } from "./badge";
-
 type PageHeaderProps = Readonly<{
   eyebrow?: string;
   title: string;
   description?: string;
   actions?: ReactNode;
   preview?: boolean;
+  /** Use 2 when the header introduces a section embedded in another screen that already owns the h1. */
+  headingLevel?: 1 | 2;
 }>;
 
-export function PageHeader({ eyebrow, title, description, actions, preview = false }: PageHeaderProps) {
+export function PageHeader({ eyebrow, title, description, actions, preview: _preview = false, headingLevel = 1 }: PageHeaderProps) {
+  const Heading = headingLevel === 2 ? "h2" : "h1";
   return (
-    <header className="page-header">
-      <div className="page-header-copy">
-        <div className="page-header-eyebrow">
-          {eyebrow ? <span>{eyebrow}</span> : null}
-          {preview ? <Badge tone="information">UI önizleme</Badge> : null}
-        </div>
-        <h1>{title}</h1>
-        {description ? <p>{description}</p> : null}
+    <header className="zx-page-header">
+      <div className="zx-page-header__copy">
+        {eyebrow ? (
+          <p className="zx-page-header__eyebrow">
+            {eyebrow}
+            
+          </p>
+        ) : null}
+        <Heading>{title}</Heading>
+        {description ? <p className="zx-page-header__description">{description}</p> : null}
       </div>
-      {actions ? <div className="page-header-actions">{actions}</div> : null}
+      {actions ? <div className="zx-page-header__actions">{actions}</div> : null}
     </header>
+  );
+}
+
+/** Page frame shared by the shipping screens: max width, rhythm and responsive gutters. */
+export function PageFrame({ children, ...props }: Readonly<{ children: ReactNode } & ComponentPropsWithoutRef<"div">>) {
+  return (
+    <div className="zx-page" {...props}>
+      {children}
+    </div>
   );
 }
 

@@ -101,7 +101,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <form className="auth-form" onSubmit={handleSubmit} noValidate>
       <div className="auth-form__field">
-        <label htmlFor="reset-password">Yeni parola</label>
+        <label htmlFor="reset-password">Yeni parola <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="reset-password"
           name="newPassword"
@@ -116,7 +116,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       </div>
 
       <div className="auth-form__field">
-        <label htmlFor="reset-password-confirm">Yeni parola (tekrar)</label>
+        <label htmlFor="reset-password-confirm">Yeni parola (tekrar) <span className="zx-required" aria-hidden="true">*</span></label>
         <input
           id="reset-password-confirm"
           name="confirmPassword"

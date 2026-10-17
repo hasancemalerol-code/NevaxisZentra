@@ -161,7 +161,7 @@ export async function executeOperationalRiskDetectionRunAction(input: Readonly<{
     return {
       status: "failure" as const,
       message: result.code === "idempotency-conflict" || result.code === "concurrency-conflict"
-        ? "Tespit çalıştırması çakıştı. Aynı anahtar farklı yük ile kullanılamaz veya kayıt güncellendi."
+        ? "Kontrol çalışması çakıştı. Aynı anahtar farklı yük ile kullanılamaz veya kayıt güncellendi."
         : result.message,
       code: result.code,
     };

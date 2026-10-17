@@ -13,6 +13,7 @@ import type {
   resumeProductionOrderAction,
   startProductionOrderAction,
 } from "../server/production-order-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 export type ProductionOrderLifecycleActionsProps = Readonly<{
   orderId: string;
@@ -214,7 +215,7 @@ export function ProductionOrderLifecycleActions({
           className="production-order-lifecycle-actions__error"
           role="alert"
         >
-          <span>{actionState.message}</span>
+          <span>{customerMessage(actionState.message)}</span>
 
           <button
             type="button"

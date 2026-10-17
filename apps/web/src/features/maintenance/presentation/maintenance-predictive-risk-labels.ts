@@ -8,10 +8,10 @@ import type {
 export const MAINTENANCE_PREDICTIVE_RISK_RULE_SET_VERSION = "MAINT-PRED-RISK-V1";
 
 export const MAINTENANCE_PREDICTIVE_RISK_SAFETY_COPY =
-  "Bakım önerileri deterministik karar desteğidir; otomatik bakım talebi veya bakım emri oluşturmaz. Operasyonel aksiyon yetkili kullanıcı incelemesi ile başlatılır.";
+  "Bakım önerileri kural tabanlı karar desteğidir; otomatik bakım talebi veya bakım emri oluşturmaz. Operasyonel aksiyon yetkili kullanıcı incelemesi ile başlatılır.";
 
 export const MAINTENANCE_PREDICTIVE_RISK_SIMULATOR_COPY =
-  "Simülatör tabanlı kanıtlar gerçek makine doğrulaması değildir.";
+  "Kanıtlar kayıtlı bakım ve durum verisine dayanır; sahada makine doğrulamasının yerine geçmez.";
 
 export const MAINTENANCE_PREDICTIVE_RISK_TASK_DISCLAIMER =
   "Bu görev taslağı otomatik bakım emri, duruş veya makine müdahalesi başlatmaz.";
@@ -125,8 +125,8 @@ export function formatMaintenancePredictiveEvidenceTypeLabel(evidenceType: strin
     "condition-profile": "Durum profili",
     "condition-anomaly": "Anomali kanıtı",
     "maintenance-history": "Bakım geçmişi",
-    "edge-alarm": "Edge alarm",
-    "edge-downtime": "Edge duruş",
+    "edge-alarm": "Saha alarmı",
+    "edge-downtime": "Saha duruşu",
   };
 
   return labels[evidenceType] ?? "Kanıt";

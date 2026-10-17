@@ -15,6 +15,7 @@ import {
 } from "../server/erp-writeback-workflow-actions";
 import { ErpInfoBanner, ErpSimulatorNotice } from "./erp-ui-primitives";
 import "./erp-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ErpWritebackActionPanelProps = Readonly<{
   writebackId: string;
@@ -72,10 +73,10 @@ export function ErpWritebackActionPanel({
   }
 
   return (
-    <div className="erp-writeback-actions" aria-label="Writeback işlemleri">
+    <div className="erp-writeback-actions" aria-label="Onaylı işlem adımları">
       {actionState.kind === "error" ? (
         <div className="erp-writeback-actions__error" role="alert">
-          {actionState.message}
+          {customerMessage(actionState.message)}
         </div>
       ) : null}
 

@@ -26,7 +26,7 @@ export function ErpDocumentDetailView({ document }: ErpDocumentDetailViewProps) 
   const title = document.documentNumber ?? document.externalCode ?? document.externalId;
 
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={title}
         description="ERP belge özeti — salt okunur."
@@ -100,6 +100,6 @@ export function ErpDocumentDetailView({ document }: ErpDocumentDetailViewProps) 
         {" · "}
         <Link href="/erp-entegrasyonlari/uretim">Üretim</Link>
       </p>
-    </main>
+    </div>
   );
 }

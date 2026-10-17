@@ -33,6 +33,9 @@ import {
   getProductionFollowUpTaskButtonLabel,
   PRODUCTION_FOLLOW_UP_TASK_DISCLAIMER,
 } from "../presentation/production-follow-up-labels";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 type ProductionFollowUpWorkspaceViewProps = Readonly<{
   workspace: ProductionFollowUpWorkspacePayload;
@@ -126,10 +129,15 @@ export function ProductionFollowUpWorkspaceView({
 
   if (workspace.exceptions.length === 0) {
     return (
-      <div className="quality-empty-panel" data-testid="production-follow-up-empty">
-        <FileWarning aria-hidden="true" />
-        <h3>Takip edilecek üretim istisnası yok</h3>
-        <p>Yetkili tesis kapsamında açık üretim istisnası bulunamadı.</p>
+      <div className="production-execution-empty" role="status" data-testid="production-follow-up-empty">
+        <div className="production-execution-empty__icon">
+          <FileWarning aria-hidden="true" />
+        </div>
+        <div>
+          <p>TAKİP KAYDI YOK</p>
+          <h2>Takip edilecek üretim istisnası yok</h2>
+        </div>
+        <p className="production-execution-empty__desc">Yetkili tesis kapsamında açık üretim istisnası bulunamadı.</p>
       </div>
     );
   }
@@ -158,7 +166,7 @@ export function ProductionFollowUpWorkspaceView({
         <QualityDashboardKpi
           label="Görev bağlantısı"
           value={workspace.kpis.taskLinkedCount}
-          description="AI görev taslağı"
+          description="Yapay zekâ görev taslağı"
           tone="ready"
           icon={<ExternalLink />}
         />
@@ -193,7 +201,7 @@ export function ProductionFollowUpWorkspaceView({
       {actionError ? (
         <div role="alert" className="quality-error-panel">
           <AlertTriangle aria-hidden="true" />
-          <p>{actionError}</p>
+          <p>{customerMessage(actionError)}</p>
         </div>
       ) : null}
 
@@ -203,8 +211,8 @@ export function ProductionFollowUpWorkspaceView({
             <h2>Üretim istisna envanteri</h2>
             <p>Takip gerektiren üretim istisnaları</p>
           </header>
-          <div className="quality-table-wrap" data-testid="production-follow-up-table">
-            <table>
+          <div className="quality-table-wrap" tabIndex={0} data-testid="production-follow-up-table">
+            <table aria-label="Üretim istisna envanteri">
               <thead>
                 <tr>
                   <th>Emir</th>
@@ -247,17 +255,17 @@ export function ProductionFollowUpWorkspaceView({
           </header>
 
           {exceptionError ? (
-            <p role="alert" data-testid="production-follow-up-detail-error">{exceptionError}</p>
+            <p role="alert" data-testid="production-follow-up-detail-error">{customerMessage(exceptionError)}</p>
           ) : !exception ? (
-            <p data-testid="production-follow-up-detail-empty">Seçili üretim istisnası yüklenemedi.</p>
+            <InlineUnavailable subject="Seçili üretim istisnası" testId="production-follow-up-detail-empty" />
           ) : (
             <div data-testid="production-follow-up-detail-ready">
               <dl className="quality-detail-grid">
                 <div><dt>Üretim emri</dt><dd>{exception.productionOrderReference}</dd></div>
                 <div><dt>Emir başlığı</dt><dd>{exception.productionOrderTitle}</dd></div>
-                <div><dt>Emir durumu</dt><dd>{exception.productionOrderStatus}</dd></div>
+                <div><dt>Emir durumu</dt><dd>{enumLabel(exception.productionOrderStatus)}</dd></div>
                 <div><dt>İstisna türü</dt><dd>{getProductionExceptionTypeLabel(exception.exceptionType)}</dd></div>
-                <div><dt>Şiddet</dt><dd>{getProductionExceptionSeverityLabel(exception.severity)}</dd></div>
+                <div><dt>Kritiklik</dt><dd>{getProductionExceptionSeverityLabel(exception.severity)}</dd></div>
                 <div><dt>Takip durumu</dt><dd>{getProductionFollowUpStatusLabel(exception.followUpStatus)}</dd></div>
                 <div><dt>Makine</dt><dd>{exception.machineReference ?? "—"}</dd></div>
                 <div><dt>Kalıp</dt><dd>{exception.moldReference ?? "—"}</dd></div>
@@ -282,7 +290,7 @@ export function ProductionFollowUpWorkspaceView({
                   <ul className="quality-audit-list">
                     {exception.auditEvents.map((event) => (
                       <li key={`${event.eventType}-${event.occurredAtUtc}`}>
-                        <strong>{event.eventType}</strong> — {event.actor} ({formatDateTime(event.occurredAtUtc)})
+                        <strong>{enumLabel(event.eventType)}</strong> — {event.actor} ({formatDateTime(event.occurredAtUtc)})
                       </li>
                     ))}
                   </ul>
@@ -342,7 +350,7 @@ export function ProductionFollowUpWorkspaceView({
 
               {exception.linkedAiTaskId ? (
                 <div data-testid="production-follow-up-linked-task-state">
-                  <Badge tone="neutral">Bağlı görev: {exception.linkedAiTaskId}</Badge>
+                  <Badge tone="neutral">Bağlı görev oluşturuldu</Badge>
                 </div>
               ) : null}
             </div>

@@ -40,6 +40,7 @@ import {
   AiTaskDetailSelect,
   AiTaskDetailTextarea,
 } from "./ai-task-detail-form-controls";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type AiTaskAutomationRuleBuilderProps = Readonly<{
   mode: "create" | "edit";
@@ -488,7 +489,7 @@ export function AiTaskAutomationRuleBuilder({
         </div>
 
         {error ? (
-          <p className="ai-task-automation-builder__error" role="alert">{error}</p>
+          <p className="ai-task-automation-builder__error" role="alert">{customerMessage(error)}</p>
         ) : null}
       </AiTaskDetailSectionCard>
     </div>

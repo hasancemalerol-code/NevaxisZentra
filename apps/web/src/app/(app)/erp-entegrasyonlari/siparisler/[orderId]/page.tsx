@@ -1,7 +1,8 @@
-import { ClipboardList } from "lucide-react";
+
 
 import { ErpOrderDetailView } from "@/features/erp/components/erp-order-detail-view";
 import { readErpOrderDetail } from "@/features/erp/server/erp-orders-reader";
+import { ErpFailurePage } from "@/features/erp/components/erp-failure-page";
 
 type ErpOrderDetailPageProps = Readonly<{
   params: Promise<{ orderId: string }>;
@@ -13,19 +14,16 @@ export default async function ErpOrderDetailPage({ params }: ErpOrderDetailPageP
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
-        <header className="production-execution-header">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>Sipariş Detayı</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">
-          <ClipboardList aria-hidden="true" />
-          <div>
-            <h3>{result.code === "not-found" ? "Kayıt bulunamadı" : "ERP siparişi yüklenemedi"}</h3>
-            <p>{result.code === "not-found" ? "İstenen ERP kaydı bulunamadı." : result.message}</p>
-          </div>
-        </div>
-      </main>
+      <ErpFailurePage
+        title="Sipariş Detayı"
+        description="ERP sipariş özeti ve operasyonel hazırlık."
+        listHref="/erp-entegrasyonlari/siparisler"
+        listLabel="Siparişlere Dön"
+        failedTitle="ERP siparişi yüklenemedi"
+        entityLabel="sipariş"
+        code={"code" in result ? result.code : undefined}
+        message={result.message}
+      />
     );
   }
 

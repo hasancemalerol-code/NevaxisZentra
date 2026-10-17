@@ -78,7 +78,7 @@ export const AI_TASK_ACTION_TYPE_LABELS: Readonly<
   "create-maintenance-request": "Bakım Talebi Oluştur",
   "create-quality-record": "Kalite Kaydı Oluştur",
   "create-purchase-request": "Satın Alma Talebi Oluştur",
-  "create-transfer-request": "Transfer Talebi Oluştur",
+  "create-transfer-request": "Aktarım Talebi Oluştur",
   "send-notification": "Bildirim Gönder",
   "sync-to-erp": "ERP'ye Aktar",
 };

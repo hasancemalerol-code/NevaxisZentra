@@ -23,7 +23,6 @@ import {
   SHIFT_CONTINUITY_COMPETENCY_FILTER_OPTIONS,
   SHIFT_CONTINUITY_FRESHNESS_FILTER_OPTIONS,
   SHIFT_CONTINUITY_OUTCOME_FILTER_OPTIONS,
-  SHIFT_CONTINUITY_RULE_SET_VERSION,
   SHIFT_CONTINUITY_SHIFT_FILTER_OPTIONS,
 } from "../domain/shift-continuity-labels";
 import type {
@@ -36,6 +35,7 @@ import {
   loadShiftContinuityAssessmentsAction,
   loadShiftContinuityOverviewAction,
 } from "../server/shift-continuity-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type ShiftContinuityPanelProps = Readonly<{
   canManage: boolean;
@@ -200,7 +200,7 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
       {error ? (
         <div role="alert" className="shift-workforce-error-inline">
           <AlertTriangle aria-hidden="true" size={16} />
-          <span>{error}</span>
+          <span>{customerMessage(error)}</span>
         </div>
       ) : null}
 
@@ -350,7 +350,7 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
         <div
           className={`shift-workforce-workspace${detailOpen ? " shift-workforce-workspace--detail-open" : ""}`}
         >
-          <div className="shift-workforce-registry__table-wrap">
+          <div className="shift-workforce-registry__table-wrap" tabIndex={0} role="region" aria-label="Tablo (kaydırılabilir)">
             {isPending && !assessments.length ? (
               <div className="shift-workforce-loading">
                 <LoaderCircle className="animate-spin" aria-hidden="true" />
@@ -362,7 +362,7 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
                 <p>Kayıtlı personel sürekliliği değerlendirmesi bulunamadı.</p>
               </div>
             ) : (
-              <table className="shift-workforce-table">
+              <table aria-label="Personel sürekliliği değerlendirmeleri" className="shift-workforce-table">
                 <thead>
                   <tr>
                     <th>Vardiya / tarih</th>
@@ -461,7 +461,6 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
 
               <div className="shift-workforce-detail__metrics">
                 <span className={outcomeBadgeClass(detail.outcome)}>{detail.outcomeLabel}</span>
-                <span>Kural seti: {detail.ruleSetVersion || SHIFT_CONTINUITY_RULE_SET_VERSION}</span>
                 <span className={availabilityBadgeClass(detail.availabilityState)}>
                   {detail.availabilityLabel}
                 </span>
@@ -523,7 +522,7 @@ export function ShiftContinuityPanel({ canManage }: ShiftContinuityPanelProps) {
                     <dd>{formatShiftContinuityDateTime(detail.sourceUpdatedAtUtc)}</dd>
                   </div>
                   <div>
-                    <dt>Senkronizasyon</dt>
+                    <dt>Eşitleme</dt>
                     <dd>{formatShiftContinuityDateTime(detail.synchronizedAtUtc)}</dd>
                   </div>
                 </dl>

@@ -10,6 +10,8 @@ export type BulkImportJobSummaryApi = {
   validRows: number;
   quarantinedRows: number;
   importedRows: number;
+  updatedRows: number;
+  failedRows: number;
   safetyMode: string;
   createdAtUtc: string;
   updatedAtUtc: string;
@@ -40,7 +42,9 @@ export type BulkImportJobWorkspaceApi = {
     stagedRows: number;
     validRows: number;
     importedRows: number;
+    updatedRows: number;
     quarantinedRows: number;
+    failedRows: number;
     balanced: boolean;
   };
   checkpoint?: {

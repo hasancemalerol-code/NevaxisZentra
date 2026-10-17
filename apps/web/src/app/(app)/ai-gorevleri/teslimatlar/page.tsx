@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { Send } from "lucide-react";
 
-import { PageContent, Section } from "@/components/ui/page";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { DataTable } from "@/components/ui/data-table";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import { EmptyPanel } from "@/components/ui/empty-panel";
+import { PageFrame, PageHeader } from "@/components/ui/page";
+import { Panel } from "@/components/ui/panel";
 import {
   getAiTaskDeliveryChannelLabel,
   getAiTaskDeliveryStatusLabel,
@@ -14,6 +18,7 @@ import {
 } from "@/features/ai-task-center/presentation/ai-task-delivery-labels";
 import { formatAiTaskShortDateTime } from "@/features/ai-task-center/presentation/ai-task-formatters";
 import { readAiTaskDeliveryManagement } from "@/features/ai-task-center/server/ai-task-delivery-queries";
+import "@/features/ai-task-center/components/ai-task-center-round3.css";
 
 type PageProps = Readonly<{
   searchParams: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -28,99 +33,119 @@ export default async function AiTaskDeliveriesPage({ searchParams }: PageProps) 
     }
   }
 
-  const { items, channels, totalCount } = await readAiTaskDeliveryManagement(query.toString());
+  const management = await readAiTaskDeliveryManagement(query.toString());
+  if (management.status === "failure") {
+    return (
+      <PageFrame data-page="ai-task-deliveries">
+        <PageHeader
+          eyebrow="GÖREV MERKEZİ"
+          title="Teslimatlar"
+          description="E-posta ve mesaj teslimat kayıtları ile kanal hazırlık durumu."
+        />
+        <FailureStatePage
+          code={management.code}
+          failedTitle="Teslimat bilgisi şu anda alınamıyor"
+          backHref="/ai-gorevleri"
+          backLabel="Görev Merkezi’ne dön"
+          inline
+        />
+      </PageFrame>
+    );
+  }
+
+  const { items, channels, totalCount } = management;
+  const visibleChannels = channels.filter((channel) => channel.channelKey !== "development-loopback");
 
   return (
-    <PageContent>
-      <Section
+    <PageFrame data-page="ai-task-deliveries">
+      <PageHeader
+        eyebrow="GÖREV MERKEZİ"
         title="Teslimatlar"
-        description="AI Görev Merkezi teslimat operasyonları — kanonik görev kaydı dışında bağımsız motor değildir."
-        action={
-          <Link href="/ai-gorevleri" className="text-sm text-primary hover:underline">
-            Görev Merkezi
-          </Link>
-        }
-      >
-        <div className="mb-4 grid gap-2 sm:grid-cols-3">
-          {channels
-            .filter((channel) => channel.channelKey !== "development-loopback")
-            .map((channel) => (
-              <Card key={channel.channelKey} className="p-3 text-sm">
-                <div className="font-medium">
-                  {getAiTaskDeliveryChannelLabel(channel.channelKey)}
-                </div>
-                <div className="text-muted-foreground">
-                  {channel.channelKey === "whatsapp"
-                    ? getAiTaskWhatsAppReadinessLabel(channel)
-                    : channel.channelKey === "email"
-                      ? getAiTaskEmailReadinessLabel(channel)
-                      : channel.available
-                        ? "Hazır"
-                        : "Henüz yapılandırılmadı"}
-                </div>
-              </Card>
-            ))}
-        </div>
+        description="E-posta ve mesaj teslimat kayıtları ile kanal hazırlık durumu."
+      />
 
-        <p className="mb-3 text-sm text-muted-foreground">{totalCount} kayıt</p>
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left">
+      <Panel headingId="delivery-channels-heading" title="Teslimat kanalları" subtitle="Kanal hazırlığı yönetici yapılandırmasına bağlıdır.">
+        <ul className="zx-channel-grid ai-task-delivery-channels" aria-label="Teslimat kanalı hazırlık durumu">
+          {visibleChannels.map((channel) => {
+            const readiness =
+              channel.channelKey === "whatsapp"
+                ? getAiTaskWhatsAppReadinessLabel(channel)
+                : channel.channelKey === "email"
+                  ? getAiTaskEmailReadinessLabel(channel)
+                  : channel.available
+                    ? "Hazır"
+                    : "Yapılandırılmadı";
+            return (
+              <li key={channel.channelKey} className="zx-channel">
+                <span className="zx-channel__name">{getAiTaskDeliveryChannelLabel(channel.channelKey)}</span>
+                <Badge tone={channel.available ? "success" : "neutral"}>{readiness}</Badge>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
+
+      <Panel
+        flush
+        headingId="delivery-records-heading"
+        title="Teslimat kayıtları"
+        subtitle={`${totalCount} kayıt`}
+      >
+        {items.length === 0 ? (
+          <div className="zx-panel__body">
+            <EmptyPanel
+              icon={<Send />}
+              title="Henüz teslimat kaydı yok"
+              description="Bir görev için e-posta veya mesaj teslimatı istendiğinde kayıtlar burada listelenir."
+            />
+          </div>
+        ) : (
+          <DataTable label="Teslimat kayıtları" minWidth={900}>
+            <thead>
               <tr>
-                <th className="px-3 py-2">Kanal</th>
-                <th className="px-3 py-2">Durum</th>
-                <th className="px-3 py-2">Sağlayıcı Durumu</th>
-                <th className="px-3 py-2">Alıcı</th>
-                <th className="px-3 py-2">Onay</th>
-                <th className="px-3 py-2">Deneme</th>
-                <th className="px-3 py-2">Hata</th>
-                <th className="px-3 py-2">İstenen</th>
-                <th className="px-3 py-2">Görev</th>
+                <th scope="col">Kanal</th>
+                <th scope="col">Durum</th>
+                <th scope="col">Sağlayıcı durumu</th>
+                <th scope="col">Alıcı</th>
+                <th scope="col">Onay</th>
+                <th scope="col" className="zx-num">Deneme</th>
+                <th scope="col">Hata</th>
+                <th scope="col">İstenen</th>
+                <th scope="col">Görev</th>
               </tr>
             </thead>
             <tbody>
               {items.map((delivery) => (
-                <tr key={delivery.id} className="border-t">
-                  <td className="px-3 py-2">
-                    {getAiTaskDeliveryChannelLabel(delivery.channel)}
+                <tr key={delivery.id}>
+                  <td>{getAiTaskDeliveryChannelLabel(delivery.channel)}</td>
+                  <td>
+                    <Badge tone="neutral">{getAiTaskDeliveryStatusLabel(delivery.status)}</Badge>
                   </td>
-                  <td className="px-3 py-2">
-                    <Badge tone="neutral">
-                      {getAiTaskDeliveryStatusLabel(delivery.status)}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2">
+                  <td>
                     {delivery.channel === "whatsapp"
                       ? getAiTaskWhatsAppProviderStatusLabel(delivery.providerStatus)
                       : delivery.channel === "email"
                         ? getAiTaskEmailProviderStatusLabel(delivery.providerStatus)
                         : "—"}
                   </td>
-                  <td className="px-3 py-2">{delivery.maskedRecipient ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    {delivery.channel === "whatsapp"
-                      ? getAiTaskWhatsAppConsentLabel(delivery.consentStatus)
-                      : "—"}
+                  <td>{delivery.maskedRecipient ?? "—"}</td>
+                  <td>
+                    {delivery.channel === "whatsapp" ? getAiTaskWhatsAppConsentLabel(delivery.consentStatus) : "—"}
                   </td>
-                  <td className="px-3 py-2">{delivery.attemptCount}</td>
-                  <td className="px-3 py-2">{delivery.lastErrorCategory ?? "—"}</td>
-                  <td className="px-3 py-2">
-                    {formatAiTaskShortDateTime(delivery.requestedAtUtc)}
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      href={`/ai-gorevleri/${delivery.aiTaskId}`}
-                      className="text-primary hover:underline"
-                    >
+                  <td className="zx-num">{delivery.attemptCount}</td>
+                  <td>{delivery.lastErrorCategory ? "Teslimat hatası" : "—"}</td>
+                  <td>{formatAiTaskShortDateTime(delivery.requestedAtUtc)}</td>
+                  <td>
+                    <Link href={`/ai-gorevleri/${delivery.aiTaskId}`} className="zx-table-link">
                       Aç
                     </Link>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
-      </Section>
-    </PageContent>
+          </DataTable>
+        )}
+      </Panel>
+    </PageFrame>
   );
 }

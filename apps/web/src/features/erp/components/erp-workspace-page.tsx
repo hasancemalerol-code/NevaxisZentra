@@ -1,7 +1,9 @@
-import { Cable } from "lucide-react";
+
 
 import { ErpWorkspaceView } from "@/features/erp/components/erp-workspace-view";
 import { readErpWorkspace } from "@/features/erp/server/erp-reader";
+
+import { ErpFailurePage } from "./erp-failure-page";
 
 type ErpWorkspacePageProps = Readonly<{
   activeHref: string;
@@ -12,19 +14,15 @@ export async function ErpWorkspacePage({ activeHref }: ErpWorkspacePageProps) {
 
   if (result.status === "failure") {
     return (
-      <main className="production-execution-page erp-workspace-page">
-        <header className="production-execution-header">
-          <p>ERP ENTEGRASYONLARI</p>
-          <h1>ERP Entegrasyonları</h1>
-        </header>
-        <div role="alert" className="state-panel error-state">
-          <Cable aria-hidden="true" />
-          <div>
-            <h3>ERP verisi yüklenemedi</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+      <ErpFailurePage
+        title="ERP Entegrasyonları"
+        description="ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini tek merkezden yönetin."
+        listHref={activeHref}
+        listLabel="Bağlantılara Dön"
+        failedTitle="ERP verisi şu anda alınamıyor"
+        code={"code" in result ? result.code : undefined}
+        message={result.message}
+      />
     );
   }
 

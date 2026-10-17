@@ -1,3 +1,5 @@
+import { PageFrame, PageHeader } from "@/components/ui/page";
+import { RecordFailureState, StatePage, StatePageLink } from "@/components/ui/state-page";
 import { IntegrationFileImportWorkbench } from "@/features/integration/components/integration-file-import-workbench";
 import { denyUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { parseProductionExecutionRuntimeConfig } from "@/features/production-execution/server/production-order-runtime-config";
@@ -15,31 +17,52 @@ export default async function DosyaAktarimiPage({ params }: FileImportPageProps)
   const authorization = await denyUnlessGranted("integration.run");
   if (authorization.status === "failure") {
     return (
-      <main className="production-execution-page">
-        <h1>Dosya aktarımı</h1>
-        <p>{authorization.code === "authorization-denied" ? "Dosya aktarımı için yetkiniz yok." : "Yetki doğrulaması şu anda yapılamıyor."}</p>
-      </main>
+      <StatePage
+        kind={authorization.code === "authorization-denied" ? "forbidden" : "unavailable"}
+        title={authorization.code === "authorization-denied" ? "Dosya aktarımı için yetkiniz yok" : "Yetki doğrulanamadı"}
+        description={
+          authorization.code === "authorization-denied"
+            ? "Hesabınızın rolü dosya aktarımı çalıştırmaya izin vermiyor. Erişim gerekiyorsa yöneticinizle iletişime geçin."
+            : "Yetki doğrulaması şu anda yapılamıyor. Lütfen biraz sonra yeniden deneyin."
+        }
+        actions={<StatePageLink href="/ayarlar/entegrasyonlar" primary>Entegrasyonlara dön</StatePageLink>}
+      />
     );
   }
 
   const configResult = parseProductionExecutionRuntimeConfig();
   if (configResult.status !== "success") {
-    return <main><p>{configResult.message}</p></main>;
+    return (
+      <RecordFailureState notFound={false} entityLabel="bağlantı" failedTitle="Dosya aktarımı açılamadı" message={configResult.message} backHref="/ayarlar/entegrasyonlar" backLabel="Entegrasyonlara dön" />
+    );
   }
 
   const contextResult = await resolveProductionOrderRequestContextForIncomingRequest(configResult.config);
   if (contextResult.status === "failure") {
-    return <main><p>{contextResult.message}</p></main>;
+    return (
+      <RecordFailureState notFound={false} entityLabel="bağlantı" failedTitle="Dosya aktarımı açılamadı" message={contextResult.message} backHref="/ayarlar/entegrasyonlar" backLabel="Entegrasyonlara dön" />
+    );
   }
 
   const connectors = await listIntegrationConnectors(contextResult.context);
   const connector = connectors.find((item) => item.id === connectorId);
   if (!connector) {
-    return <main><p>Bağlantı bulunamadı.</p></main>;
+    return (
+      <PageFrame>
+        <PageHeader eyebrow="Ayarlar" title="Dosya Aktarımı" description="Dosya aktarımı yapılacak bağlantı bu çalışma alanında bulunamadı." />
+        <StatePage
+          kind="empty"
+          inline
+          title="Bağlantı bulunamadı"
+          description="Bağlantı mevcut değil, kaldırılmış ya da yetki alanınızın dışında olabilir."
+          actions={<StatePageLink href="/ayarlar/entegrasyonlar" primary>Entegrasyonlara dön</StatePageLink>}
+        />
+      </PageFrame>
+    );
   }
 
   return (
-    <main className="production-execution-page">
+    <div className="production-execution-page">
       <header className="production-execution-header">
         <p>ENTEGRASYONLAR</p>
         <h1>Dosya Aktarımı</h1>
@@ -50,6 +73,6 @@ export default async function DosyaAktarimiPage({ params }: FileImportPageProps)
         facilityId={contextResult.context.facilityId}
         apiBaseUrl={contextResult.context.apiBaseUrl}
       />
-    </main>
+    </div>
   );
 }

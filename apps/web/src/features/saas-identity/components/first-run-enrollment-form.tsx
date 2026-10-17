@@ -114,31 +114,31 @@ export function FirstRunEnrollmentForm() {
       </p>
 
       <div className="auth-form__field">
-        <label htmlFor="enroll-token">Kurulum anahtarı</label>
+        <label htmlFor="enroll-token">Kurulum anahtarı <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-token" name="token" autoComplete="off" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-org-code">Kuruluş kodu</label>
+        <label htmlFor="enroll-org-code">Kuruluş kodu <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-org-code" name="organizationCode" autoComplete="off" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-org-name">Kuruluş adı</label>
+        <label htmlFor="enroll-org-name">Kuruluş adı <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-org-name" name="organizationName" autoComplete="organization" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-owner-name">Yönetici adı</label>
+        <label htmlFor="enroll-owner-name">Yönetici adı <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-owner-name" name="ownerDisplayName" autoComplete="name" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-owner-email">Yönetici e-posta</label>
+        <label htmlFor="enroll-owner-email">Yönetici e-posta <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-owner-email" name="ownerEmail" type="email" autoComplete="username" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-password">Parola</label>
+        <label htmlFor="enroll-password">Parola <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-password" name="password" type="password" autoComplete="new-password" required disabled={pending} />
       </div>
       <div className="auth-form__field">
-        <label htmlFor="enroll-password-confirm">Parola (tekrar)</label>
+        <label htmlFor="enroll-password-confirm">Parola (tekrar) <span className="zx-required" aria-hidden="true">*</span></label>
         <input id="enroll-password-confirm" name="passwordConfirm" type="password" autoComplete="new-password" required disabled={pending} />
       </div>
 

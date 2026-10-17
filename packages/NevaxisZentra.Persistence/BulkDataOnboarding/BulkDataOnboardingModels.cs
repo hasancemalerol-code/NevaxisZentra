@@ -119,6 +119,8 @@ public sealed record BulkImportJobSummary(
     int ValidRows,
     int QuarantinedRows,
     int ImportedRows,
+    int UpdatedRows,
+    int FailedRows,
     string SafetyMode,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc);

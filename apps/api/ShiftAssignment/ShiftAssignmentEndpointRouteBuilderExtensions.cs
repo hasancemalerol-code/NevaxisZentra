@@ -123,8 +123,8 @@ public static class ShiftAssignmentEndpointRouteBuilderExtensions
                 "ShiftDate must be a valid date.");
         }
 
-        if (!DateTimeOffset.TryParse(body.PlannedStartUtc, out var plannedStartUtc)
-            || !DateTimeOffset.TryParse(body.PlannedEndUtc, out var plannedEndUtc))
+        if (!DateTimeOffset.TryParse(body.PlannedStartUtc, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var plannedStartUtc)
+            || !DateTimeOffset.TryParse(body.PlannedEndUtc, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var plannedEndUtc))
         {
             return ShiftAssignmentEndpointHelpers.MapFailure(
                 ShiftAssignmentFailureCodes.ValidationFailed,

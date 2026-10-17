@@ -854,12 +854,14 @@ public static class PlanStabilityMetricsEngine
         IReadOnlyList<PlanChange> changesToday,
         IReadOnlyList<ProductionPlanVersion> versionsToday,
         decimal adherence,
-        decimal utilization) =>
+        decimal utilization,
+        int ordersAtRisk,
+        int lateOrders) =>
         new(
             adherence,
             adherence,
-            OrdersAtRisk: 1,
-            LateOrders: 0,
+            OrdersAtRisk: ordersAtRisk,
+            LateOrders: lateOrders,
             PlanVersionsToday: versionsToday.Count,
             ReplansToday: changesToday.Count,
             OperationsMovedToday: changesToday.Sum(c =>

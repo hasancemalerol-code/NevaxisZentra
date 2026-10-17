@@ -815,7 +815,8 @@ public sealed class AiTaskRepository(
             sla.State,
             task.ClosureState,
             evidenceCount,
-            closurePolicy.ApprovalRequired);
+            closurePolicy.ApprovalRequired,
+            sla.BreachType);
     }
 
     private async Task<AiTaskDetailReadModel> MapDetailAsync(AiTask task, CancellationToken ct)

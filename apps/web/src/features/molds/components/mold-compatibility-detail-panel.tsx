@@ -16,6 +16,8 @@ import {
   MOLD_COMPATIBILITY_THEORETICAL_CAPACITY_DISCLAIMER,
 } from "../presentation/mold-compatibility-labels";
 import { evaluateMoldCompatibilityAllAction } from "../server/mold-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
 
 type MoldCompatibilityDetailPanelProps = Readonly<{
   moldId: string;
@@ -69,7 +71,7 @@ export function MoldCompatibilityDetailPanel({
   if (loadError) {
     return (
       <div className="mold-registry-error" role="alert">
-        {loadError}
+        {customerMessage(loadError)}
       </div>
     );
   }
@@ -83,7 +85,7 @@ export function MoldCompatibilityDetailPanel({
   }
 
   if (!overview && !isPending) {
-    return <div className="mold-registry-empty">Makine uyumluluğu verisi yüklenemedi.</div>;
+    return <InlineUnavailable subject="Makine uyumluluğu verisi" />;
   }
 
   if (!overview) {
@@ -154,8 +156,8 @@ export function MoldCompatibilityDetailPanel({
       </div>
 
       <div className="mold-compat-layout">
-        <div className="mold-compat-table-wrap" aria-label="Makine karşılaştırma tablosu">
-          <table className="mold-registry-table">
+        <div className="mold-compat-table-wrap" aria-label="Makine karşılaştırma tablosu" tabIndex={0} role="region">
+          <table aria-label="Makine karşılaştırma tablosu" className="mold-registry-table">
             <thead>
               <tr>
                 <th>Makine</th>
@@ -280,8 +282,8 @@ export function MoldCompatibilityDetailPanel({
               </dl>
 
               {selectedAssessment && selectedAssessment.reasons.length > 0 ? (
-                <div className="mold-compat-table-wrap">
-                  <table className="mold-registry-table">
+                <div className="mold-compat-table-wrap" tabIndex={0} role="region" aria-label="Kanıt ve Kural Sonuçları (kaydırılabilir)">
+                  <table aria-label="Kanıt ve Kural Sonuçları" className="mold-registry-table">
                     <thead>
                       <tr>
                         <th>Kural</th>

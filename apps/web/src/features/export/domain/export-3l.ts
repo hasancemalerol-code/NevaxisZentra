@@ -361,7 +361,7 @@ export function getResearchFindingCategoryLabel(category: string): string {
     case "logistics":
       return "Lojistik";
     case "broker-question":
-      return "Broker sorusu";
+      return "Gümrük müşaviri sorusu";
     case "other":
       return "Diğer";
     default:
@@ -378,7 +378,7 @@ export function getKnowledgeAuthorityLabel(authority: string): string {
     case "customer-requirement":
       return "Müşteri gereksinimi";
     case "broker-input":
-      return "Broker girdisi";
+      return "Gümrük müşaviri bilgisi";
     case "manual-entry":
       return "Manuel kayıt";
     default:

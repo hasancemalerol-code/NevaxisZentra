@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { Button } from "@/components/ui/button";
 import { TEAMS_APPROVAL_DECISIONS } from "@/features/teams/domain/teams-constants";
@@ -10,6 +10,9 @@ import {
   cancelTeamsApprovalAction,
   decideTeamsApprovalAction,
 } from "@/features/teams/server/teams-actions";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { createActorLabeler } from "@/lib/presentation/display-label";
+import { Notice } from "@/components/ui/notice";
 
 type TeamsApprovalDecisionFormProps = Readonly<{
   requestId: string;
@@ -26,6 +29,7 @@ export function TeamsApprovalDecisionForm({
   canManageReviewers,
   reviewerCandidates,
 }: TeamsApprovalDecisionFormProps) {
+  const actorLabel = useMemo(() => createActorLabeler(), []);
   const router = useRouter();
   const [note, setNote] = useState("");
   const [reviewerId, setReviewerId] = useState(reviewerCandidates[0]?.tenantMembershipId ?? "");
@@ -116,7 +120,7 @@ export function TeamsApprovalDecisionForm({
             >
               {reviewerCandidates.map((member) => (
                 <option key={member.tenantMembershipId} value={member.tenantMembershipId}>
-                  {member.displayLabel}
+                  {actorLabel(member.displayLabel)}
                 </option>
               ))}
             </select>
@@ -136,9 +140,7 @@ export function TeamsApprovalDecisionForm({
       ) : null}
 
       {error ? (
-        <p role="alert" style={{ color: "#b91c1c", margin: 0 }} data-testid="teams-approval-decision-error">
-          {error}
-        </p>
+        <Notice tone="danger" alert data-testid="teams-approval-decision-error">{customerMessage(error)}</Notice>
       ) : null}
     </div>
   );

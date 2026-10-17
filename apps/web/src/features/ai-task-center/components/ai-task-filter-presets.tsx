@@ -70,7 +70,7 @@ export function AiTaskFilterPresets({
 }: AiTaskFilterPresetsProps) {
   return (
     <nav
-      aria-label="Hazır AI görev filtreleri"
+      aria-label="Hazır yapay zekâ görev filtreleri"
       className="ai-task-filter-presets"
     >
       {AI_TASK_FILTER_PRESETS.map((preset) => {

@@ -3,6 +3,8 @@ import { ShieldAlert } from "lucide-react";
 import { WorksWorkspaceView } from "../components/works-workspace-view";
 import { readWorksWorkspacePage } from "../server/works-queries";
 import "../works-workspace.css";
+import { deferredSurfacesEnabled } from "@/lib/runtime/deferred-surfaces";
+import { customerMessage } from "@/lib/presentation/customer-message";
 
 type WorksPageContentProps = Readonly<{
   searchParams?: Promise<Readonly<Record<string, string | string[] | undefined>>>;
@@ -24,7 +26,7 @@ export async function WorksPageContent({ searchParams }: WorksPageContentProps) 
     const isUnauthorized = result.code === "permission-denied";
 
     return (
-      <main className="works-page" data-testid="works-page-error">
+      <div className="works-page" data-testid="works-page-error">
         <div
           role="alert"
           className={isUnauthorized ? "works-error-banner" : "works-partial-error"}
@@ -32,16 +34,16 @@ export async function WorksPageContent({ searchParams }: WorksPageContentProps) 
           <ShieldAlert aria-hidden="true" />
           <div>
             <h1>İşler</h1>
-            <p>{result.message}</p>
+            <p>{customerMessage(result.message)}</p>
           </div>
         </div>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="fact-workspace works-page" data-testid="works-page">
-      <WorksWorkspaceView page={result.page} />
-    </main>
+    <div className="fact-workspace works-page" data-testid="works-page">
+      <WorksWorkspaceView page={result.page} showWorkforce={deferredSurfacesEnabled()} />
+    </div>
   );
 }

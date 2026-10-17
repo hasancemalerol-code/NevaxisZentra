@@ -7,7 +7,7 @@ import {
   PageHeader,
   Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { TeamsHandoverActions } from "@/features/teams/components/teams-handover-actions";
 import { TeamsHandoverForm } from "@/features/teams/components/teams-handover-form";
@@ -20,6 +20,7 @@ import {
 } from "@/features/teams/domain/teams-constants";
 import { readTeamsHandover } from "@/features/teams/server/teams-queries";
 import "@/features/teams/components/teams-workspace.css";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export const dynamic = "force-dynamic";
 
@@ -57,10 +58,10 @@ export default async function TeamsHandoverDetailPage({
       <PageContent>
         <PageHeader
           description="Vardiya devri detayı."
-          eyebrow="Teams"
+          eyebrow="Operasyon iletişimi"
           title="Vardiya devri"
         />
-        <EmptyState description={result.message} title="Vardiya devri yüklenemedi" />
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Vardiya devri yüklenemedi" inline />
       </PageContent>
     );
   }
@@ -71,7 +72,7 @@ export default async function TeamsHandoverDetailPage({
     <PageContent data-testid="teams-handover-detail-page">
       <PageHeader
         description={`${detail.channelName} · ${detail.shiftDate} · ${shiftLabel(detail.shiftType)}`}
-        eyebrow="Teams vardiya devri"
+        eyebrow="Vardiya devri"
         title={`${detail.shiftDate} vardiya devri`}
         actions={<Badge tone="neutral">{statusLabel(detail.status)}</Badge>}
       />

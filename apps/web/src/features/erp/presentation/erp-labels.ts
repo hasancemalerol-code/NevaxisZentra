@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/presentation/format";
 import type { ErpConnectionStatus, ErpSyncRunStatus } from "../domain/erp";
 
 const LOGO_CAPABILITIES = ["customers.read", "products.read"] as const;
@@ -6,7 +7,7 @@ const NETSIS_CAPABILITIES = ["customers.read", "products.read"] as const;
 
 export function getErpProviderLabel(provider: string, displayName?: string): string {
   if (provider === "simulator") {
-    return displayName ?? "ERP Simulator";
+    return displayName ?? "Örnek ERP";
   }
 
   if (provider === "logo") {
@@ -66,7 +67,7 @@ export function getErpNetsisConnectionStateLabel(input: {
 }
 
 export function getErpNetsisAdapterReadyLabel(): string {
-  return "Adapter Hazır";
+  return "Bağlantı hazır";
 }
 
 export function getErpNetsisLiveValidatedLabel(isLiveValidated: boolean): string | null {
@@ -86,7 +87,7 @@ export function getErpNetsisTransportLabel(connectionMode: string, hasTestFixtur
 }
 
 export function getErpNetsisSetupGuidance(): string {
-  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında Zentra Netsis Bridge yapılandırılmalıdır.";
+  return "Gerçek Netsis bağlantısı için Netsis erişimi bulunan entegrasyon bilgisayarında Zentra Netsis Köprüsü yapılandırılmalıdır.";
 }
 
 export function getErpMikroConnectionStateLabel(input: {
@@ -119,7 +120,7 @@ export function getErpMikroConnectionStateLabel(input: {
 }
 
 export function getErpMikroAdapterReadyLabel(): string {
-  return "Adapter Hazır";
+  return "Bağlantı hazır";
 }
 
 export function getErpMikroLiveValidatedLabel(isLiveValidated: boolean): string | null {
@@ -139,7 +140,7 @@ export function getErpMikroTransportLabel(connectionMode: string, hasTestFixture
 }
 
 export function getErpMikroSetupGuidance(): string {
-  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında Zentra Mikro Bridge yapılandırılmalıdır.";
+  return "Gerçek Mikro bağlantısı için Mikro erişimi bulunan entegrasyon bilgisayarında Zentra Mikro Köprüsü yapılandırılmalıdır.";
 }
 
 export function getErpLogoConnectionStateLabel(input: {
@@ -172,7 +173,7 @@ export function getErpLogoConnectionStateLabel(input: {
 }
 
 export function getErpLogoAdapterReadyLabel(): string {
-  return "Adapter Hazır";
+  return "Bağlantı hazır";
 }
 
 export function getErpLogoLiveValidatedLabel(isLiveValidated: boolean): string | null {
@@ -192,7 +193,7 @@ export function getErpLogoTransportLabel(connectionMode: string, hasTestFixtureC
 }
 
 export function getErpLogoSetupGuidance(): string {
-  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında Zentra Logo Bridge yapılandırılmalıdır.";
+  return "Gerçek Logo bağlantısı için Logo erişimi bulunan entegrasyon bilgisayarında Zentra Logo Köprüsü yapılandırılmalıdır.";
 }
 
 export function getErpConnectionStatusLabel(status: ErpConnectionStatus | string): string {
@@ -372,22 +373,7 @@ export function getErpSourceFreshnessTone(
 }
 
 export function formatErpDateTime(iso?: string | null): string {
-  if (!iso) {
-    return "—";
-  }
-
-  const date = new Date(iso);
-  const datePart = date.toLocaleDateString("tr-TR", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-  const timePart = date.toLocaleTimeString("tr-TR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  return `${datePart}, ${timePart}`;
+  return formatDateTime(iso);
 }
 
 export function formatErpKpiTimestamp(iso?: string | null): { date: string; time: string } {

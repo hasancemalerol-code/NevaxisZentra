@@ -1,3 +1,5 @@
+import { CircleCheck, Clock, ShieldCheck } from "lucide-react";
+
 import type { ErpWritebackSummary } from "../domain/erp";
 import {
   formatErpDateTime,
@@ -8,8 +10,11 @@ import {
 import {
   ErpDataTable,
   ErpEmptyState,
+  ErpKpiCard,
+  ErpKpiGrid,
   ErpPageHeader,
   ErpProviderBadge,
+  ErpReadonlyNotice,
   ErpSectionHeader,
   ErpSimulatorNotice,
   ErpStatusBadge,
@@ -26,24 +31,59 @@ type ErpWritebacksViewProps = Readonly<{
 
 export function ErpWritebacksView({ writebacks }: ErpWritebacksViewProps) {
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title="Onaylı İşlemler"
-        description="ERP writeback istekleri — onay ve uygulama akışı. Maker-checker ile kontrollü ERP yazma."
-        notice={<ErpSimulatorNotice variant="writeback" />}
+        description="ERP’ye yazılacak işlem istekleri — iki aşamalı onay ve uygulama akışı."
+        notice={
+          <>
+            <ErpReadonlyNotice>
+              ERP’ye yazma yalnızca insan onayıyla gerçekleşir; onaysız işlem uygulanmaz.
+            </ErpReadonlyNotice>
+            <ErpSimulatorNotice variant="writeback" />
+          </>
+        }
       />
 
       <ErpWorkspaceNav activeHref="/erp-entegrasyonlari/onayli-islemler" />
 
+      <ErpKpiGrid columns={3}>
+        <ErpKpiCard
+          label="İşlem İstekleri"
+          value={writebacks.length}
+          description="Kayıtlı ERP işlem isteği"
+          icon={<ShieldCheck aria-hidden="true" />}
+        />
+        <ErpKpiCard
+          label="Onay Bekliyor"
+          value={writebacks.filter((writeback) => writeback.status === "pending-approval").length}
+          description="İnsan onayı bekleyen"
+          icon={<Clock aria-hidden="true" />}
+          tone="warning"
+        />
+        <ErpKpiCard
+          label="Tamamlandı"
+          value={writebacks.filter((writeback) => writeback.status === "succeeded").length}
+          description="ERP’ye başarıyla yazılan"
+          icon={<CircleCheck aria-hidden="true" />}
+          tone="success"
+        />
+      </ErpKpiGrid>
+
       <section className="erp-section">
         <ErpSectionHeader
-          title="Writeback İstekleri"
+          title="Onaylı İşlem İstekleri"
           description="Komut türü, durum, müşteri referansı ve onay geçmişi"
         />
         {writebacks.length === 0 ? (
-          <ErpEmptyState title="Henüz onaylı işlem kaydı yok." />
+          <ErpEmptyState
+            title="Henüz onaylı işlem kaydı yok."
+            description="ERP işlem istekleri oluşturulduğunda onay geçmişiyle birlikte burada listelenir."
+            actionHref="/erp-entegrasyonlari/senkronizasyonlar"
+            actionLabel="Eşitleme Merkezi"
+          />
         ) : (
-          <ErpDataTable className="erp-table--writebacks">
+          <ErpDataTable label="Onaylı işlemler" className="erp-table--writebacks">
             <thead>
               <tr>
                 <th>Komut</th>
@@ -92,6 +132,6 @@ export function ErpWritebacksView({ writebacks }: ErpWritebacksViewProps) {
           </ErpDataTable>
         )}
       </section>
-    </main>
+    </div>
   );
 }

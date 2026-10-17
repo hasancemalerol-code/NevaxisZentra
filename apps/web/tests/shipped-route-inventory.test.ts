@@ -11,6 +11,7 @@ import {
   HIDDEN_PLACEHOLDER_NAV_HREFS,
   WORKFLOW_PRIMARY_HOMES,
 } from "../src/lib/navigation/workflow-primary-navigation";
+import { isDeferredSurfaceHref } from "../src/lib/runtime/deferred-surfaces";
 import {
   isSubscriptionRecoveryRoute,
   resolveEntitlementCodeFromPath,
@@ -21,13 +22,15 @@ import {
 //   A = shipped, customer-visible V1 (reachable from navigation, a shipped child page, or a canonical redirect)
 //   B = internal / development-only (must be unreachable for customers and fail with an explained response)
 //   C = future / deferred (no page may exist for it yet; hidden navigation placeholders live here)
+//   D = deferred module whose pages exist but are fail-closed (404) unless a Demo/Presentation/Development context allows them;
+//       never shown in Production navigation and excluded from the shipping acceptance matrix
 // A new page without an entry, or a stale entry, fails this test. Class A routes must also be entitlement-mapped
 // identically in the API (C#) and the web map, otherwise the API fail-closes the route for every tenant and the
 // customer is redirected to the subscription page ("module" denial) even on a fully licensed installation.
 const repositoryRoot = path.resolve(__dirname, "..", "..", "..");
 const appRoot = path.resolve(__dirname, "..", "src", "app", "(app)");
 
-type RouteClass = "A" | "B" | "C";
+type RouteClass = "A" | "B" | "C" | "D";
 type InventoryEntry = Readonly<{ cls: RouteClass; why: string }>;
 
 const INVENTORY: Readonly<Record<string, InventoryEntry>> = {
@@ -61,14 +64,14 @@ const INVENTORY: Readonly<Record<string, InventoryEntry>> = {
   "/bakim/raporlama": { cls: "A", why: "child-of:/bakim" },
   "/bakim/varliklar/[assetReference]": { cls: "A", why: "child-of:/bakim" },
   "/dashboard": { cls: "A", why: "canonical-redirect:/" },
-  "/dijital-is-gucu": { cls: "A", why: "nav:/dijital-is-gucu" },
-  "/dijital-is-gucu/[workerId]": { cls: "A", why: "child-of:/dijital-is-gucu" },
-  "/dijital-is-gucu/aktivite": { cls: "A", why: "child-of:/dijital-is-gucu" },
-  "/dijital-is-gucu/calisanlar": { cls: "A", why: "child-of:/dijital-is-gucu" },
-  "/dijital-is-gucu/onaylar": { cls: "A", why: "nav:/dijital-is-gucu/onaylar" },
-  "/dijital-is-gucu/sonuclar": { cls: "A", why: "nav:/dijital-is-gucu/sonuclar" },
-  "/dijital-is-gucu/tamamlanan": { cls: "A", why: "child-of:/dijital-is-gucu" },
-  "/dijital-is-gucu/vakalar/[caseId]": { cls: "A", why: "child-of:/dijital-is-gucu" },
+  "/dijital-is-gucu": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/[workerId]": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/aktivite": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/calisanlar": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/onaylar": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/sonuclar": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/tamamlanan": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
+  "/dijital-is-gucu/vakalar/[caseId]": { cls: "D", why: "deferred Digital Workforce: fail-closed 404 in Production (layout gate)" },
   "/enerji": { cls: "A", why: "nav:/enerji" },
   "/erp-entegrasyonlari/baglanti": { cls: "A", why: "ERP workspace child (components/erp/erp-workspace-nav)" },
   "/erp-entegrasyonlari/belgeler": { cls: "A", why: "ERP workspace child (components/erp/erp-workspace-nav)" },
@@ -93,14 +96,14 @@ const INVENTORY: Readonly<Record<string, InventoryEntry>> = {
   "/fabrika-karar-merkezi/vakalar/[caseId]": { cls: "A", why: "child-of:/fabrika-karar-merkezi" },
   "/fabrika-vitrini": { cls: "A", why: "dashboard navigation child (components/dashboard/dashboard-navigation.ts)" },
   "/fabrika-zekasi": { cls: "A", why: "nav:/fabrika-zekasi" },
-  "/golden-demo/gumruk-dosyasi": { cls: "A", why: "Sunum Modu child (presentation-mode links)" },
-  "/golden-demo/uretim-kurtarma": { cls: "A", why: "Sunum Modu child (presentation-mode links)" },
+  "/golden-demo/gumruk-dosyasi": { cls: "D", why: "deferred demo surface: fail-closed 404 in Production (layout gate)" },
+  "/golden-demo/uretim-kurtarma": { cls: "D", why: "deferred demo surface: fail-closed 404 in Production (layout gate)" },
   "/ihracat": { cls: "A", why: "nav:/ihracat" },
   "/ihracat/[exportCaseId]": { cls: "A", why: "child-of:/ihracat" },
   "/ihracat/ulke-arastirma": { cls: "A", why: "child-of:/ihracat" },
   "/ihracat/ulke-arastirma/[researchCaseId]": { cls: "A", why: "child-of:/ihracat" },
   "/ihracat/ulke-bilgisi": { cls: "A", why: "child-of:/ihracat" },
-  "/intelligence-runtime": { cls: "A", why: "nav:/intelligence-runtime" },
+  "/intelligence-runtime": { cls: "D", why: "internal ML operations tooling: fail-closed 404 in Production (layout gate), never customer navigation" },
   "/internal/erisim-tanilama": { cls: "B", why: "development-only diagnostics; page answers 404 unless runtime mode is development-api" },
   "/iot-plc": { cls: "A", why: "nav:/iot-plc" },
   "/isler": { cls: "A", why: "nav:/isler" },
@@ -133,14 +136,14 @@ const INVENTORY: Readonly<Record<string, InventoryEntry>> = {
   "/siparisler": { cls: "A", why: "nav:/siparisler" },
   "/siparisler/[orderDraftId]": { cls: "A", why: "child-of:/siparisler" },
   "/stok-ve-depo/malzeme-riskleri": { cls: "A", why: "linked from Task Center source references and operations command center" },
-  "/sunum-modu": { cls: "A", why: "nav:/sunum-modu" },
+  "/sunum-modu": { cls: "D", why: "deferred demo surface: fail-closed 404 in Production (layout gate)" },
   "/surekli-optimizasyon": { cls: "A", why: "nav:/surekli-optimizasyon" },
   "/teams": { cls: "A", why: "nav:/teams" },
   "/teams/bildirimler": { cls: "A", why: "child-of:/teams" },
   "/teams/devretme": { cls: "A", why: "child-of:/teams" },
   "/teams/devretme/[handoverId]": { cls: "A", why: "child-of:/teams" },
   "/teams/devretme/yeni": { cls: "A", why: "child-of:/teams" },
-  "/teams/is-kutum": { cls: "A", why: "canonical-redirect:/" },
+  "/teams/is-kutum": { cls: "A", why: "child-of:/teams" },
   "/teams/onaylar": { cls: "A", why: "child-of:/teams" },
   "/teams/onaylar/[requestId]": { cls: "A", why: "child-of:/teams" },
   "/teams/onaylar/yeni": { cls: "A", why: "child-of:/teams" },
@@ -238,7 +241,11 @@ test("every navigation entry resolves to a classified class A page (or is a docu
     "navigation points at routes that have no page (route-map drift)",
   );
   for (const href of visible) {
-    assert.equal(inventoryByExample.get(href)?.cls, "A", `${href} is in navigation so it must be class A`);
+    assert.equal(
+      inventoryByExample.get(href)?.cls,
+      isDeferredSurfaceHref(href) ? "D" : "A",
+      `${href} is in navigation so it must be class A (or class D when it belongs to a deferred module)`,
+    );
   }
   for (const hidden of HIDDEN_PLACEHOLDER_NAV_HREFS) {
     assert.equal(inventoryByExample.has(hidden), false, `${hidden} is a hidden placeholder (class C) and must have no page`);
@@ -247,7 +254,7 @@ test("every navigation entry resolves to a classified class A page (or is a docu
   for (const required of [
     "/", "/dashboard", "/fabrika", "/planlama", "/isler", "/ai-gorevleri", "/vardiyalar",
     "/yonetici-komuta-merkezi", "/fabrika-karar-merkezi", "/uygulamalar", "/ayarlar/veri-aktarim-merkezi",
-    "/operasyon/yonetim-merkezi", "/fabrika-zekasi", "/sunum-modu",
+    "/operasyon/yonetim-merkezi", "/fabrika-zekasi",
   ]) {
     assert.equal(INVENTORY[required]?.cls, "A", `${required} must be a shipped route`);
   }
@@ -330,5 +337,50 @@ test("canonical redirects point at classified shipped routes", () => {
     if (!entry.why.startsWith("canonical-redirect:")) continue;
     const target = entry.why.slice("canonical-redirect:".length).split("?")[0];
     assert.equal(inventoryByExample.has(exampleOf(target)), true, `${route} redirects to ${target}, which is not a page`);
+  }
+});
+
+test("class D (deferred) routes are exactly the deferred-module prefix and their layout fails closed", () => {
+  const deferred = Object.entries(INVENTORY).filter(([, entry]) => entry.cls === "D").map(([route]) => route);
+  assert.ok(deferred.length >= 8, "the Digital Workforce pages stay in the inventory as class D");
+  for (const route of deferred) {
+    assert.equal(isDeferredSurfaceHref(route), true, `${route} must be under the deferred prefix`);
+  }
+  const layout = readFileSync(path.join(appRoot, "dijital-is-gucu", "layout.tsx"), "utf8");
+  assert.match(layout, /deferredSurfacesEnabled\(\)[\s\S]{0,40}notFound\(\)/, "the deferred module layout must fail closed");
+  for (const dir of ["sunum-modu", "golden-demo", "intelligence-runtime"]) {
+    const demoLayout = readFileSync(path.join(appRoot, dir, "layout.tsx"), "utf8");
+    assert.match(demoLayout, /deferredSurfacesEnabled\(\)[\s\S]{0,40}notFound\(\)/, `${dir} layout must fail closed`);
+  }
+});
+
+test("deferred surfaces answer a real 404 from the middleware before streaming starts", async () => {
+  const { middleware } = await import("../src/middleware");
+  const { NextRequest } = await import("next/server");
+  const saved = { ...process.env };
+  const clear = () => {
+    delete process.env.NEVAXIS_FACTOS_DEPLOYMENT_CHANNEL;
+    delete process.env.NEVAXIS_ZENTRA_ENABLE_DEFERRED_SURFACES;
+    (process.env as Record<string, string>).NODE_ENV = "production";
+  };
+  try {
+    clear();
+    for (const path of ["/dijital-is-gucu", "/dijital-is-gucu/aktivite", "/sunum-modu", "/golden-demo/uretim-kurtarma"]) {
+      const response = middleware(new NextRequest(`http://localhost${path}`));
+      assert.equal(response.status, 404, path);
+      assert.match(response.headers.get("x-middleware-rewrite") ?? "", /__deferred-surface-not-found/, path);
+      assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
+    }
+    for (const path of ["/", "/dijital-isgucu", "/golden-demonstration"]) {
+      const response = middleware(new NextRequest(`http://localhost${path}`));
+      assert.doesNotMatch(response.headers.get("x-middleware-rewrite") ?? "", /__deferred-surface-not-found/, path);
+    }
+    clear();
+    process.env.NEVAXIS_FACTOS_DEPLOYMENT_CHANNEL = "DEMO";
+    const demo = middleware(new NextRequest("http://localhost/sunum-modu"));
+    assert.doesNotMatch(demo.headers.get("x-middleware-rewrite") ?? "", /__deferred-surface-not-found/);
+  } finally {
+    for (const key of Object.keys(process.env)) if (!(key in saved)) delete process.env[key];
+    Object.assign(process.env, saved);
   }
 });

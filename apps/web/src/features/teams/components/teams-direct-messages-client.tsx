@@ -17,6 +17,8 @@ import {
   sendTeamsDirectMessageAction,
 } from "@/features/teams/server/teams-actions";
 import { TEAMS_DIRECT_MESSAGE_DISCLAIMER } from "@/features/teams/domain/teams-constants";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { createActorLabeler } from "@/lib/presentation/display-label";
 
 type TeamsDirectMessagesClientProps = Readonly<{
   conversations: RawTeamsDirectConversationListResponse;
@@ -44,6 +46,7 @@ export function TeamsDirectMessagesClient({
   selectedConversationId,
   canWrite,
 }: TeamsDirectMessagesClientProps) {
+  const actorLabel = useMemo(() => createActorLabeler(), []);
   const router = useRouter();
   const [messageBody, setMessageBody] = useState("");
   const [selectedRecipientId, setSelectedRecipientId] = useState("");
@@ -140,7 +143,7 @@ export function TeamsDirectMessagesClient({
                 >
                   <span className="teams-channel-name">
                     <UserRound aria-hidden size={16} />
-                    {conversation.otherParticipantLabel}
+                    {actorLabel(conversation.otherParticipantLabel)}
                   </span>
                   {conversation.latestMessagePreview ? (
                     <span className="teams-channel-preview">{conversation.latestMessagePreview}</span>
@@ -168,13 +171,16 @@ export function TeamsDirectMessagesClient({
               <option value="">Üye seçin</option>
               {recipientOptions.map((recipient) => (
                 <option key={recipient.tenantMembershipId} value={recipient.tenantMembershipId}>
-                  {recipient.displayLabel}
+                  {actorLabel(recipient.displayLabel)}
                 </option>
               ))}
             </select>
             <Button disabled={pending || !selectedRecipientId} onClick={() => void startConversation()} type="button">
               Başlat
             </Button>
+            {!selectedRecipientId ? (
+              <p className="teams-direct-compose__hint">Önce üye seçin.</p>
+            ) : null}
           </div>
         ) : null}
       </aside>
@@ -184,7 +190,7 @@ export function TeamsDirectMessagesClient({
           <>
             <header className="teams-workspace-header">
               <div>
-                <h2>{selectedConversation.otherParticipantLabel}</h2>
+                <h2>{actorLabel(selectedConversation.otherParticipantLabel)}</h2>
                 <p>{selectedConversation.totalMessageCount} mesaj</p>
               </div>
             </header>
@@ -200,7 +206,7 @@ export function TeamsDirectMessagesClient({
                     data-testid={`teams-direct-message-${message.id}`}
                   >
                     <header>
-                      <strong>{message.authorLabel}</strong>
+                      <strong>{actorLabel(message.authorLabel)}</strong>
                       <time dateTime={message.createdAt}>{formatWhen(message.createdAt)}</time>
                     </header>
                     <p>{message.body}</p>
@@ -230,11 +236,12 @@ export function TeamsDirectMessagesClient({
         ) : (
           <div className="teams-empty-state">
             <MessageSquare aria-hidden size={28} />
+            <p><strong>Konuşma seçilmedi</strong></p>
             <p>Bir konuşma seçin veya yeni konuşma başlatın.</p>
           </div>
         )}
 
-        {error ? <p className="teams-error" role="alert">{error}</p> : null}
+        {error ? <p className="teams-error" role="alert">{customerMessage(error)}</p> : null}
         <p className="teams-disclaimer" data-testid="teams-direct-messages-disclaimer">
           {TEAMS_DIRECT_MESSAGE_DISCLAIMER}
         </p>

@@ -61,7 +61,7 @@ async function requestJson<T>(
       return {
         status: "failure",
         code: "invalid-response",
-        message: "AI değerlendirme yanıtı çözümlenemedi.",
+        message: "Yapay zekâ değerlendirme yanıtı çözümlenemedi.",
         retryable: true,
       };
     }
@@ -86,7 +86,7 @@ async function requestJson<T>(
     if (!response.ok) {
       const message = typeof payload === "object" && payload && "detail" in payload
         ? String((payload as { detail: unknown }).detail)
-        : `AI isteği başarısız (${response.status}).`;
+        : `Yapay zekâ isteği başarısız (${response.status}).`;
       return { status: "failure", code: "invalid-request", message, retryable: response.status >= 500 };
     }
 
@@ -95,7 +95,7 @@ async function requestJson<T>(
     return {
       status: "failure",
       code: "source-unavailable",
-      message: "AI değerlendirmesi şu anda kullanılamıyor.",
+      message: "Yapay zekâ değerlendirmesi şu anda kullanılamıyor.",
       retryable: true,
     };
   }

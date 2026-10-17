@@ -10,10 +10,12 @@ import {
   type FormEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Cable,
   ClipboardCheck,
+  Inbox,
   LoaderCircle,
   Plus,
   RefreshCw,
@@ -34,7 +36,6 @@ import type {
   IotPlcWorkspacePayload,
 } from "../domain/iot-plc-types";
 import {
-  IOT_PLC_CURRENT_EVIDENCE_SCOPE,
   IOT_PLC_CURRENT_STATUS_NOTE,
   IOT_PLC_DEVELOPMENT_BANNER,
   IOT_PLC_EVIDENCE_FILTER_OPTIONS,
@@ -65,6 +66,7 @@ import {
   buildQualityBarSegments,
   formatIotPlcQualitySliceLine,
   healthTimelineTone,
+  isIotPlcKpiValueEmpty,
   isIotPlcHealthCompositionAllUnknown,
   reconcileIotPlcQualityDistribution,
   resolveKpiToneClass,
@@ -83,6 +85,11 @@ import {
   updateIotPlcSignalAction,
 } from "../server/iot-plc-actions";
 import "./iot-plc-workspace.css";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { InlineUnavailable } from "@/components/ui/state-page";
+import { localizeStatusWords } from "@/lib/presentation/enum-labels";
+const localizeIotText = (text: string | null | undefined): string => displayDataName(localizeStatusWords(text));
+import { displayDataName } from "@/lib/presentation/display-name";
 
 type IotPlcWorkspaceViewProps = Readonly<{
   workspace: IotPlcWorkspacePayload;
@@ -312,8 +319,7 @@ function IotPlcQualityDistribution({
   if (!denominator || denominator <= 0) {
     return (
       <p className="iot-plc-empty" data-testid="iot-plc-quality-distribution-empty">
-        Uyumlu değerlendirme penceresi veya gözlem paydası bulunamadı; kalite dağılımı
-        gösterilemiyor.
+        Bu dönem için yeterli ölçüm bulunamadı; kalite dağılımı gösterilemiyor.
       </p>
     );
   }
@@ -366,7 +372,7 @@ function IotPlcQualityDistribution({
         ))}
       </ul>
       <p className="iot-plc-panel__meta" data-testid="iot-plc-quality-reconciliation">
-        Payda: {formatIotPlcCount(denominator)} gözlem
+        Hesaba katılan: {formatIotPlcCount(denominator)} gözlem
       </p>
     </div>
   );
@@ -424,7 +430,7 @@ function QualityProfileIntelligenceSurface({
     <div className="iot-plc-quality-hero__body" data-testid="iot-plc-quality-hero-intelligence">
       <div className="iot-plc-quality-hero__header">
         <div className="iot-plc-quality-hero__intro">
-          <h2 className="iot-plc-quality-hero__title">{profile.displayName}</h2>
+          <h2 className="iot-plc-quality-hero__title">{displayDataName(profile.displayName)}</h2>
           <p className="iot-plc-quality-hero__meta">
             {profile.profileCode} · {profile.statusLabel}
           </p>
@@ -445,7 +451,7 @@ function QualityProfileIntelligenceSurface({
         </div>
       ) : !assessment || !detail || !distribution.denominator ? (
         <p className="iot-plc-empty" data-testid="iot-plc-quality-hero-unavailable">
-          Bu profil için uyumlu sinyal kalitesi değerlendirmesi veya gözlem paydası bulunamadı.
+          Bu profil için yeterli ölçüm içeren bir sinyal kalitesi değerlendirmesi bulunamadı.
         </p>
       ) : (
         <>
@@ -455,14 +461,14 @@ function QualityProfileIntelligenceSurface({
               <strong>{assessment.evaluationPeriodLabel}</strong>
             </div>
             <div>
-              <span className="iot-plc-quality-hero__fact-label">Gözlem paydası</span>
+              <span className="iot-plc-quality-hero__fact-label">Gözlem sayısı</span>
               <strong data-testid="iot-plc-quality-hero-denominator">
                 {formatIotPlcCount(distribution.denominator)}
               </strong>
             </div>
             <div>
               <span className="iot-plc-quality-hero__fact-label">Öncü sürücü</span>
-              <strong>{leadingDriver?.reasonLabel ?? assessment.leadingDriverLabel ?? "—"}</strong>
+              <strong>{localizeIotText(leadingDriver?.reasonLabel ?? assessment.leadingDriverLabel ?? "—")}</strong>
             </div>
             <div>
               <span className="iot-plc-quality-hero__fact-label">Kanıt / kaynak</span>
@@ -538,7 +544,7 @@ function QualityProfileIntelligenceSurface({
                 ))}
               </ul>
               <p className="iot-plc-panel__meta" data-testid="iot-plc-quality-hero-reconciliation">
-                Payda: {formatIotPlcCount(distribution.denominator)} gözlem
+                Hesaba katılan: {formatIotPlcCount(distribution.denominator)} gözlem
               </p>
             </div>
           </div>
@@ -1141,7 +1147,7 @@ export function IotPlcWorkspaceView({
     }
 
     return (
-      <table className="iot-plc-registry-table">
+      <table aria-label="Sinyal kalitesi değerlendirmeleri" className="iot-plc-registry-table">
         <thead>
           <tr>
             <th>Değerlendirme</th>
@@ -1194,23 +1200,33 @@ export function IotPlcWorkspaceView({
     );
   }
 
+  const kpisAllEmpty =
+    workspace.kpis.length > 0 && workspace.kpis.every((kpi) => isIotPlcKpiValueEmpty(kpi.value));
+  const overviewEmpty =
+    workspace.healthTotal === 0 &&
+    workspace.findings.length === 0 &&
+    workspace.healthTimeline.length === 0 &&
+    !workspace.qualityDenominator;
+
   return (
-    <main className="iot-plc-page" data-testid="iot-plc-workspace">
+    <div className="iot-plc-page" data-testid="iot-plc-workspace">
       <section className="iot-plc-executive" aria-label="IoT ve PLC komuta yüzeyi">
         <div className="iot-plc-executive__top">
           <div className="iot-plc-executive__intro">
             <p className="iot-plc-executive__eyebrow">ENDÜSTRİYEL BAĞLANTI</p>
-            <h1>IoT & PLC</h1>
+            <h1>IoT ve PLC</h1>
             <p className="iot-plc-executive__subtitle">
-              Endüstriyel bağlantıları, sinyal akışını ve veri kalitesi kanıtlarını tek çalışma
-              alanında izleyin.
+              Bağlantıları, sinyal akışını ve veri kalitesi kanıtlarını tek yerde izleyin.
             </p>
             <ul className="iot-plc-executive__meta" aria-label="Çalışma alanı meta verisi">
-              <li>{meta.facilityLabel}</li>
+              {meta.hasDevelopmentPilotData ? <li>{meta.facilityLabel}</li> : null}
               <li>Yenileme: {meta.refreshedLabel}</li>
-              <li>Kanıt türü: {meta.hasDevelopmentPilotData ? "Simülasyon" : "Ölçülmüş"}</li>
+              {overviewEmpty ? null : (
+                <li>Kanıt türü: {meta.hasDevelopmentPilotData ? "Test verisi" : "Ölçülen"}</li>
+              )}
             </ul>
           </div>
+          {overviewEmpty ? null : (
           <div className="iot-plc-executive__actions">
             <button
               type="button"
@@ -1227,6 +1243,7 @@ export function IotPlcWorkspaceView({
               Yenile
             </button>
           </div>
+          )}
         </div>
 
         {meta.hasDevelopmentPilotData ? (
@@ -1235,7 +1252,7 @@ export function IotPlcWorkspaceView({
             role="status"
             data-testid="iot-plc-provenance-strip"
           >
-            <span className="iot-plc-provenance-strip__badge">Simülasyon</span>
+            <span className="iot-plc-provenance-strip__badge">Örnek veri</span>
             <span>{IOT_PLC_DEVELOPMENT_BANNER}</span>
           </p>
         ) : null}
@@ -1253,7 +1270,7 @@ export function IotPlcWorkspaceView({
       ) : null}
 
       {error ? (
-        <div className="iot-plc-error-banner" role="alert">{error}</div>
+        <div className="iot-plc-error-banner" role="alert">{customerMessage(error)}</div>
       ) : null}
 
       {actionMessage ? (
@@ -1268,6 +1285,9 @@ export function IotPlcWorkspaceView({
 
       {isWorkspaceRefreshing ? (
         <WorkspaceSkeleton />
+      ) : kpisAllEmpty ? (
+        // No connection evidence yet: the empty overview card below is the single statement of that state.
+        null
       ) : (
         <div className="iot-plc-kpi-grid" data-testid="iot-plc-kpi-grid" aria-label="IoT göstergeleri">
           {workspace.kpis.map((kpi) => {
@@ -1275,7 +1295,7 @@ export function IotPlcWorkspaceView({
             return (
               <article
                 key={kpi.id}
-                className={`iot-plc-kpi-card ${resolveKpiToneClass(kpi.tone)}`}
+                className={`iot-plc-kpi-card ${resolveKpiToneClass(kpi.tone, kpi.value)}`}
                 data-testid="iot-plc-kpi-card"
                 data-kpi-id={kpi.id}
                 aria-label={`${kpi.label}: ${kpi.value}`}
@@ -1325,7 +1345,34 @@ export function IotPlcWorkspaceView({
         ))}
       </div>
 
-      {activeTab === "overview" ? (
+      {activeTab === "overview" && overviewEmpty ? (
+        <section
+          id="iot-plc-tab-panel-overview"
+          role="tabpanel"
+          aria-labelledby="iot-plc-tab-overview"
+          className="iot-plc-panel iot-plc-overview-empty"
+          data-testid="iot-plc-overview-grid"
+        >
+          <span className="iot-plc-overview-empty__icon" aria-hidden="true"><Inbox size={22} /></span>
+          <h2 className="iot-plc-panel__title">Henüz bağlantı verisi yok</h2>
+          <p className="iot-plc-panel__note" data-testid="iot-plc-current-status-note">
+            Kayıtlı bağlantı, sinyal veya sağlık gözlemi bulunmadığı için bağlantı durumu, sinyal kalitesi ve
+            bulgular burada görünecek.
+          </p>
+          <div className="iot-plc-overview-empty__actions">
+            {canManage ? (
+              <button type="button" className="iot-plc-button iot-plc-button--primary" onClick={() => setActiveTab("connections")}>
+                Bağlantı Ekle
+              </button>
+            ) : null}
+            <Link className="iot-plc-button" href="/ayarlar/veri-aktarim-merkezi">
+              Veri Aktarım Merkezi
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
+      {activeTab === "overview" && !overviewEmpty ? (
         <div
           id="iot-plc-tab-panel-overview"
           role="tabpanel"
@@ -1336,9 +1383,6 @@ export function IotPlcWorkspaceView({
           <section className="iot-plc-panel iot-plc-panel--analytics" aria-label="Bağlantı durumu">
             <div className="iot-plc-panel__header">
               <h2 className="iot-plc-panel__title">Bağlantı durumu</h2>
-              <p className="iot-plc-panel__scope" data-testid="iot-plc-current-evidence-scope">
-                {IOT_PLC_CURRENT_EVIDENCE_SCOPE}
-              </p>
             </div>
             <p className="iot-plc-panel__note" data-testid="iot-plc-current-status-note">
               {IOT_PLC_CURRENT_STATUS_NOTE}
@@ -1379,22 +1423,22 @@ export function IotPlcWorkspaceView({
                   >
                     <div className="iot-plc-finding-card__header">
                       <span className={`iot-plc-finding-card__badge ${findingSeverityClass(finding.severity)}`}>
-                        {finding.outcomeLabel ?? finding.title}
+                        {localizeIotText(finding.outcomeLabel ?? finding.title)}
                       </span>
                       {finding.evidenceLabel ? (
                         <span className="iot-plc-finding-card__evidence">{finding.evidenceLabel}</span>
                       ) : null}
                     </div>
-                    <h3 className="iot-plc-finding-card__title">{finding.title}</h3>
+                    <h3 className="iot-plc-finding-card__title">{localizeIotText(finding.title)}</h3>
                     {finding.periodLabel ? (
                       <p className="iot-plc-finding-card__scope">{finding.periodLabel}</p>
                     ) : null}
                     {finding.leadingDriverLabel ? (
                       <p className="iot-plc-finding-card__driver">
-                        Öncü sürücü: {finding.leadingDriverLabel}
+                        Öncü sürücü: {localizeIotText(finding.leadingDriverLabel)}
                       </p>
                     ) : null}
-                    <p className="iot-plc-finding-card__detail">{finding.detail}</p>
+                    <p className="iot-plc-finding-card__detail">{localizeIotText(finding.detail)}</p>
                     {finding.id.startsWith("assessment-") ? (
                       <button
                         type="button"
@@ -1497,7 +1541,7 @@ export function IotPlcWorkspaceView({
                     <p>Kayıtlı bağlantı bulunmuyor.</p>
                   </div>
                 ) : (
-                  <table className="iot-plc-registry-table">
+                  <table aria-label="Bağlantı kayıtları" className="iot-plc-registry-table">
                     <thead>
                       <tr>
                         <th>Ad</th>
@@ -1529,7 +1573,7 @@ export function IotPlcWorkspaceView({
                             }
                           }}
                         >
-                          <td>{endpoint.displayName}</td>
+                          <td>{displayDataName(endpoint.displayName)}</td>
                           <td>{endpoint.endpointCode}</td>
                           <td>{endpoint.protocolLabel}</td>
                           <td>{endpoint.connectionDirectionLabel}</td>
@@ -1554,7 +1598,7 @@ export function IotPlcWorkspaceView({
               <aside className="iot-plc-detail-panel" aria-label="Bağlantı detayı">
                 <div className="iot-plc-detail-panel__header">
                   <div>
-                    <h3 className="iot-plc-detail-panel__title">{selectedEndpoint.displayName}</h3>
+                    <h3 className="iot-plc-detail-panel__title">{displayDataName(selectedEndpoint.displayName)}</h3>
                     <p className="iot-plc-panel__meta">{selectedEndpoint.endpointCode}</p>
                   </div>
                   <button
@@ -1602,7 +1646,7 @@ export function IotPlcWorkspaceView({
                       ) : (
                         <ul style={{ margin: 0, paddingLeft: "1rem" }}>
                           {endpointDetail.mappedSignals.map((signal) => (
-                            <li key={signal.reference}>{signal.displayName} · {signal.signalCode}</li>
+                            <li key={signal.reference}>{displayDataName(signal.displayName)} · {signal.signalCode}</li>
                           ))}
                         </ul>
                       )}
@@ -1621,7 +1665,7 @@ export function IotPlcWorkspaceView({
                     ) : null}
                   </>
                 ) : (
-                  <p className="iot-plc-empty">Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 )}
               </aside>
             ) : null}
@@ -1675,7 +1719,7 @@ export function IotPlcWorkspaceView({
                     <p>Kayıtlı sinyal bulunmuyor.</p>
                   </div>
                 ) : (
-                  <table className="iot-plc-registry-table">
+                  <table aria-label="Sinyal kayıtları" className="iot-plc-registry-table">
                     <thead>
                       <tr>
                         <th>Ad</th>
@@ -1708,7 +1752,7 @@ export function IotPlcWorkspaceView({
                             }
                           }}
                         >
-                          <td>{signal.displayName}</td>
+                          <td>{displayDataName(signal.displayName)}</td>
                           <td>{signal.signalCode}</td>
                           <td>{signal.endpointLabel}</td>
                           <td>{signal.semanticTypeLabel}</td>
@@ -1732,7 +1776,7 @@ export function IotPlcWorkspaceView({
               <aside className="iot-plc-detail-panel" aria-label="Sinyal detayı">
                 <div className="iot-plc-detail-panel__header">
                   <div>
-                    <h3 className="iot-plc-detail-panel__title">{selectedSignal.displayName}</h3>
+                    <h3 className="iot-plc-detail-panel__title">{displayDataName(selectedSignal.displayName)}</h3>
                     <p className="iot-plc-panel__meta">{selectedSignal.signalCode}</p>
                   </div>
                   <button
@@ -1821,7 +1865,7 @@ export function IotPlcWorkspaceView({
                     ) : null}
                   </>
                 ) : (
-                  <p className="iot-plc-empty">Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 )}
               </aside>
             ) : null}
@@ -2100,7 +2144,7 @@ export function IotPlcWorkspaceView({
                       <dd>{assessmentDetail.summary.leadingDriverLabel}</dd>
                       <dt>Profil</dt>
                       <dd>{assessmentDetail.profileLabel}</dd>
-                      <dt>Gözlem paydası</dt>
+                      <dt>Gözlem sayısı</dt>
                       <dd>
                         {assessmentDetail.actualObservationCount !== null
                           ? formatIotPlcCount(assessmentDetail.actualObservationCount)
@@ -2161,7 +2205,7 @@ export function IotPlcWorkspaceView({
                     </section>
                   </>
                 ) : (
-                  <p className="iot-plc-empty">Detay yüklenemedi.</p>
+                  <InlineUnavailable subject="Ayrıntı" />
                 )}
               </aside>
             ) : null}
@@ -2196,7 +2240,7 @@ export function IotPlcWorkspaceView({
               {endpointForm.mode === "create" ? "Bağlantı ekle" : "Bağlantıyı düzenle"}
             </h3>
             {dialogError ? (
-              <div className="iot-plc-error-banner" role="alert">{dialogError}</div>
+              <div className="iot-plc-error-banner" role="alert">{customerMessage(dialogError)}</div>
             ) : null}
             <label>
               Kod
@@ -2344,7 +2388,7 @@ export function IotPlcWorkspaceView({
               {signalForm.mode === "create" ? "Sinyal ekle" : "Sinyali düzenle"}
             </h3>
             {dialogError ? (
-              <div className="iot-plc-error-banner" role="alert">{dialogError}</div>
+              <div className="iot-plc-error-banner" role="alert">{customerMessage(dialogError)}</div>
             ) : null}
             {signalForm.mode === "create" ? (
               <>
@@ -2543,7 +2587,7 @@ export function IotPlcWorkspaceView({
             <h3 id="iot-plc-profile-dialog-title">Kalite profilini düzenle</h3>
             <p className="iot-plc-panel__meta">{profileForm.profile.profileCode}</p>
             {dialogError ? (
-              <div className="iot-plc-error-banner" role="alert">{dialogError}</div>
+              <div className="iot-plc-error-banner" role="alert">{customerMessage(dialogError)}</div>
             ) : null}
             <label>
               Görünen ad
@@ -2659,6 +2703,6 @@ export function IotPlcWorkspaceView({
           </form>
         </div>
       ) : null}
-    </main>
+    </div>
   );
 }

@@ -1,17 +1,17 @@
 import Link from "next/link";
-import { ArrowLeft, RefreshCw, Sparkles } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   PageContent,
   PageHeader,
-  Section,
 } from "@/components/ui/page";
-import { EmptyState } from "@/components/ui/states";
+
 import { AiTaskAutomationWorkspaceClient } from "@/features/ai-task-center/components/ai-task-automation-workspace-client";
 import { refreshAiTaskAutomationWorkspaceAction } from "@/features/ai-task-center/server/ai-task-automation-actions";
 import { readAiTaskAutomationWorkspace } from "@/features/ai-task-center/server/ai-task-automation-queries";
+import { FailureStatePage } from "@/components/ui/failure-state";
+import "@/features/ai-task-center/components/ai-task-center-round3.css";
 
 async function RefreshButton() {
   async function refresh() {
@@ -20,7 +20,7 @@ async function RefreshButton() {
   }
 
   return (
-    <form action={refresh}>
+    <form action={refresh} className="zx-inline-form">
       <Button leadingIcon={<RefreshCw />} type="submit" variant="secondary">
         Veriyi yenile
       </Button>
@@ -35,16 +35,12 @@ export async function AiTaskAutomationPageContent() {
     return (
       <PageContent>
         <PageHeader
-          description="AI görev otomasyon kuralları ve simülasyon yönetimi"
-          eyebrow="AI Görev Merkezi"
+          description="Yapay zekâ görev otomasyon kuralları ve simülasyon yönetimi"
+          eyebrow="Görev Merkezi"
           title="Otomasyon Yönetimi"
         />
 
-        <EmptyState
-          data-testid="ai-task-automation-error"
-          description={result.message}
-          title="Otomasyon yönetimi yüklenemedi"
-        />
+        <div data-testid="ai-task-automation-error"><FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Otomasyon yönetimi yüklenemedi" inline /></div>
       </PageContent>
     );
   }
@@ -63,22 +59,12 @@ export async function AiTaskAutomationPageContent() {
             <RefreshButton />
           </>
         }
-        description="Kuralları, politikaları, simülasyonları ve çalışma geçmişini yönetin."
-        eyebrow="AI Görev Merkezi"
+        description="Kuralları, politikaları, simülasyonları ve çalışma geçmişini yönetin. Kritik aksiyonlar insan onayı gerektirir."
+        eyebrow="Görev Merkezi"
         title="Otomasyon Yönetimi"
       />
 
-      <Section
-        action={
-          <Badge tone="ai">
-            <Sparkles aria-hidden="true" />
-            Human-in-the-Loop
-          </Badge>
-        }
-        description="Otomasyon kuralları görevleri yönlendirir; kritik aksiyonlar insan onayı gerektirir."
-        title="Otomasyon çalışma alanı"
-      >
-        <AiTaskAutomationWorkspaceClient
+      <AiTaskAutomationWorkspaceClient
           capabilities={workspace.capabilities}
           closurePolicies={workspace.closurePolicies}
           executions={workspace.executions}
@@ -86,7 +72,6 @@ export async function AiTaskAutomationPageContent() {
           slaPolicies={workspace.slaPolicies}
           taskOptions={workspace.taskOptions}
         />
-      </Section>
     </PageContent>
   );
 }

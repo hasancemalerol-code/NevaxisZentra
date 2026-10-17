@@ -176,7 +176,7 @@ export function getEvidenceSourceLabel(source: string, label?: string): string {
     case "assignment-registry":
       return "Atama kaydı";
     case "eligibility-engine":
-      return "Uygunluk motoru";
+      return "Uygunluk kuralları";
     default:
       return "Kaynak";
   }

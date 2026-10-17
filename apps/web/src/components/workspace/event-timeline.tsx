@@ -1,3 +1,4 @@
+import { FACILITY_TIME_ZONE } from "@/lib/presentation/format";
 type EventTimelineEntry = Readonly<{
   id: string;
   occurredAtUtc: string;
@@ -14,7 +15,11 @@ type EventTimelineProps = Readonly<{
 
 export function EventTimeline({ entries, emptyMessage = "Henüz olay kaydı yok." }: EventTimelineProps) {
   if (entries.length === 0) {
-    return <p className="production-execution-empty__desc">{emptyMessage}</p>;
+    return (
+      <p className="production-execution-empty__desc fact-event-timeline__empty" role="status">
+        {emptyMessage}
+      </p>
+    );
   }
 
   return (
@@ -22,11 +27,11 @@ export function EventTimeline({ entries, emptyMessage = "Henüz olay kaydı yok.
       {entries.map((entry) => (
         <article key={entry.id} className="fact-event-row">
           <time className="fact-event-row__time" dateTime={entry.occurredAtUtc}>
-            {new Date(entry.occurredAtUtc).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+            {new Date(entry.occurredAtUtc).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit", timeZone: FACILITY_TIME_ZONE })}
           </time>
           <span className="fact-event-row__category">{entry.category}</span>
           <span className="fact-event-row__summary" title={entry.summary}>
-            {entry.eventType} · {entry.summary}
+            {entry.eventType ? `${entry.eventType} · ` : ""}{entry.summary}
           </span>
           {entry.quantity != null ? <span className="fact-numeric">{entry.quantity}</span> : <span />}
         </article>

@@ -1,3 +1,4 @@
+import { formatDateTime } from "@/lib/presentation/format";
 import type { QualityCorrectiveActionDetail } from "../domain/quality-control";
 import { getQualityStatusLabel } from "../domain/quality-control";
 import { isCorrectiveActionOverdue } from "./quality-dashboard-labels";
@@ -60,11 +61,42 @@ export function formatQualityDateTime(isoTimestamp?: string): string {
     return "—";
   }
 
-  return new Date(isoTimestamp).toLocaleString("tr-TR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTime(isoTimestamp);
+}
+
+const CATEGORY_LABELS: Readonly<Record<string, string>> = {
+  surface: "Yüzey",
+  dimensional: "Ölçü",
+  dimension: "Ölçü",
+  appearance: "Görünüm",
+  cosmetic: "Görünüm",
+  material: "Malzeme",
+  process: "Proses",
+  assembly: "Montaj",
+  packaging: "Ambalaj",
+  labeling: "Etiketleme",
+  labelling: "Etiketleme",
+  functional: "Fonksiyonel",
+  electrical: "Elektrik",
+  mechanical: "Mekanik",
+  contamination: "Kontaminasyon",
+  supplier: "Tedarikçi",
+  documentation: "Dokümantasyon",
+  safety: "Güvenlik",
+  workmanship: "İşçilik",
+  tooling: "Takım",
+  mold: "Kalıp",
+  "inspection-failure": "Kontrol uygunsuzluğu",
+  inspection_failure: "Kontrol uygunsuzluğu",
+  other: "Diğer",
+};
+
+/** Turkish label for a free-text NCR category or defect dimension value; unknown values are humanized, never shown raw. */
+export function getQualityCategoryLabel(value: string | null | undefined): string {
+  const key = (value ?? "").trim().toLowerCase();
+  if (!key) {
+    return "—";
+  }
+
+  return CATEGORY_LABELS[key] ?? getQualityStatusLabel(key);
 }

@@ -1,7 +1,7 @@
 .shift-ops-page {
   display: grid;
-  gap: 1.5rem;
-  padding: 1.5rem;
+  gap: 24px;
+  padding: 24px;
 }
 
 .shift-ops-shell__nav {
@@ -51,6 +51,7 @@
   background: var(--surface-elevated, #fff);
 }
 
+.shift-ops-card h2,
 .shift-ops-card h3 {
   margin: 0 0 0.5rem;
   font-size: 1rem;
@@ -106,7 +107,7 @@
   justify-content: center;
   border-radius: 10px;
   padding: 0.65rem 1rem;
-  background: var(--accent, #0f4c81);
+  background: var(--zx-accent-strong, #1d4ed8);
   color: #fff;
   text-decoration: none;
   font-weight: 600;
@@ -126,4 +127,402 @@
   padding: 0.5rem 0.75rem;
   border-left: 3px solid #c62828;
   background: #fafafa;
+}
+
+/* Header first, then one single-row tab bar that scrolls instead of wrapping. */
+.shift-ops-tabs {
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shift-ops-tabs .zx-subnav {
+  flex-wrap: nowrap;
+  margin: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.shift-ops-tabs .zx-subnav__group {
+  flex-wrap: nowrap;
+}
+
+.shift-ops-tabs .zx-subnav__link {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  scroll-snap-align: start;
+}
+
+.shift-ops-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.shift-ops-muted {
+  margin: 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.shift-ops-link {
+  color: var(--zx-accent-strong, #1d4ed8);
+  font-weight: 600;
+}
+
+.shift-ops-kpi {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.shift-ops-kpi .shift-ops-readiness {
+  margin: 0;
+  line-height: 1.1;
+}
+
+.shift-ops-kpi__caption {
+  margin: 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.shift-ops-facts {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.shift-ops-facts div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+
+.shift-ops-facts dt {
+  color: var(--zx-text-muted, #5b6676);
+}
+
+.shift-ops-facts dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.shift-ops-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+}
+
+.shift-ops-kpi-card {
+  display: grid;
+  align-content: space-between;
+  gap: 8px;
+}
+
+.shift-ops-kpi-card h2 {
+  min-height: 2.6em;
+  margin: 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.shift-ops-kpi-value {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.shift-ops-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shift-ops-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-subtle, #d8dee9);
+}
+
+.shift-ops-row:first-child {
+  border-top: 0;
+}
+
+.shift-ops-row__label {
+  font-weight: 600;
+}
+
+.shift-ops-row__meta {
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+}
+
+.shift-ops-card .zx-empty {
+  border: 0;
+  background: transparent;
+}
+
+/* ─── Round 3: one card-title style, real KPI values, chips, calm empty states ─── */
+.shift-ops-page .shift-ops-card h2 {
+  color: var(--zx-text-strong, #0f172a);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.shift-ops-page .shift-ops-card h3.shift-ops-subhead {
+  margin: 8px 0 4px;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* The generic card paragraph rule (0.9375rem) must not shrink the KPI numbers. */
+.shift-ops-page .shift-ops-card .shift-ops-readiness,
+.shift-ops-page .shift-ops-card .shift-ops-kpi-value {
+  margin: 0;
+  color: var(--zx-text-strong, #0f172a);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.shift-ops-page .shift-ops-card .shift-ops-kpi__caption {
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.shift-ops-page .shift-ops-kpi-card h2 {
+  min-height: 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.shift-ops-page .shift-ops-kpi-card {
+  align-content: start;
+  gap: 6px;
+}
+
+/* Facts strip: two separate tiles, so no cell border can stick out past the card padding. */
+.shift-ops-page .shift-ops-facts {
+  gap: 10px;
+  margin: 0 0 14px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.shift-ops-page .shift-ops-facts > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--zx-line, #d8dee9);
+  border-radius: var(--zx-radius-sm, 8px);
+  background: var(--zx-surface-soft, #f8fafc);
+}
+
+.shift-ops-page .shift-ops-facts dt {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 0.8125rem;
+}
+
+.shift-ops-page .shift-ops-facts dd {
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status chips (team / supervisor / permission) share one pill style. */
+.shift-ops-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: 1px solid var(--zx-line, #d8dee9);
+  border-radius: 999px;
+  background: var(--zx-surface-soft, #f4f7fb);
+  color: var(--zx-text, #334155);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.shift-ops-chip[data-tone="ok"] {
+  border-color: #c6e6d5;
+  background: #eef8f2;
+  color: #1b5e20;
+}
+
+.shift-ops-card__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.shift-ops-count {
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.shift-ops-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.shift-ops-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.shift-ops-table th,
+.shift-ops-table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-subtle, #d8dee9);
+  text-align: left;
+  font-size: 0.875rem;
+}
+
+.shift-ops-table th {
+  border-top: 0;
+  color: var(--zx-text-muted, #5b6676);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.shift-ops-table td:first-child,
+.shift-ops-table th:first-child {
+  padding-left: 0;
+}
+
+/* Handover: 1 / 2 / 1 columns with a readable minimum for the category card. */
+.shift-ops-page .shift-ops-handover-layout {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.shift-ops-page .shift-ops-handover-layout > .shift-ops-card {
+  min-height: 260px;
+}
+
+.shift-ops-page .shift-ops-card p.shift-ops-muted {
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 1100px) {
+  .shift-ops-page .shift-ops-handover-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Empty states on these screens are centred blocks with a sensible width, not a full-width dashed strip. */
+.shift-ops-page > .zx-empty {
+  width: 100%;
+  max-width: 720px;
+  justify-self: center;
+}
+
+/* Tab strip: edge fade where more tabs are hidden (state set by useScrollFade). */
+.shift-ops-tabs {
+  --fade-left: 0px;
+  --fade-right: 0px;
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent 100%);
+}
+
+.shift-ops-tabs[data-fade-start="true"] { --fade-left: 32px; }
+.shift-ops-tabs[data-fade-end="true"] { --fade-right: 40px; }
+
+.shift-ops-tabs .zx-subnav {
+  padding-inline-end: 12px;
+}
+
+/* ─── Round 5 ─── */
+/* Resource table: the type column hugs its content instead of splitting the row 50/50. */
+.shift-ops-table--resources th:last-child,
+.shift-ops-table--resources td:last-child {
+  width: 160px;
+}
+
+.shift-ops-table--resources th:first-child,
+.shift-ops-table--resources td:first-child {
+  width: auto;
+}
+
+/* ─── Round 7 ─── */
+.shift-ops-page > .zx-empty {
+  max-width: none;
+  justify-self: stretch;
+}
+
+.shift-ops-cta--secondary {
+  border: 1px solid var(--zx-accent-strong, #1d4ed8);
+  background: var(--zx-surface, #fff);
+  color: var(--zx-accent-strong, #1d4ed8);
+}
+
+/* Resource table: fixed layout keeps the type column next to the name. */
+.shift-ops-table--resources {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.shift-ops-table--resources th:last-child,
+.shift-ops-table--resources td:last-child {
+  width: 160px;
+}
+
+/* Handover readiness: the sub-heading is separated from the score block by a hairline. */
+.shift-ops-page .shift-ops-card h3.shift-ops-subhead {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--zx-line, #e2e8f0);
+}
+
+/* Round 9: tabs wrap onto a second row on narrow screens instead of hiding behind a fade. */
+@media (max-width: 900px) {
+  .shift-ops-tabs {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  body .content-viewport .shift-ops-tabs {
+    overflow: visible;
+  }
+
+  body .content-viewport .shift-ops-tabs .zx-subnav {
+    flex-wrap: wrap;
+    overflow: visible;
+    width: auto;
+    min-width: 0;
+  }
+}
+
+/* Frozen checklist C4: cards in one row share the row height so their bottom edges align. */
+.shift-ops-page .shift-ops-grid {
+  align-items: stretch;
 }

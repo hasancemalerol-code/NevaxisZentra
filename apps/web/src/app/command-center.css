@@ -58,7 +58,7 @@
 .command-center__eyebrow {
   margin: 0 0 3px;
   color: var(--cc-text-muted);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -89,7 +89,7 @@
   border-radius: 8px;
   background: var(--cc-panel);
   color: var(--cc-text-soft);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -118,7 +118,7 @@
 .command-center .dashboard-section-heading__eyebrow {
   margin: 0 0 3px;
   color: var(--cc-text-muted);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 750;
   letter-spacing: 0.07em;
   line-height: 1.2;
@@ -145,7 +145,7 @@
   border-radius: 7px;
   background: var(--cc-panel-soft);
   color: var(--cc-text-soft);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -210,7 +210,7 @@
   align-items: center !important;
   gap: 4px !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -252,7 +252,7 @@
 .command-center__kpis .dashboard-metric-card__label {
   margin: 0 !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -268,7 +268,7 @@
 .command-center__kpis .dashboard-metric-card__supporting {
   margin: 5px 0 0 !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
 }
 
@@ -276,7 +276,7 @@
   margin-top: auto !important;
   padding-top: 5px !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Row compositions */
@@ -378,14 +378,14 @@
 .command-center .ai-task-card__source {
   margin: 0 !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
 .command-center .ai-task-card__title {
   margin: 2px 0 0 !important;
   color: var(--cc-text) !important;
-  font-size: 0.61rem !important;
+  font-size: 0.75rem !important;
   font-weight: 760 !important;
   line-height: 1.3 !important;
 }
@@ -397,14 +397,14 @@
   gap: 4px !important;
   padding: 4px 6px !important;
   border-radius: 6px !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
 .command-center .ai-task-card__description {
   margin: 6px 0 0 36px !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.53rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
 }
 
@@ -427,7 +427,7 @@
   align-items: center !important;
   gap: 4px !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   font-weight: 700 !important;
 }
 
@@ -438,7 +438,7 @@
   border-radius: 6px !important;
   background: var(--cc-panel) !important;
   color: var(--cc-primary) !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Daily operations: compact list-like summary */
@@ -495,7 +495,7 @@
   grid-row: 1 !important;
   margin: 0 !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
   font-weight: 650 !important;
 }
 
@@ -504,7 +504,7 @@
   grid-row: 1 !important;
   margin: 0 !important;
   color: var(--cc-text) !important;
-  font-size: 0.62rem !important;
+  font-size: 0.75rem !important;
   font-weight: 780 !important;
   white-space: nowrap !important;
 }
@@ -573,7 +573,7 @@
 .command-center .critical-risk-card__title {
   margin: 0 !important;
   color: var(--cc-text) !important;
-  font-size: 0.56rem !important;
+  font-size: 0.75rem !important;
   font-weight: 750 !important;
   line-height: 1.3 !important;
 }
@@ -581,14 +581,14 @@
 .command-center .critical-risk-card__description {
   margin: 3px 0 0 !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
 .command-center .critical-risk-card__severity {
   padding: 3px 5px !important;
   border-radius: 5px !important;
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center .critical-risk-card__details {
@@ -637,11 +637,11 @@
 }
 
 .command-center .plan-confidence__classification {
-  font-size: 0.6rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center .plan-confidence__completion {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center .plan-confidence__review,
@@ -690,18 +690,18 @@
 }
 
 .command-center__operations-grid .machine-status-card__code {
-  font-size: 0.56rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .machine-status-card__name {
   margin-top: 2px !important;
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .machine-status-card__state {
   margin-top: 6px !important;
   padding: 3px 5px !important;
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .machine-status-card__job {
@@ -717,7 +717,7 @@
 
 .command-center__operations-grid .machine-status-card__job strong {
   margin: 0 !important;
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
@@ -732,7 +732,7 @@
 .command-center__operations-grid
   .machine-status-card__utilization-header {
   margin-bottom: 4px !important;
-  font-size: 0.45rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid
@@ -773,11 +773,11 @@
 }
 
 .command-center__operations-grid .production-orders__table th {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .production-orders__table td {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid
@@ -808,7 +808,7 @@
 .command-center__operations-grid .production-orders__status,
 .command-center__operations-grid .production-orders__risk {
   padding: 3px 4px !important;
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .production-orders__note {
@@ -855,12 +855,12 @@
 }
 
 .command-center__operations-grid .maintenance-status-card__title {
-  font-size: 0.53rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .maintenance-status-card__status {
   padding: 3px 4px !important;
-  font-size: 0.43rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__operations-grid .maintenance-status-card__details {
@@ -917,16 +917,16 @@
 }
 
 .command-center__support-grid .material-risk-card__code {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .material-risk-card__title {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .material-risk-card__severity {
   padding: 3px 5px !important;
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .material-risk-card__details {
@@ -936,12 +936,12 @@
 }
 
 .command-center__support-grid .material-risk-card__detail dt {
-  font-size: 0.43rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .material-risk-card__detail dd {
   margin-top: 2px !important;
-  font-size: 0.47rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid
@@ -969,16 +969,16 @@
 }
 
 .command-center__support-grid .mold-status-card__code {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .mold-status-card__title {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .mold-status-card__risk {
   padding: 3px 5px !important;
-  font-size: 0.43rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .mold-status-card__details {
@@ -992,7 +992,7 @@
 
 .command-center__support-grid .mold-status-card__condition-label,
 .command-center__support-grid .mold-status-card__condition strong {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .mold-status-card__progress {
@@ -1025,16 +1025,16 @@
 }
 
 .command-center__support-grid .maintenance-status-card__asset {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .maintenance-status-card__title {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .maintenance-status-card__status {
   padding: 3px 4px !important;
-  font-size: 0.42rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid .maintenance-status-card__details {
@@ -1072,7 +1072,7 @@
 }
 
 .command-center__support-grid .quick-action-card__title {
-  font-size: 0.45rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -1132,7 +1132,7 @@
 .command-center__health-strip .system-health-row__name {
   overflow: hidden !important;
   margin: 0 !important;
-  font-size: 0.45rem !important;
+  font-size: 0.75rem !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
@@ -1143,7 +1143,7 @@
 
 .command-center__health-strip .system-health-row__status {
   padding: 3px 4px !important;
-  font-size: 0.4rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Footer */
@@ -1155,7 +1155,7 @@
   gap: 16px;
   padding: 1px 3px;
   color: var(--cc-text-muted);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
 }
 
 /* Remove obsolete dashboard-page effects when nested styles remain loaded */
@@ -1339,7 +1339,7 @@
   overflow: hidden;
   margin: 0;
   color: var(--cc-text-soft);
-  font-size: 0.57rem;
+  font-size: 0.75rem;
   font-weight: 720;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -1365,7 +1365,7 @@
 
 .locked-kpi-card__unit {
   color: var(--cc-text-soft);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -1400,7 +1400,7 @@
 
 .locked-kpi-card__footer > span {
   color: var(--locked-kpi-accent);
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 760;
   white-space: nowrap;
 }
@@ -1408,7 +1408,7 @@
 .locked-kpi-card__footer small {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-align: right;
   text-overflow: ellipsis;
@@ -1427,7 +1427,7 @@
 
 .locked-kpi-card__status {
   color: var(--locked-kpi-accent);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.2;
   white-space: nowrap;
@@ -1436,7 +1436,7 @@
 .locked-kpi-card__supporting {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   line-height: 1.25;
   text-align: right;
   text-overflow: ellipsis;
@@ -1529,14 +1529,14 @@
 .live-alarms__table th {
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 760;
   letter-spacing: 0.02em;
 }
 
 .live-alarms__table td {
   color: var(--cc-text-soft);
-  font-size: 0.49rem;
+  font-size: 0.75rem;
 }
 
 .live-alarms__table tbody tr:last-child td {
@@ -1588,14 +1588,14 @@
 
 .live-alarms__machine strong {
   color: var(--cc-text);
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 780;
 }
 
 .live-alarms__machine span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1610,7 +1610,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 760;
 }
 
@@ -1618,7 +1618,7 @@
   overflow: hidden;
   display: block;
   color: var(--cc-text-soft);
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   line-height: 1.3;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1632,7 +1632,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.43rem;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -1668,7 +1668,7 @@
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -1784,7 +1784,7 @@
 .locked-machine-card__code {
   margin: 0;
   color: var(--cc-text);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 820;
   letter-spacing: 0.02em;
 }
@@ -1793,7 +1793,7 @@
   overflow: hidden;
   margin: 2px 0 0;
   color: var(--cc-text-muted);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 620;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -1809,7 +1809,7 @@
   border-radius: 6px;
   background: var(--machine-soft);
   color: var(--machine-accent);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1;
   white-space: nowrap;
@@ -1824,14 +1824,14 @@
 
 .locked-machine-card__job span {
   color: var(--cc-text-muted);
-  font-size: 0.41rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
 .locked-machine-card__job strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -1846,7 +1846,7 @@
   gap: 6px;
   margin-top: 6px;
   color: var(--cc-text-muted);
-  font-size: 0.41rem;
+  font-size: 0.75rem;
   line-height: 1.2;
 }
 
@@ -1868,7 +1868,7 @@
   gap: 6px;
   margin-bottom: 5px;
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
 }
 
 .locked-machine-card__utilization-header > span {
@@ -1879,7 +1879,7 @@
 
 .locked-machine-card__utilization-header strong {
   color: var(--machine-accent);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -1911,7 +1911,7 @@
 .locked-machine-card__footer span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1919,7 +1919,7 @@
 
 .locked-machine-card__footer strong {
   color: var(--machine-accent);
-  font-size: 0.41rem;
+  font-size: 0.75rem;
   font-weight: 780;
   white-space: nowrap;
 }
@@ -2007,14 +2007,14 @@
 .locked-production-orders__table th {
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   font-weight: 760;
   letter-spacing: 0.02em;
 }
 
 .locked-production-orders__table td {
   color: var(--cc-text-soft);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
 }
 
 .locked-production-orders__table tbody tr:last-child td {
@@ -2062,7 +2062,7 @@
 
 .locked-production-orders__number {
   color: var(--cc-text);
-  font-size: 0.49rem;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -2075,7 +2075,7 @@
 .locked-production-orders__product strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.49rem;
+  font-size: 0.75rem;
   font-weight: 760;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2084,7 +2084,7 @@
 .locked-production-orders__product span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2099,7 +2099,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   font-weight: 760;
 }
 
@@ -2119,14 +2119,14 @@
 .locked-production-orders__progress-top span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .locked-production-orders__progress-top strong {
   color: var(--cc-primary);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -2147,7 +2147,7 @@
 
 .locked-production-orders__due {
   color: var(--cc-text-soft);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -2160,7 +2160,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -2215,7 +2215,7 @@
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.5rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -2342,14 +2342,14 @@
 .locked-material-risks__table th {
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   font-weight: 760;
   letter-spacing: 0.02em;
 }
 
 .locked-material-risks__table td {
   color: var(--cc-text-soft);
-  font-size: 0.47rem;
+  font-size: 0.75rem;
 }
 
 .locked-material-risks__table tbody tr:last-child td {
@@ -2407,7 +2407,7 @@
 .locked-material-risks__identity strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
   font-weight: 780;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2416,7 +2416,7 @@
 .locked-material-risks__identity span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2424,7 +2424,7 @@
 .locked-material-risks__stock,
 .locked-material-risks__threshold {
   color: var(--cc-text-soft);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -2436,7 +2436,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 750;
 }
 
@@ -2481,7 +2481,7 @@
   gap: 5px;
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2493,7 +2493,7 @@
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -2507,7 +2507,7 @@
   gap: 6px;
   padding: 14px;
   color: var(--cc-text-muted);
-  font-size: 0.5rem;
+  font-size: 0.75rem;
 }
 
 /*
@@ -2634,7 +2634,7 @@
 
 .locked-mold-status__donut-center span {
   color: var(--cc-text-muted);
-  font-size: 0.43rem;
+  font-size: 0.75rem;
   font-weight: 650;
 }
 
@@ -2684,7 +2684,7 @@
   ) {
   overflow: hidden;
   color: var(--cc-text-soft);
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2692,7 +2692,7 @@
 
 .locked-mold-status__legend-row strong {
   color: var(--cc-text);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -2748,7 +2748,7 @@
 .locked-mold-status__identity strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 780;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2757,7 +2757,7 @@
 .locked-mold-status__identity span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.39rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2769,12 +2769,12 @@
 
 .locked-mold-status__maintenance span {
   color: var(--cc-text-muted);
-  font-size: 0.39rem;
+  font-size: 0.75rem;
 }
 
 .locked-mold-status__maintenance strong {
   color: var(--cc-text);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 780;
 }
 
@@ -2805,7 +2805,7 @@
   border-radius: 6px;
   background: var(--cc-panel-soft);
   color: var(--cc-text-muted);
-  font-size: 0.41rem;
+  font-size: 0.75rem;
   font-weight: 750;
   white-space: nowrap;
 }
@@ -2844,7 +2844,7 @@
   gap: 5px;
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2856,7 +2856,7 @@
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.46rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -2940,7 +2940,7 @@
   display: block;
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 650;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -3024,7 +3024,7 @@
 .locked-maintenance-row__asset {
   margin: 0;
   color: var(--cc-text-muted);
-  font-size: 0.39rem;
+  font-size: 0.75rem;
   font-weight: 720;
   line-height: 1.2;
 }
@@ -3033,7 +3033,7 @@
   overflow: hidden;
   margin: 2px 0 0;
   color: var(--cc-text);
-  font-size: 0.49rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1.3;
   text-overflow: ellipsis;
@@ -3049,7 +3049,7 @@
   border-radius: 6px;
   background: var(--maintenance-soft);
   color: var(--maintenance-accent);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1;
   white-space: nowrap;
@@ -3063,7 +3063,7 @@
   gap: 7px;
   margin-top: 5px;
   color: var(--cc-text-muted);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
 }
 
 .locked-maintenance-row__meta span {
@@ -3088,7 +3088,7 @@
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -3173,7 +3173,7 @@
 .locked-system-health__title p {
   margin: 0 0 2px;
   color: var(--cc-text-muted);
-  font-size: 0.39rem;
+  font-size: 0.75rem;
   font-weight: 650;
   line-height: 1.1;
 }
@@ -3181,7 +3181,7 @@
 .locked-system-health__title h2 {
   margin: 0;
   color: var(--cc-text);
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.2;
 }
@@ -3195,7 +3195,7 @@
   border-radius: 7px;
   background: var(--cc-success-soft);
   color: var(--cc-success);
-  font-size: 0.43rem;
+  font-size: 0.75rem;
   font-weight: 760;
   white-space: nowrap;
 }
@@ -3251,7 +3251,7 @@
 .locked-system-health__content strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.45rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -3261,7 +3261,7 @@
 .locked-system-health__content span {
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.36rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3284,7 +3284,7 @@
 
 .locked-system-health__value strong {
   color: var(--health-accent);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -3391,7 +3391,7 @@
 .command-center__eyebrow {
   margin: 0 0 3px;
   color: var(--cc-primary);
-  font-size: 0.44rem;
+  font-size: 0.75rem;
   font-weight: 780;
   letter-spacing: 0.06em;
   line-height: 1.2;
@@ -3410,7 +3410,7 @@
 .command-center__description {
   margin: 5px 0 0;
   color: var(--cc-text-muted);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -3444,7 +3444,7 @@
 .command-center__titlebar-status strong {
   overflow: hidden;
   color: var(--cc-text);
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 760;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3452,7 +3452,7 @@
 
 .command-center__titlebar-status span {
   color: var(--cc-text-muted);
-  font-size: 0.39rem;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -3564,7 +3564,7 @@
   align-items: center;
   padding: 4px 7px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1;
   white-space: nowrap;
@@ -3607,7 +3607,7 @@
 
 .command-center__market-rates-card-pair {
   color: var(--cc-text-muted);
-  font-size: 10px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 1.1;
@@ -3659,7 +3659,7 @@
 .command-center .dashboard-section-heading__eyebrow {
   margin: 0 0 2px;
   color: var(--cc-text-muted);
-  font-size: 0.38rem;
+  font-size: 0.75rem;
   font-weight: 650;
   line-height: 1.15;
 }
@@ -3668,7 +3668,7 @@
   overflow: hidden;
   margin: 0;
   color: var(--cc-text);
-  font-size: 0.57rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -3681,7 +3681,7 @@
   align-items: center;
   gap: 5px;
   color: var(--cc-text-muted);
-  font-size: 0.41rem;
+  font-size: 0.75rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -3715,7 +3715,7 @@
   min-height: 28px;
   padding: 0 4px;
   color: var(--cc-text-muted);
-  font-size: 0.38rem;
+  font-size: 0.75rem;
   line-height: 1.3;
 }
 
@@ -3834,7 +3834,7 @@
   }
 
   .command-center__description {
-    font-size: 0.44rem;
+    font-size: 0.75rem;
   }
 
   .command-center .dashboard-section-heading {
@@ -4518,7 +4518,7 @@ body:has(.command-center) .command-center {
 .locked-plan-confidence__center span {
   margin-top: 4px;
   color: var(--cc-text-muted);
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 680;
   line-height: 1.15;
 }
@@ -4564,7 +4564,7 @@ body:has(.command-center) .command-center {
   ) {
   overflow: hidden;
   color: var(--cc-text-soft);
-  font-size: 0.48rem;
+  font-size: 0.75rem;
   font-weight: 680;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4572,7 +4572,7 @@ body:has(.command-center) .command-center {
 
 .locked-plan-confidence__legend-row strong {
   color: var(--cc-text);
-  font-size: 0.49rem;
+  font-size: 0.75rem;
   font-weight: 820;
 }
 
@@ -4594,7 +4594,7 @@ body:has(.command-center) .command-center {
   gap: 5px;
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.4rem;
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4616,7 +4616,7 @@ body:has(.command-center) .command-center {
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.47rem;
+  font-size: 0.75rem;
   font-weight: 760;
   cursor: not-allowed;
   opacity: 0.9;
@@ -4735,7 +4735,7 @@ body:has(.command-center) .command-center {
   display: block !important;
   margin-top: 4px !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.42rem !important;
+  font-size: 0.75rem !important;
   font-weight: 680 !important;
   line-height: 1.1 !important;
 }
@@ -4789,7 +4789,7 @@ body:has(.command-center) .command-center {
   > span:not(.locked-plan-confidence__legend-dot) {
   overflow: hidden !important;
   color: var(--cc-text-soft) !important;
-  font-size: 0.47rem !important;
+  font-size: 0.75rem !important;
   font-weight: 680 !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
@@ -4799,7 +4799,7 @@ body:has(.command-center) .command-center {
 .dashboard-panel--plan-confidence
   .locked-plan-confidence__legend-row strong {
   color: var(--cc-text) !important;
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
   font-weight: 820 !important;
   line-height: 1 !important;
 }
@@ -4824,7 +4824,7 @@ body:has(.command-center) .command-center {
   gap: 4px !important;
   overflow: hidden !important;
   color: var(--cc-text-muted) !important;
-  font-size: 0.39rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -4849,7 +4849,7 @@ body:has(.command-center) .command-center {
   background: transparent !important;
   color: var(--cc-primary) !important;
   font: inherit !important;
-  font-size: 0.45rem !important;
+  font-size: 0.75rem !important;
   font-weight: 750 !important;
   opacity: 0.9 !important;
 }
@@ -4913,7 +4913,7 @@ body:has(.command-center) .command-center {
   display: block;
   overflow: hidden;
   color: var(--cc-text-muted);
-  font-size: 0.37rem;
+  font-size: 0.75rem;
   font-weight: 650;
   line-height: 1.15;
   text-overflow: ellipsis;
@@ -4926,7 +4926,7 @@ body:has(.command-center) .command-center {
   display: block;
   margin-top: 3px;
   color: var(--cc-text);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 820;
   line-height: 1;
 }
@@ -4999,7 +4999,7 @@ body:has(.command-center) .command-center {
   .locked-maintenance-row__asset {
   margin: 0;
   color: var(--cc-text-muted);
-  font-size: 0.34rem;
+  font-size: 0.75rem;
   font-weight: 720;
   line-height: 1.1;
 }
@@ -5010,7 +5010,7 @@ body:has(.command-center) .command-center {
   overflow: hidden;
   margin: 2px 0 0;
   color: var(--cc-text);
-  font-size: 0.43rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -5026,7 +5026,7 @@ body:has(.command-center) .command-center {
   justify-content: center;
   padding: 3px 5px;
   border-radius: 6px;
-  font-size: 0.35rem;
+  font-size: 0.75rem;
   font-weight: 760;
   line-height: 1;
   white-space: nowrap;
@@ -5042,7 +5042,7 @@ body:has(.command-center) .command-center {
   gap: 6px;
   margin-top: 3px;
   color: var(--cc-text-muted);
-  font-size: 0.34rem;
+  font-size: 0.75rem;
   line-height: 1.1;
 }
 
@@ -5073,7 +5073,7 @@ body:has(.command-center) .command-center {
   background: transparent;
   color: var(--cc-primary);
   font: inherit;
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 750;
   cursor: not-allowed;
   opacity: 0.9;
@@ -5165,19 +5165,19 @@ body:has(.command-center) .command-center {
 
 .command-center__decision-grid
   .dashboard-section-heading__eyebrow {
-  font-size: 0.37rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__decision-grid
   .dashboard-section-heading__title {
-  font-size: 0.56rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__decision-grid
   .dashboard-section-heading__meta {
   max-width: 48%;
   overflow: hidden;
-  font-size: 0.39rem !important;
+  font-size: 0.75rem !important;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -5316,7 +5316,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--live-alarms
   article h3 {
   margin-top: 2px !important;
-  font-size: 0.43rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -5324,7 +5324,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--live-alarms
   article p {
   margin-top: 3px !important;
-  font-size: 0.34rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
   -webkit-line-clamp: 2 !important;
 }
@@ -5341,7 +5341,7 @@ body:has(.command-center) .command-center {
   min-height: 29px !important;
   flex: 0 0 29px !important;
   padding: 0 10px !important;
-  font-size: 0.36rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -5464,35 +5464,35 @@ body:has(.command-center) .command-center {
   .dashboard-panel--machine-status
   .locked-machine-card
   [style*="font-size: 0.51rem"] {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   [style*="font-size: 0.43rem"] {
-  font-size: 0.4rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   [style*="font-size: 0.39rem"] {
-  font-size: 0.36rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   [style*="font-size: 0.35rem"] {
-  font-size: 0.33rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   [style*="font-size: 0.33rem"] {
-  font-size: 0.31rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -5643,7 +5643,7 @@ body:has(.command-center) .command-center {
   th {
   padding-top: 6px !important;
   padding-bottom: 6px !important;
-  font-size: 0.37rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
@@ -5652,7 +5652,7 @@ body:has(.command-center) .command-center {
   height: 47px !important;
   padding-top: 6px !important;
   padding-bottom: 6px !important;
-  font-size: 0.4rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
@@ -5877,7 +5877,7 @@ body:has(.command-center) .command-center {
   th {
   padding-top: 6px !important;
   padding-bottom: 6px !important;
-  font-size: 0.36rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
@@ -5886,7 +5886,7 @@ body:has(.command-center) .command-center {
   height: 42px !important;
   padding-top: 5px !important;
   padding-bottom: 5px !important;
-  font-size: 0.39rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
@@ -5917,7 +5917,7 @@ body:has(.command-center) .command-center {
   min-height: 29px !important;
   flex: 0 0 29px !important;
   padding: 0 9px !important;
-  font-size: 0.35rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -6150,7 +6150,7 @@ body:has(.command-center) .command-center {
   min-height: 29px !important;
   flex: 0 0 29px !important;
   padding: 0 9px !important;
-  font-size: 0.35rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -6275,7 +6275,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   strong {
-  font-size: 0.4rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.1 !important;
 }
 
@@ -6283,7 +6283,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   small {
-  font-size: 0.31rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.15 !important;
 }
 
@@ -6548,7 +6548,7 @@ body:has(.command-center) .command-center {
 .command-center__eyebrow {
   margin-bottom: 4px;
   color: #1769e0;
-  font-size: 0.42rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.07em;
 }
@@ -6563,7 +6563,7 @@ body:has(.command-center) .command-center {
   max-width: 620px;
   margin-top: 5px;
   color: #68778d;
-  font-size: 0.46rem;
+  font-size: 0.75rem;
 }
 
 .command-center__titlebar-status {
@@ -6574,11 +6574,11 @@ body:has(.command-center) .command-center {
 }
 
 .command-center__titlebar-status strong {
-  font-size: 0.45rem;
+  font-size: 0.75rem;
 }
 
 .command-center__titlebar-status span {
-  font-size: 0.36rem;
+  font-size: 0.75rem;
 }
 
 .command-center__live-dot {
@@ -6621,18 +6621,18 @@ body:has(.command-center) .command-center {
 
 .command-center .dashboard-section-heading__eyebrow {
   color: #7b8799;
-  font-size: 0.35rem;
+  font-size: 0.75rem;
 }
 
 .command-center .dashboard-section-heading__title {
   color: #10213d;
-  font-size: 0.54rem;
+  font-size: 0.75rem;
   font-weight: 810;
 }
 
 .command-center .dashboard-section-heading__meta {
   color: #75839a;
-  font-size: 0.37rem;
+  font-size: 0.75rem;
 }
 
 .command-center__decision-grid {
@@ -6650,8 +6650,8 @@ body:has(.command-center) .command-center {
 .command-center__footer {
   min-height: 26px;
   padding: 0 3px;
-  color: #8793a5;
-  font-size: 0.35rem;
+  color: #5a697d;
+  font-size: 0.75rem;
 }
 
 .command-center__footer span:first-child {
@@ -6866,7 +6866,7 @@ body:has(.command-center) .command-center {
  */
 
 .command-center__eyebrow {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__titlebar h1 {
@@ -6874,16 +6874,16 @@ body:has(.command-center) .command-center {
 }
 
 .command-center__description {
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.45 !important;
 }
 
 .command-center__titlebar-status strong {
-  font-size: 0.55rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__titlebar-status span {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -6891,17 +6891,17 @@ body:has(.command-center) .command-center {
  */
 
 .command-center .dashboard-section-heading__eyebrow {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center .dashboard-section-heading__title {
-  font-size: 0.67rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center .dashboard-section-heading__meta {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -6917,7 +6917,7 @@ body:has(.command-center) .command-center {
     .locked-metric-card__label,
     .metric-card__label
   ) {
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__metrics
@@ -6944,7 +6944,7 @@ body:has(.command-center) .command-center {
     .metric-card__trend,
     .metric-card__detail
   ) {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -6952,12 +6952,12 @@ body:has(.command-center) .command-center {
  */
 
 .command-center__decision-grid article h3 {
-  font-size: 0.57rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
 .command-center__decision-grid article p {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.45 !important;
 }
 
@@ -6970,17 +6970,17 @@ body:has(.command-center) .command-center {
  */
 
 .command-center table th {
-  font-size: 0.47rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center table td {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
 .command-center table td strong {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center table td span {
@@ -6995,28 +6995,28 @@ body:has(.command-center) .command-center {
   .dashboard-panel--machine-status
   .locked-machine-card
   p:first-child {
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   p:nth-child(2) {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   strong {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   span {
-  font-size: 0.41rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7024,13 +7024,13 @@ body:has(.command-center) .command-center {
  */
 
 .command-center__support-grid article h3 {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__support-grid article p,
 .command-center__support-grid article span,
 .command-center__support-grid article small {
-  font-size: 0.41rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -7038,14 +7038,14 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   strong {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--quick-actions
   .locked-quick-action
   small {
-  font-size: 0.38rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7056,14 +7056,14 @@ body:has(.command-center) .command-center {
   .dashboard-panel--system-health
   article
   strong {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--system-health
   article
   span {
-  font-size: 0.39rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7071,7 +7071,7 @@ body:has(.command-center) .command-center {
  */
 
 .command-center__footer {
-  font-size: 0.42rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7110,7 +7110,7 @@ body:has(.command-center) .command-center {
 /* Ana başlık */
 
 .command-center__eyebrow {
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__titlebar h1 {
@@ -7118,33 +7118,33 @@ body:has(.command-center) .command-center {
 }
 
 .command-center__description {
-  font-size: 0.66rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.45 !important;
 }
 
 .command-center__titlebar-status strong {
-  font-size: 0.62rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__titlebar-status span {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Ortak panel başlıkları */
 
 .command-center .dashboard-section-heading__eyebrow {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center .dashboard-section-heading__title {
-  font-size: 0.72rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.22 !important;
 }
 
 .command-center .dashboard-section-heading__meta,
 .command-center .dashboard-section-heading__meta span {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7153,12 +7153,12 @@ body:has(.command-center) .command-center {
 .command-center__metrics p,
 .command-center__metrics span,
 .command-center__metrics small {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
 .command-center__metrics strong {
-  font-size: 0.68rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.1 !important;
 }
 
@@ -7176,23 +7176,23 @@ body:has(.command-center) .command-center {
 /* Karar merkezi */
 
 .command-center__decision-grid article h3 {
-  font-size: 0.64rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.28 !important;
 }
 
 .command-center__decision-grid article p {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.42 !important;
 }
 
 .command-center__decision-grid article span,
 .command-center__decision-grid article small {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
 .command-center__decision-grid article strong {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Günlük operasyon özeti */
@@ -7201,14 +7201,14 @@ body:has(.command-center) .command-center {
   .dashboard-panel--daily-operations
   > div:nth-of-type(2)
   span {
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--daily-operations
   > div:nth-of-type(2)
   strong {
-  font-size: 0.58rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Plan güvenilirliği */
@@ -7224,41 +7224,41 @@ body:has(.command-center) .command-center {
   .dashboard-panel--plan-confidence
   [role="img"]
   span {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--plan-confidence
   :is(span, small) {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--plan-confidence
   strong {
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Tablolar */
 
 .command-center table th {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center table td {
-  font-size: 0.55rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
 .command-center table td strong {
-  font-size: 0.57rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
 .command-center table td span,
 .command-center table td small {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
@@ -7268,21 +7268,21 @@ body:has(.command-center) .command-center {
   .dashboard-panel--machine-status
   .locked-machine-card
   p:first-child {
-  font-size: 0.64rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   p:nth-child(2) {
-  font-size: 0.5rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   strong {
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7290,7 +7290,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--machine-status
   .locked-machine-card
   span {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.22 !important;
 }
 
@@ -7299,38 +7299,38 @@ body:has(.command-center) .command-center {
 .command-center
   .dashboard-panel--live-alarms
   article h3 {
-  font-size: 0.59rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--live-alarms
   article p {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
 }
 
 .command-center
   .dashboard-panel--live-alarms
   article span {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
 }
 
 /* Malzeme, kalıp ve bakım panelleri */
 
 .command-center__support-grid article h3 {
-  font-size: 0.57rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
 .command-center__support-grid article p,
 .command-center__support-grid article span,
 .command-center__support-grid article small {
-  font-size: 0.46rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.28 !important;
 }
 
 .command-center__support-grid article strong {
-  font-size: 0.52rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7340,7 +7340,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   strong {
-  font-size: 0.55rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.15 !important;
 }
 
@@ -7348,7 +7348,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   small {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7358,7 +7358,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--system-health
   article
   strong {
-  font-size: 0.54rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7366,20 +7366,20 @@ body:has(.command-center) .command-center {
   .dashboard-panel--system-health
   article
   span {
-  font-size: 0.44rem !important;
+  font-size: 0.75rem !important;
   line-height: 1.22 !important;
 }
 
 /* Alt bilgi ve panel alt aksiyonları */
 
 .command-center__footer {
-  font-size: 0.48rem !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel
   > :last-child {
-  font-size: 0.47rem !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7402,11 +7402,11 @@ body:has(.command-center) .command-center {
   }
 
   .command-center table th {
-    font-size: 0.48rem !important;
+    font-size: 0.75rem !important;
   }
 
   .command-center table td {
-    font-size: 0.51rem !important;
+    font-size: 0.75rem !important;
   }
 }
 
@@ -7426,7 +7426,7 @@ body:has(.command-center) .command-center {
 /* Ana başlık */
 
 .command-center__eyebrow {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center__titlebar h1 {
@@ -7444,13 +7444,13 @@ body:has(.command-center) .command-center {
 }
 
 .command-center__titlebar-status span {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Ortak panel başlıkları */
 
 .command-center .dashboard-section-heading__eyebrow {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
@@ -7461,7 +7461,7 @@ body:has(.command-center) .command-center {
 
 .command-center .dashboard-section-heading__meta,
 .command-center .dashboard-section-heading__meta span {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
 }
 
@@ -7477,7 +7477,7 @@ body:has(.command-center) .command-center {
     button,
     button span
   ) {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.4 !important;
 }
 
@@ -7491,7 +7491,7 @@ body:has(.command-center) .command-center {
 
 .command-center__metrics
   :is(p, span, small) {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -7519,13 +7519,13 @@ body:has(.command-center) .command-center {
 }
 
 .command-center__decision-grid article p {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.45 !important;
 }
 
 .command-center__decision-grid article span,
 .command-center__decision-grid article small {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Günlük operasyon satırları */
@@ -7557,13 +7557,13 @@ body:has(.command-center) .command-center {
   .dashboard-panel--plan-confidence
   [role="img"]
   span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--plan-confidence
   :is(span, small) {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
@@ -7575,12 +7575,12 @@ body:has(.command-center) .command-center {
 /* Tablolar */
 
 .command-center table th {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
 .command-center table td {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
 }
 
@@ -7590,7 +7590,7 @@ body:has(.command-center) .command-center {
 
 .command-center table td span,
 .command-center table td small {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Makine kartları */
@@ -7606,21 +7606,21 @@ body:has(.command-center) .command-center {
   .dashboard-panel--machine-status
   .locked-machine-card
   p:nth-child(2) {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   strong {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--machine-status
   .locked-machine-card
   span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Canlı alarmlar */
@@ -7634,13 +7634,13 @@ body:has(.command-center) .command-center {
 .command-center
   .dashboard-panel--live-alarms
   article p {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--live-alarms
   article span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Destek panelleri */
@@ -7653,7 +7653,7 @@ body:has(.command-center) .command-center {
 .command-center__support-grid article p,
 .command-center__support-grid article span,
 .command-center__support-grid article small {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
 }
 
@@ -7670,7 +7670,7 @@ body:has(.command-center) .command-center {
   .dashboard-panel--quick-actions
   .locked-quick-action
   small {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Sistem sağlığı */
@@ -7679,14 +7679,14 @@ body:has(.command-center) .command-center {
   .dashboard-panel--system-health
   article
   strong {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
 }
 
 .command-center
   .dashboard-panel--system-health
   article
   span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -7724,7 +7724,7 @@ body:has(.command-center) .command-center {
 /* Alt bilgi */
 
 .command-center__footer {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.4 !important;
 }
 
@@ -7817,7 +7817,7 @@ body:has(.command-center) .command-center {
   > span:first-child {
   display: block !important;
   margin: 0 !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
 }
 
@@ -7841,7 +7841,7 @@ body:has(.command-center) .command-center {
   display: -webkit-box !important;
   margin: 6px 0 0 !important;
   overflow: hidden !important;
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.35 !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 2 !important;
@@ -7866,7 +7866,7 @@ body:has(.command-center) .command-center {
   padding: 0 !important;
   overflow: hidden !important;
   color: #75839a !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   font-weight: 650 !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
@@ -7895,7 +7895,7 @@ body:has(.command-center) .command-center {
   > span {
   min-width: 52px !important;
   padding: 6px 7px !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1 !important;
 }
 
@@ -7918,7 +7918,7 @@ body:has(.command-center) .command-center {
   min-height: 34px !important;
   flex: 0 0 34px !important;
   margin-top: 0 !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /*
@@ -8041,7 +8041,7 @@ body:has(.command-center) .command-center {
     .locked-metric-card__unit,
     .metric-card__unit
   ) {
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Alt bilgi ve trend */
@@ -8061,7 +8061,7 @@ body:has(.command-center) .command-center {
     span,
     small
   ) {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -8153,7 +8153,7 @@ body:has(.command-center) .command-center {
 .command-center__quick-actions-strip
   .dashboard-section-heading__eyebrow {
   margin-bottom: 2px !important;
-  font-size: 9px !important;
+  font-size: 0.75rem !important;
   line-height: 1.1 !important;
 }
 
@@ -8167,7 +8167,7 @@ body:has(.command-center) .command-center {
   .dashboard-section-heading__meta {
   min-height: 28px !important;
   padding: 5px 8px !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
 }
 
 /* Sekiz işlem kartı */
@@ -8259,7 +8259,7 @@ body:has(.command-center) .command-center {
   min-width: 0 !important;
   overflow: hidden !important;
   color: #10213d !important;
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   font-weight: 780 !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
@@ -8272,8 +8272,8 @@ body:has(.command-center) .command-center {
   display: block !important;
   min-width: 0 !important;
   overflow: hidden !important;
-  color: #738198 !important;
-  font-size: 9px !important;
+  color: #566478 !important;
+  font-size: 0.75rem !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
@@ -8485,8 +8485,8 @@ body:has(.command-center) .command-center {
 
 .command-center__teams-button-copy span {
   overflow: hidden !important;
-  color: #738198 !important;
-  font-size: 10px !important;
+  color: #566478 !important;
+  font-size: 0.75rem !important;
   font-weight: 650 !important;
   line-height: 1.2 !important;
   text-overflow: ellipsis !important;
@@ -8502,7 +8502,7 @@ body:has(.command-center) .command-center {
   border-radius: 999px !important;
   background: #1769e0 !important;
   color: #ffffff !important;
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   font-weight: 820 !important;
   line-height: 1 !important;
 }
@@ -8616,7 +8616,7 @@ body:has(.command-center) .command-center {
 
 .command-center__teams-button-copy span,
 .command-center__titlebar-status span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -8690,7 +8690,7 @@ body:has(.command-center) .command-center {
 .command-center__health-strip
   .dashboard-panel--system-health
   article span {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   line-height: 1.3 !important;
 }
 
@@ -8717,7 +8717,7 @@ body:has(.command-center) .command-center {
   display: -webkit-box !important;
   min-width: 0 !important;
   overflow: hidden !important;
-  font-size: 11px !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
   text-overflow: ellipsis !important;
   white-space: normal !important;
@@ -8739,7 +8739,7 @@ body:has(.command-center) .command-center {
   min-width: 0 !important;
   max-width: 100% !important;
   overflow: hidden !important;
-  font-size: 9.5px !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
   text-overflow: ellipsis !important;
   white-space: normal !important;
@@ -8790,7 +8790,7 @@ body:has(.command-center) .command-center {
     .locked-metric-card__unit,
     .metric-card__unit
   ) {
-  font-size: 10px !important;
+  font-size: 0.75rem !important;
   white-space: nowrap !important;
 }
 
@@ -9066,7 +9066,7 @@ body:has(.command-center) .command-center {
 .command-center__ai-task-button-copy span,
 .command-center__teams-button-copy span,
 .command-center__titlebar-status span {
-  font-size: 11px;
+  font-size: 0.75rem;
 }
 
 .command-center__teams-button,
@@ -9147,7 +9147,7 @@ body:has(.command-center) .command-center {
 .command-center__teams-button-copy span,
 .command-center__titlebar-status span {
   overflow: hidden !important;
-  font-size: 10.5px !important;
+  font-size: 0.75rem !important;
   line-height: 1.25 !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;

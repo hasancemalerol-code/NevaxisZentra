@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 1rem;
-  min-height: 640px;
+  min-height: 480px;
 }
 
 .teams-rail,
@@ -60,7 +60,7 @@
 .teams-panel {
   display: flex;
   flex-direction: column;
-  min-height: 640px;
+  min-height: 480px;
 }
 
 .teams-messages {
@@ -191,7 +191,12 @@
 }
 
 .teams-disclaimer {
-  margin-top: 1rem;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  border-radius: 10px;
+  background: var(--surface-muted, #f8fafc);
   color: var(--text-muted, #6b7280);
   font-size: 0.875rem;
 }
@@ -204,8 +209,15 @@
 }
 
 .teams-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex: 1;
   padding: 2rem;
   text-align: center;
+  min-width: 0;
   color: var(--text-muted, #6b7280);
 }
 
@@ -242,4 +254,312 @@
   .teams-workspace {
     grid-template-columns: 1fr;
   }
+}
+
+.teams-empty > p {
+  margin: 0;
+  max-width: 46ch;
+}
+
+.teams-empty > svg {
+  width: 40px;
+  height: 40px;
+  padding: 9px;
+  border-radius: 12px;
+  background: var(--surface-muted, #f1f5f9);
+  color: var(--text-muted, #64748b);
+}
+
+.teams-workspace-main .teams-disclaimer {
+  margin: 0 16px 16px;
+}
+
+.teams-workspace-main {
+  min-height: 480px;
+}
+
+main .teams-disclaimer {
+  margin-top: 16px;
+}
+
+.teams-cta-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Round 3: compact panels, capped width, stronger empty state */
+.teams-workspace,
+.teams-workspace-main,
+.teams-panel {
+  min-height: 320px;
+}
+
+.teams-workspace {
+  max-width: 1320px;
+  align-items: start;
+}
+
+.teams-workspace > .teams-panel,
+.teams-workspace > .teams-rail {
+  min-height: 320px;
+}
+
+.teams-empty > svg {
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent, #2563eb) 10%, white);
+  color: var(--accent, #155eef);
+}
+
+.teams-empty > p:first-of-type {
+  font-size: 1rem;
+  color: var(--text, #0f172a);
+}
+
+.teams-empty .teams-context-chip {
+  margin-top: 0.25rem;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Empty states with actions: a centered stack of buttons instead of loose inline items. */
+.teams-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Direct messages: new-conversation form on top of the list, compact panels, centered empty state. */
+.teams-workspace .teams-workspace-main,
+.teams-workspace .teams-workspace-sidebar {
+  min-height: 360px;
+}
+
+.teams-workspace-sidebar > .teams-workspace-sidebar-header {
+  order: -2;
+}
+
+.teams-workspace-sidebar > .teams-direct-compose {
+  order: -1;
+  border-top: 0;
+  border-bottom: 1px solid var(--zx-line, #dce5f0);
+}
+
+.teams-workspace-sidebar > .teams-direct-compose .button {
+  width: 100%;
+  justify-content: center;
+}
+
+.teams-workspace .teams-empty-state svg {
+  width: 48px;
+  height: 48px;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--zx-accent-soft, #eaf1ff);
+}
+
+/* ---- Round 4 ---- */
+/* Full-width workspace: the inner grid fills the card at every width (no dead strip at 1920). */
+.teams-workspace {
+  max-width: none;
+  width: 100%;
+}
+
+/* Channel list empty state: centered, icon-led, not a top-weighted grey line. */
+.teams-rail__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-empty--rail {
+  min-height: 220px;
+  padding: 1.5rem 1rem;
+}
+
+.teams-empty--rail > p {
+  font-size: 0.8125rem;
+}
+
+.teams-empty--rail > p:first-of-type {
+  font-size: 0.9375rem;
+}
+
+/* Direct messages: select and "Başlat" share one row; the button keeps its natural size. */
+.teams-workspace-sidebar > .teams-direct-compose {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.teams-workspace-sidebar > .teams-direct-compose > label {
+  grid-column: 1 / -1;
+}
+
+.teams-workspace-sidebar > .teams-direct-compose .button {
+  width: auto;
+  min-width: 88px;
+}
+
+.teams-workspace-sidebar > .teams-direct-compose .button:disabled {
+  opacity: 1;
+  background: var(--zx-surface, #fff);
+  border: 1px solid var(--zx-line, #dce5f0);
+  color: var(--zx-text-muted, #566478);
+}
+
+/* Right-hand empty state sits in the vertical middle with the footnote below it. */
+.teams-workspace-main > .teams-empty-state {
+  min-height: 240px;
+}
+
+.teams-rail__preview,
+.teams-disclaimer {
+  font-size: 0.8125rem;
+}
+
+/* One centered-stack empty state on every Teams page (icon, text, then actions below). */
+.zx-subnav-bar ~ * .state-panel.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 340px;
+  padding: 36px 24px;
+  text-align: center;
+}
+
+.zx-subnav-bar ~ * .state-panel.empty-state > div {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  max-width: 56ch;
+}
+
+.zx-subnav-bar ~ * .state-panel.empty-state p {
+  margin: 0;
+  font-size: 0.8125rem;
+}
+
+/* ---- Round 5 (slice 3) ---- */
+/* Direct messages: the empty state is centred in the whole panel, the start button says why it is idle. */
+[data-testid="teams-direct-messages-page"] {
+  align-items: stretch;
+}
+
+.teams-workspace-main:has(> .teams-empty-state) {
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-workspace-main:has(> .teams-empty-state) > .teams-empty-state {
+  flex: 1 1 auto;
+}
+
+.teams-direct-compose__hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.8125rem;
+}
+
+/* Two stacked panels on tablets stay compact instead of two tall mostly-empty boxes. */
+@media (max-width: 1180px) {
+  .teams-workspace > .teams-panel,
+  .teams-workspace > .teams-rail,
+  .teams-workspace .teams-workspace-main,
+  .teams-workspace .teams-workspace-sidebar {
+    min-height: 220px;
+  }
+}
+
+/* An idle create action reads as unavailable (neutral, outlined), never as a faded primary button. */
+.button.teams-cta-disabled {
+  border: 1px solid var(--zx-line, #dce5f0);
+  background: var(--zx-surface-muted, #f1f5f9);
+  color: var(--zx-text-muted, #566478);
+  opacity: 1;
+}
+
+.teams-cta-reason {
+  align-self: center;
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.8125rem;
+}
+
+/* Empty-state action is the page's one primary action. */
+.teams-empty .teams-context-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--color-accent, #2463a7);
+  border-radius: 8px;
+  background: var(--color-accent, #2463a7);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+[data-testid="teams-direct-messages-page"] .teams-workspace-main {
+  display: flex;
+  flex-direction: column;
+}
+
+[data-testid="teams-direct-messages-page"] .teams-workspace-main > .teams-empty-state {
+  flex: 1 1 auto;
+  margin-block: auto;
+}
+
+/* Direct messages fill the viewport below the header so the empty state is truly centred and the page does not end early. */
+[data-testid="teams-direct-messages-page"] {
+  min-height: max(480px, calc(100vh - 380px));
+}
+
+[data-testid="teams-direct-messages-page"] .teams-workspace-sidebar,
+[data-testid="teams-direct-messages-page"] .teams-workspace-main {
+  min-height: inherit;
+}
+
+.button.teams-cta-disabled {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+@media (max-width: 1180px) {
+  .teams-workspace > .teams-panel,
+  .teams-workspace > .teams-rail {
+    min-height: 200px;
+  }
+}
+
+/* Bare list hints become framed, centred empties like the rest of Teams. */
+.teams-channel-list > .teams-empty-hint {
+  display: grid;
+  place-items: center;
+  min-height: 120px;
+  margin: 12px;
+  padding: 16px;
+  border: 1px dashed var(--zx-line, #dce5f0);
+  border-radius: 10px;
+  color: var(--zx-text-muted, #566478);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* Wide screens: the Teams tab bar and its page share one capped, centred column. */
+.zx-subnav-bar:has([aria-label="Operasyon iletişimi bölümleri"]),
+.zx-subnav-bar:has([aria-label="Operasyon iletişimi bölümleri"]) ~ .page-content {
+  width: 100%;
+  max-width: 1384px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.zx-subnav-bar:has([aria-label="Operasyon iletişimi bölümleri"]) {
+  padding-inline: 28px;
 }

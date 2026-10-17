@@ -7,7 +7,7 @@ export function AiTaskWorkspaceLoading() {
   return (
     <div
       aria-busy="true"
-      aria-label="AI görev çalışma alanı yükleniyor"
+      aria-label="Yapay zekâ görev çalışma alanı yükleniyor"
       className="ai-task-workspace ai-task-workspace--loading"
     >
       <div className="ai-task-filter-presets">

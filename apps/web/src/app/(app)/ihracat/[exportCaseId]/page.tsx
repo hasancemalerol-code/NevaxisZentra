@@ -3,7 +3,6 @@ import {
   CalendarClock,
   Globe2,
   Package,
-  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
@@ -71,6 +70,7 @@ import {
   rejectExportAiRecommendationAction,
   suggestExportNextActionsAction,
 } from "@/features/export/server/export-4l-writer";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type BadgeTone =
   | "neutral"
@@ -195,7 +195,7 @@ export default async function ExportCaseDetailPage({
     }
 
     return (
-      <main className="export-detail-page">
+      <div className="export-detail-page">
         <div className="export-detail-page__back">
           <Link href="/ihracat">
             <ArrowLeft aria-hidden="true" />
@@ -203,16 +203,8 @@ export default async function ExportCaseDetailPage({
           </Link>
         </div>
 
-        <div role="alert" className="state-panel error-state">
-          <div className="state-icon">
-            <ShieldCheck aria-hidden="true" />
-          </div>
-          <div>
-            <h3>İhracat dosyası yüklenemedi</h3>
-            <p>Veriler alınırken bir hata oluştu. Lütfen sayfayı yenileyin.</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in caseResult ? caseResult.code : undefined} message={caseResult.message} failedTitle="İhracat dosyası yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -265,7 +257,7 @@ export default async function ExportCaseDetailPage({
   }
 
   return (
-    <main className="export-detail-page">
+    <div className="export-detail-page">
       <div className="export-detail-page__back">
         <Link href="/ihracat">
           <ArrowLeft aria-hidden="true" />
@@ -284,9 +276,9 @@ export default async function ExportCaseDetailPage({
           <Badge tone={getCaseStatusTone(exportCase.status)}>
             {getExportCaseStatusLabel(exportCase.status)}
           </Badge>
-          <Badge tone={getReadinessTone(exportCase.readinessStatus)}>
-            {getExportReadinessStatusLabel(exportCase.readinessStatus)} · %
-            {exportCase.readinessPercent}
+          <Badge tone={getReadinessTone(readiness?.readinessStatus ?? exportCase.readinessStatus)}>
+            {getExportReadinessStatusLabel(readiness?.readinessStatus ?? exportCase.readinessStatus)} · %
+            {readiness?.readinessPercent ?? exportCase.readinessPercent}
           </Badge>
         </div>
       </header>
@@ -388,6 +380,6 @@ export default async function ExportCaseDetailPage({
           dismissAiRecommendation: dismissExportAiRecommendationAction,
         }}
       />
-    </main>
+    </div>
   );
 }

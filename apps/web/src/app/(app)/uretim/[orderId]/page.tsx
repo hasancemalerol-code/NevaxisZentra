@@ -1,9 +1,9 @@
+import { formatDateTime } from "@/lib/presentation/format";
 import {
   ArrowLeft,
   CalendarClock,
   CalendarRange,
   Factory,
-  ShieldCheck,
   Wrench,
 } from "lucide-react";
 import Link from "next/link";
@@ -64,6 +64,7 @@ import {
   unassignExceptionAction,
 } from "@/features/production-execution/server/production-order-writer";
 import type { ProductionOrderStatus } from "@/features/production-execution/domain/production-order";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type BadgeTone =
   | "neutral"
@@ -90,26 +91,7 @@ function getStatusTone(status: ProductionOrderStatus): BadgeTone {
 }
 
 function formatUtcDate(iso: string | undefined): string {
-  if (!iso) {
-    return "—";
-  }
-
-  try {
-    return new Date(iso).toLocaleDateString("tr-TR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-}
-
-function shortId(id: string): string {
-  if (id.length > 12) return `…${id.slice(-8)}`;
-  return id;
+  return formatDateTime(iso);
 }
 
 type ProductionOrderDetailPageProps = Readonly<{
@@ -144,7 +126,7 @@ export default async function ProductionOrderDetailPage({
     }
 
     return (
-      <main className="production-order-detail-page">
+      <div className="production-order-detail-page">
         <div className="production-order-detail-page__back">
           <Link href="/uretim">
             <ArrowLeft aria-hidden="true" />
@@ -152,16 +134,8 @@ export default async function ProductionOrderDetailPage({
           </Link>
         </div>
 
-        <div role="alert" className="state-panel error-state">
-          <div className="state-icon">
-            <ShieldCheck aria-hidden="true" />
-          </div>
-          <div>
-            <h3>Üretim emri yüklenemedi</h3>
-            <p>Veriler alınırken bir hata oluştu. Lütfen sayfayı yenileyin.</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Üretim emri yüklenemedi" inline />
+      </div>
     );
   }
 
@@ -197,7 +171,7 @@ export default async function ProductionOrderDetailPage({
   const handovers = handoversResult.status === "success" ? handoversResult.handovers : [];
 
   return (
-    <main className="production-order-detail-page">
+    <div className="production-order-detail-page">
       {/* Back navigation */}
       <div className="production-order-detail-page__back">
         <Link href="/uretim">
@@ -210,7 +184,7 @@ export default async function ProductionOrderDetailPage({
       <header className="production-order-detail-page__header">
         <div>
           <p className="production-order-detail-page__header-eyebrow">
-            ÜRETİM EMRİ
+            ÜRETİM
           </p>
 
           <h1>{order.title}</h1>
@@ -228,7 +202,7 @@ export default async function ProductionOrderDetailPage({
             <Badge tone="warning">Aktif Duruş</Badge>
           )}
           {activeSetup && (
-            <Badge tone="information">Aktif Setup</Badge>
+            <Badge tone="information">Aktif Kurulum</Badge>
           )}
           {healthSummary?.scheduleOverrun && order.status !== "completed" && (
             <Badge tone="warning">Planlanan bitiş aşıldı</Badge>
@@ -374,7 +348,7 @@ export default async function ProductionOrderDetailPage({
         onComplete={completeProductionOrderAction}
       />
 
-      {/* 6 — Downtime + Setup + Cycle panels */}
+      {/* 6 — Downtime + Kurulum + Cycle panels */}
       <section
         className="production-order-detail-page__ops-panels"
         aria-label="Operasyonel yönetim"
@@ -468,12 +442,7 @@ export default async function ProductionOrderDetailPage({
 
           <h2>Versiyon {order.sourceProductionPlanVersion}</h2>
 
-          <span>
-            Plan:{" "}
-            <span className="production-order-detail-page__context-card__guid">
-              {shortId(order.sourceProductionPlanId)}
-            </span>
-          </span>
+          <Link href={`/planlama/${order.sourceProductionPlanId}`}>Kaynak planı aç</Link>
         </div>
 
         <div className="production-order-detail-page__context-card">
@@ -481,14 +450,9 @@ export default async function ProductionOrderDetailPage({
 
           <h2>v{order.version} — {formatUtcDate(order.createdAtUtc)}</h2>
 
-          <span>
-            El değişimi:{" "}
-            <span className="production-order-detail-page__context-card__guid">
-              {shortId(order.productionPlanHandoffId)}
-            </span>
-          </span>
+          <span>Üretim planından devredildi</span>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

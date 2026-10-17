@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { StatePage, StatePageLink } from "@/components/ui/state-page";
 
 import { initializeRealFactoryPilotAction } from "../server/real-factory-pilot-actions";
 
@@ -14,22 +14,21 @@ const NOTICES: Readonly<Record<string, string>> = {
   failed: "Sentetik pilot verisi oluşturulamadı.",
 };
 
-/** Truthful empty state: no real-factory connection exists for this facility, and none is created by viewing the page. */
+/** Truthful empty state: no factory connection exists for this facility, and none is created by viewing the page. */
 export function RealFactoryPilotEmptyState({ canInitialize, notice }: Props) {
   const message = notice ? NOTICES[notice] : undefined;
 
   return (
-    <section className="state-panel" data-testid="real-factory-pilot-empty">
-      <h2>Henüz gerçek fabrika bağlantısı yok</h2>
-      <p>
-        Bu tesis için yapılandırılmış bir gerçek fabrika bağlantısı bulunmuyor. Bu sayfayı görüntülemek herhangi bir
-        bağlantı veya veri oluşturmaz.
-      </p>
-      <p>
-        <Link href="/ayarlar/entegrasyonlar">Entegrasyonlar</Link>
-        {" · "}
-        <Link href="/ayarlar/veri-aktarim-merkezi">Veri Aktarım Merkezi</Link>
-      </p>
+    <section data-testid="real-factory-pilot-empty">
+      <StatePage
+        kind="empty"
+        inline
+        title="Henüz fabrika bağlantısı yok"
+        description="Bu tesis için henüz bir fabrika sistemi bağlanmadı. Bağlantılar eklendiğinde durumları burada izlenir."
+        actions={
+          <StatePageLink href="/ayarlar/veri-aktarim-merkezi" primary>Veri Aktarım Merkezi</StatePageLink>
+        }
+      />
       {message ? (
         <p role="alert" data-testid="real-factory-pilot-notice">
           {message}

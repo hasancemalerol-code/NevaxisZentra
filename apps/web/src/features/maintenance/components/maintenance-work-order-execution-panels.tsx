@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Info, Package } from "lucide-react";
+import { Info } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,15 @@ import {
   formatMaintenanceCurrency,
   formatMaintenanceDateTime,
   getMaintenanceWorkNoteTypeLabel,
+  localizeMaintenanceEventText,
 } from "../presentation/maintenance-labels";
 import type {
   createMaintenancePartUsageAction,
   createMaintenanceWorkNoteAction,
 } from "../server/maintenance-writer";
+import { customerMessage } from "@/lib/presentation/customer-message";
+import { displayActor } from "@/lib/presentation/display-label";
+import { enumLabel } from "@/lib/presentation/enum-labels";
 
 const NOTE_TYPE_OPTIONS = [
   { value: "general", label: "Genel" },
@@ -92,7 +96,7 @@ export function MaintenanceWorkOrderNotesPanel({
                   <p>{note.text}</p>
                   <div className="maintenance-ca-item__meta">
                     <span>{formatMaintenanceDateTime(note.createdAtUtc)}</span>
-                    <span>{note.createdBySubjectId}</span>
+                    <span>{displayActor(note.createdBySubjectId)}</span>
                   </div>
                 </div>
               </li>
@@ -102,53 +106,55 @@ export function MaintenanceWorkOrderNotesPanel({
 
         {message ? (
           <div role="alert" className="maintenance-error-panel">
-            <p>{message}</p>
+            <p>{customerMessage(message)}</p>
           </div>
         ) : null}
 
-        <form className="maintenance-form-stack" onSubmit={(event) => void handleSubmit(event)}>
-          <div className="maintenance-form-grid">
+        <details className="maintenance-form-disclosure">
+          <summary>Not ekle</summary>
+          <form className="maintenance-form-stack" onSubmit={(event) => void handleSubmit(event)}>
+            <div className="maintenance-form-grid">
+              <div className="maintenance-form-field">
+                <label htmlFor="noteType">Not Türü</label>
+                <select
+                  id="noteType"
+                  name="noteType"
+                  className="maintenance-form-select"
+                  defaultValue="general"
+                  disabled={pending}
+                >
+                  {NOTE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="maintenance-form-field maintenance-form-field--check">
+                <label htmlFor="isImportant" className="maintenance-form-check">
+                  <input id="isImportant" name="isImportant" type="checkbox" disabled={pending} />
+                  Önemli not olarak işaretle
+                </label>
+              </div>
+            </div>
             <div className="maintenance-form-field">
-              <label htmlFor="noteType">Not Türü</label>
-              <select
-                id="noteType"
-                name="noteType"
-                className="maintenance-form-select"
-                defaultValue="general"
+              <label htmlFor="text">Not <span className="zx-required" aria-hidden="true">*</span></label>
+              <textarea
+                id="text"
+                name="text"
+                className="maintenance-form-textarea"
+                placeholder="Bakım notu girin"
                 disabled={pending}
-              >
-                {NOTE_TYPE_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                required
+              />
             </div>
-            <div className="maintenance-form-field">
-              <span>Önem</span>
-              <label htmlFor="isImportant" className="maintenance-form-field">
-                <input id="isImportant" name="isImportant" type="checkbox" disabled={pending} />
-                Önemli not
-              </label>
+            <div className="maintenance-form-actions">
+              <Button type="submit" variant="primary" disabled={pending}>
+                Not Ekle
+              </Button>
             </div>
-          </div>
-          <div className="maintenance-form-field">
-            <label htmlFor="text">Not</label>
-            <textarea
-              id="text"
-              name="text"
-              className="maintenance-form-textarea"
-              placeholder="Bakım notu girin"
-              disabled={pending}
-              required
-            />
-          </div>
-          <div className="maintenance-form-actions">
-            <Button type="submit" variant="primary" disabled={pending}>
-              Not Ekle
-            </Button>
-          </div>
-        </form>
+          </form>
+        </details>
       </div>
     </section>
   );
@@ -227,8 +233,8 @@ export function MaintenanceWorkOrderPartsPanel({
         {parts.length === 0 ? (
           <p className="maintenance-empty-state">Henüz parça kullanım kaydı yok.</p>
         ) : (
-          <div className="maintenance-table-wrap">
-            <table className="maintenance-table maintenance-table--compact">
+          <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Kullanılan Parçalar (kaydırılabilir)">
+            <table aria-label="Kullanılan Parçalar" className="maintenance-table maintenance-table--compact">
               <thead>
                 <tr>
                   <th>Parça</th>
@@ -252,7 +258,7 @@ export function MaintenanceWorkOrderPartsPanel({
                     <td>{formatMaintenanceCurrency(part.actualLineCost ?? part.estimatedLineCost)}</td>
                     <td>
                       {formatMaintenanceDateTime(part.recordedAtUtc)}
-                      <small>{part.recordedBySubjectId}</small>
+                      <small>{displayActor(part.recordedBySubjectId)}</small>
                     </td>
                   </tr>
                 ))}
@@ -261,81 +267,79 @@ export function MaintenanceWorkOrderPartsPanel({
           </div>
         )}
 
-        <div className="maintenance-footer-note">
-          <Package aria-hidden="true" />
-          Bu kayıt bakım kullanım bilgisidir; stok hareketi oluşturmaz.
-        </div>
-
         {message ? (
           <div role="alert" className="maintenance-error-panel">
-            <p>{message}</p>
+            <p>{customerMessage(message)}</p>
           </div>
         ) : null}
 
-        <form className="maintenance-form-stack" onSubmit={(event) => void handleSubmit(event)}>
-          <div className="maintenance-form-grid">
-            <div className="maintenance-form-field">
-              <label htmlFor="partReference">Parça Referansı</label>
-              <input
-                id="partReference"
-                name="partReference"
-                className="maintenance-form-input"
-                disabled={pending}
-                required
-              />
+        <details className="maintenance-form-disclosure">
+          <summary>Parça kullanımı ekle</summary>
+          <form className="maintenance-form-stack" onSubmit={(event) => void handleSubmit(event)}>
+            <div className="maintenance-form-grid">
+              <div className="maintenance-form-field">
+                <label htmlFor="partReference">Parça Referansı <span className="zx-required" aria-hidden="true">*</span></label>
+                <input
+                  id="partReference"
+                  name="partReference"
+                  className="maintenance-form-input"
+                  disabled={pending}
+                  required
+                />
+              </div>
+              <div className="maintenance-form-field">
+                <label htmlFor="partName">Parça Adı</label>
+                <input
+                  id="partName"
+                  name="partName"
+                  className="maintenance-form-input"
+                  disabled={pending}
+                />
+              </div>
+              <div className="maintenance-form-field">
+                <label htmlFor="quantity">Miktar <span className="zx-required" aria-hidden="true">*</span></label>
+                <input
+                  id="quantity"
+                  name="quantity"
+                  type="number"
+                  min="0"
+                  step="any"
+                  className="maintenance-form-input"
+                  disabled={pending}
+                  required
+                />
+              </div>
+              <div className="maintenance-form-field">
+                <label htmlFor="unit">Birim <span className="zx-required" aria-hidden="true">*</span></label>
+                <input
+                  id="unit"
+                  name="unit"
+                  className="maintenance-form-input"
+                  defaultValue="adet"
+                  disabled={pending}
+                  required
+                />
+              </div>
+              <div className="maintenance-form-field">
+                <label htmlFor="actualUnitCost">Birim Maliyet</label>
+                <input
+                  id="actualUnitCost"
+                  name="actualUnitCost"
+                  type="number"
+                  min="0"
+                  step="any"
+                  className="maintenance-form-input"
+                  disabled={pending}
+                />
+              </div>
             </div>
-            <div className="maintenance-form-field">
-              <label htmlFor="partName">Parça Adı</label>
-              <input
-                id="partName"
-                name="partName"
-                className="maintenance-form-input"
-                disabled={pending}
-              />
+            <div className="maintenance-form-actions">
+              <Button type="submit" variant="primary" disabled={pending}>
+                Parça Kullanımı Ekle
+              </Button>
             </div>
-            <div className="maintenance-form-field">
-              <label htmlFor="quantity">Miktar</label>
-              <input
-                id="quantity"
-                name="quantity"
-                type="number"
-                min="0"
-                step="any"
-                className="maintenance-form-input"
-                disabled={pending}
-                required
-              />
-            </div>
-            <div className="maintenance-form-field">
-              <label htmlFor="unit">Birim</label>
-              <input
-                id="unit"
-                name="unit"
-                className="maintenance-form-input"
-                defaultValue="adet"
-                disabled={pending}
-                required
-              />
-            </div>
-            <div className="maintenance-form-field">
-              <label htmlFor="actualUnitCost">Birim Maliyet</label>
-              <input
-                id="actualUnitCost"
-                name="actualUnitCost"
-                type="number"
-                min="0"
-                step="any"
-                className="maintenance-form-input"
-                disabled={pending}
-              />
-            </div>
-          </div>
-          <div className="maintenance-form-actions">
-            <Button type="submit" variant="primary" disabled={pending}>
-              Parça Kullanımı Ekle
-            </Button>
-          </div>
-        </form>
+          </form>
+        </details>
       </div>
     </section>
   );
@@ -350,37 +354,47 @@ export function MaintenanceWorkOrderCostSummaryPanel({
   costSummary,
   workOrder,
 }: MaintenanceWorkOrderCostSummaryPanelProps) {
+  const externalServiceCost = costSummary?.externalServiceCost ?? workOrder.externalServiceCost;
+  const otherCost = costSummary?.otherCost ?? workOrder.otherCost;
+  const hasAnyCost = [
+    costSummary?.estimatedPartsCost,
+    costSummary?.actualPartsCost,
+    externalServiceCost,
+    otherCost,
+    costSummary?.totalMaintenanceCost,
+  ].some((value) => value !== undefined && value !== null);
+
   return (
-    <section className="maintenance-section" aria-label="Maliyet Özeti">
+    <section className="maintenance-section maintenance-section--wide" aria-label="Maliyet Özeti">
       <header className="maintenance-section__header">
         <h2>Maliyet Özeti</h2>
       </header>
-      <dl className="maintenance-detail-dl">
-        <div>
-          <dt>Tahmini Parça Maliyeti</dt>
-          <dd>{formatMaintenanceCurrency(costSummary?.estimatedPartsCost)}</dd>
-        </div>
-        <div>
-          <dt>Gerçekleşen Parça Maliyeti</dt>
-          <dd>{formatMaintenanceCurrency(costSummary?.actualPartsCost)}</dd>
-        </div>
-        <div>
-          <dt>Dış Hizmet Maliyeti</dt>
-          <dd>
-            {formatMaintenanceCurrency(
-              costSummary?.externalServiceCost ?? workOrder.externalServiceCost,
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt>Diğer Maliyet</dt>
-          <dd>{formatMaintenanceCurrency(costSummary?.otherCost ?? workOrder.otherCost)}</dd>
-        </div>
-        <div>
-          <dt>Toplam Bakım Maliyeti</dt>
-          <dd>{formatMaintenanceCurrency(costSummary?.totalMaintenanceCost)}</dd>
-        </div>
-      </dl>
+      {hasAnyCost ? (
+        <dl className="maintenance-detail-dl">
+          <div>
+            <dt>Tahmini Parça</dt>
+            <dd>{formatMaintenanceCurrency(costSummary?.estimatedPartsCost)}</dd>
+          </div>
+          <div>
+            <dt>Gerçekleşen Parça</dt>
+            <dd>{formatMaintenanceCurrency(costSummary?.actualPartsCost)}</dd>
+          </div>
+          <div>
+            <dt>Dış Hizmet</dt>
+            <dd>{formatMaintenanceCurrency(externalServiceCost)}</dd>
+          </div>
+          <div>
+            <dt>Diğer</dt>
+            <dd>{formatMaintenanceCurrency(otherCost)}</dd>
+          </div>
+          <div>
+            <dt>Toplam Maliyet</dt>
+            <dd>{formatMaintenanceCurrency(costSummary?.totalMaintenanceCost)}</dd>
+          </div>
+        </dl>
+      ) : (
+        <p className="maintenance-empty-state">Henüz maliyet girilmedi.</p>
+      )}
     </section>
   );
 }
@@ -392,6 +406,15 @@ type MaintenanceWorkOrderTimelinePanelProps = Readonly<{
 export function MaintenanceWorkOrderTimelinePanel({
   timeline,
 }: MaintenanceWorkOrderTimelinePanelProps) {
+  const rows = timeline.map((entry) => {
+    const event = localizeMaintenanceEventText(entry.entryType) ?? enumLabel(entry.entryType);
+    const title = localizeMaintenanceEventText(entry.title) ?? null;
+    const detail = localizeMaintenanceEventText(entry.detail) ?? null;
+    return { entry, event, title: title && title !== event ? title : null, detail };
+  });
+  const showTitle = rows.some((row) => row.title);
+  const showDetail = rows.some((row) => row.detail);
+
   return (
     <section className="maintenance-section maintenance-section--wide" aria-label="Zaman Çizelgesi">
       <header className="maintenance-section__header">
@@ -400,25 +423,25 @@ export function MaintenanceWorkOrderTimelinePanel({
       {timeline.length === 0 ? (
         <p className="maintenance-empty-state">Zaman çizelgesi kaydı bulunmuyor.</p>
       ) : (
-        <div className="maintenance-table-wrap">
-          <table className="maintenance-table maintenance-table--compact">
+        <div className="maintenance-table-wrap" tabIndex={0} role="region" aria-label="Zaman Çizelgesi (kaydırılabilir)">
+          <table aria-label="Zaman Çizelgesi" className="maintenance-table maintenance-table--compact maintenance-table--timeline">
             <thead>
               <tr>
                 <th>Zaman</th>
                 <th>Olay</th>
-                <th>Başlık</th>
-                <th>Detay</th>
+                {showTitle ? <th>Başlık</th> : null}
+                {showDetail ? <th>Detay</th> : null}
                 <th>Aktör</th>
               </tr>
             </thead>
             <tbody>
-              {timeline.map((entry, index) => (
+              {rows.map(({ entry, event, title, detail }, index) => (
                 <tr key={`${entry.occurredAtUtc}-${entry.entryType}-${index}`}>
-                  <td>{formatMaintenanceDateTime(entry.occurredAtUtc)}</td>
-                  <td>{entry.entryType}</td>
-                  <td className="maintenance-table__cell--wrap">{entry.title}</td>
-                  <td className="maintenance-table__cell--wrap">{entry.detail ?? "—"}</td>
-                  <td>{entry.actorSubjectId ?? "—"}</td>
+                  <td data-label="Zaman">{formatMaintenanceDateTime(entry.occurredAtUtc)}</td>
+                  <td data-label="Olay">{event}</td>
+                  {showTitle ? <td data-label="Başlık" className="maintenance-table__cell--wrap">{title ?? "—"}</td> : null}
+                  {showDetail ? <td data-label="Detay" className="maintenance-table__cell--wrap">{detail ?? "—"}</td> : null}
+                  <td data-label="Aktör">{entry.actorSubjectId ? displayActor(entry.actorSubjectId) : "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -447,22 +470,14 @@ export function MaintenanceWorkOrderPreventiveSourcePanel({
   }
 
   return (
-    <section className="maintenance-section" aria-label="Periyodik Bakım Kaynağı">
+    <section className="maintenance-section maintenance-section--wide" aria-label="Periyodik Bakım Kaynağı">
       <header className="maintenance-section__header">
         <h2>Periyodik Bakım Kaynağı</h2>
       </header>
       <dl className="maintenance-detail-dl">
         <div>
           <dt>Plan Kodu</dt>
-          <dd>{workOrder.preventivePlanCode ?? "—"}</dd>
-        </div>
-        <div>
-          <dt>Plan Kimliği</dt>
-          <dd>{workOrder.preventivePlanId ?? "—"}</dd>
-        </div>
-        <div>
-          <dt>Vade Kimliği</dt>
-          <dd>{workOrder.preventiveDueId ?? "—"}</dd>
+          <dd>{workOrder.preventivePlanCode ?? "Plan kodu girilmedi"}</dd>
         </div>
       </dl>
       <div className="maintenance-footer-note">

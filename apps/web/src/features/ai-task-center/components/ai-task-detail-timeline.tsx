@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import type { AiTaskAuditEvent } from "../domain/ai-task";
 import {
   getAiTaskAuditEventLabel,
+  localizeAiTaskAuditActorLabel,
   getAiTaskAuditMetadataSummary,
   getAiTaskAuditTransitionLabel,
 } from "../presentation/ai-task-audit-labels";
@@ -93,7 +94,7 @@ export function AiTaskDetailTimeline({
               </div>
 
               <p className="ai-task-detail-timeline__actor">
-                {event.actorLabel}
+                {localizeAiTaskAuditActorLabel(event.actorLabel)}
               </p>
 
               {event.note ? (

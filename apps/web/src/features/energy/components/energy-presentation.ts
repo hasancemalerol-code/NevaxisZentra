@@ -299,8 +299,8 @@ export function resolveKpiEvidenceRail(kpi: EnergyKpiCard): EnergyKpiEvidenceRai
     return {
       progressPercent: 0,
       markerPercent: null,
-      railLabel: kpi.state === "available" ? "Geliştirme tarifesi" : "Tarife kanıtı yok",
-      accessibleSummary: `${kpi.label}: ${kpi.value}. Geliştirme tarifesi.`,
+      railLabel: kpi.state === "available" ? "Örnek tarife" : "Tarife kanıtı yok",
+      accessibleSummary: `${kpi.label}: ${kpi.value}. Örnek tarife.`,
     };
   }
 
@@ -383,7 +383,7 @@ export function resolveKpiPresentation(
     }
     case "estimated-cost":
       tone = "info";
-      statusLabel = kpi.state === "available" ? "Geliştirme tarifesi" : "Tarife kanıtı yok";
+      statusLabel = kpi.state === "available" ? "Örnek tarife" : "Tarife kanıtı yok";
       accessibleSummary = `${kpi.label}: ${kpi.value}. ${statusLabel}.`;
       scopeLabel = "Raporlama dönemi maliyet kanıtı";
       break;

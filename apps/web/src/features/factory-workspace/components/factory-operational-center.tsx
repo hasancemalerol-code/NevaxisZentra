@@ -7,14 +7,62 @@ import { ContextPanel } from "@/components/workspace/context-panel";
 import { EventTimeline } from "@/components/workspace/event-timeline";
 import { LineTopology } from "@/components/workspace/line-topology";
 import { OperationalBadge, mapOperationalStatus } from "@/components/workspace/operational-status";
+import { knownStateLabel } from "@/lib/presentation/enum-labels";
 import { StatusStrip } from "@/components/workspace/status-strip";
 import { ThroughputIntelligencePanel } from "@/features/throughput-intelligence/components/throughput-intelligence-panel";
 import { ThroughputOptimizerPanel } from "@/features/throughput-optimizer/components/throughput-optimizer-panel";
 import { ContinuousOptimizationOpportunityStrip } from "@/features/continuous-optimization/components/continuous-optimization-control-center-view";
 import { buildScenarioRecoveryHref } from "@/features/scenario-recovery/application/scenario-recovery-links";
 import type { MixedProductionStationSnapshotApi } from "@/features/mixed-production/server/mixed-production-api-client";
+import { collectLineStates } from "../application/build-factory-hierarchy";
 import { resolveActiveSelectionKind } from "../application/factory-workspace-selection";
 import type { FactoryWorkspacePayload } from "../domain/factory-workspace-types";
+
+type LineRow = Readonly<{
+  lineId: string;
+  lineCode: string;
+  lineName: string;
+  state: string;
+  order?: string;
+  good: number;
+  reject: number;
+}>;
+
+function LineRowsList({
+  rows,
+  onSelectLine,
+}: Readonly<{ rows: readonly LineRow[]; onSelectLine: (lineId: string) => void }>) {
+  return (
+    <div className="factory-operational-rows" role="group" aria-label="Hat durumları">
+      <div className="factory-operational-row factory-operational-row--head" aria-hidden="true">
+        <span>Hat</span>
+        <span>Durum</span>
+        <span>Emir</span>
+        <span className="fact-numeric">İyi üretim</span>
+        <span className="fact-numeric">Fire</span>
+      </div>
+      {rows.map((line) => (
+        <button
+          key={line.lineId}
+          type="button"
+          className="factory-operational-row"
+          onClick={() => onSelectLine(line.lineId)}
+        >
+          <div className="factory-operational-row__primary">
+            <strong title={line.lineCode}>{line.lineCode}</strong>
+            <span title={line.lineName}>{line.lineName}</span>
+          </div>
+          <span>
+            <OperationalBadge label={line.state} status={mapOperationalStatus(line.state)} />
+          </span>
+          <span className="factory-operational-row__order" data-label="Emir">{line.order ?? "Emir yok"}</span>
+          <span className="fact-numeric" data-label="İyi üretim">{line.good}</span>
+          <span className="fact-numeric" data-label="Fire">{line.reject}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 type FactoryOperationalCenterProps = Readonly<{
   workspace: FactoryWorkspacePayload;
@@ -25,13 +73,13 @@ type FactoryOperationalCenterProps = Readonly<{
 function buildStationRows(station: MixedProductionStationSnapshotApi | undefined) {
   if (!station) return [];
   return [
-    { label: "Durum", value: station.state },
+    { label: "Durum", value: knownStateLabel(station.state) ?? station.state },
     { label: "Operasyon", value: station.operationCode ?? "—" },
     { label: "Kaynak", value: station.resourceCode ?? "—" },
     { label: "Operatör", value: station.operatorCode ?? "—" },
-    { label: "GOOD", value: station.goodCount },
-    { label: "REJECT", value: station.rejectCount },
-    { label: "WIP", value: station.bufferQuantity != null ? `${station.bufferQuantity}/${station.bufferCapacity ?? "—"}` : "—" },
+    { label: "İyi üretim", value: station.goodCount },
+    { label: "Fire", value: station.rejectCount },
+    { label: "Ara stok", value: station.bufferQuantity != null ? `${station.bufferQuantity}/${station.bufferCapacity ?? "—"}` : "—" },
   ];
 }
 
@@ -55,69 +103,57 @@ export function FactoryOperationalCenter({
   }, [workspace.resources.resources, workspace.selection.areaCode]);
 
   const lineRows = useMemo(() => {
-    const map = new Map<string, { lineCode: string; lineName: string; state: string; order?: string; good: number; reject: number }>();
+    const canonicalStates = collectLineStates(workspace.hierarchy);
+    const map = new Map<string, LineRow>();
     for (const resource of workspace.resources.resources) {
       const current = map.get(resource.lineId);
       if (!current) {
         map.set(resource.lineId, {
+          lineId: resource.lineId,
           lineCode: resource.lineCode,
           lineName: resource.lineName,
-          state: resource.state,
+          state: canonicalStates.get(resource.lineId) ?? resource.state,
           order: resource.orderReference,
           good: resource.goodCount,
           reject: resource.rejectCount,
         });
       } else {
-        current.good += resource.goodCount;
-        current.reject += resource.rejectCount;
+        map.set(resource.lineId, {
+          ...current,
+          good: current.good + resource.goodCount,
+          reject: current.reject + resource.rejectCount,
+        });
       }
     }
     return [...map.values()];
-  }, [workspace.resources.resources]);
+  }, [workspace.hierarchy, workspace.resources.resources]);
 
   const selectedStation = workspace.lineDetail?.stations.find(
     (station) => station.stationId === (workspace.selection.stationId ?? selectedStationId),
   );
 
+  if (activeKind === "factory" && lineRows.length === 0) {
+    return (
+      <div data-testid="factory-level-view" className="factory-operational-empty">
+        <p>Hat tanımı eklendiğinde hat durumları, üretilen ve reddedilen adetler burada listelenir.</p>
+        {workspace.activeOrderCount != null ? <p>Aktif üretim emri: <strong>{workspace.activeOrderCount}</strong></p> : null}
+      </div>
+    );
+  }
+
   if (activeKind === "factory") {
     return (
-      <div data-testid="factory-level-view">
-        <StatusStrip
-          aria-label="Fabrika özet"
-          items={[
-            { label: "Hat", value: lineRows.length },
-            { label: "Kaynak", value: workspace.resources.status.total },
-            { label: "Çalışan", value: workspace.resources.status.running },
-            { label: "Risk", value: workspace.resources.status.atRisk },
-            { label: "Aktif emir", value: workspace.activeOrderCount ?? "—" },
-          ]}
-        />
-
+      <div data-testid="factory-level-view" className="factory-view-stack">
         <section className="fact-section" aria-label="Hat durumları">
           <header className="fact-section__header">
             <h2 className="fact-section__title">Hatlar</h2>
+            <span className="factory-operational-count">
+              {lineRows.length} hat
+              {workspace.activeOrderCount != null ? ` · ${workspace.activeOrderCount} aktif emir` : ""}
+            </span>
           </header>
-          <div className="fact-section__body factory-operational-rows">
-            {lineRows.map((line) => (
-              <button
-                key={line.lineCode}
-                type="button"
-                className="factory-operational-row"
-                onClick={() => {
-                  const lineId = workspace.resources.resources.find((resource) => resource.lineCode === line.lineCode)?.lineId;
-                  if (lineId) onSelectLine(lineId);
-                }}
-              >
-                <div className="factory-operational-row__primary">
-                  <strong>{line.lineCode}</strong>
-                  <span>{line.lineName}</span>
-                </div>
-                <OperationalBadge label={line.state} status={mapOperationalStatus(line.state)} />
-                <span>{line.order ?? "—"}</span>
-                <span className="fact-numeric">{line.good}</span>
-                <span className="fact-numeric">{line.reject}</span>
-              </button>
-            ))}
+          <div className="fact-section__body">
+            <LineRowsList rows={lineRows} onSelectLine={onSelectLine} />
           </div>
         </section>
 
@@ -156,7 +192,7 @@ export function FactoryOperationalCenter({
     );
 
     return (
-      <div data-testid="factory-area-view">
+      <div data-testid="factory-area-view" className="factory-view-stack">
         <StatusStrip
           aria-label="Alan özet"
           items={[
@@ -166,28 +202,7 @@ export function FactoryOperationalCenter({
             { label: "Çalışan", value: areaLines.filter((resource) => resource.state === "RUNNING").length },
           ]}
         />
-        <div className="factory-operational-rows">
-          {rows.map((line) => (
-            <button
-              key={line.lineCode}
-              type="button"
-              className="factory-operational-row"
-              onClick={() => {
-                const lineId = workspace.resources.resources.find((resource) => resource.lineCode === line.lineCode)?.lineId;
-                if (lineId) onSelectLine(lineId);
-              }}
-            >
-              <div className="factory-operational-row__primary">
-                <strong>{line.lineCode}</strong>
-                <span>{line.lineName}</span>
-              </div>
-              <OperationalBadge label={line.state} status={mapOperationalStatus(line.state)} />
-              <span>{line.order ?? "—"}</span>
-              <span className="fact-numeric">{line.good}</span>
-              <span className="fact-numeric">{line.reject}</span>
-            </button>
-          ))}
-        </div>
+        <LineRowsList rows={rows} onSelectLine={onSelectLine} />
       </div>
     );
   }
@@ -204,14 +219,14 @@ export function FactoryOperationalCenter({
     }));
 
     return (
-      <div data-testid="factory-line-view">
+      <div data-testid="factory-line-view" className="factory-view-stack">
         <StatusStrip
           aria-label="Hat özet"
           items={[
-            { label: "Durum", value: line.lineState },
+            { label: "Durum", value: knownStateLabel(line.lineState) ?? line.lineState },
             { label: "Emir", value: line.currentOrderReference ?? "—" },
-            { label: "GOOD", value: line.goodOutputToday },
-            { label: "REJECT", value: line.rejectOutputToday },
+            { label: "İyi üretim", value: line.goodOutputToday },
+            { label: "Fire", value: line.rejectOutputToday },
             { label: "Vardiya", value: line.currentShiftCode ?? workspace.shift?.shiftLabel ?? "—" },
           ]}
         />

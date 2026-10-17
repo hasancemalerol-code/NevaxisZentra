@@ -54,9 +54,14 @@
   min-width: 0;
 }
 
+/* Headers that skip the row wrapper sit in a column flex parent: the 320px basis would become a minimum height. */
+.commint-executive > .commint-executive__intro {
+  flex: 0 0 auto;
+}
+
 .commint-executive__eyebrow {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.1em;
   color: var(--commint-blue);
   font-weight: 700;
@@ -86,7 +91,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.16rem 0.38rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--commint-slate-500);
 }
 
@@ -130,11 +135,11 @@
   padding: 0.08rem 0.34rem;
   background: #eef2f7;
   border: 1px solid #e2e8f0;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #566478;
 }
 
 .commint-readonly-note,
@@ -217,7 +222,7 @@
 
 .commint-kpi-card__tone--critical::before { background: #dc2626; }
 .commint-kpi-card__tone--attention::before { background: #d97706; }
-.commint-kpi-card__tone--informational::before { background: #2563eb; }
+.commint-kpi-card__tone--informational::before { background: #2463a7; }
 .commint-kpi-card__tone--controlled::before { background: #16a34a; }
 .commint-kpi-card__tone--insufficient::before { background: #64748b; }
 .commint-kpi-card__tone--conflict::before { background: #7c3aed; }
@@ -247,14 +252,14 @@
 
 .commint-kpi-card__detail {
   margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-kpi-card__summary {
   margin: 0;
-  font-size: 0.66rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
   line-height: 1.35;
 }
 
@@ -263,8 +268,8 @@
   flex-wrap: wrap;
   gap: 0.18rem 0.32rem;
   align-items: center;
-  font-size: 0.64rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-kpi-card__badge {
@@ -378,20 +383,20 @@
 .commint-panel__secondary,
 .commint-chart__secondary {
   display: block;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-panel__trace {
   display: block;
-  font-size: 0.62rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .commint-panel__hint {
   margin: 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-button {
@@ -404,14 +409,14 @@
   background: #ffffff;
   color: #0f172a;
   padding: 0.38rem 0.68rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
 }
 
 .commint-button--primary {
-  background: #155eef;
-  border-color: #155eef;
+  background: #2463a7;
+  border-color: #2463a7;
   color: #ffffff;
 }
 
@@ -432,7 +437,7 @@
   padding: 0.38rem 0.55rem;
   border: 1px solid #dbe3ee;
   border-radius: 8px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   background: #ffffff;
 }
 
@@ -445,7 +450,7 @@
 .commint-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .commint-table th,
@@ -467,7 +472,7 @@
   align-items: center;
   border-radius: 999px;
   padding: 0.12rem 0.42rem;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 600;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -493,7 +498,7 @@
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 1fr) auto;
   gap: 0.35rem;
   align-items: center;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 .commint-chart__label {
@@ -517,7 +522,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #2563eb;
+  background: #2463a7;
 }
 
 .commint-supplier-list {
@@ -556,8 +561,8 @@
 
 .commint-supplier-row__meta {
   margin: 0;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-priority-list,
@@ -582,8 +587,8 @@
 
 .commint-empty {
   margin: 0;
-  font-size: 0.74rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-drawer-backdrop {
@@ -631,8 +636,8 @@
 }
 
 .commint-detail-field__label {
-  font-size: 0.64rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -657,7 +662,7 @@
 .commint-driver-list {
   margin: 0;
   padding-left: 1rem;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   color: #334155;
 }
 
@@ -711,13 +716,13 @@
 
 .commint-supplier-context {
   margin: 0;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-table__secondary {
-  font-size: 0.66rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: #5d6b7f;
 }
 
 .commint-composer {
@@ -746,8 +751,8 @@
 
 .commint-composer__hint {
   margin: 0.12rem 0 0;
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-composer__context {
@@ -758,8 +763,8 @@
 }
 
 .commint-composer__basis {
-  font-size: 0.66rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-composer__modes {
@@ -775,7 +780,7 @@
   background: #ffffff;
   color: #475569;
   padding: 0.34rem 0.72rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -804,7 +809,7 @@
 }
 
 .commint-field__label {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #475569;
   text-transform: uppercase;
@@ -819,7 +824,7 @@
   padding: 0.42rem 0.58rem;
   border: 1px solid #dbe3ee;
   border-radius: 8px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   background: #ffffff;
 }
 
@@ -830,8 +835,8 @@
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #e8edf3;
-  font-size: 0.68rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
 }
 
 .commint-composer__actions {
@@ -854,7 +859,7 @@
   padding: 0.38rem 0.55rem;
   border: 1px solid #dbe3ee;
   border-radius: 8px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
 }
 
 .commint-panel--spread {
@@ -871,7 +876,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: #475569;
 }
 
@@ -903,8 +908,8 @@
 }
 
 .commint-filter-rail__label {
-  font-size: 0.64rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -916,7 +921,7 @@
   padding: 0.38rem 0.55rem;
   border: 1px solid #dbe3ee;
   border-radius: 8px;
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   background: #ffffff;
 }
 
@@ -971,8 +976,8 @@
 .commint-driver-summary__leading-label,
 .commint-driver-summary__supporting-label {
   margin: 0;
-  font-size: 0.64rem;
-  color: #64748b;
+  font-size: 0.75rem;
+  color: #566478;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -988,4 +993,924 @@
   .commint-driver-summary__grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Review fixes: sentences are notes, not pills; links never wrap their arrow; actions stay top-right. */
+.commint-executive__scope-note {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #5b6b7c;
+}
+
+.commint-table__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.commint-executive__intro {
+  flex: 1 1 0;
+  min-width: min(100%, 20rem);
+}
+
+.commint-executive__actions {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.commint-kpi-card__label {
+  min-height: 2.5em;
+  line-height: 1.25;
+}
+
+.commint-filter-field--wide {
+  grid-column: 1 / -1;
+}
+
+.commint-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* Round 3: calm preamble, one-line action rows, content-sized overview panels. */
+.commint-executive__subtitle {
+  text-wrap: pretty;
+}
+
+@media (min-width: 600px) {
+  .commint-executive__top {
+    flex-wrap: nowrap;
+  }
+
+  .commint-executive__intro {
+    min-width: 0;
+  }
+}
+
+.commint-executive__meta li {
+  border-radius: 8px;
+  white-space: normal;
+}
+
+/* Disclaimers read as one muted note block: no pills, no boxes, no uppercase chips. */
+body .commint-executive .commint-provenance-strip,
+body .commint-panel .commint-provenance-strip {
+  display: block;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--zx-text-muted, #5b6b7c);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+body .commint-provenance-strip .commint-provenance-strip__badge {
+  display: inline;
+  margin-right: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--zx-text-strong, #12263a);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body .commint-provenance-strip .commint-provenance-strip__badge::after {
+  content: ":";
+}
+
+body .commint-panel .commint-provenance-strip {
+  margin: 8px 0 0;
+}
+
+/* KPI cards: the accessible summary repeats the detail line, so it stays for screen readers only. */
+.commint-kpi-card__summary {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.commint-kpi-card__tone--insufficient .commint-kpi-card__badge,
+.commint-kpi-card__tone--neutral .commint-kpi-card__badge {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-weight: 650;
+}
+
+/* Lens links keep their arrow on the same line and fit their content. */
+.commint-kpi-card > .commint-table__link {
+  justify-self: start;
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.commint-table__link svg {
+  flex: 0 0 auto;
+}
+
+/* Overview panels size to their content; single-panel overviews flow into a fluid grid instead of a named-area grid. */
+.commint-panel-grid {
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .commint-panel-grid--overview:not(:has(.commint-panel--supplier)),
+  .commint-panel-grid--auto {
+    grid-template-areas: none;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  }
+
+  .commint-panel-grid--overview:not(:has(.commint-panel--supplier)),
+  .commint-panel-grid--overview:not(:has(.commint-panel--supplier)) > *,
+  .commint-panel-grid--auto > * {
+    grid-area: auto;
+  }
+}
+
+/* Round 4: count-aware KPI rows (no lone or stretched last card at 1920/1440/1366/1024/768). */
+body .content-viewport .commint-kpi-grid:not(:has(> :nth-child(7):last-child)) {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)) !important;
+  gap: 12px !important;
+  align-items: stretch;
+}
+
+body .content-viewport .commint-kpi-grid > * {
+  min-width: 0;
+}
+
+/* 3 or 4 cards: one row on wide screens, 2 x 2 (or 2 + full-width last) below. */
+body .content-viewport .commint-kpi-grid:has(> :nth-child(4):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body .content-viewport .commint-kpi-grid:has(> :nth-child(3):last-child) {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 1100px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 5 cards: one row >= 1280px; 3 + 2 centred 821-1279px; 2 columns + full-width last <= 820px. */
+body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > :nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 821px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > * {
+    grid-column: span 2;
+  }
+
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > :nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > :nth-child(5) {
+    grid-column: 4 / span 2;
+  }
+}
+
+@media (min-width: 1280px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > *,
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > :nth-child(4),
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(5):last-child:not(:nth-child(6))) > :nth-child(5) {
+    grid-column: auto;
+  }
+}
+
+/* 6 cards: 2 x 3 on phones, 3 x 2 up to 1699px, one row only on very wide screens. */
+body .content-viewport .commint-kpi-grid:has(> :nth-child(6):last-child) {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+@media (min-width: 821px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(6):last-child) {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1700px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(6):last-child) {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(3):last-child),
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(4):last-child) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body .content-viewport .commint-kpi-grid:has(> :nth-child(3):last-child) > :nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* 7 cards keep the shared flex rule: 4 + 3, the last row stretches. */
+
+/* KPI card copy: readable size, one caption line, provenance stays available to screen readers. */
+.commint-kpi-card__label {
+  font-size: 0.8125rem;
+  min-height: 0;
+}
+
+.commint-kpi-card__detail,
+.commint-kpi-card__footer {
+  font-size: 0.8125rem;
+}
+
+.commint-kpi-card__footer > span:not(.commint-kpi-card__badge) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.commint-kpi-card__value {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The shared "all: unset" link reset must not drop the arrow onto its own line. */
+body .content-viewport a.commint-table__link {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* Header preamble: the context list reads as one muted line, not as a row of pills. */
+body .content-viewport .commint-executive__meta {
+  gap: 2px 0;
+  font-size: 0.8125rem;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+body .content-viewport .commint-executive__meta li {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+body .content-viewport .commint-executive__meta li + li::before {
+  content: "·";
+  margin: 0 8px;
+  color: #5b6b7c;
+}
+
+body .content-viewport .commint-readonly-note {
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+body .content-viewport .commint-executive {
+  gap: 6px;
+}
+
+body .content-viewport .commint-tab {
+  font-size: 0.8125rem;
+}
+
+body .content-viewport .commint-filter-rail label,
+body .content-viewport .commint-filter-rail span {
+  font-size: 0.8125rem;
+}
+
+/* Round 5: header notes read as one muted paragraph, never a stack of differently styled lines. */
+body .content-viewport .commint-notes {
+  margin: 0;
+  max-width: 72rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+body .content-viewport .commint-notes:empty {
+  display: none;
+}
+
+body .content-viewport .commint-notes > p {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  max-width: none;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: inherit;
+  color: inherit;
+}
+
+body .content-viewport .commint-notes > p::after {
+  content: " ";
+}
+
+body .content-viewport .commint-notes .commint-provenance-strip__badge {
+  display: inline;
+  margin-right: 4px;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: inherit;
+}
+
+/* KPI cards: label on top, figure and caption pinned to the bottom so figures line up across a row. */
+body .content-viewport .commint-kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+body .content-viewport .commint-kpi-card__header {
+  flex: 0 0 auto;
+}
+
+body .content-viewport .commint-kpi-card__label {
+  text-wrap: balance;
+}
+
+body .content-viewport .commint-kpi-card__value {
+  margin-top: 0;
+  padding-top: 2px;
+  font-size: clamp(1.25rem, 1.6vw, 1.5rem);
+  overflow-wrap: anywhere;
+}
+
+body .content-viewport .commint-kpi-card > .commint-table__link {
+  align-self: flex-start;
+}
+
+/* Cards that carry a separate accessible summary keep a single visible caption; the status footer is screen-reader only. */
+.commint-kpi-card__summary ~ .commint-kpi-card__footer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Filter rail: fields share the row evenly (count-aware width); the clear action closes the last row, so no row has a hole or a lone control. */
+body .content-viewport .commint-filter-rail {
+  --rail-cols: 4;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+body .content-viewport .commint-filter-rail > label {
+  display: grid;
+  gap: 6px;
+  align-content: end;
+  flex: 1 1 calc((100% - 12px * (var(--rail-cols) - 1)) / var(--rail-cols));
+  min-width: 0;
+}
+
+body .content-viewport .commint-filter-rail :is(select, input):not([multiple]):not([size]) {
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  min-height: 40px;
+}
+
+body .content-viewport .commint-filter-rail > button {
+  flex: 0 0 auto;
+  margin-left: auto;
+  min-height: 40px;
+  border-color: transparent;
+  background: none;
+  color: var(--zx-accent-strong, #1a4a8a);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+body .content-viewport .commint-filter-rail > label > span {
+  display: block;
+  line-height: 1.25rem;
+}
+
+body .content-viewport .commint-filter-rail:has(> :nth-child(3):last-child) { --rail-cols: 3; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(4):last-child) { --rail-cols: 4; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(5):last-child) { --rail-cols: 3; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(6):last-child) { --rail-cols: 3; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(7):last-child) { --rail-cols: 4; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(8):last-child) { --rail-cols: 4; }
+body .content-viewport .commint-filter-rail:has(> :nth-child(9):last-child) { --rail-cols: 5; }
+
+@media (min-width: 1240px) {
+  body .content-viewport .commint-filter-rail:has(> :nth-child(5):last-child) { --rail-cols: 5; }
+  body .content-viewport .commint-filter-rail:has(> :nth-child(6):last-child) { --rail-cols: 6; }
+}
+
+@media (max-width: 820px) {
+  body .content-viewport .commint-filter-rail,
+  body .content-viewport .commint-filter-rail:has(> :nth-child(n):last-child) {
+    --rail-cols: 2;
+  }
+
+}
+
+@media (max-width: 520px) {
+  body .content-viewport .commint-filter-rail,
+  body .content-viewport .commint-filter-rail:has(> :nth-child(n):last-child) {
+    --rail-cols: 1;
+  }
+}
+
+/* Panel sub-lines: one muted weight, no bold line among muted lines. */
+.commint-panel__primary,
+.commint-chart__primary {
+  font-weight: 500;
+  color: #334155;
+}
+
+
+body .content-viewport .commint-executive__subtitle {
+  text-wrap: balance;
+}
+
+/* Round 5b */
+body .content-viewport .commint-kpi-card > .commint-table__link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+
+.commint-detail-field__label {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+@media (min-width: 1700px) {
+  body .content-viewport .commint-filter-rail:has(> :nth-child(7):last-child) { --rail-cols: 7; }
+  body .content-viewport .commint-filter-rail:has(> :nth-child(8):last-child) { --rail-cols: 8; }
+  body .content-viewport .commint-filter-rail:has(> :nth-child(9):last-child) { --rail-cols: 9; }
+}
+
+/* Round 6: one rule set for the shared view layer. */
+.commint-kpi-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+/* Header notes are one collapsed line; the full sentences open on demand. */
+body .content-viewport details.commint-notes {
+  max-width: none;
+}
+
+body .content-viewport details.commint-notes > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+body .content-viewport details.commint-notes > summary::-webkit-details-marker {
+  display: none;
+}
+
+body .content-viewport details.commint-notes > summary::before {
+  content: "+";
+}
+
+body .content-viewport details.commint-notes[open] > summary::before {
+  content: "−";
+}
+
+body .content-viewport details.commint-notes > p {
+  display: block;
+  margin: 4px 0 0;
+}
+
+body .content-viewport details.commint-notes > p::after {
+  content: none;
+}
+
+/* A panel whose only content is an empty message does not sit beside a tall panel: the row becomes one column. */
+body .content-viewport .commint-panel-grid:has(> .commint-panel > .commint-empty) {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: none;
+  align-items: start;
+}
+
+body .content-viewport .commint-panel-grid:has(> .commint-panel > .commint-empty) > * {
+  grid-area: auto;
+}
+
+body .content-viewport .commint-panel > .commint-empty {
+  margin: 0;
+  text-align: left;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+/* Round 7 */
+.commint-kpi-note {
+  margin: 8px 0 16px;
+}
+
+body .content-viewport .commint-panel > .commint-panel__header {
+  margin-bottom: 0;
+}
+
+body .content-viewport .commint-detail-field__value {
+  font-weight: 400;
+}
+
+
+/* Round 9: one no-data pattern, one key/value pattern, one list pattern for the whole module. */
+body .content-viewport .commint-kpi-card__value--empty {
+  font-size: 1rem !important;
+  font-weight: 500;
+  color: var(--zx-text-muted, #5b6b7c);
+  padding-top: 0;
+}
+
+body .content-viewport .commint-detail-field__value--empty {
+  font-weight: 400;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+/* Evidence summaries read as muted key/value lines; nothing is bold unless it is a real figure. */
+.commint-evidence-summary .commint-priority-row__title,
+.commint-priority-row__title {
+  font-weight: 400;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+.commint-keyvalue {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+
+.commint-keyvalue > li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+  gap: 4px 16px;
+  padding: 8px 0;
+  border-top: 1px solid var(--zx-line, #e3e9f1);
+}
+
+.commint-keyvalue > li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.commint-keyvalue > li > span:first-child {
+  color: var(--zx-text-strong, #12263a);
+  font-weight: 600;
+}
+
+.commint-keyvalue > li > span:last-child {
+  color: var(--zx-text-muted, #5b6b7c);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .commint-keyvalue > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.commint-summary-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commint-summary-list > li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--zx-line, #e3e9f1);
+  font-size: 0.8125rem;
+  color: var(--zx-text-muted, #5b6b7c);
+}
+
+.commint-summary-list > li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.commint-summary-list__count {
+  color: var(--zx-text-strong, #12263a);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.commint-lens-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commint-lens-list__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 4px 24px;
+  padding: 10px 0;
+  border-top: 1px solid var(--zx-line, #e3e9f1);
+}
+
+.commint-lens-list__row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.commint-lens-list__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.commint-lens-list__label {
+  color: var(--zx-text-strong, #12263a);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.commint-lens-list__hint {
+  color: var(--zx-text-muted, #5b6b7c);
+  font-size: 0.8125rem;
+}
+
+.commint-lens-list__count {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--zx-text-strong, #12263a);
+  font-size: 1.125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .commint-lens-list__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .commint-lens-list__row > a {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Round 10: no-data cards are short and flat; one note style; compact key/value grids. */
+body .content-viewport .commint-kpi-card > * {
+  margin-block: 0;
+}
+
+body .content-viewport .commint-kpi-card__header {
+  align-items: center;
+}
+
+body .content-viewport .commint-kpi-card__icon {
+  width: 24px;
+  height: 24px;
+  flex-basis: 24px;
+}
+
+body .content-viewport .commint-kpi-card__value--empty {
+  line-height: 1.5rem;
+}
+
+/* A no-data card is one compact block: label, muted dash, caption. */
+body .content-viewport .commint-kpi-card:has(.commint-kpi-card__value--empty) {
+  gap: 2px;
+}
+
+body .content-viewport .commint-kpi-grid > .commint-kpi-card {
+  align-self: start;
+}
+
+body .content-viewport .commint-kpi-note {
+  padding: 8px 12px;
+  border: 1px solid var(--zx-line, #e3e9f1);
+  border-radius: 8px;
+  background: var(--zx-surface-inset, #f7f9fc);
+}
+
+body .content-viewport .commint-spread-panel .commint-detail-grid {
+  grid-template-columns: repeat(3, minmax(0, 15rem));
+  gap: 10px 20px !important;
+  justify-content: start;
+}
+
+body .content-viewport .commint-panel {
+  gap: 8px;
+}
+
+body .content-viewport .commint-panel__header h2,
+body .content-viewport .commint-panel__title {
+  margin: 0;
+}
+
+/* Round 12: an all-empty KPI set is one compact card; compact key/value list; 768 summaries side by side. */
+.commint-kpi-compact {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--zx-line, #e3e9f1);
+  border-radius: 12px;
+  background: var(--zx-surface, #fff);
+}
+
+.commint-kpi-compact__title {
+  margin: 0;
+  color: var(--zx-text-strong, #12263a);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.commint-kpi-compact__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 32px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.commint-kpi-compact__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 12px;
+  min-height: 36px;
+  border-top: 1px solid var(--zx-line, #e3e9f1);
+  font-size: 0.8125rem;
+}
+
+.commint-kpi-compact__label {
+  color: var(--zx-text-strong, #12263a);
+  font-weight: 600;
+}
+
+.commint-kpi-compact__value {
+  color: var(--zx-text-muted, #5b6b7c);
+  font-variant-numeric: tabular-nums;
+}
+
+.commint-kpi-compact__caption {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .commint-kpi-compact__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .commint-kpi-compact__list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.commint-keyvalue--compact {
+  max-width: 720px;
+}
+
+.commint-keyvalue--compact > li > span:last-child:not(.commint-detail-field__value--empty) {
+  color: var(--zx-text-strong, #12263a);
+  font-weight: 600;
+}
+
+.commint-keyvalue--compact > li > .commint-detail-field__value--empty {
+  font-weight: 400;
+}
+
+@media (min-width: 600px) {
+  body .content-viewport .commint-panel-grid--overview:has(.commint-summary-list) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  body .content-viewport .commint-filter-rail:has(> :nth-child(3):last-child) { --rail-cols: 3; }
+}
+
+/* Round 13: compact key/value lists span the card in two columns; ürün rail keeps the clear link inline at 768. */
+body .content-viewport .commint-keyvalue--compact {
+  max-width: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 32px;
+}
+
+body .content-viewport .commint-keyvalue--compact > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body .content-viewport .commint-keyvalue--compact > li:nth-child(2) {
+  border-top: 0;
+  padding-top: 0;
+}
+
+@media (max-width: 640px) {
+  body .content-viewport .commint-keyvalue--compact {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body .content-viewport .commint-keyvalue--compact > li:nth-child(2) {
+    border-top: 1px solid var(--zx-line, #e3e9f1);
+    padding-top: 8px;
+  }
+}
+
+@media (max-width: 820px) {
+  body .content-viewport .commint-filter-rail:has(> :nth-child(9):last-child) { --rail-cols: 3; }
+}
+
+/* An empty-state sentence sits 12px above the list that follows it (panel gap 8px + 4px). */
+body .content-viewport .commint-panel > .commint-empty + .commint-keyvalue {
+  margin-top: 4px;
+}
+
+/* Frozen checklist: one card padding, one section gap and pill tabs across the whole Ticari Zekâ module. */
+body .content-viewport .commint-page {
+  gap: 12px;
+}
+
+body .content-viewport :is(.commint-panel, .commint-kpi-compact) {
+  padding: 16px;
+}
+
+body .content-viewport .commint-tab-rail {
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body .content-viewport .commint-tab {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--zx-line, #e3e9f1);
+  border-radius: 999px;
+  background: var(--zx-surface, #fff);
+}
+
+body .content-viewport .commint-tab--active {
+  border-color: var(--zx-accent, #2463a7);
+  background: var(--zx-accent-soft, #eaf1fa);
+  color: var(--zx-accent-strong, #1a4a8a);
+  box-shadow: none;
 }

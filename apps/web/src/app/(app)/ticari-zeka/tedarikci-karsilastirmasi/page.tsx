@@ -1,9 +1,11 @@
-import { ShieldAlert } from "lucide-react";
+
 
 import { forbidUnlessGranted } from "@/features/admin-access/server/require-current-permission";
 import { CommercialSupplierComparisonWorkspaceView } from "@/features/commercial-intelligence/components/commercial-supplier-comparison-workspace-view";
 import "@/features/commercial-intelligence/components/commercial-intelligence-workspace.css";
 import { readCommercialSupplierComparisonWorkspace } from "@/features/commercial-intelligence/server/commercial-supplier-comparison-queries";
+
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 type PageProps = Readonly<{
   searchParams: Promise<Readonly<{ comparison?: string }>>;
@@ -16,11 +18,8 @@ export default async function CommercialSupplierComparisonPage({ searchParams }:
   const result = await readCommercialSupplierComparisonWorkspace(params.comparison ?? null);
 
   if (result.status === "failure") {
-    const isUnauthorized =
-      result.code === "permission-denied" || result.code === "unauthenticated";
-
     return (
-      <main className="commint-page">
+      <div className="commint-page">
         <header className="commint-executive">
           <div className="commint-executive__intro">
             <p className="commint-executive__eyebrow">TİCARİ ZEKÂ</p>
@@ -30,17 +29,8 @@ export default async function CommercialSupplierComparisonPage({ searchParams }:
             </p>
           </div>
         </header>
-        <div
-          role="alert"
-          className={isUnauthorized ? "commint-error-banner" : "commint-partial-error"}
-        >
-          <ShieldAlert aria-hidden="true" />
-          <div>
-            <h3>{isUnauthorized ? "Bu modüle erişim yetkiniz yok" : "Tedarikçi karşılaştırma verisi yüklenemedi"}</h3>
-            <p>{result.message}</p>
-          </div>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Tedarikçi karşılaştırma verisi yüklenemedi" inline />
+      </div>
     );
   }
 

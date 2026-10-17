@@ -1,6 +1,12 @@
 "use client";
 
 import { StatusStrip } from "@/components/workspace/status-strip";
+import {
+  constraintTypeLabel,
+  intelligencePathLabel,
+  optimizerCaseStatusLabel,
+  optimizerPhaseLabel,
+} from "@/lib/presentation/throughput-labels";
 
 import type { ThroughputOptimizerWorkspaceApi } from "../server/throughput-optimizer-api-client";
 
@@ -25,30 +31,31 @@ export function ThroughputOptimizerPanel({ workspace }: ThroughputOptimizerPanel
   const improvement = workspace.improvement;
 
   return (
-    <div className="fact-workspace" data-testid="throughput-optimizer-panel">
+    <div className="fact-workspace mlp-panel" data-testid="throughput-optimizer-panel">
       <StatusStrip
         aria-label="Verim optimizasyon durumu"
         items={[
-          { label: "Faz", value: workspace.currentPhase },
-          { label: "Vaka", value: workspace.caseStatus },
-          { label: "Gap", value: observation ? `${observation.gapPerHour.toFixed(0)} GOOD/saat` : "—" },
+          { label: "Aşama", value: optimizerPhaseLabel(workspace.currentPhase) },
+          { label: "Vaka", value: optimizerCaseStatusLabel(workspace.caseStatus) },
+          { label: "Fark", value: observation ? `${observation.gapPerHour.toFixed(0)} iyi/saat` : "—" },
           { label: "Kısıt", value: observation?.currentConstraintStationCode ?? "—" },
-          { label: "Onay", value: workspace.hasPendingApproval ? "BEKLİYOR" : "—" },
+          { label: "İnsan Onayı", value: workspace.hasPendingApproval ? "Onay Bekliyor" : "—" },
         ]}
       />
 
-      <section className="fact-section" aria-label="Worker fazı">
+      <section className="fact-section" aria-label="Optimizasyon aşamaları">
         <header className="fact-section__header">
-          <h2 className="fact-section__title">Worker fazı</h2>
+          <h2 className="fact-section__title">Optimizasyon aşamaları</h2>
         </header>
-        <div className="fact-section__body" data-testid="throughput-optimizer-phases">
+        <div className="fact-section__body mlp-phases" data-testid="throughput-optimizer-phases">
           {PHASES.map((phase) => (
             <span
               key={phase}
-              className={phase === workspace.currentPhase ? "fact-workspace__meta" : "fact-workspace__meta"}
-              style={{ opacity: phase === workspace.currentPhase ? 1 : 0.5, marginRight: "0.75rem" }}
+              className="mlp-phase"
+              data-current={phase === workspace.currentPhase ? "true" : "false"}
+              aria-current={phase === workspace.currentPhase ? "step" : undefined}
             >
-              {phase}
+              {optimizerPhaseLabel(phase)}
             </span>
           ))}
         </div>
@@ -62,11 +69,11 @@ export function ThroughputOptimizerPanel({ workspace }: ThroughputOptimizerPanel
           <div className="fact-section__body">
             <p className="fact-workspace__meta">{workspace.diagnosis.rootCauseSummary}</p>
             <p className="fact-workspace__meta">
-              Kısıt: {workspace.diagnosis.currentConstraintStationCode} · {workspace.diagnosis.constraintType}
+              Kısıt: {workspace.diagnosis.currentConstraintStationCode} · {constraintTypeLabel(workspace.diagnosis.constraintType)}
             </p>
             {workspace.modelIntelligencePath ? (
               <p className="fact-workspace__meta" data-testid="model-transparency">
-                Intelligence path: {workspace.modelIntelligencePath}
+                Zekâ yolu: {intelligencePathLabel(workspace.modelIntelligencePath)}
               </p>
             ) : null}
           </div>
@@ -81,7 +88,7 @@ export function ThroughputOptimizerPanel({ workspace }: ThroughputOptimizerPanel
           <div className="fact-section__body" data-testid="selected-intervention">
             <p className="fact-workspace__meta">{workspace.selection.selected.title}</p>
             <p className="fact-workspace__meta">
-              Tahmin: +{workspace.selection.selected.deltaGoodThroughputPerHour.toFixed(0)} GOOD/saat
+              Tahmin: +{workspace.selection.selected.deltaGoodThroughputPerHour.toFixed(0)} iyi/saat
             </p>
           </div>
         </section>
@@ -94,23 +101,25 @@ export function ThroughputOptimizerPanel({ workspace }: ThroughputOptimizerPanel
           </header>
           <div className="fact-section__body" data-testid="before-after-comparison">
             <p className="fact-workspace__meta">
-              ÖNCE: {improvement.baseline.goodThroughputPerHour.toFixed(0)} GOOD/saat · REJECT {improvement.baseline.rejectCount}
+              Önce: {improvement.baseline.goodThroughputPerHour.toFixed(0)} iyi/saat · Hurda {improvement.baseline.rejectCount}
             </p>
             {improvement.actual ? (
               <p className="fact-workspace__meta">
-                SONRA (ölçülen): {improvement.actual.goodThroughputPerHour.toFixed(0)} GOOD/saat · REJECT {improvement.actual.rejectCount}
+                Sonra (ölçülen): {improvement.actual.goodThroughputPerHour.toFixed(0)} iyi/saat · Hurda {improvement.actual.rejectCount}
               </p>
             ) : (
-              <p className="fact-workspace__meta">SONRA: gözlem devam ediyor</p>
+              <p className="fact-workspace__meta">Sonra: gözlem devam ediyor</p>
             )}
-            <p className="fact-workspace__meta">Doğrulama: {improvement.verificationOutcome || "BEKLİYOR"}</p>
+            <p className="fact-workspace__meta">
+              Doğrulama: {improvement.verificationOutcome ? optimizerCaseStatusLabel(improvement.verificationOutcome) : "Bekliyor"}
+            </p>
           </div>
         </section>
       ) : null}
 
       {workspace.isVerifiedClosed ? (
         <p className="fact-workspace__meta" data-testid="verified-closed-banner" role="status">
-          VERIFIED CLOSED — throughput outcome doğrulandı.
+          Doğrulanarak kapandı: verim sonucu ölçümle doğrulandı.
         </p>
       ) : null}
     </div>

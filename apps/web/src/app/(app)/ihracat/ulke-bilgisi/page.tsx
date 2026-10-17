@@ -7,36 +7,38 @@ import {
   createKnowledgeEntryAction,
   verifyKnowledgeEntryAction,
 } from "@/features/export/server/export-case-writer";
+import { FailureStatePage } from "@/components/ui/failure-state";
 
 export default async function CountryKnowledgePage() {
   const result = await readCountryKnowledgeEntries();
 
   if (result.status === "failure") {
     return (
-      <main className="export-page">
+      <div className="export-page">
         <header className="export-header">
-          <p>ÜLKE BİLGİSİ</p>
+          <p>İHRACAT</p>
           <h1>Ülke Bilgisi</h1>
         </header>
-        <div role="alert" className="state-panel error-state">
-          <p>Ülke bilgisi kayıtları yüklenemedi.</p>
-        </div>
-      </main>
+        <FailureStatePage code={"code" in result ? result.code : undefined} message={result.message} failedTitle="Ülke bilgisi kayıtları yüklenemedi" inline />
+      </div>
     );
   }
 
   return (
-    <main className="export-page">
-      <div className="export-detail-page__back">
-        <Link href="/ihracat">
-          <ArrowLeft aria-hidden="true" />
-          İhracat ana sayfasına dön
-        </Link>
-      </div>
-
+    <div className="export-page">
       <header className="export-header">
-        <p>ÜLKE BİLGİ BANKASI</p>
-        <h1>Ülke Bilgisi</h1>
+        <div className="export-header__top">
+          <div className="export-header__intro">
+            <p>İHRACAT</p>
+            <h1>Ülke Bilgisi</h1>
+          </div>
+          <div className="export-header__actions">
+            <Link href="/ihracat" className="button button-secondary button-medium">
+              <ArrowLeft aria-hidden="true" />
+              İhracat ana sayfası
+            </Link>
+          </div>
+        </div>
         <span>Doğrulanmış ülke gereksinimleri ve operasyonel bilgi kayıtları</span>
       </header>
 
@@ -45,6 +47,6 @@ export default async function CountryKnowledgePage() {
         onCreate={createKnowledgeEntryAction}
         onVerify={verifyKnowledgeEntryAction}
       />
-    </main>
+    </div>
   );
 }

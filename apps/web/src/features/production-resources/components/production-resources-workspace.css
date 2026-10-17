@@ -119,3 +119,317 @@
     width: 100%;
   }
 }
+
+/* ─── Page polish: equal KPI columns, readable table, inspector below the table on laptop widths ─── */
+
+.production-resources-workspace .fact-status-strip {
+  grid-template-columns: none;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+}
+
+.production-resources-workspace .fact-status-strip__item {
+  min-width: 0;
+  padding: 12px 14px;
+}
+
+.production-resources-grid__code {
+  white-space: nowrap;
+}
+
+.production-resources-workspace .fact-data-grid th {
+  white-space: normal;
+}
+
+.production-resources-workspace .fact-data-grid td:nth-child(5) {
+  white-space: nowrap;
+}
+
+.production-resources-inspector__links .commint-table__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1500px) {
+  .production-resources-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .production-resources-inspector {
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    align-items: start;
+  }
+
+  .production-resources-inspector__links {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .production-resources-workspace .fact-status-strip {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .production-resources-workspace .fact-status-strip__item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ─── Round 3: one control height, readable chips, even inspector cards ─── */
+
+.production-resources-workspace .production-resources-filter-rail {
+  align-items: flex-end;
+  padding: 10px 12px;
+}
+
+.production-resources-workspace .production-resources-filter-rail .fact-command-bar__group {
+  flex: 1 1 auto;
+  align-items: flex-end;
+}
+
+.production-resources-workspace .production-resources-filter-rail .fact-command-bar__field > span {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.production-resources-workspace .production-resources-filter-rail input[type="search"] {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.production-resources-workspace .production-resources-filter-rail .production-resources-filter-rail__search {
+  flex: 1 1 240px;
+}
+
+.production-resources-workspace .production-resources-filter-rail > button {
+  min-height: 40px;
+}
+
+.production-resources-workspace .production-resources-type-chips__chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.production-resources-workspace .production-resources-type-chips__chip--active {
+  border-color: var(--fact-accent, #2563eb);
+  background: var(--fact-accent, #2563eb);
+  color: #fff;
+}
+
+.production-resources-workspace .production-resources-grid__secondary {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.production-resources-inspector {
+  align-items: stretch;
+}
+
+.production-resources-inspector > .fact-context-panel,
+.production-resources-inspector > .fact-section {
+  height: auto;
+  align-self: start;
+  box-sizing: border-box;
+}
+
+.production-resources-inspector .fact-line-topology {
+  border: 0;
+  border-radius: 0;
+}
+
+.production-resources-inspector__links {
+  padding: 10px 14px;
+  border: 1px solid var(--fact-border, #d5dde8);
+  border-radius: 10px;
+  background: var(--fact-surface-panel, #fff);
+}
+
+/* Inspector cards shrink-wrap their content (no dead white) and use one frame with single hairline rows. */
+.production-resources-inspector > .fact-context-panel {
+  height: auto;
+  align-self: start;
+  overflow: hidden;
+}
+
+body .content-viewport .production-resources-inspector .fact-context-panel__body {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: -1px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+body .content-viewport .production-resources-inspector .fact-context-panel__row {
+  display: grid;
+  grid-template-columns: minmax(96px, 38%) minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 1px solid var(--zx-line, #e3e9f1);
+  background: transparent;
+}
+
+.production-resources-workspace .production-resources-grid__secondary {
+  color: var(--color-text-secondary, #44556b);
+  font-size: 0.8125rem;
+}
+
+.production-resources-inspector__subtitle {
+  margin: 0 0 -2px;
+  color: var(--color-text-secondary, #44556b);
+  font-size: 0.8125rem;
+}
+
+/* ─── Round 5: shared KPI cards, equal-height inspector cards, quiet link row ─── */
+
+/* Seven status cards fill every row (no empty slot) at every width. */
+body .production-resources-kpis .zx-metric-grid:has(> :nth-child(7):last-child) {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+body .production-resources-kpis .zx-metric-grid:has(> :nth-child(7):last-child) > * {
+  flex: 1 1 calc(25% - 14px);
+  min-width: 170px;
+}
+
+@media (min-width: 1500px) {
+  body .production-resources-kpis .zx-metric-grid:has(> :nth-child(7):last-child) > * {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+/* Laptop widths: the identity card spans the left column, the two short cards stack beside it, and all three share one top and bottom edge. */
+@media (min-width: 901px) and (max-width: 1500px) {
+  .production-resources-inspector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .production-resources-inspector > .fact-context-panel:first-child {
+    grid-row: span 2;
+  }
+
+  .production-resources-inspector > .fact-context-panel,
+  .production-resources-inspector > .fact-section {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 900px) {
+  .production-resources-inspector {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Two links do not need a bordered bar of their own. */
+.production-resources-workspace .production-resources-inspector__links {
+  padding: 2px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Sub-names under the resource code stay readable. */
+body .production-resources-workspace td .production-resources-grid__secondary {
+  color: #3b4a5f;
+  font-size: 0.8125rem;
+}
+
+/* Round 5b: plain shared cards (no accent bar), seven in one row on laptop and wider. */
+.production-resources-kpis .zx-metric::before {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  body .production-resources-kpis .zx-metric-grid:has(> :nth-child(7):last-child) {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 10px;
+  }
+
+  body .production-resources-kpis .zx-metric-grid:has(> :nth-child(7):last-child) > * {
+    min-width: 0;
+    gap: 10px;
+    padding: 14px 12px;
+  }
+
+  .production-resources-kpis .zx-metric__icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+  }
+
+  .production-resources-kpis .zx-metric__value {
+    font-size: 1.375rem;
+  }
+}
+
+/* Equal caption block in every status card so labels, values and captions line up across the row. */
+.production-resources-kpis .zx-metric__hint {
+  min-height: 1.4em;
+}
+
+.production-resources-workspace .fact-data-grid {
+  width: 100%;
+}
+
+/* The table runs edge to edge so the header band and the row bands reach the card border together. */
+.production-resources-workspace .production-resources-grid-wrap {
+  padding: 0;
+}
+
+/* Inspector links are real secondary buttons; the last identity row does not double the card border. */
+.production-resources-workspace .production-resources-inspector__links {
+  gap: 10px;
+}
+
+body .content-viewport .production-resources-inspector .fact-context-panel__row:last-child {
+  border-bottom: 0;
+}
+
+/* Related-context card carries the two links; selected row has a marker. */
+.production-resources-inspector > .production-resources-inspector__context {
+  grid-column: 1 / -1;
+}
+
+.production-resources-inspector__context .production-resources-inspector__links {
+  padding: 0;
+}
+
+.production-resources-workspace .fact-data-grid tbody tr[data-selected="true"] > td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-accent, #2463a7);
+}
+
+/* Explicit column widths: the numeric columns reach the right edge and the name column does not swallow the free space. */
+.production-resources-workspace .fact-data-grid {
+  width: 100%;
+}
+
+.production-resources-grid__col--name { width: 24%; }
+.production-resources-grid__col--type { width: 16%; }
+.production-resources-grid__col--line { width: 11%; }
+.production-resources-grid__col--station { width: 13%; }
+.production-resources-grid__col--state { width: 14%; }
+.production-resources-grid__col--num { width: 9%; }
+
+/* The shared ".fact-data-grid th/td { text-align: left }" (0,1,1) outranks the numeric class (0,1,0); this selector restores right alignment. */
+.production-resources-workspace .fact-data-grid :is(th, td).production-resources-grid__numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,1181 @@
+[
+ {
+  "route": "/",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/abonelik-erisimi",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/[taskId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/otomasyon",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/playbooklar",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/playbooklar/[playbookId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/playbooklar/calisma/[runId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/teslimatlar",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ai-gorevleri/yeni",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/entegrasyonlar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/entegrasyonlar/[connectorId]/dosya-aktarimi",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/entegrasyonlar/gercek-fabrika",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/entegrasyonlar/merkez",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/faturalandirma/odeme-donusu",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/sistem-durumu",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ayarlar/veri-aktarim-merkezi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/arizalar/[id]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/arizalar/yeni",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/durum-zekasi",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/emirler/[id]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/emirler/yeni",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/kestirimci-riskler",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/planlama",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/planlar/yeni",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/raporlama",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/bakim/varliklar/[assetReference]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/dashboard",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/enerji",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/baglanti",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/belgeler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/belgeler/[documentId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/eslestirme",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/hata-kuyrugu",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/onayli-islemler",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/onayli-islemler/[writebackId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/saglik",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/satin-alma",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/satin-alma/[purchaseOrderId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/senkronizasyonlar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/siparisler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/siparisler/[orderId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/stok",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/uretim",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/uretim/[productionOrderId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/erp-entegrasyonlari/veri-eslestirme",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika-agi",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika-karar-merkezi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika-karar-merkezi/vakalar/[caseId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika-vitrini",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/fabrika-zekasi",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ihracat",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ihracat/[exportCaseId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ihracat/ulke-arastirma",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ihracat/ulke-arastirma/[researchCaseId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ihracat/ulke-bilgisi",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/intelligence-runtime",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/iot-plc",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/isler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kaliplar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kaliplar/takip-ve-gorevler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/kontroller/[inspectionId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/kontroller/[inspectionId]/ozet",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/kontroller/yeni",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 9.8,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/ncr",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/ncr/[ncrId]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/planlar/yeni",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 9.8,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/raporlama",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/kalite/takip-ve-gorevler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/makineler",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/malzemeler",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operasyon/yonetim-merkezi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operasyon/yonetim-merkezi/kararlar/[decisionId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operasyon/yonetim-merkezi/surekli-iyilestirme",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operasyon/yonetim-merkezi/vakalar/[caseId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operasyonel-riskler",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/operational-value",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/planlama",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/planlama/[planId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/planlama/[planId]/duzenle",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/planlama/yeni",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/proses-oee",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/satin-alma/tedarik-riskleri",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/senaryo-kurtarma",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/siparisler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/siparisler/[orderDraftId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/stok-ve-depo/malzeme-riskleri",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/surekli-optimizasyon",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/bildirimler",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/devretme",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/devretme/[handoverId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/devretme/yeni",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/is-kutum",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/onaylar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/onaylar/[requestId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/onaylar/yeni",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/teams/ozel-mesajlar",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/fiyat-koruma-ve-onay",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/karlilik-uyarilari",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/karlilik-yonetim-merkezi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/malzeme-ve-maliyet-karliligi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/musteri-karliligi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/satin-alma-fiyat-analizi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/satis-fiyat-analizi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/tedarikci-karsilastirmasi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/teklif-riskleri",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/ticari-zeka/urun-karliligi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/[orderId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/hatlar",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/hatlar/[lineId]",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/istisnalar-ve-gorevler",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/kaynaklar",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uretim/raporlama",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/uygulamalar",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiya-devir",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiya-devir/[id]",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/acik-konular",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/aktif",
+  "initialClass": "D",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 9,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/gecmis",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/kaynak",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/performans",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/plan",
+  "initialClass": "B",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/vardiyalar/teslim",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ },
+ {
+  "route": "/yonetici-komuta-merkezi",
+  "initialClass": "C",
+  "desktop": "PASS",
+  "responsive": "PASS",
+  "accessibility": "PASS",
+  "score": 10,
+  "result": "PASS"
+ }
+]

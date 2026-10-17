@@ -1,0 +1,30 @@
+/* Empty task list: a centred vertical state with a sensible width instead of a full-width strip. */
+.ai-task-center-unified .ai-task-center-unified__empty {
+  width: min(100%, 640px);
+  min-height: 0;
+  margin-inline: auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.ai-task-center-unified .ai-task-center-unified__empty p {
+  margin-inline: auto;
+  font-size: 0.875rem;
+}
+
+/* Filters: the search owns the first row; the five selects share the next row in equal columns (no orphan select). */
+body .content-viewport .ai-task-filter-bar__controls {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+body .content-viewport .ai-task-filter-bar__controls > .ai-task-filter-bar__search {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  body .content-viewport .ai-task-filter-bar__controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

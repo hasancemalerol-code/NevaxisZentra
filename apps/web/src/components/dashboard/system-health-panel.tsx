@@ -36,7 +36,7 @@ const healthItems: HealthItem[] = [
   {
     id: "database",
     label: "Veritabanı",
-    detail: "Son senkronizasyon 1 dk önce",
+    detail: "Son eşitleme 1 dk önce",
     value: "Aktif",
     icon: Database,
     status: "healthy",

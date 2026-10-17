@@ -24,7 +24,7 @@ import {
 import {
   getAiTaskEscalationLevelLabel,
   getAiTaskEscalationStateLabel,
-  getAiTaskSlaStateLabel,
+  getAiTaskSlaBreachLabel,
 } from "../presentation/ai-task-sla-labels";
 import type { AiTaskClosureQueueKey } from "../domain/ai-task";
 
@@ -155,8 +155,9 @@ export function mapTaskToCenterItem(
     facilityLabel,
     assigneeLabel: task.assignee?.displayName ?? null,
     teamLabel,
-    slaLabel: getAiTaskSlaStateLabel(task.slaState),
+    slaLabel: getAiTaskSlaBreachLabel(task.slaState, task.sla?.breachType),
     slaState: task.slaState,
+    slaBreachType: task.sla?.breachType ?? null,
     dueAt: task.dueAt ?? null,
     dueAtLabel: task.dueAt ? formatAiTaskShortDateTime(task.dueAt) : null,
     escalationLabel,
@@ -203,6 +204,7 @@ export function mapWorkInboxItemToCenterItem(
     teamLabel: null,
     slaLabel: null,
     slaState: null,
+    slaBreachType: null,
     dueAt: null,
     dueAtLabel: null,
     escalationLabel: null,
@@ -294,8 +296,29 @@ function isSlaRiskState(item: AiTaskCenterItem): boolean {
     || item.slaState === "breached";
 }
 
-function isOverdueState(item: AiTaskCenterItem): boolean {
-  return item.slaState === "overdue" || item.slaState === "breached";
+/**
+ * "Geciken" = the due / resolution deadline has actually passed. A breached SLA whose missed target is the
+ * acknowledgement or response target while the resolution deadline is still ahead is an SLA breach, not a delay.
+ */
+export function isAiTaskCenterItemOverdue(
+  item: AiTaskCenterItem,
+  now: Date = new Date(),
+): boolean {
+  if (item.slaState === "overdue") {
+    return true;
+  }
+
+  if (item.slaState !== "breached") {
+    return false;
+  }
+
+  if (item.slaBreachType === "resolution") {
+    return true;
+  }
+
+  const deadline = item.slaDueAt ?? item.dueAt;
+  const deadlineMs = deadline ? Date.parse(deadline) : Number.NaN;
+  return !Number.isNaN(deadlineMs) && deadlineMs < now.getTime();
 }
 
 function isUnassignedTask(item: AiTaskCenterItem): boolean {
@@ -351,6 +374,7 @@ export function filterAiTaskCenterItems(
   view: AiTaskCenterView,
   assignedTaskIds: ReadonlySet<string>,
   originFilter: AiTaskCenterTaskOriginFilter,
+  now: Date = new Date(),
 ): readonly AiTaskCenterItem[] {
   const viewFiltered = items.filter((item) => {
     switch (view) {
@@ -361,7 +385,7 @@ export function filterAiTaskCenterItems(
       case "unassigned":
         return isUnassignedTask(item) && !isTaskItemFinal(item);
       case "overdue":
-        return item.kind === "task" && isOverdueState(item) && !isTaskItemFinal(item);
+        return item.kind === "task" && isAiTaskCenterItemOverdue(item, now) && !isTaskItemFinal(item);
       case "sla-risk":
         return item.kind === "task" && isSlaRiskState(item) && !isTaskItemFinal(item);
       case "escalated":

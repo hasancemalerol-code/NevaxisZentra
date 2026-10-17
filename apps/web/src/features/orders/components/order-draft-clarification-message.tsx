@@ -141,7 +141,7 @@ export function OrderDraftClarificationMessage({
 
         <Badge tone="ai">
           <PencilLine aria-hidden="true" />
-          AI tarafından hazırlandı
+          Yapay zekâ tarafından hazırlandı
         </Badge>
       </div>
 

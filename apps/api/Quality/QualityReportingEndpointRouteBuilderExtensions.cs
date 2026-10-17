@@ -43,7 +43,7 @@ public static class QualityReportingEndpointRouteBuilderExtensions
             Offset: int.TryParse(request.Query["offset"], out var offset) ? offset : 0);
 
     private static DateTimeOffset? ParseDate(string? value) =>
-        DateTimeOffset.TryParse(value, out var parsed) ? parsed : null;
+        DateTimeOffset.TryParse(value, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal, out var parsed) ? parsed : null;
 
     private static Guid? ParseGuid(string? value) =>
         Guid.TryParse(value, out var parsed) ? parsed : null;

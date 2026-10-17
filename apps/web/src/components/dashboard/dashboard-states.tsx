@@ -116,7 +116,7 @@ export function DashboardEmptyState({
 export function DashboardErrorState({
   title = "Operasyon görünümü yüklenemedi",
   description = "Dashboard verileri şu anda görüntülenemiyor. Bu durum yalnızca arayüz önizlemesidir ve gerçek bir servis hatasını temsil etmez.",
-  retryLabel = "Yeniden dene",
+  retryLabel = "Yeniden Dene",
 }: DashboardErrorStateProps) {
   return (
     <section

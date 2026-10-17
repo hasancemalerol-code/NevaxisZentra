@@ -43,6 +43,7 @@ import {
   ErpStatusBadge,
   ErpTableIdentifierCell,
   ErpInfoBanner,
+  ErpReadonlyNotice,
   getErpFacilityDisplayLabel,
 } from "./erp-ui-primitives";
 import { ErpWorkspaceNav } from "./erp-workspace-nav";
@@ -87,39 +88,198 @@ export function ErpWorkspaceView({
   const isErrorPage = activeHref === "/erp-entegrasyonlari/hata-kuyrugu";
 
   const pageTitle = isConnectionPage
-    ? "ERP Entegrasyonları"
+    ? "Bağlantı"
     : isSyncPage
-      ? "Senkronizasyon Merkezi"
+      ? "Eşitleme Merkezi"
       : isHealthPage
         ? "Bağlantı Sağlığı"
         : isErrorPage
-          ? "Entegrasyon Hata Kuyruğu"
+          ? "Hata Kuyruğu"
           : "ERP Entegrasyonları";
 
   const pageDescription = isConnectionPage
     ? "ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini tek merkezden yönetin."
     : isSyncPage
-      ? "Veri senkronizasyon durumunu, son çalışmaları ve güncellik sinyallerini izleyin."
+      ? "Veri eşitleme durumunu, son çalışmaları ve güncellik sinyallerini izleyin."
       : isHealthPage
         ? "ERP bağlantılarının sağlık durumu, gecikme ve son kontrol sonuçları."
         : isErrorPage
-          ? "Senkronizasyon ve entegrasyon sırasında oluşan hataların özeti."
+          ? "Eşitleme ve entegrasyon sırasında oluşan hataların özeti."
           : "ERP bağlantılarınızı, veri akışını ve kontrollü ERP işlemlerini tek merkezden yönetin.";
+
+  // One fixed slot for the source note on every ERP page: inside the header, same component as the sibling pages.
+  const sourceNote = (
+    <ErpReadonlyNotice>
+      Harici ERP sistem kayıt sahibidir. Zentra yalnızca salt okunur kopyalarını saklar.
+    </ErpReadonlyNotice>
+  );
+
+  if (connections.length === 0) {
+    const failedRuns = syncRuns.filter((run) => run.status === "failed" || run.recordsFailed > 0 || run.errorMessage);
+    const failedRecordCount = syncRuns.reduce((total, run) => total + run.recordsFailed, 0);
+    const emptyCopy = isSyncPage
+      ? {
+          title: "Henüz eşitleme çalıştırılmadı",
+          description: "Bir ERP bağlantısı tanımlandığında eşitleme çalışmaları ve güncellik bilgisi bu sayfada görünür.",
+        }
+      : isHealthPage
+        ? {
+            title: "Sağlık kontrolü yapılacak bağlantı yok",
+            description: "Bağlantı tanımlandığında erişilebilirlik, gecikme ve son kontrol sonucu burada görünür.",
+          }
+        : isErrorPage
+          ? {
+              title: "Hata kaydı yok",
+              description: "Bağlantı tanımlandığında eşitleme ve entegrasyon hataları burada listelenir.",
+            }
+          : {
+              title: "Henüz ERP bağlantısı yok",
+              description: "Bir ERP bağlantısı tanımlandığında bağlantı, eşitleme ve hata bilgileri bu sayfada görünür.",
+            };
+
+    const emptySectionTitle = isSyncPage
+      ? "Eşitleme Çalışmaları"
+      : isHealthPage
+        ? "Bağlantı Sağlığı"
+        : isErrorPage
+          ? "Hata Kuyruğu"
+          : "Bağlantı Durumu";
+    const emptySectionDescription = isSyncPage
+      ? "Son çalışmalar, kayıt sayıları ve güncellik bilgisi"
+      : isHealthPage
+        ? "Bağlantıların erişilebilirliği ve son kontrol durumu"
+        : isErrorPage
+          ? "Eşitleme ve entegrasyon hataları"
+          : "Bağlantı, eşitleme ve hata bilgileri";
+    const emptyAction = isErrorPage
+      ? { href: "/erp-entegrasyonlari/senkronizasyonlar", label: "Eşitleme Merkezi" }
+      : { href: "/ayarlar/entegrasyonlar", label: "Entegrasyon Ayarları" };
+
+    return (
+      <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+        <ErpPageHeader title={pageTitle} description={pageDescription} notice={sourceNote} />
+        <ErpWorkspaceNav activeHref={activeHref} />
+        <ErpKpiGrid columns={3}>
+          {isSyncPage ? (
+            <>
+              <ErpKpiCard
+                label="Eşitleme Çalışmaları"
+                value={syncRuns.length}
+                description="Kayıtlı çalışma"
+                icon={<CircleGauge aria-hidden="true" />}
+              />
+              <ErpKpiCard
+                label="Tamamlanan"
+                value={syncRuns.filter((run) => run.status === "completed").length}
+                description="Hatasız biten çalışma"
+                icon={<CheckCircle2 aria-hidden="true" />}
+                tone="success"
+              />
+              <ErpKpiCard
+                label="Hatalı"
+                value={failedRuns.length}
+                description="İnceleme gereken çalışma"
+                icon={<TriangleAlert aria-hidden="true" />}
+                tone="warning"
+              />
+            </>
+          ) : isHealthPage ? (
+            <>
+              <ErpKpiCard
+                label="ERP Bağlantıları"
+                value={summary.connectionCount}
+                description="Tanımlı bağlantı"
+                icon={<Cable aria-hidden="true" />}
+              />
+              <ErpKpiCard
+                label="Sağlıklı"
+                value={summary.healthyCount}
+                description="Sağlık kontrolü başarılı"
+                icon={<CheckCircle2 aria-hidden="true" />}
+                tone="success"
+              />
+              <ErpKpiCard
+                label="Dikkat Gerektiren"
+                value={summary.problematicCount}
+                description="İnceleme gereken bağlantı"
+                icon={<TriangleAlert aria-hidden="true" />}
+                tone="warning"
+              />
+            </>
+          ) : isErrorPage ? (
+            <>
+              <ErpKpiCard
+                label="Açık Hata"
+                value={failedRuns.length}
+                description="Hata kaydı olan çalışma"
+                icon={<TriangleAlert aria-hidden="true" />}
+                tone="warning"
+              />
+              <ErpKpiCard
+                label="Hatalı Kayıt"
+                value={failedRecordCount}
+                description="Aktarılamayan kayıt"
+                icon={<Package aria-hidden="true" />}
+              />
+              <ErpKpiCard
+                label="Sorunlu Bağlantı"
+                value={summary.problematicCount}
+                description="İnceleme gereken bağlantı"
+                icon={<Cable aria-hidden="true" />}
+                tone="warning"
+              />
+            </>
+          ) : (
+            <>
+              <ErpKpiCard
+                label="ERP Bağlantıları"
+                value={summary.connectionCount}
+                description="Tanımlı bağlantı"
+                icon={<Cable aria-hidden="true" />}
+              />
+              <ErpKpiCard
+                label="ERP Müşterileri"
+                value={summary.customerCount}
+                description="Müşteri kaydı"
+                icon={<Users aria-hidden="true" />}
+              />
+              <ErpKpiCard
+                label="ERP Ürünleri"
+                value={summary.productCount}
+                description="Ürün kaydı"
+                icon={<Package aria-hidden="true" />}
+              />
+            </>
+          )}
+        </ErpKpiGrid>
+        <section className="erp-section">
+          <ErpSectionHeader title={emptySectionTitle} description={emptySectionDescription} />
+          <ErpEmptyState
+            title={emptyCopy.title}
+            description={emptyCopy.description}
+            actionHref={emptyAction.href}
+            actionLabel={emptyAction.label}
+          />
+        </section>
+      </div>
+    );
+  }
 
   const primaryConnection = connections[0];
   const headerHealthStatus = primaryConnection?.status ?? (summary.healthyCount > 0 ? "healthy" : "configured");
 
   return (
-    <main className="production-execution-page erp-workspace-page erp-workspace-page--dense">
+    <div className="production-execution-page erp-workspace-page erp-workspace-page--dense">
       <ErpPageHeader
         title={pageTitle}
         description={pageDescription}
+        notice={sourceNote}
         aside={
           isConnectionPage ? (
             <ErpHeaderStatusContext
               healthLabel={getErpConnectionStatusLabel(headerHealthStatus)}
               healthTone={getErpConnectionStatusTone(headerHealthStatus)}
-              syncLabel={`Son senkronizasyon: ${formatErpDateTime(summary.lastSyncAtUtc)}`}
+              syncLabel={`Son eşitleme: ${formatErpDateTime(summary.lastSyncAtUtc)}`}
             />
           ) : undefined
         }
@@ -150,23 +310,23 @@ export function ErpWorkspaceView({
             tone={summary.problematicCount > 0 ? "warning" : "neutral"}
           />
           <ErpKpiCard
-            label="Son Senkronizasyon"
+            label="Son Eşitleme"
             value=""
             timestamp={formatErpKpiTimestamp(summary.lastSyncAtUtc)}
-            description="En son tamamlanan senkronizasyon"
+            description="En son tamamlanan eşitleme"
             icon={<CircleGauge aria-hidden="true" />}
             tone="info"
           />
           <ErpKpiCard
             label="ERP Müşterileri"
             value={summary.customerCount}
-            description="Kanonik müşteri kaydı"
+            description="Müşteri kaydı"
             icon={<Users aria-hidden="true" />}
           />
           <ErpKpiCard
             label="ERP Ürünleri"
             value={summary.productCount}
-            description="Kanonik ürün kaydı"
+            description="Ürün kaydı"
             icon={<Package aria-hidden="true" />}
           />
         </ErpKpiGrid>
@@ -181,7 +341,7 @@ export function ErpWorkspaceView({
           {connections.length === 0 ? (
             <ErpEmptyState
               title="Henüz ERP bağlantısı bulunmuyor."
-              description="Pilot ortamda ERP Simulator bağlantısı bootstrap ile oluşturulur."
+              description="Bağlantı tanımlandığında burada görünür."
             />
           ) : (
             <div className="erp-connection-grid">
@@ -223,11 +383,11 @@ export function ErpWorkspaceView({
       {(isSyncPage || isConnectionPage) && (
         <section className="erp-section" id="senkronizasyon-durumu">
           <ErpSectionHeader
-            title="Senkronizasyon Durumu"
-            description="Varlık bazında son senkronizasyon ve güncellik özeti"
+            title="Eşitleme Durumu"
+            description="Varlık bazında son eşitleme ve güncellik özeti"
             action={
               <Link href="/erp-entegrasyonlari/senkronizasyonlar" className="erp-action erp-action--tertiary">
-                Tüm senkronizasyonlar
+                Tüm eşitlemeler
               </Link>
             }
           />
@@ -287,13 +447,13 @@ export function ErpWorkspaceView({
       {(isSyncPage || isConnectionPage) && (
         <section className="erp-section" id="son-senkronizasyonlar">
           <ErpSectionHeader
-            title="Son Senkronizasyonlar"
-            description="Operasyonel senkronizasyon aktivitesi"
+            title="Son Eşitlemeler"
+            description="Operasyonel eşitleme aktivitesi"
           />
           {recentSyncRuns.length === 0 ? (
-            <ErpEmptyState title="Henüz senkronizasyon çalıştırılmamış." />
+            <ErpEmptyState title="Henüz eşitleme çalıştırılmamış." />
           ) : (
-            <ErpDataTable className="erp-table--sync-runs">
+            <ErpDataTable label="Eşitleme çalışmaları" className="erp-table--sync-runs">
               <thead>
                 <tr>
                   <th>Veri</th>
@@ -345,7 +505,7 @@ export function ErpWorkspaceView({
           {recentSyncRuns.filter((run) => run.errorMessage || run.recordsFailed > 0).length === 0 ? (
             <ErpEmptyState title="Açık entegrasyon hatası bulunmuyor." />
           ) : (
-            <ErpDataTable>
+            <ErpDataTable label="Entegrasyon hataları">
               <thead>
                 <tr>
                   <th>Veri</th>
@@ -378,12 +538,12 @@ export function ErpWorkspaceView({
           <section className="erp-section" id="erp-musteriler">
             <ErpSectionHeader
               title="ERP Müşterileri"
-              description="Bağlı ERP sisteminden salt okunur olarak alınan kanonik müşteri kayıtları."
+              description="Bağlı ERP sisteminden salt okunur olarak alınan müşteri kayıtları."
             />
             {customers.length === 0 ? (
               <ErpEmptyState title="Henüz ERP müşterisi bulunmuyor." />
             ) : (
-              <ErpDataTable>
+              <ErpDataTable label="ERP müşterileri">
                 <thead>
                   <tr>
                     <th>ERP Müşteri Kodu</th>
@@ -420,12 +580,12 @@ export function ErpWorkspaceView({
           <section className="erp-section" id="erp-urunler">
             <ErpSectionHeader
               title="ERP Ürünleri"
-              description="Bağlı ERP sisteminden salt okunur olarak alınan kanonik ürün kayıtları."
+              description="Bağlı ERP sisteminden salt okunur olarak alınan ürün kayıtları."
             />
             {products.length === 0 ? (
               <ErpEmptyState title="Henüz ERP ürünü bulunmuyor." />
             ) : (
-              <ErpDataTable>
+              <ErpDataTable label="ERP ürünleri">
                 <thead>
                   <tr>
                     <th>ERP Ürün Kodu</th>
@@ -479,12 +639,7 @@ export function ErpWorkspaceView({
         </section>
       ) : null}
 
-      <section className="erp-section erp-section--compact" aria-label="Kaynak notu">
-        <ErpInfoBanner title="Salt okunur projeksiyon">
-          Harici ERP sistem kayıt sahibidir. Zentra yalnızca salt okunur kanonik projeksiyonları saklar.
-        </ErpInfoBanner>
-      </section>
-    </main>
+    </div>
   );
 }
 

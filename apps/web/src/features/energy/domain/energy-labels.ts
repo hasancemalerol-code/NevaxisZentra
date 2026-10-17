@@ -1,5 +1,5 @@
 export const ENERGY_DEVELOPMENT_BANNER =
-  "Yerel geliştirme / simülasyon verisi — gerçek müşteri sayaç verisi değildir.";
+  "Örnek veri — gerçek müşteri sayaç verisi değildir.";
 
 export const ENERGY_OPPORTUNITY_DISCLAIMER =
   "Bu değer garanti edilen tasarruf değildir; mevcut hedefe göre hesaplanan açıklanabilir bir karşılaştırmadır.";
@@ -25,7 +25,7 @@ export const ENERGY_EVIDENCE_LABELS: Readonly<Record<string, string>> = {
   measured: "Ölçülmüş",
   calculated: "Hesaplanmış",
   estimated: "Tahmini",
-  simulated: "Simülasyon",
+  simulated: "Örnek veri",
   "insufficient-data": "Veri yetersiz",
   "source-conflict": "Kaynak çelişkisi",
 };
@@ -58,7 +58,7 @@ export const ENERGY_DRIVER_LABELS: Readonly<Record<string, string>> = {
   "source-stale": "Kaynak bayat",
   "source-conflict": "Kaynak çelişkisi",
   "insufficient-comparable-windows": "Karşılaştırılabilir pencere yetersiz",
-  "missing-production-denominator": "Üretim paydası eksik",
+  "missing-production-denominator": "Üretim toplamı eksik",
   "missing-production-state": "Üretim durumu eksik",
   "missing-target": "Hedef tanımlı değil",
   "missing-tariff": "Tarife tanımlı değil",

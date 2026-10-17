@@ -1,3 +1,6 @@
+import { displayReferenceCode } from "@/lib/presentation/display-name";
+import { enumLabel } from "@/lib/presentation/enum-labels";
+import { getProductionPlanApprovalStatusLabel } from "../presentation/production-plan-labels";
 import type {
   ProductionPlan,
   ProductionPlanOrigin,
@@ -138,7 +141,7 @@ export function createProductionPlanHistoryViewModel(
         `${productionPlan.id}-approval`,
         "approval",
         "Onay süreci güncellendi",
-        `Güncel onay durumu: ${productionPlan.approval.status}.`,
+        `Güncel onay durumu: ${getProductionPlanApprovalStatusLabel(productionPlan.approval.status)}.`,
         approvalOccurredAt,
       ),
     );
@@ -176,7 +179,7 @@ export function createProductionPlanHistoryViewModel(
   return {
     sourceType: productionPlan.origin,
     sourceReference: sourceReference
-      ? `${sourceReference.sourceType}: ${sourceReference.sourceId}`
+      ? [sourceTypeLabel(sourceReference.sourceType), displayReferenceCode(sourceReference.sourceId)].filter(Boolean).join(" · ")
       : null,
     createdAt,
     updatedAt,
@@ -185,4 +188,7 @@ export function createProductionPlanHistoryViewModel(
     items: sortedItems,
     hasHistory: sortedItems.length > 0,
   };
+}
+function sourceTypeLabel(sourceType: string): string {
+  return sourceType === "manual-request" ? "Elle istek" : enumLabel(sourceType);
 }

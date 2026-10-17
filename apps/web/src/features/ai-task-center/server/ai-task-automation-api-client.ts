@@ -1,3 +1,4 @@
+import { stripFixtureRecords } from "@/lib/runtime/fixture-data";
 import { refusalCode } from "@/lib/api/api-failure-classifier";
 import "./ai-task-server-boundary";
 
@@ -98,12 +99,22 @@ async function getJson<T>(
       };
     }
 
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+
+    if (guarded === null) {
+
+      // A fixture record is not a customer record outside isolated environments.
+
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+
+    }
+
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
       code: "source-unavailable",
-      message: "AI görev otomasyon API'sine ulaşılamadı.",
+      message: "Yapay zekâ görev otomasyon API'sine ulaşılamadı.",
       retryable: true,
     };
   }
@@ -144,12 +155,22 @@ async function writeJson<T>(
       };
     }
 
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+
+    if (guarded === null) {
+
+      // A fixture record is not a customer record outside isolated environments.
+
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+
+    }
+
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
       code: "source-unavailable",
-      message: "AI görev otomasyon API'sine ulaşılamadı.",
+      message: "Yapay zekâ görev otomasyon API'sine ulaşılamadı.",
       retryable: true,
     };
   }

@@ -38,6 +38,7 @@ $required = @(
     '/api/identity/:path*',
     '/api/admin-access/:path*',
     '/api/saas-subscription/:path*',
+    '/api/bulk-data-onboarding/:path*',
     '/api/public/ai-task-access/:path*'
 )
 

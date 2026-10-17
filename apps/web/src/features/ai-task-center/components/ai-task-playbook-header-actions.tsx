@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Plus, RefreshCw } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +43,7 @@ export function AiTaskPlaybookHeaderActions({
 
   return (
     <div className="ai-task-playbook-page-actions">
-      {canManage ? (
+      {canManage && counts.playbooks > 0 ? (
         <Link
           className="button button-primary button-medium ai-task-playbook-page-actions__primary"
           href="/ai-gorevleri/playbooklar/yeni"
@@ -58,7 +58,7 @@ export function AiTaskPlaybookHeaderActions({
       <Button
         aria-current={activeView === "active" ? "page" : undefined}
         type="button"
-        variant={activeView === "active" ? "secondary" : "quiet"}
+        variant="secondary"
         onClick={() => setView("active")}
       >
         {counts.active > 0 ? `Çalışan Akışlar (${counts.active})` : "Çalışan Akışlar"}
@@ -67,7 +67,7 @@ export function AiTaskPlaybookHeaderActions({
       <Button
         aria-current={activeView === "history" ? "page" : undefined}
         type="button"
-        variant={activeView === "history" ? "secondary" : "quiet"}
+        variant="secondary"
         onClick={() => setView("history")}
       >
         {counts.history > 0 ? `Geçmiş (${counts.history})` : "Geçmiş"}
@@ -76,11 +76,6 @@ export function AiTaskPlaybookHeaderActions({
       <Button leadingIcon={<RefreshCw />} type="button" variant="secondary" onClick={refresh}>
         Veriyi yenile
       </Button>
-
-      <Link className="ai-task-playbook-back-link" href="/ai-gorevleri">
-        <ArrowLeft aria-hidden="true" />
-        <span>Görev listesine dön</span>
-      </Link>
     </div>
   );
 }

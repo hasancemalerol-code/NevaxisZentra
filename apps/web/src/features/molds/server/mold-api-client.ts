@@ -1,3 +1,4 @@
+import { stripFixtureRecords } from "@/lib/runtime/fixture-data";
 import {
   classifyFailedResponse,
   SESSION_REQUIRED_MESSAGE,
@@ -118,7 +119,12 @@ async function getJson<T>(
     }
 
     const payload: unknown = await response.json();
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+    if (guarded === null) {
+      // A fixture record is not a customer record outside isolated environments.
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+    }
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
@@ -168,7 +174,12 @@ async function mutateJson<T>(
     }
 
     const payload: unknown = await response.json();
-    return { status: "success", value: parser(payload) };
+    const guarded = stripFixtureRecords(parser(payload));
+    if (guarded === null) {
+      // A fixture record is not a customer record outside isolated environments.
+      return { status: "failure", code: "not-found", message: "Kayıt bulunamadı.", retryable: false } as never;
+    }
+    return { status: "success", value: guarded };
   } catch {
     return {
       status: "failure",
