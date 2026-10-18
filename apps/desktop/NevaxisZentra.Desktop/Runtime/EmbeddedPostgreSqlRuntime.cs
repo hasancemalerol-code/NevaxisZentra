@@ -170,13 +170,14 @@ public sealed class EmbeddedPostgreSqlRuntime : IAsyncDisposable
             throw new InvalidOperationException($"pg_ctl.exe not found: {pgCtl}");
         }
 
-        var logFile = Path.Combine(logDirectory, "postgresql.log");
-        ownedProcess = RuntimeProcess.StartHidden(
+        // PostgreSQL writes its server log (postgresql.log) itself; the supervisor captures pg_ctl's console
+        // output in a separate file so the two never contend for one file.
+        ownedProcess = EmbeddedPostgresLogFiles.LaunchPgCtlStart(
             pgCtl,
-            $"start -D \"{dataDirectory}\" -l \"{logFile}\" -w -o \"-p {port.ToString(CultureInfo.InvariantCulture)}\"",
             bundle.PostgresBinDirectory,
-            null,
-            logFile);
+            dataDirectory,
+            logDirectory,
+            port);
         diagnostics.Add($"postgres=pg_ctl-started pid={ownedProcess.ProcessId}");
         await Task.CompletedTask.ConfigureAwait(false);
     }

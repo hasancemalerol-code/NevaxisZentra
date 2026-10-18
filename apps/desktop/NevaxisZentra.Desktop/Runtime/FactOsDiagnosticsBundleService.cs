@@ -10,16 +10,33 @@ namespace NevaxisZentra.Desktop.Runtime;
 public static class FactOsDiagnosticsBundleService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+
     public static string CreateSupportBundle(
         StartupSession? session,
         IReadOnlyList<string> diagnostics,
         string? errorCode = null)
     {
         PackagedRuntimePaths.EnsureCustomerDirectories();
-        var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
-        var bundlePath = Path.Combine(
+        return CreateSupportBundle(
+            session,
+            diagnostics,
+            errorCode,
             PackagedRuntimePaths.DiagnosticsDirectory,
-            $"Nevaxis-Zentra-Diagnostics-{timestamp}.zip");
+            [PackagedRuntimePaths.LogsDirectory, RuntimePaths.GetLogDirectory()],
+            Path.Combine(PackagedRuntimePaths.DataRoot, "database", "logs"));
+    }
+
+    internal static string CreateSupportBundle(
+        StartupSession? session,
+        IReadOnlyList<string> diagnostics,
+        string? errorCode,
+        string outputDirectory,
+        IReadOnlyList<string> logDirectories,
+        string databaseLogDirectory)
+    {
+        Directory.CreateDirectory(outputDirectory);
+        var timestamp = DateTimeOffset.Now.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture);
+        var bundlePath = Path.Combine(outputDirectory, $"Nevaxis-Zentra-Diagnostics-{timestamp}.zip");
 
         var summary = new
         {
@@ -38,11 +55,7 @@ public static class FactOsDiagnosticsBundleService
         using var archive = ZipFile.Open(bundlePath, ZipArchiveMode.Create);
         AddTextEntry(archive, "summary.json", JsonSerializer.Serialize(summary, JsonOptions));
 
-        foreach (var logDirectory in new[]
-        {
-            PackagedRuntimePaths.LogsDirectory,
-            RuntimePaths.GetLogDirectory(),
-        })
+        foreach (var logDirectory in logDirectories)
         {
             if (!Directory.Exists(logDirectory))
             {
@@ -51,18 +64,47 @@ public static class FactOsDiagnosticsBundleService
 
             foreach (var logFile in Directory.GetFiles(logDirectory, "*.log").Take(20))
             {
-                var entryName = $"logs/{Path.GetFileName(logDirectory)}/{Path.GetFileName(logFile)}";
-                archive.CreateEntryFromFile(logFile, entryName, CompressionLevel.Optimal);
+                AddLogEntry(archive, logFile, $"logs/{Path.GetFileName(logDirectory)}/{Path.GetFileName(logFile)}");
             }
         }
 
-        var postgresLog = Path.Combine(PackagedRuntimePaths.DataRoot, "database", "logs", "postgresql.log");
-        if (File.Exists(postgresLog))
+        // The bundled PostgreSQL server log and the supervisor's pg_ctl capture log (kept under logs/ as before).
+        if (Directory.Exists(databaseLogDirectory))
         {
-            archive.CreateEntryFromFile(postgresLog, "logs/postgresql.log", CompressionLevel.Optimal);
+            foreach (var logFile in Directory.GetFiles(databaseLogDirectory, "*.log").Take(20))
+            {
+                AddLogEntry(archive, logFile, $"logs/{Path.GetFileName(logFile)}");
+            }
         }
 
         return bundlePath;
+    }
+
+    /// <summary>
+    /// Copies a log into the bundle while its writer (the supervisor or PostgreSQL itself) may still hold it open:
+    /// the file is opened with FileShare.ReadWrite | Delete so a live log never blocks diagnostics. A log that still
+    /// cannot be read is recorded as a note in the bundle instead of failing the whole bundle.
+    /// </summary>
+    internal static void AddLogEntry(ZipArchive archive, string path, string entryName)
+    {
+        try
+        {
+            using var source = new FileStream(
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite | FileShare.Delete);
+            var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+            using var target = entry.Open();
+            source.CopyTo(target);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            AddTextEntry(
+                archive,
+                entryName + ".unreadable.txt",
+                $"This log could not be read: {exception.GetType().Name}: {exception.Message}");
+        }
     }
 
     private static void AddTextEntry(ZipArchive archive, string name, string content)
